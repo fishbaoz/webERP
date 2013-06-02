@@ -177,9 +177,11 @@ if (isset($_POST['PrintPDF'])) {
 					  GROUP BY locstock.stockid) AS qoh,
 				   (SELECT
 					  SUM(purchorderdetails.quantityord - purchorderdetails.quantityrecd) as netqty
-					  FROM purchorderdetails
+					  FROM purchorderdetails INNER JOIN purchorders
+					  ON purchorderdetails.orderno=purchorders.orderno
 					  WHERE purchorderdetails.itemcode = tempbom.component
-					  AND completed = 0
+					  AND purchorderdetails.completed = 0
+					  AND (purchorders.status = 'Authorised' OR purchorders.status='Printed')
 					  GROUP BY purchorderdetails.itemcode) AS poqty,
 				   (SELECT
 					  SUM(woitems.qtyreqd - woitems.qtyrecd) as netwoqty
