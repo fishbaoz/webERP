@@ -524,16 +524,18 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
 	$result=DB_query($sql,$db,$ErrMsg,$DbgMsg);
 	if( DB_num_rows($result) > 0 ) {
-		echo '<table class="selection">';
-        echo '<tr><td><div class="centre">'._('Phantom').' : ';
+		echo '<table class="selection">
+				<tr>
+					<td><div class="centre">'._('Phantom').' : ';
 	 	$ix = 0;
 	 	while ($myrow = DB_fetch_array($result)){
-	 	   echo (($ix)?', ':'').'<a href="'.htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?Select='.$myrow['parent'].'">'.
+			echo (($ix)?', ':'').'<a href="'.htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?Select='.$myrow['parent'].'">'. $myrow['description'].'&nbsp;('.$myrow['parent'].')</a>';
 			$myrow['description'].'&nbsp;('.$myrow['parent'].')</a>';
 			$ix++;
 	 	} //end while loop
-	 	echo '</div></td></tr>';
-        echo '</table>';
+	 	echo '</div></td>
+				</tr>
+			</table>';
 	}
 	echo '<br />
 			<table class="selection">';
@@ -626,6 +628,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			echo '<tr>
 					<td>' . _('Component') . ':</td>
 					<td><b>' . $SelectedComponent . '</b></td>
+					<input type="hidden" name="Component" value="' . $SelectedComponent . '" />
 				</tr>';
 
 		} else { //end of if $SelectedComponent
