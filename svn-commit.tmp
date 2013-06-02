@@ -1,0 +1,8 @@
+
+--This line, and those below, will be ignored--
+
+M    doc/Change.log
+M    doc/Manual/ManualContributors.html
+M    sql/mysql/weberp-demo.sql
+M    sql/mysql/weberp-new.sql
+M    locale/en_GB.utf8/LC_MESSAGES/messages.pot
