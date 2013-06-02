@@ -15,6 +15,14 @@ if (isset($_GET['CustomerID'])) {
 	$_POST['SelectedCustomer']=$_GET['CustomerID'];
 }
 
+foreach ($_POST as $FormVariableName=>$FormVariableValue) {
+	if (mb_substr($FormVariableName, 0, 6)=='Submit') {
+		$Index = mb_substr($FormVariableName, 6);
+		$_POST['SelectedCustomer']=$_POST['SelectedCustomer'.$Index];
+		$_POST['SelectedBranch']=$_POST['SelectedBranch'.$Index];
+	}
+}
+
 $ViewTopic= 'Contracts';
 $BookMark = 'CreateContract';
 
@@ -688,14 +696,6 @@ if (isset($_POST['SelectedCustomer'])) {
 /* will only be true if page called from customer selection form
  * or set because only one customer record returned from a search
  * so parse the $Select string into debtorno and branch code */
-
-	foreach ($_POST as $key => $value) {
-		if (mb_substr($key, 0, 6)=='Submit') {
-			$Index=mb_substr($key, 6, 1);
-			$_POST['SelectedCustomer']=$_POST['SelectedCustomer'.$Index];
-			$_POST['SelectedBranch']=$_POST['SelectedBranch'.$Index];
-		}
-	}
 
 	$_SESSION['Contract'.$identifier]->DebtorNo  = $_POST['SelectedCustomer'];
 	$_SESSION['Contract'.$identifier]->BranchCode = $_POST['SelectedBranch'];
