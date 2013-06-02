@@ -32,7 +32,7 @@ if (!isset($_POST['supplierid'])) {
 		LEFT JOIN suppliers
 			ON suppliers.supplierid=offers.supplierid
 		WHERE purchorderauth.userid='".$_SESSION['UserID']."'
-			AND offers.expirydate>'".date('Y-m-d')."'
+			AND offers.expirydate>='NOW()'
 			AND purchorderauth.cancreate=0";
 	$result=DB_query($sql, $db);
 	if (DB_num_rows($result)==0) {
