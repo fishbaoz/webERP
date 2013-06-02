@@ -2,7 +2,7 @@
 /* $Id: Z_CurrencySuppliersBalances.php 5784 2012-12-29 04:00:43Z daintree $*/
 
 include('includes/session.inc');
-$Title=_('Currency Debtor Balances');
+$Title=_('Currency Supplier Balances');
 include('includes/header.inc');
 
 echo '<div class="centre"><h3>' . _('Suppliers Balances By Currency Totals') . '</h3></div>';
