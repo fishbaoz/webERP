@@ -234,6 +234,12 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			} /* end of the loop round the detail line items on the order */
 			echo '<p />';
 			prnMsg(_('Purchase Order') . ' ' . $_SESSION['PO'.$identifier]->OrderNo . ' ' . _('on') . ' ' . $_SESSION['PO'.$identifier]->SupplierName . ' ' . _('has been created'),'success');
+			if ($_SESSION['PO'.$identifier]->AllowPrintPO==1
+				AND ($_SESSION['PO'.$identifier]->Status=='Authorised'
+					OR $_SESSION['PO'.$identifier]->Status=='Printed')){
+
+				echo '<br /><div class="centre"><a target="_blank" href="'.$RootPath.'/PO_PDFPurchOrder.php?OrderNo=' . $_SESSION['PO'.$identifier]->OrderNo . '">' . _('Print Purchase Order') . '</a></div>';
+			}
 
 
 		} else { /*its an existing order need to update the old order info */
