@@ -69,10 +69,28 @@ if ( !isset($_GET['TypeID']) OR !isset($_GET['TransNo']) ) {
 		$Posted = _('Yes');
 		$CreditTotal = 0;
 		$DebitTotal = 0;
+		if ($_GET['TypeID']==10 or $_GET['TypeID']==11 or$_GET['TypeID']==12) {
+			$DetailSQL = "SELECT debtortrans.debtorno,
+								debtorsmaster.name
+							FROM debtortrans
+							INNER JOIN debtorsmaster
+								ON debtortrans.debtorno = debtorsmaster.debtorno
+							WHERE debtortrans.type = '" . $_GET['TypeID'] . "'
+								AND debtortrans.transno = '" . $_GET['TransNo']. "'";
+			$DetailResult = DB_query($DetailSQL,$db);
+		} elseif ($_GET['TypeID']==20 or $_GET['TypeID']==21 or$_GET['TypeID']==22)	{
+			$DetailSQL = "SELECT supptrans.supplierno,
+								suppliers.suppname
+							FROM supptrans
+							INNER JOIN suppliers
+								ON supptrans.supplierno = suppliers.supplierid
+							WHERE supptrans.type = '" . $_GET['TypeID'] . "'
+								AND supptrans.transno = '" . $_GET['TransNo'] . "'";
+			$DetailResult = DB_query($DetailSQL,$db);
+		}
 		$j=1;
 		while ( $TransRow = DB_fetch_array($TransResult) ) {
 			$TranDate = ConvertSQLDate($TransRow['trandate']);
-			$DetailResult = false;
 
 			$AccountName = $TransRow['accountname'];
 			$URL = $RootPath . '/GLAccountInquiry.php?Account=' . $TransRow['account'];
@@ -89,29 +107,13 @@ if ( !isset($_GET['TypeID']) OR !isset($_GET['TransNo']) ) {
 			if ( $TransRow['posted']==0 ){
 				$Posted = _('No');
 			}
-			if ( $TransRow['account'] == $_SESSION['CompanyRecord']['debtorsact'] )	{
-				$DetailSQL = "SELECT debtortrans.debtorno,
-									debtorsmaster.name
-								FROM debtortrans INNER JOIN debtorsmaster
-								ON debtortrans.debtorno = debtorsmaster.debtorno
-								WHERE debtortrans.type = '" . $TransRow['type'] . "'
-								AND debtortrans.transno = '" . $_GET['TransNo']. "'";
-				$DetailResult = DB_query($DetailSQL,$db);
-			} elseif ( $TransRow['account'] == $_SESSION['CompanyRecord']['creditorsact'] )	{
-				$DetailSQL = "SELECT supptrans.supplierno,
-									suppliers.suppname
-								FROM supptrans INNER JOIN suppliers
-								ON supptrans.supplierno = suppliers.supplierid
-								WHERE supptrans.type = '" . $TransRow['type'] . "'
-								AND supptrans.transno = '" . $_GET['TransNo'] . "'";
-				$DetailResult = DB_query($DetailSQL,$db);
-			}
 			if ($DetailResult) {
-				$DetailRow = DB_fetch_array($DetailResult);// there can be only one
 				if ($TransRow['account'] == $_SESSION['CompanyRecord']['debtorsact']) {
+					$DetailRow = DB_fetch_array($DetailResult);// there can be only one
 					$URL = $RootPath . '/CustomerInquiry.php?CustomerID=' . $DetailRow['debtorno'] . '&amp;TransAfterDate=' . $TranDate;
 					$AccountName .= ' ' . $DetailRow['name'];
 				} else { //its a supplier trans
+					$DetailRow = DB_fetch_array($DetailResult);// there can be only one
 					$URL = $RootPath . '/SupplierInquiry.php?SupplierID=' . $DetailRow['supplierno'] . '&amp;FromDate=' . $TranDate;
 					$AccountName .= ' ' . $DetailRow['suppname'];
 				}

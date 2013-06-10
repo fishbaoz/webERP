@@ -132,9 +132,9 @@ if (!isset($_GET['Delete']) AND isset($_SESSION['ReceiptBatch'])){
 		$myrow = DB_fetch_array($result);
 		$SuggestedFunctionalExRate = $myrow['rate'];
 		$_SESSION['ReceiptBatch']->CurrDecimalPlaces = $myrow['decimalplaces'];
-		
+
 	} //end else account currency != functional currency
-	
+
 	if ($_POST['Currency']==$_SESSION['ReceiptBatch']->AccountCurrency){
 		$_SESSION['ReceiptBatch']->ExRate = 1; //ex rate between receipt currency and account currency
 		$SuggestedExRate=1;
@@ -146,8 +146,8 @@ if (!isset($_GET['Delete']) AND isset($_SESSION['ReceiptBatch'])){
 		/*Calculate cross rate to suggest appropriate exchange rate between receipt currency and account currency */
 		$SuggestedExRate = $TableExRate/$SuggestedFunctionalExRate;
 	}
-	
-	
+
+
 
 	$_SESSION['ReceiptBatch']->Narrative = $_POST['BatchNarrative'];
 
@@ -395,7 +395,7 @@ if (isset($_POST['CommitBatch'])){
 			$BatchDebtorTotal += (($ReceiptItem->Discount + $ReceiptItem->Amount)/$_SESSION['ReceiptBatch']->ExRate/$_SESSION['ReceiptBatch']->FunctionalExRate);
 			/*Create a DebtorTrans entry for each customer deposit */
 
-			/*The rate of exchange required here is the rate between the functional (home) currency and the customer receipt currency 
+			/*The rate of exchange required here is the rate between the functional (home) currency and the customer receipt currency
 			 * We have the exchange rate between the bank account and the functional home currency  $_SESSION['ReceiptBatch']->ExRate
 			 * and the exchange rate betwen the currency being paid and the bank account */
 
@@ -439,6 +439,29 @@ if (isset($_POST['CommitBatch'])){
 			$DbgMsg = _('The SQL that failed to update the date of the last payment received was');
 			$ErrMsg = _('Cannot update the customer record for the date of the last payment received because');
 			$result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+			if ($BatchDebtorTotal!=0){
+				/* Now Credit Debtors account with receipts + discounts */
+				$SQL="INSERT INTO gltrans ( type,
+											typeno,
+											trandate,
+											periodno,
+											account,
+											narrative,
+											amount)
+										VALUES (
+											12,
+											'" . $_SESSION['ReceiptBatch']->BatchNo . "',
+											'" . FormatDateForSQL($_SESSION['ReceiptBatch']->DateBanked) . "',
+											'" . $PeriodNo . "',
+											'" . $_SESSION['CompanyRecord']['debtorsact'] . "',
+											'" . $ReceiptItem->Customer . ' - ' . $ReceiptItem->Narrative . "',
+											'" . -$ReceiptItem->Amount . "'
+										)";
+				$DbgMsg = _('The SQL that failed to insert the GL transaction for the debtors account credit was');
+				$ErrMsg = _('Cannot insert a GL transaction for the debtors account credit');
+				$result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+			} //end if there are some customer deposits in this batch
 
 		} //end of if its a customer receipt
 		$BatchDiscount += ($ReceiptItem->Discount/$_SESSION['ReceiptBatch']->ExRate/$_SESSION['ReceiptBatch']->FunctionalExRate);
@@ -502,29 +525,6 @@ if (isset($_POST['CommitBatch'])){
 
 
 		}
-		if ($BatchDebtorTotal!=0){
-			/* Now Credit Debtors account with receipts + discounts */
-			$SQL="INSERT INTO gltrans ( type,
-										typeno,
-										trandate,
-										periodno,
-										account,
-										narrative,
-										amount)
-						VALUES (
-							12,
-							'" . $_SESSION['ReceiptBatch']->BatchNo . "',
-							'" . FormatDateForSQL($_SESSION['ReceiptBatch']->DateBanked) . "',
-							'" . $PeriodNo . "',
-							'". $_SESSION['CompanyRecord']['debtorsact'] . "',
-							'" . $_SESSION['ReceiptBatch']->Narrative . "',
-							'" . -$BatchDebtorTotal . "'
-							)";
-			$DbgMsg = _('The SQL that failed to insert the GL transaction for the debtors account credit was');
-			$ErrMsg = _('Cannot insert a GL transaction for the debtors account credit');
-			$result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
-
-		} //end if there are some customer deposits in this batch
 
 		if ($BatchDiscount!=0){
 			/* Now Debit Discount account with discounts allowed*/
@@ -906,7 +906,7 @@ if (isset($_SESSION['ReceiptBatch'])){
 	/* Now show the entries made so far */
 	if (!$BankAccountEmpty) {
 		echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/transactions.png" title="' . _('Banked') . '" alt="" />
-             ' . ' ' . $_SESSION['ReceiptBatch']->ReceiptType . ' - ' . _('Banked into the') . " " .
+		 ' . ' ' . $_SESSION['ReceiptBatch']->ReceiptType . ' - ' . _('Banked into the') . " " .
 				$_SESSION['ReceiptBatch']->BankAccountName . ' ' . _('on') . ' ' . $_SESSION['ReceiptBatch']->DateBanked . '</p>';
 	}
 
