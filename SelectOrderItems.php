@@ -13,7 +13,7 @@ if (isset($_GET['ModifyOrderNumber'])) {
 else {
 	$Title = _('Select Order Items');
 }
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'SalesOrders';
 $BookMark = 'SalesOrderEntry';
 

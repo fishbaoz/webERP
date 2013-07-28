@@ -2,7 +2,7 @@
 
 include('includes/session.inc');
 $Title = _('Customer How Paid Inquiry');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'ARInquiries';
 $BookMark = 'WhereAllocated';
 include('includes/header.inc');

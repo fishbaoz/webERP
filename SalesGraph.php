@@ -3,7 +3,7 @@
 include('includes/session.inc');
 include('includes/phplot/phplot.php');
 $Title = _('Sales Report Graph');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'ARInquiries';
 $BookMark = 'SalesGraph';
 include('includes/header.inc');

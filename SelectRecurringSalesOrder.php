@@ -2,7 +2,7 @@
 
 include('includes/session.inc');
 $Title = _('Search Recurring Sales Orders');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'SalesOrders';
 $BookMark = 'RecurringSalesOrders';
 

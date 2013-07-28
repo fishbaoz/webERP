@@ -453,7 +453,7 @@ if (isset($_POST['PrintPDF']) and isset($_POST['FromCriteria']) and mb_strlen($_
 	/*The option to print PDF was not hit */
 
 	$Title = _('Aged Debtor Analysis');
-	/* KwaMoja manual links before header.inc */
+	/* webERP manual links before header.inc */
 	$ViewTopic = 'ARReports';
 	$BookMark = 'AgedDebtors';
 	include('includes/header.inc');

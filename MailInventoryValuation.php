@@ -55,8 +55,8 @@ $pdf = new Cpdf('P', 'pt', 'A4');
 
 /* Standard PDF file creation header stuff */
 
-$pdf->addInfo('Creator', 'KwaMoja http://www.kwamoja.com');
-$pdf->addInfo('Author', 'KwaMoja ' . $_SESSION['VersionNumber']);
+$pdf->addInfo('Creator', 'webERP http://www.weberp.com');
+$pdf->addInfo('Author', 'webERP ' . $_SESSION['VersionNumber']);
 
 
 // $FontSize=10;

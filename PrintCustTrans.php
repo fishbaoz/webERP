@@ -45,8 +45,8 @@ if (isset($PrintPDF) or isset($_GET['PrintPDF']) and $PrintPDF and isset($FromTr
 
 
 	$pdf = new Cpdf('L', 'pt', 'A4');
-	$pdf->addInfo('Creator', 'KwaMoja http://www.kwamoja.com');
-	$pdf->addInfo('Author', 'KwaMoja ' . $_SESSION['VersionNumber']);
+	$pdf->addInfo('Creator', 'webERP http://www.weberp.com');
+	$pdf->addInfo('Author', 'webERP ' . $_SESSION['VersionNumber']);
 
 	if ($InvOrCredit == 'Invoice') {
 		$pdf->addInfo('Title', _('Sales Invoice') . ' ' . $FromTransNo . ' to ' . $_POST['ToTransNo']);
@@ -528,7 +528,7 @@ if (isset($PrintPDF) or isset($_GET['PrintPDF']) and $PrintPDF and isset($FromTr
 	/*The option to print PDF was not hit */
 
 	$Title = _('Select Invoices/Credit Notes To Print');
-	/* KwaMoja manual links before header.inc */
+	/* webERP manual links before header.inc */
 	$ViewTopic = 'ARReports';
 	$BookMark = 'PrintInvoicesCredits';
 	include('includes/header.inc');

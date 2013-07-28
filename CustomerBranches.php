@@ -2,7 +2,7 @@
 
 include('includes/session.inc');
 $Title = _('Customer Branches');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'AccountsReceivable';
 $BookMark = 'NewCustomerBranch';
 include('includes/header.inc');

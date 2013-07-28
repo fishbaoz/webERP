@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 -- MySQL dump 10.14  Distrib 10.0.0-MariaDB, for debian-linux-gnu (i686)
 --
--- Host: localhost    Database: kwamoja
+-- Host: localhost    Database: weberp
 -- ------------------------------------------------------
 -- Server version	10.0.0-MariaDB-mariadb1~precise-log
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
@@ -3031,7 +3031,7 @@ CREATE TABLE `www_users` (
 -- Dump completed on 2013-01-25 10:39:53
 -- MySQL dump 10.14  Distrib 10.0.0-MariaDB, for debian-linux-gnu (i686)
 --
--- Host: localhost    Database: kwamoja
+-- Host: localhost    Database: weberp
 -- ------------------------------------------------------
 -- Server version	10.0.0-MariaDB-mariadb1~precise-log
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
@@ -3224,7 +3224,7 @@ INSERT INTO `chartmaster` VALUES ('9100','Income Tax Provision','Income Tax');
 -- Dumping data for table `companies`
 --
 
-INSERT INTO `companies` VALUES (1,'KwaMoja Demonstration Company Ltd','not entered yet','KE1234567890','Plot 8172','Kisanjani Road','Ganjoni','Mombasa','Kenya','East Africa','+61 3 4567 8901','+61 3 4567 8902','kwamoja@kwamojademo.com','KES',1100,4900,2100,2400,2150,4200,5200,3500,1,1,1,5600);
+INSERT INTO `companies` VALUES (1,'webERP Demonstration Company Ltd','not entered yet','KE1234567890','Plot 8172','Kisanjani Road','Ganjoni','Mombasa','Kenya','East Africa','+61 3 4567 8901','+61 3 4567 8902','weberp@weberpdemo.com','KES',1100,4900,2100,2400,2150,4200,5200,3500,1,1,1,5600);
 
 --
 -- Dumping data for table `cogsglpostings`
@@ -3541,7 +3541,7 @@ INSERT INTO `taxprovinces` VALUES (1,'East African Community');
 -- Dumping data for table `www_users`
 --
 
-INSERT INTO `www_users` VALUES ('admin','8467dd232d0410dd7fc0e25a5e9ce72f9bdc0d1e','Demonstration user','','','','','info@kwamoja.com','MSA',8,1,'2013-01-25 10:30:00','','A4','1,1,1,1,1,1,1,1,1,1,1,',0,50,'aguapop','en_GB.utf8',0,0,0);
+INSERT INTO `www_users` VALUES ('admin','8467dd232d0410dd7fc0e25a5e9ce72f9bdc0d1e','Demonstration user','','','','','info@weberp.com','MSA',8,1,'2013-01-25 10:30:00','','A4','1,1,1,1,1,1,1,1,1,1,1,',0,50,'aguapop','en_GB.utf8',0,0,0);
 INSERT INTO `www_users` VALUES ('coastal','8467dd232d0410dd7fc0e25a5e9ce72f9bdc0d1e','Coastal Hotelsd Ltd','COA001','','','','','MSA',7,0,'2012-12-17 22:37:30','COA001','A4','1,1,0,0,0,0,0,0',0,50,'aguapop','en_GB.utf8',0,0,0);
 INSERT INTO `www_users` VALUES ('voifv','8467dd232d0410dd7fc0e25a5e9ce72f9bdc0d1e','Voi Fruit and Vegetable supplies Lt','','VOI001','','','','MSA',9,0,'2013-01-03 11:59:54','','A4','0,0,0,0,0,0,0,0,0,0,0,',0,50,'silverwolf','en_GB.utf8',0,0,1);
 
@@ -3720,10 +3720,10 @@ INSERT INTO `config` VALUES ('DefineControlledOnWOEntry','1');
 INSERT INTO `config` VALUES ('DispatchCutOffTime','14');
 INSERT INTO `config` VALUES ('DoFreightCalc','0');
 INSERT INTO `config` VALUES ('EDIHeaderMsgId','D:01B:UN:EAN010');
-INSERT INTO `config` VALUES ('EDIReference','KWAMOJA');
-INSERT INTO `config` VALUES ('EDI_Incoming_Orders','companies/kwamojademo/EDI_Incoming_Orders');
-INSERT INTO `config` VALUES ('EDI_MsgPending','companies/kwamojademo/EDI_MsgPending');
-INSERT INTO `config` VALUES ('EDI_MsgSent','companies/kwamojademo/EDI_Sent');
+INSERT INTO `config` VALUES ('EDIReference','WEBERP');
+INSERT INTO `config` VALUES ('EDI_Incoming_Orders','companies/weberpdemo/EDI_Incoming_Orders');
+INSERT INTO `config` VALUES ('EDI_MsgPending','companies/weberpdemo/EDI_MsgPending');
+INSERT INTO `config` VALUES ('EDI_MsgSent','companies/weberpdemo/EDI_Sent');
 INSERT INTO `config` VALUES ('ExchangeRateFeed','ECB');
 INSERT INTO `config` VALUES ('Extended_CustomerInfo','0');
 INSERT INTO `config` VALUES ('Extended_SupplierInfo','0');
@@ -3745,7 +3745,7 @@ INSERT INTO `config` VALUES ('OverChargeProportion','30');
 INSERT INTO `config` VALUES ('OverReceiveProportion','20');
 INSERT INTO `config` VALUES ('PackNoteFormat','1');
 INSERT INTO `config` VALUES ('PageLength','48');
-INSERT INTO `config` VALUES ('part_pics_dir','companies/kwamoja/EDI_Sent');
+INSERT INTO `config` VALUES ('part_pics_dir','companies/weberp/EDI_Sent');
 INSERT INTO `config` VALUES ('PastDueDays1','30');
 INSERT INTO `config` VALUES ('PastDueDays2','60');
 INSERT INTO `config` VALUES ('PO_AllowSameItemMultipleTimes','1');
@@ -3761,7 +3761,7 @@ INSERT INTO `config` VALUES ('RadioBeaconStockLocation','BL');
 INSERT INTO `config` VALUES ('RadioBraconFTP_server','192.168.2.2');
 INSERT INTO `config` VALUES ('RadioBreaconFilePrefix','ORDXX');
 INSERT INTO `config` VALUES ('RadionBeaconFTP_user_pass','Radio Beacon remote ftp server password');
-INSERT INTO `config` VALUES ('reports_dir','companies/kwamoja/EDI_Sent');
+INSERT INTO `config` VALUES ('reports_dir','companies/weberp/EDI_Sent');
 INSERT INTO `config` VALUES ('RequirePickingNote','0');
 INSERT INTO `config` VALUES ('RomalpaClause','Ownership will not pass to the buyer until the goods have been paid for in full.');
 INSERT INTO `config` VALUES ('ShowStockidOnImages','0');
@@ -3904,10 +3904,10 @@ INSERT INTO `scripts` VALUES ('InventoryPlanning.php',2,'Creates a pdf report sh
 INSERT INTO `scripts` VALUES ('InventoryPlanningPrefSupplier.php',2,'Produces a report showing the inventory to be ordered by supplier');
 INSERT INTO `scripts` VALUES ('InventoryQuantities.php',2,'');
 INSERT INTO `scripts` VALUES ('InventoryValuation.php',2,'Creates a pdf report showing the value of stock at standard cost for a range of product categories selected');
-INSERT INTO `scripts` VALUES ('ItemsWithoutPicture.php',15,'Shows the list of curent items without picture in KwaMoja');
+INSERT INTO `scripts` VALUES ('ItemsWithoutPicture.php',15,'Shows the list of curent items without picture in webERP');
 INSERT INTO `scripts` VALUES ('Labels.php',15,'Produces item pricing labels in a pdf from a range of selected criteria');
 INSERT INTO `scripts` VALUES ('Locations.php',11,'Defines the inventory stocking locations or warehouses');
-INSERT INTO `scripts` VALUES ('Logout.php',1,'Shows when the user logs out of KwaMoja');
+INSERT INTO `scripts` VALUES ('Logout.php',1,'Shows when the user logs out of webERP');
 INSERT INTO `scripts` VALUES ('MailInventoryValuation.php',1,'Meant to be run as a scheduled process to email the stock valuation off to a specified person. Creates the same stock valuation report as InventoryValuation.php');
 INSERT INTO `scripts` VALUES ('ManualContents.php',1,'');
 INSERT INTO `scripts` VALUES ('MenuAccess.php',15,'');
@@ -4123,7 +4123,7 @@ INSERT INTO `scripts` VALUES ('Z_ImportGLAccountSections.php',11,'');
 INSERT INTO `scripts` VALUES ('Z_ImportPartCodes.php',11,'Allows inventory items to be imported from a csv');
 INSERT INTO `scripts` VALUES ('Z_ImportStocks.php',15,'');
 INSERT INTO `scripts` VALUES ('Z_index.php',15,'Utility menu page');
-INSERT INTO `scripts` VALUES ('Z_ItemsWithoutPicture.php',15,'Shows the list of curent items without picture in KwaMoja');
+INSERT INTO `scripts` VALUES ('Z_ItemsWithoutPicture.php',15,'Shows the list of curent items without picture in webERP');
 INSERT INTO `scripts` VALUES ('Z_MakeNewCompany.php',15,'');
 INSERT INTO `scripts` VALUES ('Z_MakeStockLocns.php',15,'Utility to make LocStock records for all items and locations if not already set up.');
 INSERT INTO `scripts` VALUES ('Z_poAddLanguage.php',15,'Allows a new language po file to be created');

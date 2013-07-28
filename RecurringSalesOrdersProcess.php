@@ -3,7 +3,7 @@
 /*need to allow this script to run from Cron or windows scheduler */
 $AllowAnyone = true;
 
-/* Get this puppy to run from cron (cd KwaMoja and php -f RecurringSalesOrdersProcess.php "kwamojademo") or direct URL (RecurringSalesOrdersProcess.php?Database=kwamojademo) */
+/* Get this puppy to run from cron (cd webERP and php -f RecurringSalesOrdersProcess.php "weberpdemo") or direct URL (RecurringSalesOrdersProcess.php?Database=weberpdemo) */
 if (isset($_GET['Database'])) {
 	$_SESSION['DatabaseName'] = $_GET['Database'];
 	$DatabaseName = $_GET['Database'];
@@ -20,7 +20,7 @@ if (isset($argc)) {
 include('includes/session.inc');
 
 $Title = _('Recurring Orders Process');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = "SalesOrders";
 $BookMark = "RecurringSalesOrders";
 include('includes/header.inc');

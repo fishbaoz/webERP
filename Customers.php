@@ -3,7 +3,7 @@
 include('includes/session.inc');
 
 $Title = _('Customer Maintenance');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 if (isset($_POST['Edit']) or isset($_GET['Edit']) or isset($_GET['DebtorNo'])) {
 	$ViewTopic = 'AccountsReceivable';
 	$BookMark = 'AmendCustomer';

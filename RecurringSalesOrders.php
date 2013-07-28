@@ -8,7 +8,7 @@ include('includes/DefineCartClass.php');
 include('includes/session.inc');
 $Title = _('Recurring Orders');
 
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'SalesOrders';
 $BookMark = 'RecurringSalesOrders';
 

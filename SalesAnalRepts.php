@@ -3,7 +3,7 @@
 include('includes/session.inc');
 
 $Title = _('Sales Analysis Reports Maintenance');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = 'SalesAnalysis';
 $BookMark = 'SalesAnalysis';
 

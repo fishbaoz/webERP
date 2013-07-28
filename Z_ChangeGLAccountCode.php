@@ -1,6 +1,6 @@
 <?php
 
-/*Script to change the GL account code in all KwaMoja */
+/*Script to change the GL account code in all webERP */
 
 include('includes/session.inc');
 $Title = _('UTILITY PAGE Change A GL Account Code');

@@ -17,7 +17,7 @@ $PDFLanguages = array(
 );
 
 $Title = _('User Maintenance');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = "GettingStarted";
 $BookMark = "UserMaintenance";
 include('includes/header.inc');

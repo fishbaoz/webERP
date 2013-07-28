@@ -5,7 +5,7 @@ include('includes/session.inc');
 
 $Title = _('Receipt Entry');
 
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 if ($_GET['Type'] == 'GL') {
 	$ViewTopic = "GeneralLedger";
 	$BookMark = "GLReceipts";

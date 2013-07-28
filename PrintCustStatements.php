@@ -407,7 +407,7 @@ if (isset($_POST['PrintPDF']) and isset($_POST['FromCust']) and $_POST['FromCust
 	/*The option to print PDF was not hit */
 
 	$Title = _('Select Statements to Print');
-	/* KwaMoja manual links before header.inc */
+	/* webERP manual links before header.inc */
 	$ViewTopic = 'ARReports';
 	$BookMark = 'CustomerStatements';
 	include('includes/header.inc');

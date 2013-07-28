@@ -2,7 +2,7 @@
 
 include('includes/session.inc');
 $Title = _('Stock Movements');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = "Inventory";
 $BookMark = "InventoryMovement";
 include('includes/header.inc');

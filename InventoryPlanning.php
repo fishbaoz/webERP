@@ -1,7 +1,7 @@
 <?php
 
 include('includes/session.inc');
-/* KwaMoja manual links before header.inc */
+/* webERP manual links before header.inc */
 $ViewTopic = "Inventory";
 $BookMark = "PlanningReport";
 
@@ -26,8 +26,8 @@ if (isset($_POST['PrintPDF']) and isset($_POST['FromCriteria']) and mb_strlen($_
 	// Javier: better to not use references
 	//	$pdf = & new Cpdf($PageSize);
 	$pdf = new Cpdf('L', 'pt', 'A4');
-	$pdf->addInfo('Creator', 'KwaMoja http://www.kwamoja.com');
-	$pdf->addInfo('Author', 'KwaMoja ' . $_SESSION['VersionNumber']);
+	$pdf->addInfo('Creator', 'webERP http://www.weberp.com');
+	$pdf->addInfo('Author', 'webERP ' . $_SESSION['VersionNumber']);
 	$pdf->addInfo('Title', _('Inventory Planning Report') . ' ' . Date($_SESSION['DefaultDateFormat']));
 	$pdf->addInfo('Subject', _('Inventory Planning'));
 

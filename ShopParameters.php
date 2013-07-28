@@ -357,7 +357,7 @@ while ($ItemsRow = DB_fetch_array($DummyItemsResult)) {
 	}
 }
 echo '</select></td>
-		<td>' . _('Select the KwaMoja service item to use for payment surcharges to be processed as') . '</td>
+		<td>' . _('Select the webERP service item to use for payment surcharges to be processed as') . '</td>
 	</tr>';
 
 echo '<tr>
@@ -478,7 +478,7 @@ while ($BankAccountRow = DB_fetch_array($BankAccountsResult)) {
 	}
 }
 echo '</select></td>
-		<td>' . _('Select the KwaMoja bank account to use for receipts processed by Pay Pal') . '</td>
+		<td>' . _('Select the webERP bank account to use for receipts processed by Pay Pal') . '</td>
 	</tr>';
 
 echo '<tr>
@@ -572,7 +572,7 @@ while ($BankAccountRow = DB_fetch_array($BankAccountsResult)) {
 	}
 }
 echo '</select></td>
-		<td>' . _('Select the KwaMoja bank account to use for receipts processed by credit card') . '</td>
+		<td>' . _('Select the webERP bank account to use for receipts processed by credit card') . '</td>
 	</tr>';
 
 if ($AllowDemoMode) {
