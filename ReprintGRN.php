@@ -38,7 +38,7 @@ if (isset($_POST['Show'])) {
 		exit;
 	}
 	$sql="SELECT count(orderno)
-				FROM purchorders
+				FROM weberp_purchorders
 				WHERE orderno='" . $_POST['PONumber'] ."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
@@ -49,25 +49,25 @@ if (isset($_POST['Show'])) {
 		exit;
 	}
 	$sql="SELECT grnbatch,
-				grns.grnno,
-				grns.podetailitem,
-				grns.itemcode,
-				grns.itemdescription,
-				grns.deliverydate,
-				grns.qtyrecd,
-				suppinvstogrn.suppinv,
-				suppliers.suppname,
-				stockmaster.decimalplaces
-			FROM grns INNER JOIN suppliers
-			ON grns.supplierid=suppliers.supplierid
-			LEFT JOIN suppinvstogrn ON grns.grnno=suppinvstogrn.grnno
-			INNER JOIN purchorderdetails
-			ON grns.podetailitem=purchorderdetails.podetailitem
-			INNER JOIN purchorders on purchorders.orderno=purchorderdetails.orderno
-			INNER JOIN locationusers ON locationusers.loccode=purchorders.intostocklocation AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			LEFT JOIN stockmaster
-			ON grns.itemcode=stockmaster.stockid
-			WHERE purchorderdetails.orderno='" . $_POST['PONumber'] ."'";
+				weberp_grns.grnno,
+				weberp_grns.podetailitem,
+				weberp_grns.itemcode,
+				weberp_grns.itemdescription,
+				weberp_grns.deliverydate,
+				weberp_grns.qtyrecd,
+				weberp_suppinvstogrn.suppinv,
+				weberp_suppliers.suppname,
+				weberp_stockmaster.decimalplaces
+			FROM weberp_grns INNER JOIN weberp_suppliers
+			ON weberp_grns.supplierid=weberp_suppliers.supplierid
+			LEFT JOIN weberp_suppinvstogrn ON weberp_grns.grnno=weberp_suppinvstogrn.grnno
+			INNER JOIN weberp_purchorderdetails
+			ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+			INNER JOIN weberp_purchorders on weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			LEFT JOIN weberp_stockmaster
+			ON weberp_grns.itemcode=weberp_stockmaster.stockid
+			WHERE weberp_purchorderdetails.orderno='" . $_POST['PONumber'] ."'";
 	$result=DB_query($sql);
 	if (DB_num_rows($result)==0) {
 		echo '<br />';

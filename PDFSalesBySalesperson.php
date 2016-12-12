@@ -19,34 +19,34 @@ if (sizeOf($Recipients) == 0) {
 	exit;
 }
 
-$sql= "SELECT salesorders.orderno,
-			  salesorders.orddate,
-			  salesorderdetails.stkcode,
-			  salesorderdetails.unitprice,
-			  stockmaster.description,
-			  stockmaster.units,
-			  stockmaster.decimalplaces,
-			  salesorderdetails.quantity,
-			  salesorderdetails.qtyinvoiced,
-			  salesorderdetails.completed,
-			  salesorderdetails.discountpercent,
-			  stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standardcost,
-			  debtorsmaster.name,
-			  salesman.salesmanname
-		 FROM salesorders
-			 INNER JOIN salesorderdetails
-			 ON salesorders.orderno = salesorderdetails.orderno
-			 INNER JOIN stockmaster
-			 ON salesorderdetails.stkcode = stockmaster.stockid
-			 INNER JOIN debtorsmaster
-			 ON salesorders.debtorno=debtorsmaster.debtorno
-			 INNER JOIN custbranch ON custbranch.debtorno=salesorders.debtorno 
-			 AND custbranch.branchcode=salesorders.branchcode
-			 INNER JOIN salesman ON salesman.salesmancode=custbranch.salesman
-		 WHERE salesorders.orddate >='" . FormatDateForSQL($WeekStartDate) . "'
-			  AND salesorders.orddate <='" . $_POST['ToDate'] . "'
-		 AND salesorders.quotation=0
-		 ORDER BY custbranch.salesman, salesorders.orderno";
+$sql= "SELECT weberp_salesorders.orderno,
+			  weberp_salesorders.orddate,
+			  weberp_salesorderdetails.stkcode,
+			  weberp_salesorderdetails.unitprice,
+			  weberp_stockmaster.description,
+			  weberp_stockmaster.units,
+			  weberp_stockmaster.decimalplaces,
+			  weberp_salesorderdetails.quantity,
+			  weberp_salesorderdetails.qtyinvoiced,
+			  weberp_salesorderdetails.completed,
+			  weberp_salesorderdetails.discountpercent,
+			  weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standardcost,
+			  weberp_debtorsmaster.name,
+			  weberp_salesman.salesmanname
+		 FROM weberp_salesorders
+			 INNER JOIN weberp_salesorderdetails
+			 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			 INNER JOIN weberp_stockmaster
+			 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+			 INNER JOIN weberp_debtorsmaster
+			 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+			 INNER JOIN weberp_custbranch ON weberp_custbranch.debtorno=weberp_salesorders.debtorno 
+			 AND weberp_custbranch.branchcode=weberp_salesorders.branchcode
+			 INNER JOIN weberp_salesman ON weberp_salesman.salesmancode=weberp_custbranch.salesman
+		 WHERE weberp_salesorders.orddate >='" . FormatDateForSQL($WeekStartDate) . "'
+			  AND weberp_salesorders.orddate <='" . $_POST['ToDate'] . "'
+		 AND weberp_salesorders.quotation=0
+		 ORDER BY weberp_custbranch.salesman, weberp_salesorders.orderno";
 
 $Result=DB_query($sql,$db,'','',false,false); //dont trap errors here
 

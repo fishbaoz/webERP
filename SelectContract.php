@@ -76,17 +76,17 @@ if (isset($_POST['ContractRef']) AND $_POST['ContractRef'] !='') {
 		$SQL = "SELECT contractref,
 					   contractdescription,
 					   categoryid,
-					   contracts.debtorno,
-					   debtorsmaster.name AS customername,
+					   weberp_contracts.debtorno,
+					   weberp_debtorsmaster.name AS customername,
 					   branchcode,
 					   status,
 					   orderno,
 					   wo,
 					   customerref,
 					   requireddate
-				FROM contracts INNER JOIN debtorsmaster
-				ON contracts.debtorno = debtorsmaster.debtorno
-				INNER JOIN locationusers ON locationusers.loccode=contracts.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+				FROM weberp_contracts INNER JOIN weberp_debtorsmaster
+				ON weberp_contracts.debtorno = weberp_debtorsmaster.debtorno
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_contracts.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 				WHERE contractref " . LIKE . " '%" .  $_POST['ContractRef'] ."%'";
 
 } else { //contractref not selected
@@ -95,17 +95,17 @@ if (isset($_POST['ContractRef']) AND $_POST['ContractRef'] !='') {
 		$SQL = "SELECT contractref,
 					   contractdescription,
 					   categoryid,
-					   contracts.debtorno,
-					   debtorsmaster.name AS customername,
+					   weberp_contracts.debtorno,
+					   weberp_debtorsmaster.name AS customername,
 					   branchcode,
 					   status,
 					   orderno,
 					   wo,
 					   customerref,
 					   requireddate
-				FROM contracts INNER JOIN debtorsmaster
-				ON contracts.debtorno = debtorsmaster.debtorno
-				INNER JOIN locationusers ON locationusers.loccode=contracts.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+				FROM weberp_contracts INNER JOIN weberp_debtorsmaster
+				ON weberp_contracts.debtorno = weberp_debtorsmaster.debtorno
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_contracts.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 				WHERE debtorno='". $_POST['SelectedCustomer'] ."'";
 		if ($_POST['Status']!=4){
 			$SQL .= " AND status='" . $_POST['Status'] . "'";
@@ -114,17 +114,17 @@ if (isset($_POST['ContractRef']) AND $_POST['ContractRef'] !='') {
 		$SQL = "SELECT contractref,
 					   contractdescription,
 					   categoryid,
-					   contracts.debtorno,
-					   debtorsmaster.name AS customername,
+					   weberp_contracts.debtorno,
+					   weberp_debtorsmaster.name AS customername,
 					   branchcode,
 					   status,
 					   orderno,
 					   wo,
 					   customerref,
 					   requireddate
-				FROM contracts INNER JOIN debtorsmaster
-				ON contracts.debtorno = debtorsmaster.debtorno
-				INNER JOIN locationusers ON locationusers.loccode=contracts.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+				FROM weberp_contracts INNER JOIN weberp_debtorsmaster
+				ON weberp_contracts.debtorno = weberp_debtorsmaster.debtorno
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_contracts.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 		if ($_POST['Status']!=4){
 			$SQL .= " AND status='" . $_POST['Status'] . "'";
 		}

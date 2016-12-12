@@ -14,9 +14,9 @@ if(!isset($_POST['CreateCSV'])) {
 
 if (!isset($_POST['RunReport'])){
 
-	$SalesAreasResult = DB_query("SELECT areacode, areadescription FROM areas");
-	$CustomersResult = DB_query("SELECT debtorno, name FROM debtorsmaster ORDER BY name");
-	$SalesFolkResult = DB_query("SELECT salesmancode, salesmanname FROM salesman ORDER BY salesmanname");
+	$SalesAreasResult = DB_query("SELECT areacode, areadescription FROM weberp_areas");
+	$CustomersResult = DB_query("SELECT debtorno, name FROM weberp_debtorsmaster ORDER BY name");
+	$SalesFolkResult = DB_query("SELECT salesmancode, salesmanname FROM weberp_salesman ORDER BY salesmanname");
 
 	echo '<form id="Form1" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
 
@@ -80,29 +80,29 @@ if (!isset($_POST['RunReport'])){
 }
 
 if ($_POST['Customer']!='') {
-	$WhereClause = "debtorsmaster.debtorno='" . $_POST['Customer'] . "'";
+	$WhereClause = "weberp_debtorsmaster.debtorno='" . $_POST['Customer'] . "'";
 } elseif ($_POST['SalesArea']!='') {
-	$WhereClause = "custbranch.area='" . $_POST['SalesArea'] . "'";
+	$WhereClause = "weberp_custbranch.area='" . $_POST['SalesArea'] . "'";
 } elseif ($_POST['SalesPerson']!='') {
-	$WhereClause = "custbranch.salesman='" . $_POST['SalesPerson'] . "'";
+	$WhereClause = "weberp_custbranch.salesman='" . $_POST['SalesPerson'] . "'";
 }
 
 $sql = "SELECT SUM(ovamount+ovgst+ovdiscount+ovfreight-alloc) AS currencybalance,
-				debtorsmaster.debtorno,
-				debtorsmaster.name,
+				weberp_debtorsmaster.debtorno,
+				weberp_debtorsmaster.name,
 				decimalplaces AS currdecimalplaces,
-				SUM((ovamount+ovgst+ovdiscount+ovfreight-alloc)/debtortrans.rate) AS localbalance
-		FROM debtortrans INNER JOIN debtorsmaster
-			ON debtortrans.debtorno=debtorsmaster.debtorno
-		INNER JOIN currencies
-		ON debtorsmaster.currcode=currencies.currabrev
-		INNER JOIN custbranch
-		ON debtorsmaster.debtorno=custbranch.debtorno";
+				SUM((ovamount+ovgst+ovdiscount+ovfreight-alloc)/weberp_debtortrans.rate) AS localbalance
+		FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+		INNER JOIN weberp_currencies
+		ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+		INNER JOIN weberp_custbranch
+		ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno";
 
 if (mb_strlen($WhereClause)>0){
 	$sql .= " WHERE " . $WhereClause . " ";
 }
-$sql .= " GROUP BY debtorsmaster.debtorno";
+$sql .= " GROUP BY weberp_debtorsmaster.debtorno";
 
 $result = DB_query($sql);
 
@@ -134,28 +134,28 @@ while ($myrow=DB_fetch_array($result)){
  * to get the balance as at the end of the period
  */
 	$sql = "SELECT SUM(ovamount+ovgst+ovdiscount+ovfreight) AS currencytotalpost,
-					debtorsmaster.debtorno,
-					SUM((ovamount+ovgst+ovdiscount+ovfreight)/debtortrans.rate) AS localtotalpost
-			FROM debtortrans INNER JOIN debtorsmaster
-				ON debtortrans.debtorno=debtorsmaster.debtorno
+					weberp_debtorsmaster.debtorno,
+					SUM((ovamount+ovgst+ovdiscount+ovfreight)/weberp_debtortrans.rate) AS localtotalpost
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+				ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
 			WHERE trandate > '" . FormatDateForSQL($_POST['ToDate']) . "'
-			AND debtorsmaster.debtorno = '" . $myrow['debtorno'] . "'
-			GROUP BY debtorsmaster.debtorno";
+			AND weberp_debtorsmaster.debtorno = '" . $myrow['debtorno'] . "'
+			GROUP BY weberp_debtorsmaster.debtorno";
 
 	$TransPostResult = DB_query($sql);
 	$TransPostRow = DB_fetch_array($TransPostResult);
 /* Now we need to get the debits and credits during the period under review
  */
-	$sql = "SELECT SUM(CASE WHEN debtortrans.type=10 THEN ovamount+ovgst+ovdiscount+ovfreight ELSE 0 END) AS currencydebits,
-					SUM(CASE WHEN debtortrans.type<>10 THEN ovamount+ovgst+ovdiscount+ovfreight ELSE 0 END) AS currencycredits,
-					debtorsmaster.debtorno,
-					SUM(CASE WHEN debtortrans.type=10 THEN (ovamount+ovgst+ovdiscount+ovfreight)/debtortrans.rate ELSE 0 END) AS localdebits,
-					SUM(CASE WHEN debtortrans.type<>10 THEN (ovamount+ovgst+ovdiscount+ovfreight)/debtortrans.rate ELSE 0 END) AS localcredits
-			FROM debtortrans INNER JOIN debtorsmaster
-				ON debtortrans.debtorno=debtorsmaster.debtorno
+	$sql = "SELECT SUM(CASE WHEN weberp_debtortrans.type=10 THEN ovamount+ovgst+ovdiscount+ovfreight ELSE 0 END) AS currencydebits,
+					SUM(CASE WHEN weberp_debtortrans.type<>10 THEN ovamount+ovgst+ovdiscount+ovfreight ELSE 0 END) AS currencycredits,
+					weberp_debtorsmaster.debtorno,
+					SUM(CASE WHEN weberp_debtortrans.type=10 THEN (ovamount+ovgst+ovdiscount+ovfreight)/weberp_debtortrans.rate ELSE 0 END) AS localdebits,
+					SUM(CASE WHEN weberp_debtortrans.type<>10 THEN (ovamount+ovgst+ovdiscount+ovfreight)/weberp_debtortrans.rate ELSE 0 END) AS localcredits
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+				ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
 			WHERE trandate>='" . FormatDateForSQL($_POST['FromDate']) . "' AND trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'
-			AND debtorsmaster.debtorno = '" . $myrow['debtorno'] . "'
-			GROUP BY debtorsmaster.debtorno";
+			AND weberp_debtorsmaster.debtorno = '" . $myrow['debtorno'] . "'
+			GROUP BY weberp_debtorsmaster.debtorno";
 
 	$TransResult = DB_query($sql);
 	$TransRow = DB_fetch_array($TransResult);

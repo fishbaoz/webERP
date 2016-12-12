@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: DefineOfferClass.php 6943 2014-10-27 07:06:42Z daintree $ */
 /* Definition of the Offer class to hold all the information for a supplier offer
 */
 
@@ -27,7 +27,7 @@ Class Offer {
 		$sql="SELECT suppname,
 					email,
 					currcode
-				FROM suppliers
+				FROM weberp_suppliers
 				WHERE supplierid='" . $this->SupplierID . "'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
@@ -73,7 +73,7 @@ Class Offer {
 		if ($Update=='') {
 			foreach ($this->LineItems as $LineItems) {
 				if ($LineItems->Deleted==False) {
-					$sql="INSERT INTO offers (	supplierid,
+					$sql="INSERT INTO weberp_offers (	supplierid,
 												tenderid,
 												stockid,
 												quantity,
@@ -106,7 +106,7 @@ Class Offer {
 		} else {
 			foreach ($this->LineItems as $LineItem) {
 				if ($LineItem->Deleted==false){ //Update only the LineItems which is not flagged as deleted
-				$sql="UPDATE offers SET
+				$sql="UPDATE weberp_offers SET
 						quantity='".$LineItem->Quantity."',
 						price='".$LineItem->Price."',
 						expirydate='".FormatDateForSQL($LineItem->ExpiryDate)."'
@@ -124,7 +124,7 @@ Class Offer {
 					exit;
 				}
 				} else { // the LineItem is Deleted flag is true so delete it
-					$sql = "DELETE from offers WHERE offerid='" . $LineItem->LineNo . "'";
+					$sql = "DELETE from weberp_offers WHERE offerid='" . $LineItem->LineNo . "'";
 					$ErrMsg = _('The supplier offer could not be deleted on the database because');
 					$DbgMsg = _('The SQL statement used to delete the suppliers offer record are failed was');
 					$result = DB_query($sql,$ErrMsg,$DbgMsg,true);

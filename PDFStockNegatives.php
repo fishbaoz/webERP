@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFStockNegatives.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -15,23 +15,23 @@ $Title = _('Negative Stock Listing Error');
 $ErrMsg = _('An error occurred retrieving the negative quantities.');
 $DbgMsg = _('The sql that failed to retrieve the negative quantities was');
 
-$sql = "SELECT stockmaster.stockid,
-               stockmaster.description,
-               stockmaster.categoryid,
-               stockmaster.decimalplaces,
-               locstock.loccode,
-               locations.locationname,
-               locstock.quantity
-        FROM stockmaster INNER JOIN locstock
-        ON stockmaster.stockid=locstock.stockid
-        INNER JOIN locations
-        ON locstock.loccode = locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-        WHERE locstock.quantity < 0
-        ORDER BY locstock.loccode,
-			stockmaster.categoryid,
-			stockmaster.stockid,
-			stockmaster.decimalplaces";
+$sql = "SELECT weberp_stockmaster.stockid,
+               weberp_stockmaster.description,
+               weberp_stockmaster.categoryid,
+               weberp_stockmaster.decimalplaces,
+               weberp_locstock.loccode,
+               weberp_locations.locationname,
+               weberp_locstock.quantity
+        FROM weberp_stockmaster INNER JOIN weberp_locstock
+        ON weberp_stockmaster.stockid=weberp_locstock.stockid
+        INNER JOIN weberp_locations
+        ON weberp_locstock.loccode = weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+        WHERE weberp_locstock.quantity < 0
+        ORDER BY weberp_locstock.loccode,
+			weberp_stockmaster.categoryid,
+			weberp_stockmaster.stockid,
+			weberp_stockmaster.decimalplaces";
 
 $result = DB_query($sql, $ErrMsg, $DbgMsg);
 

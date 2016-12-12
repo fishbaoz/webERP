@@ -48,7 +48,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	$CheckSQL = "SELECT count(*)
-		     FROM suppliertype
+		     FROM weberp_suppliertype
 		     WHERE typename = '" . $_POST['TypeName'] . "'";
 	$CheckResult=DB_query($CheckSQL);
 	$CheckRow=DB_fetch_row($CheckResult);
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedType) AND $InputError !=1) {
 
-		$sql = "UPDATE suppliertype
+		$sql = "UPDATE weberp_suppliertype
 			SET typename = '" . $_POST['TypeName'] . "'
 			WHERE typeid = '" . $SelectedType . "'";
 
@@ -69,13 +69,13 @@ if (isset($_POST['submit'])) {
 	} elseif ($InputError !=1){
 		// Add new record on submit
 
-		$sql = "INSERT INTO suppliertype
+		$sql = "INSERT INTO weberp_suppliertype
 					(typename)
 				VALUES ('" . $_POST['TypeName'] . "')";
 
 
 		$msg = _('Supplier type') . ' ' . $_POST['TypeName'] .  ' ' . _('has been created');
-		$CheckSQL = "SELECT count(typeid) FROM suppliertype";
+		$CheckSQL = "SELECT count(typeid) FROM weberp_suppliertype";
 		$result = DB_query($CheckSQL);
 		$row = DB_fetch_row($result);
 	}
@@ -87,7 +87,7 @@ if (isset($_POST['submit'])) {
 
 	// Fetch the default supplier type
 		$sql = "SELECT confvalue
-					FROM config
+					FROM weberp_config
 					WHERE confname='DefaultSupplierType'";
 		$result = DB_query($sql);
 		$SupplierTypeRow = DB_fetch_row($result);
@@ -95,14 +95,14 @@ if (isset($_POST['submit'])) {
 
 	// Does it exist
 		$CheckSQL = "SELECT count(*)
-			     FROM suppliertype
+			     FROM weberp_suppliertype
 			     WHERE typeid = '" . $DefaultSupplierType . "'";
 		$CheckResult = DB_query($CheckSQL);
 		$CheckRow = DB_fetch_row($CheckResult);
 
 	// If it doesnt then update config with newly created one.
 		if ($CheckRow[0] == 0) {
-			$sql = "UPDATE config
+			$sql = "UPDATE weberp_config
 					SET confvalue='" . $_POST['TypeID'] . "'
 					WHERE confname='DefaultSupplierType'";
 			$result = DB_query($sql);
@@ -116,7 +116,7 @@ if (isset($_POST['submit'])) {
 
 } elseif ( isset($_GET['delete']) ) {
 
-	$sql = "SELECT COUNT(*) FROM suppliers WHERE supptype='" . $SelectedType . "'";
+	$sql = "SELECT COUNT(*) FROM weberp_suppliers WHERE supptype='" . $SelectedType . "'";
 
 	$ErrMsg = _('The number of suppliers using this Type record could not be retrieved because');
 	$result = DB_query($sql,$ErrMsg);
@@ -126,7 +126,7 @@ if (isset($_POST['submit'])) {
 			_('There are') . ' ' . $myrow[0] . ' ' . _('suppliers with this type code'));
 	} else {
 
-		$sql="DELETE FROM suppliertype WHERE typeid='" . $SelectedType . "'";
+		$sql="DELETE FROM weberp_suppliertype WHERE typeid='" . $SelectedType . "'";
 		$ErrMsg = _('The Type record could not be deleted because');
 		$result = DB_query($sql,$ErrMsg);
 		prnMsg(_('Supplier type') . $SelectedType  . ' ' . _('has been deleted') ,'success');
@@ -145,7 +145,7 @@ if (!isset($SelectedType)){
  * the same page again and allow update/input or deletion of the records
  */
 
-	$sql = "SELECT typeid, typename FROM suppliertype";
+	$sql = "SELECT typeid, typename FROM weberp_suppliertype";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -202,7 +202,7 @@ if (! isset($_GET['delete'])) {
 
 		$sql = "SELECT typeid,
 			       typename
-		        FROM suppliertype
+		        FROM weberp_suppliertype
 		        WHERE typeid='" . $SelectedType . "'";
 
 		$result = DB_query($sql);

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_ImportPartCodes.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 
 include('includes/session.inc');
@@ -9,7 +9,7 @@ include('xmlrpc/lib/xmlrpc.inc');
 include('api/api_errorcodes.php');
 
 $webERPUser = $_SESSION['UserID'];
-$sql="SELECT password FROM www_users WHERE userid='" . $webERPUser."'";
+$sql="SELECT password FROM weberp_www_users WHERE userid='" . $webERPUser."'";
 $result=DB_query($sql);
 $myrow=DB_fetch_array($result);
 $weberppassword = $myrow[0];
@@ -69,14 +69,14 @@ if (isset($_POST['update'])) {
 	echo '</table>';
 	fclose ($fp);
 } else {
-	$sql = "select * from locations";
+	$sql = "select * from weberp_locations";
 	$result = DB_query($sql);
 	if (DB_num_rows($result)==0) {
 		prnMsg( _('No locations have been set up. At least one location should be set up first'), "error");
 	} else {
 		prnMsg( _('Select a csv file containing the details of the parts that you wish to import into webERP. '). '<br />' .
 			 _('The first line must contain the field names that you wish to import. ').
-			 '<a href ="Z_DescribeTable.php?table=stockmaster">' . _('The field names can be found here'). '</a>', 'info');
+			 '<a href ="Z_DescribeTable.php?table=weberp_stockmaster">' . _('The field names can be found here'). '</a>', 'info');
 		echo '<form id="ItemForm" enctype="multipart/form-data" method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?' .SID .'">';
         echo '<div class="centre">';
 		echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';

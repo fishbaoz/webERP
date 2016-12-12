@@ -17,37 +17,37 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 	}
 	$DateFrom = FormatDateForSQL($_POST['FromDate']);
 	$DateTo = FormatDateForSQL($_POST['ToDate']);
-	$sql = "SELECT fixedassets.assetid,
-					fixedassets.description,
-					fixedassets.longdescription,
-					fixedassets.assetcategoryid,
-					fixedassets.serialno,
-					fixedassetlocations.locationdescription,
-					fixedassets.datepurchased,
-					fixedassetlocations.parentlocationid,
-					fixedassets.assetlocation,
-					fixedassets.disposaldate,
-					SUM(CASE WHEN (fixedassettrans.transdate <'" . $DateFrom . "' AND fixedassettrans.fixedassettranstype='cost') THEN fixedassettrans.amount ELSE 0 END) AS costbfwd,
-					SUM(CASE WHEN (fixedassettrans.transdate <'" . $DateFrom . "' AND fixedassettrans.fixedassettranstype='depn') THEN fixedassettrans.amount ELSE 0 END) AS depnbfwd,
-					SUM(CASE WHEN (fixedassettrans.transdate >='" . $DateFrom ."'  AND fixedassettrans.transdate <='" . $DateTo . "' AND fixedassettrans.fixedassettranstype='cost') THEN fixedassettrans.amount ELSE 0 END) AS periodadditions,
-					SUM(CASE WHEN fixedassettrans.transdate >='" . $DateFrom . "'  AND fixedassettrans.transdate <='" . $DateTo . "' AND fixedassettrans.fixedassettranstype='depn' THEN fixedassettrans.amount ELSE 0 END) AS perioddepn,
-					SUM(CASE WHEN fixedassettrans.transdate >='" . $DateFrom . "'  AND fixedassettrans.transdate <='" . $DateTo . "' AND fixedassettrans.fixedassettranstype='disposal' THEN fixedassettrans.amount ELSE 0 END) AS perioddisposal
-			FROM fixedassets
-			INNER JOIN fixedassetcategories ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
-			INNER JOIN fixedassetlocations ON fixedassets.assetlocation=fixedassetlocations.locationid
-			INNER JOIN fixedassettrans ON fixedassets.assetid=fixedassettrans.assetid
-			WHERE fixedassets.assetcategoryid " . LIKE . "'" . $_POST['AssetCategory'] . "'
-			AND fixedassets.assetid " . LIKE . "'" . $_POST['AssetID'] . "'
-			AND fixedassets.assetlocation " . LIKE . "'" . $_POST['AssetLocation'] . "'
-			GROUP BY fixedassets.assetid,
-					fixedassets.description,
-					fixedassets.longdescription,
-					fixedassets.assetcategoryid,
-					fixedassets.serialno,
-					fixedassetlocations.locationdescription,
-					fixedassets.datepurchased,
-					fixedassetlocations.parentlocationid,
-					fixedassets.assetlocation";
+	$sql = "SELECT weberp_fixedassets.assetid,
+					weberp_fixedassets.description,
+					weberp_fixedassets.longdescription,
+					weberp_fixedassets.assetcategoryid,
+					weberp_fixedassets.serialno,
+					weberp_fixedassetlocations.locationdescription,
+					weberp_fixedassets.datepurchased,
+					weberp_fixedassetlocations.parentlocationid,
+					weberp_fixedassets.assetlocation,
+					weberp_fixedassets.disposaldate,
+					SUM(CASE WHEN (weberp_fixedassettrans.transdate <'" . $DateFrom . "' AND weberp_fixedassettrans.fixedassettranstype='cost') THEN weberp_fixedassettrans.amount ELSE 0 END) AS costbfwd,
+					SUM(CASE WHEN (weberp_fixedassettrans.transdate <'" . $DateFrom . "' AND weberp_fixedassettrans.fixedassettranstype='depn') THEN weberp_fixedassettrans.amount ELSE 0 END) AS depnbfwd,
+					SUM(CASE WHEN (weberp_fixedassettrans.transdate >='" . $DateFrom ."'  AND weberp_fixedassettrans.transdate <='" . $DateTo . "' AND weberp_fixedassettrans.fixedassettranstype='cost') THEN weberp_fixedassettrans.amount ELSE 0 END) AS periodadditions,
+					SUM(CASE WHEN weberp_fixedassettrans.transdate >='" . $DateFrom . "'  AND weberp_fixedassettrans.transdate <='" . $DateTo . "' AND weberp_fixedassettrans.fixedassettranstype='depn' THEN weberp_fixedassettrans.amount ELSE 0 END) AS perioddepn,
+					SUM(CASE WHEN weberp_fixedassettrans.transdate >='" . $DateFrom . "'  AND weberp_fixedassettrans.transdate <='" . $DateTo . "' AND weberp_fixedassettrans.fixedassettranstype='disposal' THEN weberp_fixedassettrans.amount ELSE 0 END) AS perioddisposal
+			FROM weberp_fixedassets
+			INNER JOIN weberp_fixedassetcategories ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
+			INNER JOIN weberp_fixedassetlocations ON weberp_fixedassets.assetlocation=weberp_fixedassetlocations.locationid
+			INNER JOIN weberp_fixedassettrans ON weberp_fixedassets.assetid=weberp_fixedassettrans.assetid
+			WHERE weberp_fixedassets.assetcategoryid " . LIKE . "'" . $_POST['AssetCategory'] . "'
+			AND weberp_fixedassets.assetid " . LIKE . "'" . $_POST['AssetID'] . "'
+			AND weberp_fixedassets.assetlocation " . LIKE . "'" . $_POST['AssetLocation'] . "'
+			GROUP BY weberp_fixedassets.assetid,
+					weberp_fixedassets.description,
+					weberp_fixedassets.longdescription,
+					weberp_fixedassets.assetcategoryid,
+					weberp_fixedassets.serialno,
+					weberp_fixedassetlocations.locationdescription,
+					weberp_fixedassets.datepurchased,
+					weberp_fixedassetlocations.parentlocationid,
+					weberp_fixedassets.assetlocation";
 	$result = DB_query($sql);
 	if (isset($_POST['pdf'])) {
 		$FontSize = 10;
@@ -58,7 +58,7 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 		if ($_POST['AssetCategory']=='%') {
 			$AssetCategory=_('All');
 		} else {
-			$CategorySQL="SELECT categorydescription FROM fixedassetcategories WHERE categoryid='".$_POST['AssetCategory']."'";
+			$CategorySQL="SELECT categorydescription FROM weberp_fixedassetcategories WHERE categoryid='".$_POST['AssetCategory']."'";
 			$CategoryResult=DB_query($CategorySQL);
 			$CategoryRow=DB_fetch_array($CategoryResult);
 			$AssetCategory=$CategoryRow['categorydescription'];
@@ -67,7 +67,7 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 		if ($_POST['AssetID']=='%') {
 			$AssetDescription =_('All');
 		} else {
-			$AssetSQL="SELECT description FROM fixedassets WHERE assetid='".$_POST['AssetID']."'";
+			$AssetSQL="SELECT description FROM weberp_fixedassets WHERE assetid='".$_POST['AssetID']."'";
 			$AssetResult=DB_query($AssetSQL);
 			$AssetRow=DB_fetch_array($AssetResult);
 			$AssetDescription =$AssetRow['description'];
@@ -113,10 +113,10 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 		$Ancestors[0] = $myrow['locationdescription'];
 		$i = 0;
 		while ($Ancestors[$i] != '') {
-			$LocationSQL = "SELECT parentlocationid from fixedassetlocations where locationdescription='" . $Ancestors[$i] . "'";
+			$LocationSQL = "SELECT parentlocationid from weberp_fixedassetlocations where locationdescription='" . $Ancestors[$i] . "'";
 			$LocationResult = DB_query($LocationSQL);
 			$LocationRow = DB_fetch_array($LocationResult);
-			$ParentSQL = "SELECT locationdescription from fixedassetlocations where locationid='" . $LocationRow['parentlocationid'] . "'";
+			$ParentSQL = "SELECT locationdescription from weberp_fixedassetlocations where locationid='" . $LocationRow['parentlocationid'] . "'";
 			$ParentResult = DB_query($ParentSQL);
 			$ParentRow = DB_fetch_array($ParentResult);
 			$i++;
@@ -255,7 +255,7 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 	include ('includes/header.inc');
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>';
 
-	$result = DB_query('SELECT categoryid,categorydescription FROM fixedassetcategories');
+	$result = DB_query('SELECT categoryid,categorydescription FROM weberp_fixedassetcategories');
 	echo '<form id="RegisterForm" method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
     echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
@@ -273,7 +273,7 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 	}
 	echo '</select></td>
 		</tr>';
-	$sql = "SELECT  locationid, locationdescription FROM fixedassetlocations";
+	$sql = "SELECT  locationid, locationdescription FROM weberp_fixedassetlocations";
 	$result = DB_query($sql);
 	echo '<tr>
 			<th>' . _('Asset Location') . '</th>
@@ -288,7 +288,7 @@ if (isset($_POST['submit']) OR isset($_POST['pdf']) OR isset($_POST['csv'])) {
 	}
 	echo '</select></td>
 		</tr>';
-	$sql = "SELECT assetid, description FROM fixedassets";
+	$sql = "SELECT assetid, description FROM weberp_fixedassets";
 	$result = DB_query($sql);
 	echo '<tr>
 			<th>' . _('Asset') . '</th>

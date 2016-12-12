@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: DeliveryDetails.php 7321 2015-06-14 03:38:33Z tehonu $ */
 /* Used during order entry to allow the entry of delivery addresses other than the defaulted branch delivery address and information about carrier/shipping method etc. */
 
 /*
@@ -139,24 +139,24 @@ if(isset($_POST['Update'])
 				prnMsg(_($_POST['FreightCost']),'warn');
 			}
 		}
-		$sql = "SELECT custbranch.brname,
-					custbranch.braddress1,
-					custbranch.braddress2,
-					custbranch.braddress3,
-					custbranch.braddress4,
-					custbranch.braddress5,
-					custbranch.braddress6,
-					custbranch.phoneno,
-					custbranch.email,
-					custbranch.defaultlocation,
-					custbranch.defaultshipvia,
-					custbranch.deliverblind,
-					custbranch.specialinstructions,
-					custbranch.estdeliverydays,
-					custbranch.salesman
-				FROM custbranch
-				WHERE custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'
-				AND custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
+		$sql = "SELECT weberp_custbranch.brname,
+					weberp_custbranch.braddress1,
+					weberp_custbranch.braddress2,
+					weberp_custbranch.braddress3,
+					weberp_custbranch.braddress4,
+					weberp_custbranch.braddress5,
+					weberp_custbranch.braddress6,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.email,
+					weberp_custbranch.defaultlocation,
+					weberp_custbranch.defaultshipvia,
+					weberp_custbranch.deliverblind,
+					weberp_custbranch.specialinstructions,
+					weberp_custbranch.estdeliverydays,
+					weberp_custbranch.salesman
+				FROM weberp_custbranch
+				WHERE weberp_custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'
+				AND weberp_custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
 
 		$ErrMsg = _('The customer branch record of the customer selected') . ': ' . $_SESSION['Items'.$identifier]->CustomerName . ' ' . _('cannot be retrieved because');
 		$DbgMsg = _('SQL used to retrieve the branch details was') . ':';
@@ -237,7 +237,7 @@ if(isset($_POST['Update'])
 		*/
 		if((isset($BestShipper) AND $BestShipper=='') AND ($_POST['ShipVia']=='' OR !isset($_POST['ShipVia']))) {
 			$sql = "SELECT shipper_id
-						FROM shippers
+						FROM weberp_shippers
 						WHERE shipper_id='" . $_SESSION['Default_Shipper']."'";
 			$ErrMsg = _('There was a problem testing for the default shipper');
 			$DbgMsg = _('SQL used to test for the default shipper') . ':';
@@ -250,7 +250,7 @@ if(isset($_POST['Update'])
 			} else {
 
 				$sql = "SELECT shipper_id
-							FROM shippers";
+							FROM weberp_shippers";
 				$TestShipperExists = DB_query($sql,$ErrMsg,$DbgMsg);
 
 				if(DB_num_rows($TestShipperExists)>=1) {
@@ -301,10 +301,10 @@ if(isset($_POST['ProcessOrder'])) {
 /*check the customer's payment terms */
 		$sql = "SELECT daysbeforedue,
 				dayinfollowingmonth
-			FROM debtorsmaster,
-				paymentterms
-			WHERE debtorsmaster.paymentterms=paymentterms.termsindicator
-			AND debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
+			FROM weberp_debtorsmaster,
+				weberp_paymentterms
+			WHERE weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+			AND weberp_debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
 
 		$ErrMsg = _('The customer terms cannot be determined') . '. ' . _('This order cannot be processed because');
 		$DbgMsg = _('SQL used to find the customer terms') . ':';
@@ -340,7 +340,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 
 	$OrderNo = GetNextTransNo(30, $db);
 
-	$HeaderSQL = "INSERT INTO salesorders (
+	$HeaderSQL = "INSERT INTO weberp_salesorders (
 								orderno,
 								debtorno,
 								branchcode,
@@ -398,7 +398,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 	$InsertQryResult = DB_query($HeaderSQL,$ErrMsg);
 
 
-	$StartOf_LineItemsSQL = "INSERT INTO salesorderdetails (
+	$StartOf_LineItemsSQL = "INSERT INTO weberp_salesorderdetails (
 											orderlineno,
 											orderno,
 											stkcode,
@@ -437,50 +437,50 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 			echo '<br />';
 
 			//now get the data required to test to see if we need to make a new WO
-			$QOHResult = DB_query("SELECT SUM(quantity) FROM locstock WHERE stockid='" . $StockItem->StockID . "'");
+			$QOHResult = DB_query("SELECT SUM(quantity) FROM weberp_locstock WHERE stockid='" . $StockItem->StockID . "'");
 			$QOHRow = DB_fetch_row($QOHResult);
 			$QOH = $QOHRow[0];
 
-			$SQL = "SELECT SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qtydemand
-					FROM salesorderdetails INNER JOIN salesorders
-					ON salesorderdetails.orderno=salesorders.orderno
-					WHERE salesorderdetails.stkcode = '" . $StockItem->StockID . "'
-					AND salesorderdetails.completed = 0
-					AND salesorders.quotation=0";
+			$SQL = "SELECT SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qtydemand
+					FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+					ON weberp_salesorderdetails.orderno=weberp_salesorders.orderno
+					WHERE weberp_salesorderdetails.stkcode = '" . $StockItem->StockID . "'
+					AND weberp_salesorderdetails.completed = 0
+					AND weberp_salesorders.quotation=0";
 			$DemandResult = DB_query($SQL);
 			$DemandRow = DB_fetch_row($DemandResult);
 			$QuantityDemand = $DemandRow[0];
 
-			$SQL = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-					FROM salesorderdetails INNER JOIN salesorders
-					ON salesorderdetails.orderno=salesorders.orderno
-					INNER JOIN bom ON salesorderdetails.stkcode=bom.parent
-					INNER JOIN stockmaster ON stockmaster.stockid=bom.parent
-					WHERE salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-					AND bom.component='" . $StockItem->StockID . "'
-					AND salesorders.quotation=0
-					AND stockmaster.mbflag='A'
-					AND salesorderdetails.completed=0";
+			$SQL = "SELECT SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+					FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+					ON weberp_salesorderdetails.orderno=weberp_salesorders.orderno
+					INNER JOIN weberp_bom ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+					INNER JOIN weberp_stockmaster ON weberp_stockmaster.stockid=weberp_bom.parent
+					WHERE weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+					AND weberp_bom.component='" . $StockItem->StockID . "'
+					AND weberp_salesorders.quotation=0
+					AND weberp_stockmaster.mbflag='A'
+					AND weberp_salesorderdetails.completed=0";
 			$AssemblyDemandResult = DB_query($SQL);
 			$AssemblyDemandRow = DB_fetch_row($AssemblyDemandResult);
 			$QuantityAssemblyDemand = $AssemblyDemandRow[0];
 
-			$SQL = "SELECT SUM(purchorderdetails.quantityord - purchorderdetails.quantityrecd) as qtyonorder
-					FROM purchorderdetails,
-						purchorders
-					WHERE purchorderdetails.orderno = purchorders.orderno
-					AND purchorderdetails.itemcode = '" . $StockItem->StockID . "'
-					AND purchorderdetails.completed = 0";
+			$SQL = "SELECT SUM(weberp_purchorderdetails.quantityord - weberp_purchorderdetails.quantityrecd) as qtyonorder
+					FROM weberp_purchorderdetails,
+						weberp_purchorders
+					WHERE weberp_purchorderdetails.orderno = weberp_purchorders.orderno
+					AND weberp_purchorderdetails.itemcode = '" . $StockItem->StockID . "'
+					AND weberp_purchorderdetails.completed = 0";
 			$PurchOrdersResult = DB_query($SQL);
 			$PurchOrdersRow = DB_fetch_row($PurchOrdersResult);
 			$QuantityPurchOrders = $PurchOrdersRow[0];
 
-			$SQL = "SELECT SUM(woitems.qtyreqd - woitems.qtyrecd) as qtyonorder
-					FROM woitems INNER JOIN workorders
-					ON woitems.wo=workorders.wo
-					WHERE woitems.stockid = '" . $StockItem->StockID . "'
-					AND woitems.qtyreqd > woitems.qtyrecd
-					AND workorders.closed = 0";
+			$SQL = "SELECT SUM(weberp_woitems.qtyreqd - weberp_woitems.qtyrecd) as qtyonorder
+					FROM weberp_woitems INNER JOIN weberp_workorders
+					ON weberp_woitems.wo=weberp_workorders.wo
+					WHERE weberp_woitems.stockid = '" . $StockItem->StockID . "'
+					AND weberp_woitems.qtyreqd > weberp_woitems.qtyrecd
+					AND weberp_workorders.closed = 0";
 			$WorkOrdersResult = DB_query($SQL);
 			$WorkOrdersRow = DB_fetch_row($WorkOrdersResult);
 			$QuantityWorkOrders = $WorkOrdersRow[0];
@@ -498,7 +498,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 
 				$WONo = GetNextTransNo(40,$db);
 				$ErrMsg = _('Unable to insert a new work order for the sales order item');
-				$InsWOResult = DB_query("INSERT INTO workorders (wo,
+				$InsWOResult = DB_query("INSERT INTO weberp_workorders (wo,
 												 loccode,
 												 requiredby,
 												 startdate)
@@ -510,11 +510,11 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 										$DbgMsg,
 										true);
 				//Need to get the latest BOM to roll up cost
-				$CostResult = DB_query("SELECT SUM((materialcost+labourcost+overheadcost)*bom.quantity) AS cost
-													FROM stockmaster INNER JOIN bom
-													ON stockmaster.stockid=bom.component
-													WHERE bom.parent='" . $StockItem->StockID . "'
-													AND bom.loccode='" . $_SESSION['DefaultFactoryLocation'] . "'");
+				$CostResult = DB_query("SELECT SUM((materialcost+labourcost+overheadcost)*weberp_bom.quantity) AS cost
+													FROM weberp_stockmaster INNER JOIN weberp_bom
+													ON weberp_stockmaster.stockid=weberp_bom.component
+													WHERE weberp_bom.parent='" . $StockItem->StockID . "'
+													AND weberp_bom.loccode='" . $_SESSION['DefaultFactoryLocation'] . "'");
 				$CostRow = DB_fetch_row($CostResult);
 				if(is_null($CostRow[0]) OR $CostRow[0]==0) {
 					$Cost =0;
@@ -524,7 +524,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 				}
 
 				// insert parent item info
-				$sql = "INSERT INTO woitems (wo,
+				$sql = "INSERT INTO weberp_woitems (wo,
 											 stockid,
 											 qtyreqd,
 											 stdcost)
@@ -548,14 +548,14 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 
 						for ($i=0;$i<$WOQuantity;$i++) {
 
-							$result = DB_query("SELECT serialno FROM stockserialitems
+							$result = DB_query("SELECT serialno FROM weberp_stockserialitems
 												WHERE serialno='" . ($StockItem->NextSerialNo + $i) . "'
 												AND stockid='" . $StockItem->StockID ."'");
 							if(DB_num_rows($result)!=0) {
 								$WOQuantity++;
 								prnMsg(($StockItem->NextSerialNo + $i) . ': ' . _('This automatically generated serial number already exists - it cannot be added to the work order'),'error');
 							} else {
-								$sql = "INSERT INTO woserialnos (wo,
+								$sql = "INSERT INTO weberp_woserialnos (wo,
 																stockid,
 																serialno)
 													VALUES ('" . $WONo . "',
@@ -568,7 +568,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 						}//end loop around creation of woserialnos
 						$NewNextSerialNo = ($StockItem->NextSerialNo + $WOQuantity +1);
 						$ErrMsg = _('Could not update the new next serial number for the item');
-						$UpdateNextSerialNoResult = DB_query("UPDATE stockmaster SET nextserialno='" . $NewNextSerialNo . "' WHERE stockid='" . $StockItem->StockID . "'",$ErrMsg,$DbgMsg,true);
+						$UpdateNextSerialNoResult = DB_query("UPDATE weberp_stockmaster SET nextserialno='" . $NewNextSerialNo . "' WHERE stockid='" . $StockItem->StockID . "'",$ErrMsg,$DbgMsg,true);
 				}// end if the item is serialised and nextserialno is set
 
 				$EmailSubject = _('New Work Order Number') . ' ' . $WONo . ' ' . _('for') . ' ' . $StockItem->StockID . ' x ' . $WOQuantity;
@@ -662,21 +662,21 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 	if($_SESSION['Items'.$identifier]->Quotation==0) {//now its being changed? to an order
 		$ContractResult = DB_query("SELECT contractref,
 											requireddate
-									FROM contracts WHERE orderno='" .  $_SESSION['ExistingOrder'.$identifier] ."'
+									FROM weberp_contracts WHERE orderno='" .  $_SESSION['ExistingOrder'.$identifier] ."'
 									AND status=1");
 		if(DB_num_rows($ContractResult)==1) {//then it is a contract quotation being changed to an order
 			$ContractRow = DB_fetch_array($ContractResult);
 			$WONo = GetNextTransNo(40,$db);
 			$ErrMsg = _('Could not update the contract status');
 			$DbgMsg = _('The SQL that failed to update the contract status was');
-			$UpdContractResult=DB_query("UPDATE contracts SET status=2,
+			$UpdContractResult=DB_query("UPDATE weberp_contracts SET status=2,
 															wo='" . $WONo . "'
 										WHERE orderno='" .$_SESSION['ExistingOrder'.$identifier] . "'",
 										$ErrMsg,
 										$DbgMsg,
 										true);
 			$ErrMsg = _('Could not insert the contract bill of materials');
-			$InsContractBOM = DB_query("INSERT INTO bom (parent,
+			$InsContractBOM = DB_query("INSERT INTO weberp_bom (parent,
 														 component,
 														 workcentreadded,
 														 loccode,
@@ -690,13 +690,13 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 													'" . Date('Y-m-d') . "',
 													'2099-12-31',
 													quantity
-											FROM contractbom
+											FROM weberp_contractbom
 											WHERE contractref='" . $ContractRow['contractref'] . "'",
 											$ErrMsg,
 											$DbgMsg);
 
 			$ErrMsg = _('Unable to insert a new work order for the sales order item');
-			$InsWOResult = DB_query("INSERT INTO workorders (wo,
+			$InsWOResult = DB_query("INSERT INTO weberp_workorders (wo,
 															 loccode,
 															 requiredby,
 															 startdate)
@@ -707,10 +707,10 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 										$ErrMsg,
 										$DbgMsg);
 			//Need to get the latest BOM to roll up cost but also add the contract other requirements
-			$CostResult = DB_query("SELECT SUM((materialcost+labourcost+overheadcost)*contractbom.quantity) AS cost
-									FROM stockmaster INNER JOIN contractbom
-									ON stockmaster.stockid=contractbom.stockid
-									WHERE contractbom.contractref='" .  $ContractRow['contractref'] . "'");
+			$CostResult = DB_query("SELECT SUM((materialcost+labourcost+overheadcost)*weberp_contractbom.quantity) AS cost
+									FROM weberp_stockmaster INNER JOIN weberp_contractbom
+									ON weberp_stockmaster.stockid=weberp_contractbom.stockid
+									WHERE weberp_contractbom.contractref='" .  $ContractRow['contractref'] . "'");
 			$CostRow = DB_fetch_row($CostResult);
 			if(is_null($CostRow[0]) OR $CostRow[0]==0) {
 				$Cost =0;
@@ -719,14 +719,14 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 				$Cost = $CostRow[0];//cost of contract BOM
 			}
 			$CostResult = DB_query("SELECT SUM(costperunit*quantity) AS cost
-									FROM contractreqts
-									WHERE contractreqts.contractref='" .  $ContractRow['contractref'] . "'");
+									FROM weberp_contractreqts
+									WHERE weberp_contractreqts.contractref='" .  $ContractRow['contractref'] . "'");
 			$CostRow = DB_fetch_row($CostResult);
 			//add other requirements cost to cost of contract BOM
 			$Cost += $CostRow[0];
 
 			// insert parent item info
-			$sql = "INSERT INTO woitems (wo,
+			$sql = "INSERT INTO weberp_woitems (wo,
 										 stockid,
 										 qtyreqd,
 										 stdcost)
@@ -744,7 +744,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 	}//end test to see if the order was a contract quotation being changed to an order
 
 
-	$HeaderSQL = "UPDATE salesorders SET debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "',
+	$HeaderSQL = "UPDATE weberp_salesorders SET debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "',
 										branchcode = '" . $_SESSION['Items'.$identifier]->Branch . "',
 										customerref = '". DB_escape_string($_SESSION['Items'.$identifier]->CustRef) ."',
 										comments = '". DB_escape_string($_SESSION['Items'.$identifier]->Comments) ."',
@@ -768,7 +768,7 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 										printedpackingslip = '" . $_POST['ReprintPackingSlip'] . "',
 										quotation = '" . $_SESSION['Items'.$identifier]->Quotation . "',
 										deliverblind = '" . $_SESSION['Items'.$identifier]->DeliverBlind . "'
-						WHERE salesorders.orderno='" . $_SESSION['ExistingOrder'.$identifier] ."'";
+						WHERE weberp_salesorders.orderno='" . $_SESSION['ExistingOrder'.$identifier] ."'";
 
 	$DbgMsg = _('The SQL that was used to update the order and failed was');
 	$ErrMsg = _('The order cannot be updated because');
@@ -785,14 +785,14 @@ if(isset($OK_to_PROCESS) AND $OK_to_PROCESS == 1 AND $_SESSION['ExistingOrder'.$
 			$Completed = 0;
 		}
 
-		$LineItemsSQL = "UPDATE salesorderdetails SET unitprice='"  . $StockItem->Price . "',
+		$LineItemsSQL = "UPDATE weberp_salesorderdetails SET unitprice='"  . $StockItem->Price . "',
 													quantity='" . $StockItem->Quantity . "',
 													discountpercent='" . floatval($StockItem->DiscountPercent) . "',
 													completed='" . $Completed . "',
 													poline='" . $StockItem->POLine . "',
 													itemdue='" . FormatDateForSQL($StockItem->ItemDue) . "'
-						WHERE salesorderdetails.orderno='" . $_SESSION['ExistingOrder'.$identifier] . "'
-						AND salesorderdetails.orderlineno='" . $StockItem->LineNumber . "'";
+						WHERE weberp_salesorderdetails.orderno='" . $_SESSION['ExistingOrder'.$identifier] . "'
+						AND weberp_salesorderdetails.orderlineno='" . $StockItem->LineNumber . "'";
 
 		$DbgMsg = _('The SQL that was used to modify the order line and failed was');
 		$ErrMsg = _('The updated order line cannot be modified because');
@@ -1014,14 +1014,14 @@ if($_SESSION['Items'.$identifier]->Location=='' OR !isset($_SESSION['Items'.$ide
 	$_SESSION['Items'.$identifier]->Location = $DefaultStockLocation;
 }
 
-$SQL = "SELECT locations.loccode, locationname
-	FROM locations
-	INNER JOIN locationusers
-	ON locationusers.loccode=locations.loccode
-		AND locationusers.userid='" . $_SESSION['UserID'] . "'
-		AND locationusers.canupd=1
-	WHERE locations.allowinvoicing='1'
-	ORDER BY locations.locationname";
+$SQL = "SELECT weberp_locations.loccode, locationname
+	FROM weberp_locations
+	INNER JOIN weberp_locationusers
+	ON weberp_locationusers.loccode=weberp_locations.loccode
+		AND weberp_locationusers.userid='" . $_SESSION['UserID'] . "'
+		AND weberp_locationusers.canupd=1
+	WHERE weberp_locations.allowinvoicing='1'
+	ORDER BY weberp_locations.locationname";
 $ErrMsg = _('The stock locations could not be retrieved');
 $DbgMsg = _('SQL used to retrieve the stock locations was') . ':';
 $StkLocsResult = DB_query($SQL, $ErrMsg, $DbgMsg);
@@ -1119,7 +1119,7 @@ echo'	<tr>
 		echo '<tr>
 				<td>' . _('Sales person'). ':</td>
 				<td><select name="SalesPerson">';
-		$SalesPeopleResult = DB_query("SELECT salesmancode, salesmanname FROM salesman WHERE current=1");
+		$SalesPeopleResult = DB_query("SELECT salesmancode, salesmanname FROM weberp_salesman WHERE current=1");
 		if(!isset($_POST['SalesPerson']) AND $_SESSION['SalesmanLogin']!=NULL ) {
 			$_SESSION['Items'.$identifier]->SalesPerson = $_SESSION['SalesmanLogin'];
 		}
@@ -1182,7 +1182,7 @@ echo'	<tr>
 		$ErrMsg = _('The shipper details could not be retrieved');
 		$DbgMsg = _('SQL used to retrieve the shipper details was') . ':';
 
-		$sql = "SELECT shipper_id, shippername FROM shippers";
+		$sql = "SELECT shipper_id, shippername FROM weberp_shippers";
 		$ShipperResults = DB_query($sql,$ErrMsg,$DbgMsg);
 		while ($myrow=DB_fetch_array($ShipperResults)) {
 			if($myrow['shipper_id']==$_POST['ShipVia']) {

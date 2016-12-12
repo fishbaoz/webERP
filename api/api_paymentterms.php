@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_paymentterms.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* This function returns a list of the payment terms abbreviations
  * currently setup on webERP
@@ -12,7 +12,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT termsindicator FROM paymentterms';
+		$sql = 'SELECT termsindicator FROM weberp_paymentterms';
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -36,7 +36,7 @@
 				return $Errors;
 			}
 		}
-		$sql = "SELECT * FROM paymentterms WHERE termsindicator='".$paymentterms."'";
+		$sql = "SELECT * FROM weberp_paymentterms WHERE termsindicator='".$paymentterms."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}
@@ -52,7 +52,7 @@
 				return $Errors;
 			}
 		}
-		$sql = "SELECT paymentid FROM paymentmethods";
+		$sql = "SELECT paymentid FROM weberp_paymentmethods";
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -76,7 +76,7 @@
 				return $Errors;
 			}
 		}
-		$sql = "SELECT * FROM paymentmethods WHERE paymentid='".$PaymentMethod."'";
+		$sql = "SELECT * FROM weberp_paymentmethods WHERE paymentid='".$PaymentMethod."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_DeleteSalesTransActions.php 6941 2014-10-26 23:18:08Z daintree $*/
 /*Script to Delete all sales transactions*/
 
 include ('includes/session.inc');
@@ -12,7 +12,7 @@ if (isset($_POST['ProcessDeletions'])){
 
 		prnMsg(_('Deleting sales analysis records'),'info');
 
-		$sql = "TRUNCATE TABLE salesanalysis";
+		$sql = "TRUNCATE TABLE weberp_salesanalysis";
 		$ErrMsg = _('The SQL to delete Sales Analysis records failed because');
 		$Result = DB_query($sql,$ErrMsg);
 	}
@@ -22,15 +22,15 @@ if (isset($_POST['ProcessDeletions'])){
 
 		$ErrMsg = _('The SQL to delete customer transaction records failed because');
 
-		$Result = DB_query("TRUNCATE TABLE custallocns",$ErrMsg);
-		$Result = DB_query("DELETE FROM debtortranstaxes",$ErrMsg);
-		$Result = DB_query("DELETE FROM debtortrans",$ErrMsg);
-		$Result = DB_query("DELETE FROM stockserialmoves",$ErrMsg);
-		$Result = DB_query("DELETE FROM stockmovestaxes" ,$ErrMsg);
-		$Result = DB_query("DELETE FROM stockmoves WHERE type=10 OR type=11",$ErrMsg);
+		$Result = DB_query("TRUNCATE TABLE weberp_custallocns",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_debtortranstaxes",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_debtortrans",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_stockserialmoves",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_stockmovestaxes" ,$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_stockmoves WHERE type=10 OR type=11",$ErrMsg);
 
 		$ErrMsg = _('The SQL to update the transaction numbers for all sales transactions because');
-		$sql = "UPDATE systypes SET typeno =0
+		$sql = "UPDATE weberp_systypes SET typeno =0
 						WHERE typeid =10
 						OR typeid=11
 						OR typeid=15
@@ -43,15 +43,15 @@ if (isset($_POST['ProcessDeletions'])){
 		prnMsg(_('Deleting all sales order records'),'info');
 
 		$ErrMsg = _('The SQL to delete sales order detail records failed because');
-		$Result = DB_query('DELETE FROM salesorderdetails');
+		$Result = DB_query('DELETE FROM weberp_salesorderdetails');
 
-		$Result = DB_query('DELETE FROM orderdeliverydifferenceslog');
+		$Result = DB_query('DELETE FROM weberp_orderdeliverydifferenceslog');
 
 		$ErrMsg = _('The SQL to delete sales order header records failed because');
-		$Result = DB_query('DELETE FROM salesorders',$ErrMsg);
+		$Result = DB_query('DELETE FROM weberp_salesorders',$ErrMsg);
 
 
-		$sql = 'UPDATE systypes SET typeno =0 WHERE typeid =30';
+		$sql = 'UPDATE weberp_systypes SET typeno =0 WHERE typeid =30';
 		$ErrMsg = _('The SQL to update the transaction number of sales orders has failed') . ', ' . _('the SQL statement was');
 		$Result = DB_query($sql,$ErrMsg);
 
@@ -60,18 +60,18 @@ if (isset($_POST['ProcessDeletions'])){
 
 		prnMsg (_('Making stock for all parts and locations nil'),'info');
 		$ErrMsg = _('The SQL to make all stocks zero failed because');
-		$result = DB_query("TRUNCATE TABLE stockserialmoves",$ErrMsg);
-		$result = DB_query("TRUNCATE TABLE stockserialitems",$ErrMsg);
-		$result = DB_query("TRUNCATE TABLE stockmovestaxes",$ErrMsg);
-		$result = DB_query("DELETE FROM stockmoves",$ErrMsg);
-		$result = DB_query("UPDATE locstock SET quantity=0",$ErrMsg);
+		$result = DB_query("TRUNCATE TABLE weberp_stockserialmoves",$ErrMsg);
+		$result = DB_query("TRUNCATE TABLE weberp_stockserialitems",$ErrMsg);
+		$result = DB_query("TRUNCATE TABLE weberp_stockmovestaxes",$ErrMsg);
+		$result = DB_query("DELETE FROM weberp_stockmoves",$ErrMsg);
+		$result = DB_query("UPDATE weberp_locstock SET quantity=0",$ErrMsg);
 
 	}
 	if ($_POST['ZeroSalesOrders']=='on'){
 
 		prnMsg(_('Making the quantity invoiced zero on all orders'),'info');
 
-		$sql = "UPDATE salesorderdetails SET qtyinvoiced=0, completed=0";
+		$sql = "UPDATE weberp_salesorderdetails SET qtyinvoiced=0, completed=0";
 		$ErrMsg =_('The SQL to un-invoice all sales orders failed');
 		$Result = DB_query($sql,$ErrMsg);
 
@@ -79,7 +79,7 @@ if (isset($_POST['ProcessDeletions'])){
 	if ($_POST['SalesGL']=='on'){
 
 		prnMsg(_('Deleting all sales related GL Transactions'),'info');
-		$sql = "DELETE FROM gltrans WHERE type>=10 AND type <=15";
+		$sql = "DELETE FROM weberp_gltrans WHERE type>=10 AND type <=15";
 		$ErrMsg = _('The SQL to delete sales related GL Transactions failed');
 		$Result = DB_query($sql,$ErrMsg);
 	}
@@ -88,7 +88,7 @@ if (isset($_POST['ProcessDeletions'])){
 
 		prnMsg(_('Deleting all stock related GL Transactions'),'info');
 
-		$sql = "DELETE FROM gltrans WHERE type=25 OR type=17 OR type=26 OR type=28";
+		$sql = "DELETE FROM weberp_gltrans WHERE type=25 OR type=17 OR type=26 OR type=28";
 		$ErrMsg = _('The SQL to delete stock related GL Transactions failed');
 		$Result = DB_query($sql,$ErrMsg);
 
@@ -97,7 +97,7 @@ if (isset($_POST['ProcessDeletions'])){
 
 		prnMsg(_('Zeroing all purchase order quantities received and uncompleting all purchase orders'),'info');
 
-		$sql = 'UPDATE purchorderdetails SET quantityrecd=0, completed=0';
+		$sql = 'UPDATE weberp_purchorderdetails SET quantityrecd=0, completed=0';
 		$ErrMsg = _('The SQL to zero quantity received for all purchase orders line items and uncompleted all purchase order line items because');
 		$Result = DB_query($sql,$ErrMsg);
 
@@ -107,23 +107,23 @@ if (isset($_POST['ProcessDeletions'])){
 		prnMsg(_('Deleting all GRN records'),'info');
 
 		$ErrMsg = _('The SQL to delete Sales Analysis records failed because');
-		$Result = DB_query("DELETE FROM grns",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_grns",$ErrMsg);
 
 		$ErrMsg = _('The SQL to update the transaction number of stock receipts has failed because');
-		$Result = DB_query("UPDATE systypes SET typeid =1 WHERE typeno =25",$ErrMsg);
+		$Result = DB_query("UPDATE weberp_systypes SET typeid =1 WHERE typeno =25",$ErrMsg);
 	}
 	if ($_POST['PurchOrders']=='on'){
 
 		prnMsg(_('Deleting all Purchase Orders'),'info');
 
 		$ErrMsg = _('The SQL to delete all purchase order details failed, the SQL statement was');
-		$Result = DB_query("DELETE FROM purchorderdetails",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_purchorderdetails",$ErrMsg);
 
 		$ErrMsg = _('The SQL to delete all purchase orders failed because');
-		$Result = DB_query("DELETE FROM purchorders",$ErrMsg);
+		$Result = DB_query("DELETE FROM weberp_purchorders",$ErrMsg);
 
 		$ErrMsg = _('The SQL to update the transaction number of stock receipts has failed because');
-		$Result = DB_query("UPDATE systypes SET typeno=0 WHERE typeid =18",$ErrMsg);
+		$Result = DB_query("UPDATE weberp_systypes SET typeno=0 WHERE typeid =18",$ErrMsg);
 
 	}
 

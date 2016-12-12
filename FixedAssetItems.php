@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: FixedAssetItems.php 7494 2016-04-25 09:53:53Z daintree $ */
 
 include('includes/session.inc');
 $Title = _('Fixed Assets');
@@ -140,8 +140,8 @@ if (isset($_POST['submit'])) {
 										accumdepn,
 										costact,
 										accumdepnact
-								FROM fixedassets INNER JOIN fixedassetcategories
-								ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
+								FROM weberp_fixedassets INNER JOIN weberp_fixedassetcategories
+								ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
 								WHERE assetid='" . $AssetID . "'");
 			$OldDetails = DB_fetch_array($result);
 			if ($OldDetails['assetcategoryid'] !=$_POST['AssetCategoryID']  AND $OldDetails['cost']!=0){
@@ -150,14 +150,14 @@ if (isset($_POST['submit'])) {
 				/* Get the new account codes for the new asset category */
 				$result = DB_query("SELECT costact,
 											accumdepnact
-									FROM fixedassetcategories
+									FROM weberp_fixedassetcategories
 									WHERE categoryid='" . $_POST['AssetCategoryID'] . "'");
 				$NewAccounts = DB_fetch_array($result);
 
 				$TransNo = GetNextTransNo( 42, $db); /* transaction type is asset category change */
 
 				//credit cost for the old category
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -177,7 +177,7 @@ if (isset($_POST['submit'])) {
 				$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 				//debit cost for the new category
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -197,7 +197,7 @@ if (isset($_POST['submit'])) {
 				$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 				if ($OldDetails['accumdepn']!=0) {
 					//debit accumdepn for the old category
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -217,7 +217,7 @@ if (isset($_POST['submit'])) {
 					$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 					//credit accum depn for the new category
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -237,7 +237,7 @@ if (isset($_POST['submit'])) {
 					$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 				} /*end if there was accumulated depreciation for the asset */
 			} /* end if there is a change in asset category */
-			$sql = "UPDATE fixedassets
+			$sql = "UPDATE weberp_fixedassets
 					SET longdescription='" . $_POST['LongDescription'] . "',
 						description='" . $_POST['Description'] . "',
 						assetcategoryid='" . $_POST['AssetCategoryID'] . "',
@@ -255,7 +255,7 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('Asset') . ' ' . $AssetID . ' ' . _('has been updated'), 'success');
 			echo '<br />';
 		} else { //it is a NEW part
-			$sql = "INSERT INTO fixedassets (description,
+			$sql = "INSERT INTO weberp_fixedassets (description,
 											longdescription,
 											assetcategoryid,
 											assetlocation,
@@ -277,7 +277,7 @@ if (isset($_POST['submit'])) {
 			$result = DB_query($sql, $ErrMsg, $DbgMsg);
 
 			if (DB_error_no() ==0) {
-				$NewAssetID = DB_Last_Insert_ID($db,'fixedassets', 'assetid');
+				$NewAssetID = DB_Last_Insert_ID($db,'weberp_fixedassets', 'assetid');
 				prnMsg( _('The new asset has been added to the database with an asset code of:') . ' ' . $NewAssetID,'success');
 				unset($_POST['LongDescription']);
 				unset($_POST['Description']);
@@ -300,8 +300,8 @@ if (isset($_POST['submit'])) {
 								accumdepn,
 								accumdepnact,
 								costact
-						FROM fixedassets INNER JOIN fixedassetcategories
-						ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
+						FROM weberp_fixedassets INNER JOIN weberp_fixedassetcategories
+						ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
 						WHERE assetid='" . $AssetID . "'");
 	$AssetRow = DB_fetch_array($result);
 	$NBV = $AssetRow['cost'] -$AssetRow['accumdepn'];
@@ -309,12 +309,12 @@ if (isset($_POST['submit'])) {
 		$CancelDelete =1; //cannot delete assets where NBV is not 0
 		prnMsg(_('The asset still has a net book value - only assets with a zero net book value can be deleted'),'error');
 	}
-	$result = DB_query("SELECT * FROM fixedassettrans WHERE assetid='" . $AssetID . "'");
+	$result = DB_query("SELECT * FROM weberp_fixedassettrans WHERE assetid='" . $AssetID . "'");
 	if (DB_num_rows($result) > 0){
 		$CancelDelete =1; /*cannot delete assets with transactions */
 		prnMsg(_('The asset has transactions associated with it. The asset can only be deleted when the fixed asset transactions are purged, otherwise the integrity of fixed asset reports may be compromised'),'error');
 	}
-	$result = DB_query("SELECT * FROM purchorderdetails WHERE assetid='" . $AssetID . "'");
+	$result = DB_query("SELECT * FROM weberp_purchorderdetails WHERE assetid='" . $AssetID . "'");
 	if (DB_num_rows($result) > 0){
 		$CancelDelete =1; /*cannot delete assets where there is a purchase order set up for it */
 		prnMsg(_('There is a purchase order set up for this asset. The purchase order line must be deleted first'),'error');
@@ -327,7 +327,7 @@ if (isset($_POST['submit'])) {
 		$TransNo = GetNextTransNo( 43, $db); /* transaction type is asset deletion - (and remove cost/acc5umdepn from GL) */
 		if ($AssetRow['cost'] > 0){
 			//credit cost for the asset deleted
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -347,7 +347,7 @@ if (isset($_POST['submit'])) {
 			$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 			//debit accumdepn for the depreciation removed on deletion of this asset
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -368,7 +368,7 @@ if (isset($_POST['submit'])) {
 
 		} //end if cost > 0
 
-		$sql="DELETE FROM fixedassets WHERE assetid='" . $AssetID . "'";
+		$sql="DELETE FROM weberp_fixedassets WHERE assetid='" . $AssetID . "'";
 		$result=DB_query($sql, _('Could not delete the asset record'),'',true);
 
 		$result = DB_Txn_Commit();
@@ -435,7 +435,7 @@ if (!isset($AssetID) OR $AssetID=='') {
 				barcode,
 				disposalproceeds,
 				disposaldate
-			FROM fixedassets
+			FROM weberp_fixedassets
 			WHERE assetid ='" . $AssetID . "'";
 
 	$result = DB_query($sql);
@@ -543,7 +543,7 @@ echo '<tr>
 		<td>' . _('Asset Category') . ':</td>
 		<td><select name="AssetCategoryID">';
 
-$sql = "SELECT categoryid, categorydescription FROM fixedassetcategories";
+$sql = "SELECT categoryid, categorydescription FROM weberp_fixedassetcategories";
 $ErrMsg = _('The asset categories could not be retrieved because');
 $DbgMsg = _('The SQL used to retrieve stock categories and failed was');
 $result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -568,7 +568,7 @@ if (isset($AssetRow) AND ($AssetRow['datepurchased']!='0000-00-00' AND $AssetRow
 		</tr>';
 }
 
-$sql = "SELECT locationid, locationdescription FROM fixedassetlocations";
+$sql = "SELECT locationid, locationdescription FROM weberp_fixedassetlocations";
 $ErrMsg = _('The asset locations could not be retrieved because');
 $DbgMsg = _('The SQL used to retrieve asset locations and failed was');
 $result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -652,13 +652,13 @@ if (isset($AssetRow)){
 		</tr>';
 	}
 	/*Get the last period depreciation (depn is transtype =44) was posted for */
-	$result = DB_query("SELECT periods.lastdate_in_period,
-								max(fixedassettrans.periodno)
-					FROM fixedassettrans INNER JOIN periods
-					ON fixedassettrans.periodno=periods.periodno
+	$result = DB_query("SELECT weberp_periods.lastdate_in_period,
+								max(weberp_fixedassettrans.periodno)
+					FROM weberp_fixedassettrans INNER JOIN weberp_periods
+					ON weberp_fixedassettrans.periodno=weberp_periods.periodno
 					WHERE transtype=44
-					GROUP BY periods.lastdate_in_period
-					ORDER BY periods.lastdate_in_period DESC");
+					GROUP BY weberp_periods.lastdate_in_period
+					ORDER BY weberp_periods.lastdate_in_period DESC");
 
 	$LastDepnRun = DB_fetch_row($result);
 	if(DB_num_rows($result)==0){

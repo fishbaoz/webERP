@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: AuditTrail.php 7196 2015-03-07 11:06:33Z exsonqu $ */
 
 include('includes/session.inc');
 
@@ -32,7 +32,7 @@ if (isset($_POST['ContainingText'])){
 $TableResult = DB_show_tables($db);
 
 // Get list of users
-$UserResult = DB_query("SELECT userid FROM www_users ORDER BY userid");
+$UserResult = DB_query("SELECT userid FROM weberp_www_users ORDER BY userid");
 
 echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">';
 echo '<div>';
@@ -158,13 +158,13 @@ if (isset($_POST['View'])) {
 		$sql="SELECT transactiondate,
 				userid,
 				querystring
-			FROM audittrail
+			FROM weberp_audittrail
 			WHERE transactiondate BETWEEN '". $FromDate."' AND '".$ToDate."'" . $ContainingText;
 	} else {
 		$sql="SELECT transactiondate,
 				userid,
 				querystring
-			FROM audittrail
+			FROM weberp_audittrail
 			WHERE userid='".$_POST['SelectedUser']."'
 			AND transactiondate BETWEEN '".$FromDate."' AND '".$ToDate."'" . $ContainingText;
 	}
@@ -207,7 +207,7 @@ if (isset($_POST['View'])) {
 			for ($i=1; $i<sizeof($_SESSION['SQLString']['fields']); $i++) {
 				if (isset($_SESSION['SQLString']['values'][$i]) and (trim(str_replace("'","",$_SESSION['SQLString']['values'][$i])) != "") &
 				(trim($_SESSION['SQLString']['fields'][$i]) != 'password') &
-				(trim($_SESSION['SQLString']['fields'][$i]) != 'www_users.password')) {
+				(trim($_SESSION['SQLString']['fields'][$i]) != 'weberp_www_users.password')) {
 					echo '<tr style="background-color:' . $RowColour . '">';
 					echo '<td></td>
 						<td></td>

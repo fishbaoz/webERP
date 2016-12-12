@@ -49,7 +49,7 @@ if (isset($_POST['Submit'])) {
 	$Where = '';
 	if (isset($_POST['SupplierRef']) AND trim($_POST['SupplierRef']) != '') {
 		$SupplierRef = trim($_POST['SupplierRef']);
-		$WhereSupplierRef = " AND grns.supplierref LIKE '%" . $SupplierRef . "%'";
+		$WhereSupplierRef = " AND weberp_grns.supplierref LIKE '%" . $SupplierRef . "%'";
 		$Where .= $WhereSupplierRef;
 	} elseif (isset($_POST['GRNBatchNo']) AND trim($_POST['GRNBatchNo']) != '') {
 		$GRNBatchNo = trim($_POST['GRNBatchNo']);
@@ -60,9 +60,9 @@ if (isset($_POST['Submit'])) {
 		$WhereInvoiceNo = " AND suppinv LIKE '%" . $InvoiceNo . "%'";
 		$Where .= $WhereInvoiceNo;
 	}
-	$sql = "SELECT grnbatch, grns.supplierref, suppinv,purchorderdetails.orderno 
-		FROM grns INNER JOIN purchorderdetails ON grns.podetailitem=purchorderdetails.podetailitem 
-		LEFT JOIN suppinvstogrn ON grns.grnno=suppinvstogrn.grnno 
+	$sql = "SELECT grnbatch, weberp_grns.supplierref, suppinv,weberp_purchorderdetails.orderno 
+		FROM weberp_grns INNER JOIN weberp_purchorderdetails ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem 
+		LEFT JOIN weberp_suppinvstogrn ON weberp_grns.grnno=weberp_suppinvstogrn.grnno 
 		WHERE supplierid='" . $SupplierID . "'" . $Where;
 	$ErrMsg = _('Failed to retrieve supplier invoice and grn data');
 	$result = DB_query($sql,$ErrMsg);

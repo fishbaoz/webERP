@@ -1,1 +1,1 @@
-ALTER TABLE www_users CHANGE language language char(5) NOT NULL DEFAULT 'en_GB';
+ALTER TABLE weberp_www_users CHANGE language language char(5) NOT NULL DEFAULT 'en_GB';

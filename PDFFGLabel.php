@@ -139,9 +139,9 @@ if ($NoOfLabels >0){
 		if ($SelectedWO!='Preview'){
 			$myrow = $myarray[$i];
 			//echo $myrow['itemcode'] ;
-			$SQL = "SELECT stockmaster.controlled,
-				stockmaster.units
-			    FROM stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
+			$SQL = "SELECT weberp_stockmaster.controlled,
+				weberp_stockmaster.units
+			    FROM weberp_stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
 			//echo $SQL;
 			$CheckControlledResult = DB_query($SQL,'<br />' . _('Could not determine if the item was controlled or not because') . ' ');
 			$ControlledRow = DB_fetch_row($CheckControlledResult);

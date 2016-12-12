@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PaymentTerms.php 7556 2016-06-16 11:11:45Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -78,13 +78,13 @@ if (isset($_POST['submit'])) {
 		/*SelectedTerms could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 
 		if (isset($_POST['DaysOrFoll']) AND $_POST['DaysOrFoll']=='on') {
-			$sql = "UPDATE paymentterms SET
+			$sql = "UPDATE weberp_paymentterms SET
 							terms='" . $_POST['Terms'] . "',
 							dayinfollowingmonth=0,
 							daysbeforedue='" . filter_number_format($_POST['DayNumber']) . "'
 					WHERE termsindicator = '" . $SelectedTerms . "'";
 		} else {
-			$sql = "UPDATE paymentterms SET
+			$sql = "UPDATE weberp_paymentterms SET
 							terms='" . $_POST['Terms'] . "',
 							dayinfollowingmonth='" . filter_number_format($_POST['DayNumber']) . "',
 							daysbeforedue=0
@@ -97,7 +97,7 @@ if (isset($_POST['submit'])) {
 	/*Selected terms is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new payment terms form */
 
 		if ($_POST['DaysOrFoll']=='on') {
-			$sql = "INSERT INTO paymentterms (termsindicator,
+			$sql = "INSERT INTO weberp_paymentterms (termsindicator,
 								terms,
 								daysbeforedue,
 								dayinfollowingmonth)
@@ -108,7 +108,7 @@ if (isset($_POST['submit'])) {
 							0
 						)";
 		} else {
-			$sql = "INSERT INTO paymentterms (termsindicator,
+			$sql = "INSERT INTO weberp_paymentterms (termsindicator,
 								terms,
 								daysbeforedue,
 								dayinfollowingmonth)
@@ -138,14 +138,14 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN DebtorsMaster
 
-	$sql= "SELECT COUNT(*) FROM debtorsmaster WHERE debtorsmaster.paymentterms = '" . $SelectedTerms . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_debtorsmaster WHERE weberp_debtorsmaster.paymentterms = '" . $SelectedTerms . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0] > 0) {
 		prnMsg( _('Cannot delete this payment term because customer accounts have been created referring to this term'),'warn');
 		echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('customer accounts that refer to this payment term');
 	} else {
-		$sql= "SELECT COUNT(*) FROM suppliers WHERE suppliers.paymentterms = '" . $SelectedTerms . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_suppliers WHERE weberp_suppliers.paymentterms = '" . $SelectedTerms . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0] > 0) {
@@ -154,7 +154,7 @@ if (isset($_POST['submit'])) {
 		} else {
 			//only delete if used in neither customer or supplier accounts
 
-			$sql="DELETE FROM paymentterms WHERE termsindicator='" . $SelectedTerms . "'";
+			$sql="DELETE FROM weberp_paymentterms WHERE termsindicator='" . $SelectedTerms . "'";
 			$result = DB_query($sql);
 			prnMsg( _('The payment term definition record has been deleted') . '!','success');
 		}
@@ -170,7 +170,7 @@ then none of the above are true and the list of payment termss will be displayed
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = "SELECT termsindicator, terms, daysbeforedue, dayinfollowingmonth FROM paymentterms";
+	$sql = "SELECT termsindicator, terms, daysbeforedue, dayinfollowingmonth FROM weberp_paymentterms";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -237,7 +237,7 @@ if (!isset($_GET['delete'])) {
 						terms,
 						daysbeforedue,
 						dayinfollowingmonth
-					FROM paymentterms
+					FROM weberp_paymentterms
 					WHERE termsindicator='" . $SelectedTerms . "'";
 
 		$result = DB_query($sql);

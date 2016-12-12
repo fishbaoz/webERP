@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GLAccounts.php 7668 2016-11-18 00:22:26Z rchacon $*/
 /* Defines the general ledger accounts */
 
 // BEGIN: Functions division ---------------------------------------------------
@@ -58,7 +58,7 @@ if(isset($_POST['submit'])) {
 	if(isset($SelectedAccount) AND $InputError != 1) {
 
 		$Sql = "UPDATE
-					chartmaster SET accountname='" . $_POST['AccountName'] . "',
+					weberp_chartmaster SET accountname='" . $_POST['AccountName'] . "',
 					group_='" . $_POST['Group'] . "',
 					cashflowsactivity='" . $_POST['CashFlowsActivity'] . "'
 				WHERE accountcode ='" . $SelectedAccount . "'";
@@ -70,7 +70,7 @@ if(isset($_POST['submit'])) {
 
 		/*SelectedAccount is null cos no item selected on first time round so must be adding a	record must be submitting new entries */
 
-		$Sql = "INSERT INTO chartmaster (
+		$Sql = "INSERT INTO weberp_chartmaster (
 					accountcode,
 					accountname,
 					group_,
@@ -98,9 +98,9 @@ if(isset($_POST['submit'])) {
 	// PREVENT DELETES IF DEPENDENT RECORDS IN 'ChartDetails'
 
 	$Sql= "SELECT COUNT(*)
-			FROM chartdetails
-			WHERE chartdetails.accountcode ='" . $SelectedAccount . "'
-			AND chartdetails.actual <>0";
+			FROM weberp_chartdetails
+			WHERE weberp_chartdetails.accountcode ='" . $SelectedAccount . "'
+			AND weberp_chartdetails.actual <>0";
 	$Result = DB_query($Sql);
 	$MyRow = DB_fetch_row($Result);
 	if($MyRow[0] > 0) {
@@ -111,8 +111,8 @@ if(isset($_POST['submit'])) {
 	} else {
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'GLTrans'
 		$Sql = "SELECT COUNT(*)
-				FROM gltrans
-				WHERE gltrans.account ='" . $SelectedAccount . "'";
+				FROM weberp_gltrans
+				WHERE weberp_gltrans.account ='" . $SelectedAccount . "'";
 		$ErrMsg = _('Could not test for existing transactions because');
 		$Result = DB_query($Sql, $ErrMsg);
 
@@ -124,7 +124,7 @@ if(isset($_POST['submit'])) {
 
 		} else {
 			//PREVENT DELETES IF Company default accounts set up to this account
-			$Sql = "SELECT COUNT(*) FROM companies
+			$Sql = "SELECT COUNT(*) FROM weberp_companies
 					WHERE debtorsact='" . $SelectedAccount . "'
 					OR pytdiscountact='" . $SelectedAccount . "'
 					OR creditorsact='" . $SelectedAccount . "'
@@ -143,7 +143,7 @@ if(isset($_POST['submit'])) {
 
 			} else {
 				//PREVENT DELETES IF Company default accounts set up to this account
-				$Sql = "SELECT COUNT(*) FROM taxauthorities
+				$Sql = "SELECT COUNT(*) FROM weberp_taxauthorities
 					WHERE taxglcode='" . $SelectedAccount ."'
 					OR purchtaxglaccount ='" . $SelectedAccount ."'";
 				$ErrMsg = _('Could not test for tax authority GL codes because');
@@ -155,7 +155,7 @@ if(isset($_POST['submit'])) {
 					prnMsg(_('Cannot delete this account because it is used as one of the tax authority accounts'), 'warn');
 				} else {
 //PREVENT DELETES IF SALES POSTINGS USE THE GL ACCOUNT
-					$Sql = "SELECT COUNT(*) FROM salesglpostings
+					$Sql = "SELECT COUNT(*) FROM weberp_salesglpostings
 						WHERE salesglcode='" . $SelectedAccount . "'
 						OR discountglcode='" . $SelectedAccount . "'";
 					$ErrMsg = _('Could not test for existing sales interface GL codes because');
@@ -168,7 +168,7 @@ if(isset($_POST['submit'])) {
 					} else {
 //PREVENT DELETES IF COGS POSTINGS USE THE GL ACCOUNT
 						$Sql = "SELECT COUNT(*)
-								FROM cogsglpostings
+								FROM weberp_cogsglpostings
 								WHERE glcode='" . $SelectedAccount . "'";
 						$ErrMsg = _('Could not test for existing cost of sales interface codes because');
 						$Result = DB_query($Sql, $ErrMsg);
@@ -180,7 +180,7 @@ if(isset($_POST['submit'])) {
 
 						} else {
 //PREVENT DELETES IF STOCK POSTINGS USE THE GL ACCOUNT
-							$Sql = "SELECT COUNT(*) FROM stockcategory
+							$Sql = "SELECT COUNT(*) FROM weberp_stockcategory
 									WHERE stockact='" . $SelectedAccount . "'
 									OR adjglact='" . $SelectedAccount . "'
 									OR purchpricevaract='" . $SelectedAccount . "'
@@ -195,7 +195,7 @@ if(isset($_POST['submit'])) {
 								prnMsg(_('Cannot delete this account because it is used by one of the stock GL posting interface records'), 'warn');
 							} else {
 //PREVENT DELETES IF STOCK POSTINGS USE THE GL ACCOUNT
-								$Sql= "SELECT COUNT(*) FROM bankaccounts
+								$Sql= "SELECT COUNT(*) FROM weberp_bankaccounts
 								WHERE accountcode='" . $SelectedAccount ."'";
 								$ErrMsg = _('Could not test for existing bank account GL codes because');
 								$Result = DB_query($Sql,$ErrMsg);
@@ -206,9 +206,9 @@ if(isset($_POST['submit'])) {
 									prnMsg(_('Cannot delete this account because it is used by one the defined bank accounts'), 'warn');
 								} else {
 
-									$Sql = "DELETE FROM chartdetails WHERE accountcode='" . $SelectedAccount ."'";
+									$Sql = "DELETE FROM weberp_chartdetails WHERE accountcode='" . $SelectedAccount ."'";
 									$Result = DB_query($Sql);
-									$Sql="DELETE FROM chartmaster WHERE accountcode= '" . $SelectedAccount ."'";
+									$Sql="DELETE FROM weberp_chartmaster WHERE accountcode= '" . $SelectedAccount ."'";
 									$Result = DB_query($Sql);
 									prnMsg(_('Account') . ' ' . $SelectedAccount . ' ' . _('has been deleted'), 'succes');
 								}
@@ -229,7 +229,7 @@ if(!isset($_GET['delete'])) {
 	if(isset($SelectedAccount)) {
 		//editing an existing account
 
-		$Sql = "SELECT accountcode, accountname, group_, cashflowsactivity FROM chartmaster WHERE accountcode='" . $SelectedAccount ."'";
+		$Sql = "SELECT accountcode, accountname, group_, cashflowsactivity FROM weberp_chartmaster WHERE accountcode='" . $SelectedAccount ."'";
 		$Result = DB_query($Sql);
 		$MyRow = DB_fetch_array($Result);
 
@@ -258,7 +258,7 @@ if(!isset($_GET['delete'])) {
 			<td>' . _('Account Name') . ':</td>
 			<td><input type="text" size="51" required="required" ' . (isset($_POST['AccountCode']) ? 'autofocus="autofocus"':'') . ' title="' . _('Enter up to 50 alpha-numeric characters for the general ledger account name') . '" maxlength="50" name="AccountName" value="' . $_POST['AccountName'] . '" /></td></tr>';
 
-	$Sql = "SELECT groupname FROM accountgroups ORDER BY sequenceintb";
+	$Sql = "SELECT groupname FROM weberp_accountgroups ORDER BY sequenceintb";
 	$Result = DB_query($Sql);
 
 	echo '<tr>
@@ -324,9 +324,9 @@ or deletion of the records*/
 				group_,
 				CASE WHEN pandl=0 THEN '" . _('Balance Sheet') . "' ELSE '" . _('Profit/Loss') . "' END AS acttype,
 				cashflowsactivity
-			FROM chartmaster, accountgroups
-			WHERE chartmaster.group_=accountgroups.groupname
-			ORDER BY chartmaster.accountcode";
+			FROM weberp_chartmaster, weberp_accountgroups
+			WHERE weberp_chartmaster.group_=weberp_accountgroups.groupname
+			ORDER BY weberp_chartmaster.accountcode";
 	$ErrMsg = _('The chart accounts could not be retrieved because');
 	$Result = DB_query($Sql, $ErrMsg);
 

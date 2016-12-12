@@ -1,12 +1,12 @@
 <?php
-/* $Id$*/
+/* $Id: MRPPlannedPurchaseOrders.php 7682 2016-11-24 14:10:25Z rchacon $*/
 // MRPPlannedPurchaseOrders.php - Report of purchase parts that MRP has determined should have
 // purchase orders created for them
 
 include('includes/session.inc');
 
 //Maybe not ANSI SQL??
-$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='mrprequirements'";
+$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='weberp_mrprequirements'";
 
 $result=DB_query($sql);
 if (DB_num_rows($result)==0) {
@@ -36,76 +36,76 @@ if (isset($_POST['PrintPDF'])) {
 		$ReportDate = _(' Through  ') . Format_Date($_POST['cutoffdate']);
 	}
 	if ($_POST['Consolidation'] == 'None') {
-		$sql = "SELECT mrpplannedorders.*,
-					   stockmaster.stockid,
-					   stockmaster.description,
-					   stockmaster.mbflag,
-					   stockmaster.decimalplaces,
-					   stockmaster.actualcost,
-					   (stockmaster.materialcost + stockmaster.labourcost +
-						stockmaster.overheadcost ) as computedcost
-				FROM mrpplannedorders, stockmaster
-				WHERE mrpplannedorders.part = stockmaster.stockid " . $WhereDate . "
-				 AND stockmaster.mbflag IN ('B','P')
-				ORDER BY mrpplannedorders.part,mrpplannedorders.duedate";
+		$sql = "SELECT weberp_mrpplannedorders.*,
+					   weberp_stockmaster.stockid,
+					   weberp_stockmaster.description,
+					   weberp_stockmaster.mbflag,
+					   weberp_stockmaster.decimalplaces,
+					   weberp_stockmaster.actualcost,
+					   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+						weberp_stockmaster.overheadcost ) as computedcost
+				FROM weberp_mrpplannedorders, weberp_stockmaster
+				WHERE weberp_mrpplannedorders.part = weberp_stockmaster.stockid " . $WhereDate . "
+				 AND weberp_stockmaster.mbflag IN ('B','P')
+				ORDER BY weberp_mrpplannedorders.part,weberp_mrpplannedorders.duedate";
 	} elseif ($_POST['Consolidation'] == 'Weekly') {
-		$sql = "SELECT mrpplannedorders.part,
-					   SUM(mrpplannedorders.supplyquantity) as supplyquantity,
+		$sql = "SELECT weberp_mrpplannedorders.part,
+					   SUM(weberp_mrpplannedorders.supplyquantity) as supplyquantity,
 					   TRUNCATE(((TO_DAYS(duedate) - TO_DAYS(CURRENT_DATE)) / 7),0) AS weekindex,
-					   MIN(mrpplannedorders.duedate) as duedate,
-					   MIN(mrpplannedorders.mrpdate) as mrpdate,
+					   MIN(weberp_mrpplannedorders.duedate) as duedate,
+					   MIN(weberp_mrpplannedorders.mrpdate) as mrpdate,
 					   COUNT(*) AS consolidatedcount,
-					   stockmaster.stockid,
-					   stockmaster.description,
-					   stockmaster.mbflag,
-					   stockmaster.decimalplaces,
-					   stockmaster.actualcost,
-					   (stockmaster.materialcost + stockmaster.labourcost +
-						stockmaster.overheadcost ) as computedcost
-				FROM mrpplannedorders, stockmaster
-				WHERE mrpplannedorders.part = stockmaster.stockid " . $WhereDate . "
-				AND stockmaster.mbflag IN ('B','P')
-				GROUP BY mrpplannedorders.part,
+					   weberp_stockmaster.stockid,
+					   weberp_stockmaster.description,
+					   weberp_stockmaster.mbflag,
+					   weberp_stockmaster.decimalplaces,
+					   weberp_stockmaster.actualcost,
+					   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+						weberp_stockmaster.overheadcost ) as computedcost
+				FROM weberp_mrpplannedorders, weberp_stockmaster
+				WHERE weberp_mrpplannedorders.part = weberp_stockmaster.stockid " . $WhereDate . "
+				AND weberp_stockmaster.mbflag IN ('B','P')
+				GROUP BY weberp_mrpplannedorders.part,
 						 weekindex,
-						 stockmaster.stockid,
-						 stockmaster.description,
-						 stockmaster.mbflag,
-						 stockmaster.decimalplaces,
-						 stockmaster.actualcost,
-					   stockmaster.materialcost,
-					   stockmaster.labourcost,
-					   stockmaster.overheadcost,
+						 weberp_stockmaster.stockid,
+						 weberp_stockmaster.description,
+						 weberp_stockmaster.mbflag,
+						 weberp_stockmaster.decimalplaces,
+						 weberp_stockmaster.actualcost,
+					   weberp_stockmaster.materialcost,
+					   weberp_stockmaster.labourcost,
+					   weberp_stockmaster.overheadcost,
 					   computedcost
-				ORDER BY mrpplannedorders.part,weekindex";
+				ORDER BY weberp_mrpplannedorders.part,weekindex";
 	} else {  // This else consolidates by month
-		$sql = "SELECT mrpplannedorders.part,
-					   SUM(mrpplannedorders.supplyquantity) as supplyquantity,
+		$sql = "SELECT weberp_mrpplannedorders.part,
+					   SUM(weberp_mrpplannedorders.supplyquantity) as supplyquantity,
 					   EXTRACT(YEAR_MONTH from duedate) AS yearmonth,
-					   MIN(mrpplannedorders.duedate) as duedate,
-					   MIN(mrpplannedorders.mrpdate) as mrpdate,
+					   MIN(weberp_mrpplannedorders.duedate) as duedate,
+					   MIN(weberp_mrpplannedorders.mrpdate) as mrpdate,
 					   COUNT(*) AS consolidatedcount,
-					   stockmaster.stockid,
-					   stockmaster.description,
-					   stockmaster.mbflag,
-					   stockmaster.decimalplaces,
-					   stockmaster.actualcost,
-					   (stockmaster.materialcost + stockmaster.labourcost +
-						stockmaster.overheadcost ) as computedcost
-				FROM mrpplannedorders, stockmaster
-				WHERE mrpplannedorders.part = stockmaster.stockid  " . $WhereDate . "
-				AND stockmaster.mbflag IN ('B','P')
-				GROUP BY mrpplannedorders.part,
+					   weberp_stockmaster.stockid,
+					   weberp_stockmaster.description,
+					   weberp_stockmaster.mbflag,
+					   weberp_stockmaster.decimalplaces,
+					   weberp_stockmaster.actualcost,
+					   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+						weberp_stockmaster.overheadcost ) as computedcost
+				FROM weberp_mrpplannedorders, weberp_stockmaster
+				WHERE weberp_mrpplannedorders.part = weberp_stockmaster.stockid  " . $WhereDate . "
+				AND weberp_stockmaster.mbflag IN ('B','P')
+				GROUP BY weberp_mrpplannedorders.part,
 						 yearmonth,
-						 stockmaster.stockid,
-						 stockmaster.description,
-						 stockmaster.mbflag,
-						 stockmaster.decimalplaces,
-						 stockmaster.actualcost,
-					   stockmaster.materialcost,
-					   stockmaster.labourcost,
-					   stockmaster.overheadcost,
+						 weberp_stockmaster.stockid,
+						 weberp_stockmaster.description,
+						 weberp_stockmaster.mbflag,
+						 weberp_stockmaster.decimalplaces,
+						 weberp_stockmaster.actualcost,
+					   weberp_stockmaster.materialcost,
+					   weberp_stockmaster.labourcost,
+					   weberp_stockmaster.overheadcost,
 					   computedcost
-				ORDER BY mrpplannedorders.part,yearmonth ";
+				ORDER BY weberp_mrpplannedorders.part,yearmonth ";
 	}
 	$result = DB_query($sql,'','',false,true);
 
@@ -355,10 +355,10 @@ function GetPartInfo(&$db,$part) {
 	// Get last purchase order date and supplier for part, and also preferred supplier
 	// Printed when there is a part break
 	$sql = "SELECT orddate as maxdate,
-				   purchorders.orderno
-			FROM purchorders INNER JOIN purchorderdetails
-			ON purchorders.orderno = purchorderdetails.orderno
-			WHERE purchorderdetails.itemcode = '" . $part ."'
+				   weberp_purchorders.orderno
+			FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+			ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+			WHERE weberp_purchorderdetails.itemcode = '" . $part ."'
 			ORDER BY orddate DESC LIMIT 1";
 	$result = DB_query($sql);
 	if (DB_num_rows($result)>0) {
@@ -366,13 +366,13 @@ function GetPartInfo(&$db,$part) {
 		$PartInfo[] = ConvertSQLDate($myrow['maxdate']);
 		$OrderNo= $myrow['orderno'];
 		$sql = "SELECT supplierno
-				FROM purchorders
-				WHERE purchorders.orderno = '" .$OrderNo. "'";
+				FROM weberp_purchorders
+				WHERE weberp_purchorders.orderno = '" .$OrderNo. "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result,$db);
 		$PartInfo[] = $myrow['supplierno'];
 		$sql = "SELECT supplierno
-				FROM purchdata
+				FROM weberp_purchdata
 				WHERE stockid = '" . $part . "'
 				AND preferred='1'";
 		$result = DB_query($sql);

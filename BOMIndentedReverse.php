@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: BOMIndentedReverse.php 7093 2015-01-22 20:15:40Z vvs2012 $*/
 
 // BOMIndented.php - Reverse Indented Bill of Materials - From lowest level component to top level
 // assembly
@@ -16,17 +16,17 @@ if (isset($_POST['PrintPDF'])) {
 	$PageNumber=1;
 	$line_height=12;
 
-	$result = DB_query("DROP TABLE IF EXISTS tempbom");
-	$result = DB_query("DROP TABLE IF EXISTS passbom");
-	$result = DB_query("DROP TABLE IF EXISTS passbom2");
-	$sql = "CREATE TEMPORARY TABLE passbom (
+	$result = DB_query("DROP TABLE IF EXISTS weberp_tempbom");
+	$result = DB_query("DROP TABLE IF EXISTS weberp_passbom");
+	$result = DB_query("DROP TABLE IF EXISTS weberp_passbom2");
+	$sql = "CREATE TEMPORARY TABLE weberp_passbom (
 				part char(20),
 				sortpart text) DEFAULT CHARSET=utf8";
 
 	$ErrMsg = _('The SQL to create passbom failed with the message');
 	$result = DB_query($sql,$ErrMsg);
 
-	$sql = "CREATE TEMPORARY TABLE tempbom (
+	$sql = "CREATE TEMPORARY TABLE weberp_tempbom (
 				parent char(20),
 				component char(20),
 				sortpart text,
@@ -36,25 +36,25 @@ if (isset($_POST['PrintPDF'])) {
 				effectiveafter date,
 				effectiveto date,
 				quantity double) DEFAULT CHARSET=utf8";
-	$result = DB_query($sql,_('Create of tempbom failed because'));
+	$result = DB_query($sql,_('Create of weberp_tempbom failed because'));
 	// First, find first level of components below requested assembly
-	// Put those first level parts in passbom, use COMPONENT in passbom
-	// to link to PARENT in bom to find next lower level and accumulate
-	// those parts into tempbom
+	// Put those first level parts in weberp_passbom, use COMPONENT in weberp_passbom
+	// to link to PARENT in weberp_bom to find next lower level and accumulate
+	// those parts into weberp_tempbom
 
 	// This finds the top level
-	$sql = "INSERT INTO passbom (part, sortpart)
-			   SELECT bom.parent AS part,
-					  CONCAT(bom.component,bom.parent) AS sortpart
-					  FROM bom
-			  WHERE bom.component ='" . $_POST['Part'] . "'
-              AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-              AND bom.effectiveto > '" . date('Y-m-d') . "'";
+	$sql = "INSERT INTO weberp_passbom (part, sortpart)
+			   SELECT weberp_bom.parent AS part,
+					  CONCAT(weberp_bom.component,weberp_bom.parent) AS sortpart
+					  FROM weberp_bom
+			  WHERE weberp_bom.component ='" . $_POST['Part'] . "'
+              AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+              AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 	$result = DB_query($sql);
 
 	$LevelCounter = 2;
 	// $LevelCounter is the level counter
-	$sql = "INSERT INTO tempbom (
+	$sql = "INSERT INTO weberp_tempbom (
 				parent,
 				component,
 				sortpart,
@@ -64,19 +64,19 @@ if (isset($_POST['PrintPDF'])) {
 				effectiveafter,
 				effectiveto,
 				quantity)
-			  SELECT bom.parent,
-					 bom.component,
-					 CONCAT(bom.component,bom.parent) AS sortpart,
+			  SELECT weberp_bom.parent,
+					 weberp_bom.component,
+					 CONCAT(weberp_bom.component,weberp_bom.parent) AS sortpart,
 					 " . $LevelCounter . " AS level,
-					 bom.workcentreadded,
-					 bom.loccode,
-					 bom.effectiveafter,
-					 bom.effectiveto,
-					 bom.quantity
-					 FROM bom
-			  WHERE bom.component ='" . $_POST['Part'] . "'
-              AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-              AND bom.effectiveto > '" . date('Y-m-d') . "'";
+					 weberp_bom.workcentreadded,
+					 weberp_bom.loccode,
+					 weberp_bom.effectiveafter,
+					 weberp_bom.effectiveto,
+					 weberp_bom.quantity
+					 FROM weberp_bom
+			  WHERE weberp_bom.component ='" . $_POST['Part'] . "'
+              AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+              AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 	$result = DB_query($sql);
 
 	// This while routine finds the other levels as long as $ComponentCounter - the
@@ -86,7 +86,7 @@ if (isset($_POST['PrintPDF'])) {
 	$ComponentCounter = 1;
 	while ($ComponentCounter > 0) {
 		$LevelCounter++;
-		$sql = "INSERT INTO tempbom (parent,
+		$sql = "INSERT INTO weberp_tempbom (parent,
 									component,
 									sortpart,
 									level,
@@ -95,41 +95,41 @@ if (isset($_POST['PrintPDF'])) {
 									effectiveafter,
 									effectiveto,
 									quantity)
-				  SELECT bom.parent,
-						 bom.component,
-						 CONCAT(passbom.sortpart,bom.parent) AS sortpart,
+				  SELECT weberp_bom.parent,
+						 weberp_bom.component,
+						 CONCAT(weberp_passbom.sortpart,weberp_bom.parent) AS sortpart,
 						 " . $LevelCounter . " AS level,
-						 bom.workcentreadded,
-						 bom.loccode,
-						 bom.effectiveafter,
-						 bom.effectiveto,
-						 bom.quantity
-				FROM bom,passbom
-				WHERE bom.component = passbom.part
-                AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                AND bom.effectiveto > '" . date('Y-m-d') . "'";
+						 weberp_bom.workcentreadded,
+						 weberp_bom.loccode,
+						 weberp_bom.effectiveafter,
+						 weberp_bom.effectiveto,
+						 weberp_bom.quantity
+				FROM weberp_bom,weberp_passbom
+				WHERE weberp_bom.component = weberp_passbom.part
+                AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 		$result = DB_query($sql);
 
-		$result = DB_query("DROP TABLE IF EXISTS passbom2");
+		$result = DB_query("DROP TABLE IF EXISTS weberp_passbom2");
 
-		$result = DB_query("ALTER TABLE passbom RENAME AS passbom2");
-		$result = DB_query("DROP TABLE IF EXISTS passbom");
+		$result = DB_query("ALTER TABLE weberp_passbom RENAME AS weberp_passbom2");
+		$result = DB_query("DROP TABLE IF EXISTS weberp_passbom");
 
-		$sql = "CREATE TEMPORARY TABLE passbom (
+		$sql = "CREATE TEMPORARY TABLE weberp_passbom (
 						part char(20),
 						sortpart text) DEFAULT CHARSET=utf8";
 		$result = DB_query($sql);
 
 
-		$sql = "INSERT INTO passbom (part, sortpart)
-				   SELECT bom.parent AS part,
-						  CONCAT(passbom2.sortpart,bom.parent) AS sortpart
-				   FROM bom,passbom2
-				   WHERE bom.component = passbom2.part
-                   AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                   AND bom.effectiveto > '" . date('Y-m-d') . "'";
+		$sql = "INSERT INTO weberp_passbom (part, sortpart)
+				   SELECT weberp_bom.parent AS part,
+						  CONCAT(weberp_passbom2.sortpart,weberp_bom.parent) AS sortpart
+				   FROM weberp_bom,weberp_passbom2
+				   WHERE weberp_bom.component = weberp_passbom2.part
+                   AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                   AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 		$result = DB_query($sql);
-		$result = DB_query("SELECT COUNT(*) FROM bom,passbom WHERE bom.component = passbom.part");
+		$result = DB_query("SELECT COUNT(*) FROM weberp_bom,weberp_passbom WHERE weberp_bom.component = weberp_passbom.part");
 
 		$myrow = DB_fetch_row($result);
 		$ComponentCounter = $myrow[0];
@@ -150,9 +150,9 @@ if (isset($_POST['PrintPDF'])) {
 	}
 
 
-    $sql = "SELECT stockmaster.stockid,
-                   stockmaster.description
-              FROM stockmaster
+    $sql = "SELECT weberp_stockmaster.stockid,
+                   weberp_stockmaster.description
+              FROM weberp_stockmaster
               WHERE stockid = '" . $_POST['Part'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result,$db);
@@ -164,12 +164,12 @@ if (isset($_POST['PrintPDF'])) {
     $Tot_Val=0;
     $fill = false;
     $pdf->SetFillColor(224,235,255);
-    $sql = "SELECT tempbom.*,
-                   stockmaster.description,
-                   stockmaster.mbflag
-              FROM tempbom INNER JOIN stockmaster
-              ON tempbom.parent = stockmaster.stockid
-			  INNER JOIN locationusers ON locationusers.loccode=tempbom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+    $sql = "SELECT weberp_tempbom.*,
+                   weberp_stockmaster.description,
+                   weberp_stockmaster.mbflag
+              FROM weberp_tempbom INNER JOIN weberp_stockmaster
+              ON weberp_tempbom.parent = weberp_stockmaster.stockid
+			  INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_tempbom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
               ORDER BY sortpart";
 	$result = DB_query($sql);
 

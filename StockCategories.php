@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockCategories.php 7054 2015-01-01 11:36:36Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -19,7 +19,7 @@ asort($StockTypeName);
 
 // BEGIN: Tax Category Name array.
 $TaxCategoryName = array();
-$Query = "SELECT taxcatid, taxcatname FROM taxcategories ORDER BY taxcatname";
+$Query = "SELECT taxcatid, taxcatname FROM weberp_taxcategories ORDER BY taxcatname";
 $Result = DB_query($Query);
 while ($Row = DB_fetch_array($Result)) {
 	$TaxCategoryName[$Row['taxcatid']] = $Row['taxcatname'];
@@ -37,9 +37,9 @@ if (isset($_GET['SelectedCategory'])){
 if (isset($_GET['DeleteProperty'])){
 
 	$ErrMsg = _('Could not delete the property') . ' ' . $_GET['DeleteProperty'] . ' ' . _('because');
-	$sql = "DELETE FROM stockitemproperties WHERE stkcatpropid='" . $_GET['DeleteProperty'] . "'";
+	$sql = "DELETE FROM weberp_stockitemproperties WHERE stkcatpropid='" . $_GET['DeleteProperty'] . "'";
 	$result = DB_query($sql,$ErrMsg);
-	$sql = "DELETE FROM stockcatproperties WHERE stkcatpropid='" . $_GET['DeleteProperty'] . "'";
+	$sql = "DELETE FROM weberp_stockcatproperties WHERE stkcatpropid='" . $_GET['DeleteProperty'] . "'";
 	$result = DB_query($sql,$ErrMsg);
 	prnMsg(_('Deleted the property') . ' ' . $_GET['DeleteProperty'],'success');
 }
@@ -88,7 +88,7 @@ if (isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE stockcategory SET stocktype = '" . $_POST['StockType'] . "',
+		$sql = "UPDATE weberp_stockcategory SET stocktype = '" . $_POST['StockType'] . "',
 									 categorydescription = '" . $_POST['CategoryDescription'] . "',
 									 defaulttaxcatid = '" . $_POST['DefaultTaxCatID'] . "',
 									 stockact = '" . $_POST['StockAct'] . "',
@@ -126,7 +126,7 @@ if (isset($_POST['submit'])) {
 			}
 
 			if ($_POST['PropID' .$i] =='NewProperty' AND mb_strlen($_POST['PropLabel'.$i])>0){
-				$sql = "INSERT INTO stockcatproperties (categoryid,
+				$sql = "INSERT INTO weberp_stockcatproperties (categoryid,
 														label,
 														controltype,
 														defaultvalue,
@@ -145,7 +145,7 @@ if (isset($_POST['submit'])) {
 				$ErrMsg = _('Could not insert a new category property for') . $_POST['PropLabel' . $i];
 				$result = DB_query($sql,$ErrMsg);
 			} elseif ($_POST['PropID' .$i] !='NewProperty') { //we could be amending existing properties
-				$sql = "UPDATE stockcatproperties SET label ='" . $_POST['PropLabel' . $i] . "',
+				$sql = "UPDATE weberp_stockcatproperties SET label ='" . $_POST['PropLabel' . $i] . "',
 													  controltype = " . $_POST['PropControlType' . $i] . ",
 													  defaultvalue = '"	. $_POST['PropDefault' .$i] . "',
 													  minimumvalue = '" . filter_number_format($_POST['PropMinimum' .$i]) . "',
@@ -165,7 +165,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected category is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new stock category form */
 
-		$sql = "INSERT INTO stockcategory (categoryid,
+		$sql = "INSERT INTO weberp_stockcategory (categoryid,
 											stocktype,
 											categorydescription,
 											defaulttaxcatid,
@@ -208,7 +208,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'StockMaster'
 
-	$sql= "SELECT stockid FROM stockmaster WHERE stockmaster.categoryid='" . $SelectedCategory . "'";
+	$sql= "SELECT stockid FROM weberp_stockmaster WHERE weberp_stockmaster.categoryid='" . $SelectedCategory . "'";
 	$result = DB_query($sql);
 
 	if (DB_num_rows($result)>0) {
@@ -216,19 +216,19 @@ if (isset($_POST['submit'])) {
 			'<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('items referring to this stock category code'),'warn');
 
 	} else {
-		$sql = "SELECT stkcat FROM salesglpostings WHERE stkcat='" . $SelectedCategory . "'";
+		$sql = "SELECT stkcat FROM weberp_salesglpostings WHERE stkcat='" . $SelectedCategory . "'";
 		$result = DB_query($sql);
 
 		if (DB_num_rows($result)>0) {
 			prnMsg(_('Cannot delete this stock category because it is used by the sales') . ' - ' . _('GL posting interface') . '. ' . _('Delete any records in the Sales GL Interface set up using this stock category first'),'warn');
 		} else {
-			$sql = "SELECT stkcat FROM cogsglpostings WHERE stkcat='" . $SelectedCategory . "'";
+			$sql = "SELECT stkcat FROM weberp_cogsglpostings WHERE stkcat='" . $SelectedCategory . "'";
 			$result = DB_query($sql);
 
 			if (DB_num_rows($result)>0) {
 				prnMsg(_('Cannot delete this stock category because it is used by the cost of sales') . ' - ' . _('GL posting interface') . '. ' . _('Delete any records in the Cost of Sales GL Interface set up using this stock category first'),'warn');
 			} else {
-				$sql="DELETE FROM stockcategory WHERE categoryid='" . $SelectedCategory . "'";
+				$sql="DELETE FROM weberp_stockcategory WHERE categoryid='" . $SelectedCategory . "'";
 				$result = DB_query($sql);
 				prnMsg(_('The stock category') . ' ' . $SelectedCategory . ' ' . _('has been deleted') . ' !','success');
 				unset ($SelectedCategory);
@@ -254,7 +254,7 @@ or deletion of the records*/
 					purchpricevaract,
 					materialuseagevarac,
 					wipact
-				FROM stockcategory";
+				FROM weberp_stockcategory";
 	$result = DB_query($sql);
 
 	echo '<br />
@@ -342,7 +342,7 @@ if (isset($SelectedCategory)) {
 						materialuseagevarac,
 						wipact,
 						defaulttaxcatid
-					FROM stockcategory
+					FROM weberp_stockcategory
 					WHERE categoryid='" . $SelectedCategory . "'";
 
 		$result = DB_query($sql);
@@ -381,20 +381,20 @@ if (isset($SelectedCategory)) {
 //SQL to poulate account selection boxes
 $sql = "SELECT accountcode,
 				accountname
-			FROM chartmaster
-			LEFT JOIN accountgroups
-				ON chartmaster.group_=accountgroups.groupname
-			WHERE accountgroups.pandl=0
+			FROM weberp_chartmaster
+			LEFT JOIN weberp_accountgroups
+				ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+			WHERE weberp_accountgroups.pandl=0
 			ORDER BY accountcode";
 
 $BSAccountsResult = DB_query($sql);
 
 $sql = "SELECT accountcode,
 				accountname
-			FROM chartmaster
-			LEFT JOIN accountgroups
-				ON chartmaster.group_=accountgroups.groupname
-			WHERE accountgroups.pandl=1
+			FROM weberp_chartmaster
+			LEFT JOIN weberp_accountgroups
+				ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+			WHERE weberp_accountgroups.pandl=1
 			ORDER BY accountcode";
 
 $PnLAccountsResult = DB_query($sql);
@@ -559,7 +559,7 @@ if (isset($SelectedCategory)) {
 					reqatsalesorder,
 					minimumvalue,
 					maximumvalue
-			   FROM stockcatproperties
+			   FROM weberp_stockcatproperties
 			   WHERE categoryid='" . $SelectedCategory . "'
 			   ORDER BY stkcatpropid";
 

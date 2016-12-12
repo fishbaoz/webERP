@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CreateCompanyTemplateFile.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include ('includes/session.inc');
 $Title = _('Create Database Template File');
@@ -24,17 +24,17 @@ if (isset($_POST['CreateTemplate'])){
 								  purchasesexchangediffact,
 								  retainedearnings,
 								  freightact
-								FROM currencies INNER JOIN companies
-								ON companies.currencydefault=currencies.currabrev
+								FROM weberp_currencies INNER JOIN weberp_companies
+								ON weberp_companies.currencydefault=weberp_currencies.currabrev
 								WHERE coycode='1'");
           $CurrRow = DB_fetch_array($CurrResult);
 
 
           $SQLScript = "SET FOREIGN_KEY_CHECKS=0;
-                            DELETE FROM currencies WHERE currabrev='" . $CurrRow['currabrev'] ."';\n";
-          $SQLScript .= "INSERT INTO currencies (currabrev, currency, country, rate)
+                            DELETE FROM weberp_currencies WHERE currabrev='" . $CurrRow['currabrev'] ."';\n";
+          $SQLScript .= "INSERT INTO weberp_currencies (currabrev, currency, country, rate)
                                 VALUES ('" . $CurrRow['currabrev'] . "', '" . $CurrRow['currency'] ."', '" . $CurrRow['country'] . "', 1);\n";
-          $SQLScript .= "UPDATE companies SET currencydefault='" . $CurrRow['currabrev'] ."',
+          $SQLScript .= "UPDATE weberp_companies SET currencydefault='" . $CurrRow['currabrev'] ."',
                                               regoffice6='" . $CurrRow['country'] . "',
                                               debtorsact=" . $CurrRow['debtorsact'] . ",
                                               creditorsact=" . $CurrRow['creditorsact'] . ",
@@ -47,33 +47,33 @@ if (isset($_POST['CreateTemplate'])){
                           WHERE coycode='1';\n";
 
           /*empty out any existing records in
-           chartmaster,
-           accountgroups,
-           taxauthorities,
-           taxauthrates,
-           taxgroups,
-           taxgrouptaxes,
-           taxcategories,
-           taxprovinces */
+           weberp_chartmaster,
+           weberp_accountgroups,
+           weberp_taxauthorities,
+           weberp_taxauthrates,
+           weberp_taxgroups,
+           weberp_taxgrouptaxes,
+           weberp_taxcategories,
+           weberp_taxprovinces */
 
-          $SQLScript .= "TRUNCATE TABLE chartmaster;\n";
-          $SQLScript .= "TRUNCATE TABLE accountgroups;\n";
-          $SQLScript .= "TRUNCATE TABLE taxauthorities;\n";
-          $SQLScript .= "TRUNCATE TABLE taxauthrates;\n";
-          $SQLScript .= "TRUNCATE TABLE taxgroups;\n";
-          $SQLScript .= "TRUNCATE TABLE taxgrouptaxes;\n";
-          $SQLScript .= "TRUNCATE TABLE taxcategories;\n";
-          $SQLScript .= "TRUNCATE TABLE taxprovinces;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_chartmaster;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_accountgroups;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxauthorities;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxauthrates;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxgroups;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxgrouptaxes;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxcategories;\n";
+          $SQLScript .= "TRUNCATE TABLE weberp_taxprovinces;\n";
 
 		  $GroupsResult = DB_query("SELECT groupname,
 									sectioninaccounts,
 									pandl,
 									sequenceintb,
 									parentgroupname
-									FROM accountgroups");
+									FROM weberp_accountgroups");
 
           while ($GroupRow = DB_fetch_array($GroupsResult)){
-              $SQLScript .= "INSERT INTO accountgroups (groupname,sectioninaccounts,pandl, sequenceintb, parentgroupname)
+              $SQLScript .= "INSERT INTO weberp_accountgroups (groupname,sectioninaccounts,pandl, sequenceintb, parentgroupname)
                                    VALUES ('" . $GroupRow['groupname'] . "',
                                           '" . $GroupRow['sectioninaccounts'] . "',
                                           " . $GroupRow['pandl'] . ",
@@ -81,12 +81,12 @@ if (isset($_POST['CreateTemplate'])){
                                           '" . $GroupRow['parentgroupname'] . "');\n";
           }
 
-		  $ChartResult = DB_query("SELECT accountcode, accountname, group_ FROM chartmaster");
+		  $ChartResult = DB_query("SELECT accountcode, accountname, group_ FROM weberp_chartmaster");
           $i=0;
           while ($ChartRow = DB_fetch_array($ChartResult)){
                 if ($_POST['IncludeAccount_' .$i]=='on'){
 
-                         $SQLScript .= "INSERT INTO chartmaster (accountcode,accountname,group_)
+                         $SQLScript .= "INSERT INTO weberp_chartmaster (accountcode,accountname,group_)
                                                VALUES ('" . $ChartRow['accountcode'] . "',
 								'" . $ChartRow['accountname'] . "',
 								'" . $ChartRow['group_'] . "');\n";
@@ -105,10 +105,10 @@ if (isset($_POST['CreateTemplate'])){
 										bankacctype,
 										bankacc,
 										bankswift
-										FROM taxauthorities");
+										FROM weberp_taxauthorities");
 
           while ($TaxAuthoritiesRow = DB_fetch_array($TaxAuthoritiesResult)){
-              $SQLScript .= "INSERT INTO taxauthorities (taxid,
+              $SQLScript .= "INSERT INTO weberp_taxauthorities (taxid,
                                                    description,
                                                    taxglcode,
                                                    purchtaxglaccount,
@@ -126,15 +126,15 @@ if (isset($_POST['CreateTemplate'])){
                                           '" . $TaxAuthoritiesRow['bankaccswift'] . "');\n";
           }
 
-          /*taxauthrates table */
+          /*weberp_taxauthrates table */
           $TaxAuthRatesResult = DB_query("SELECT taxauthority,
 									 dispatchtaxprovince,
 									 taxcatid,
 									 taxrate
-									FROM taxauthrates");
+									FROM weberp_taxauthrates");
 
           while ($TaxAuthRatesRow = DB_fetch_array($TaxAuthRatesResult)){
-              $SQLScript .= "INSERT INTO taxauthrates (taxauthority,
+              $SQLScript .= "INSERT INTO weberp_taxauthrates (taxauthority,
                                                        dispatchtaxprovince,
                                                        taxcatid,
                                                        taxrate)
@@ -144,13 +144,13 @@ if (isset($_POST['CreateTemplate'])){
                                           " . $TaxAuthRatesRow['taxrate'] . ");\n";
           }
 
-          /*taxgroups table */
+          /*weberp_taxgroups table */
           $TaxGroupsResult = DB_query("SELECT taxgroupid,
 										taxgroupdescription
-										FROM taxgroups");
+										FROM weberp_taxgroups");
 
           while ($TaxGroupsRow = DB_fetch_array($TaxGroupsResult)){
-              $SQLScript .= "INSERT INTO taxgroups (taxgroupid,
+              $SQLScript .= "INSERT INTO weberp_taxgroups (taxgroupid,
                                                     taxgroupdescription)
                                    VALUES ('" . $TaxGroupsRow['taxgroupid'] . "',
                                           '" . $TaxGroupsRow['taxgroupdescription'] . "');\n";
@@ -158,10 +158,10 @@ if (isset($_POST['CreateTemplate'])){
           /*tax categories table */
           $TaxCategoriesResult = DB_query("SELECT taxcatid,
 				                                              taxcatname
-				                                            FROM taxcategories");
+				                                            FROM weberp_taxcategories");
 
           while ($TaxCategoriesRow = DB_fetch_array($TaxCategoriesResult)){
-              $SQLScript .= "INSERT INTO taxcategories (taxcatid,
+              $SQLScript .= "INSERT INTO weberp_taxcategories (taxcatid,
                                                     taxcatname)
                                    VALUES (" . $TaxCategoriesRow['taxcatid'] . ",
                                           '" . $TaxCategoriesRow['taxcatname'] . "');\n";
@@ -169,10 +169,10 @@ if (isset($_POST['CreateTemplate'])){
           /*tax provinces table */
           $TaxProvincesResult = DB_query("SELECT taxprovinceid,
 				                                              taxprovincename
-				                                            FROM taxprovinces");
+				                                            FROM weberp_taxprovinces");
 
           while ($TaxProvincesRow = DB_fetch_array($TaxProvincesResult)){
-              $SQLScript .= "INSERT INTO taxprovinces (taxprovinceid,
+              $SQLScript .= "INSERT INTO weberp_taxprovinces (taxprovinceid,
                                                     taxprovincename)
                                    VALUES (" . $TaxProvincesRow['taxprovinceid'] . ",
                                           '" . $TaxProvincesRow['taxprovincename'] . "');\n";
@@ -182,10 +182,10 @@ if (isset($_POST['CreateTemplate'])){
 					                                                 taxauthid,
 					                                                 calculationorder,
 					                                                 taxontax
-					                                            FROM taxgrouptaxes");
+					                                            FROM weberp_taxgrouptaxes");
 
           while ($TaxGroupTaxesRow = DB_fetch_array($TaxGroupTaxesResult)){
-              $SQLScript .= "INSERT INTO taxgrouptaxes (taxgroupid,
+              $SQLScript .= "INSERT INTO weberp_taxgrouptaxes (taxgroupid,
                                                         taxauthid,
                                                         calculationorder,
                                                         taxontax)
@@ -231,7 +231,7 @@ prnMsg(_('Warning: All selected accounts will be exported - please de-select the
 echo '<table>';
  /*Show the chart of accounts to be exported for deslection of company specific ones */
 
-$ChartResult = DB_query("SELECT accountcode, accountname, group_ FROM chartmaster");
+$ChartResult = DB_query("SELECT accountcode, accountname, group_ FROM weberp_chartmaster");
 
 $TableHeadings = '<tr><th>' . _('Account Code') . '</th>
 					<th>' . _('Account Name') . '</th></tr>';

@@ -51,7 +51,7 @@ if (isset($_GET['CopySpec']) OR isset($_POST['CopySpec'])) {
 		include('includes/footer.inc');
 		exit;
 	} else {
-		$sql = "INSERT IGNORE INTO prodspecs
+		$sql = "INSERT IGNORE INTO weberp_prodspecs
 							(keyval,
 							testid,
 							defaultvalue,
@@ -72,7 +72,7 @@ if (isset($_GET['CopySpec']) OR isset($_POST['CopySpec'])) {
 								showonspec,
 								showontestplan,
 								active
-					FROM prodspecs WHERE keyval='" .$KeyValue. "'";
+					FROM weberp_prodspecs WHERE keyval='" .$KeyValue. "'";
 			$msg = _('A Product Specification has been copied to') . ' ' . $_POST['CopyTo']  . ' from ' . ' ' . $KeyValue ;
 			$ErrMsg = _('The insert of the Product Specification failed because');
 			$DbgMsg = _('The SQL that was used and failed was');
@@ -109,8 +109,8 @@ if (!isset($KeyValue) OR $KeyValue=='') {
 
 	$SQLSpecSelect="SELECT DISTINCT(keyval),
 							description
-						FROM prodspecs LEFT OUTER JOIN stockmaster
-						ON stockmaster.stockid=prodspecs.keyval";
+						FROM weberp_prodspecs LEFT OUTER JOIN weberp_stockmaster
+						ON weberp_stockmaster.stockid=weberp_prodspecs.keyval";
 
 
 	$ResultSelection=DB_query($SQLSpecSelect);
@@ -132,27 +132,27 @@ if (!isset($KeyValue) OR $KeyValue=='') {
 } else {
 	//show header
 	$SQLSpecSelect="SELECT description
-						FROM stockmaster
-						WHERE stockmaster.stockid='" .$KeyValue. "'";
+						FROM weberp_stockmaster
+						WHERE weberp_stockmaster.stockid='" .$KeyValue. "'";
 
 	$ResultSelection=DB_query($SQLSpecSelect);
 	$MyRowSelection=DB_fetch_array($ResultSelection);
 	echo '<br/>' . _('Product Specification for') . ' ' . $KeyValue . '-' . $MyRowSelection['description'] . '<br/><br/>';
 }
 if (isset($_GET['ListTests'])) {
-	$sql = "SELECT qatests.testid,
+	$sql = "SELECT weberp_qatests.testid,
 				name,
 				method,
 				units,
 				type,
 				numericvalue,
-				qatests.defaultvalue
-			FROM qatests
-			LEFT JOIN prodspecs
-			ON prodspecs.testid=qatests.testid
-			AND prodspecs.keyval='".$KeyValue."'
-			WHERE qatests.active='1'
-			AND prodspecs.keyval IS NULL
+				weberp_qatests.defaultvalue
+			FROM weberp_qatests
+			LEFT JOIN weberp_prodspecs
+			ON weberp_prodspecs.testid=weberp_qatests.testid
+			AND weberp_prodspecs.keyval='".$KeyValue."'
+			WHERE weberp_qatests.active='1'
+			AND weberp_prodspecs.keyval IS NULL
 			ORDER BY name";
 	$result = DB_query($sql);
 	echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
@@ -254,7 +254,7 @@ if (isset($_POST['AddTests'])) {
 				$AddRangeMax="'" . $_POST['AddRangeMax' .$i] . "'";
 			}
 
-			$sql = "INSERT INTO prodspecs
+			$sql = "INSERT INTO weberp_prodspecs
 							(keyval,
 							testid,
 							defaultvalue,
@@ -275,7 +275,7 @@ if (isset($_POST['AddTests'])) {
 								showonspec,
 								showontestplan,
 								active
-						FROM qatests WHERE testid='" .$_POST['AddTestID' .$i]. "'";
+						FROM weberp_qatests WHERE testid='" .$_POST['AddTestID' .$i]. "'";
 			//echo $sql;
 			$msg = _('A Product Specification record has been added for Test ID') . ' ' . $_POST['AddTestID' .$i]  . ' for ' . ' ' . $KeyValue ;
 			$ErrMsg = _('The insert of the Product Specification failed because');
@@ -301,7 +301,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedQATest could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 
-		$sql = "UPDATE prodspecs SET defaultvalue='" . $_POST['DefaultValue'] . "',
+		$sql = "UPDATE weberp_prodspecs SET defaultvalue='" . $_POST['DefaultValue'] . "',
 									targetvalue='" . $_POST['TargetValue'] . "',
 									rangemin=" . $RangeMin . ",
 									rangemax=" . $RangeMax . ",
@@ -309,8 +309,8 @@ if (isset($_POST['submit'])) {
 									showonspec='" . $_POST['ShowOnSpec'] . "',
 									showontestplan='" . $_POST['ShowOnTestPlan'] . "',
 									active='" . $_POST['Active'] . "'
-				WHERE prodspecs.keyval = '".$KeyValue."'
-				AND prodspecs.testid = '".$SelectedQATest."'";
+				WHERE weberp_prodspecs.keyval = '".$KeyValue."'
+				AND weberp_prodspecs.testid = '".$SelectedQATest."'";
 
 		$msg = _('Product Specification record for') . ' ' . $_POST['QATestName']  . ' for ' . ' ' . $KeyValue .  _('has been updated');
 		$ErrMsg = _('The update of the Product Specification failed because');
@@ -333,15 +333,15 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS
 
-	$sql= "SELECT COUNT(*) FROM qasamples
-			INNER JOIN sampleresults on sampleresults.sampleid=qasamples.sampleid AND sampleresults.testid='". $SelectedQATest."'
-			WHERE qasamples.prodspeckey='".$KeyValue."'";
+	$sql= "SELECT COUNT(*) FROM weberp_qasamples
+			INNER JOIN weberp_sampleresults on weberp_sampleresults.sampleid=weberp_qasamples.sampleid AND weberp_sampleresults.testid='". $SelectedQATest."'
+			WHERE weberp_qasamples.prodspeckey='".$KeyValue."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this Product Specification because there are test results tied to it'),'error');
 	} else {
-		$sql="DELETE FROM prodspecs WHERE keyval='". $KeyValue."'
+		$sql="DELETE FROM weberp_prodspecs WHERE keyval='". $KeyValue."'
 									AND testid='". $SelectedQATest."'";
 		$ErrMsg = _('The Product Specification could not be deleted because');
 		$result = DB_query($sql,$ErrMsg);
@@ -360,23 +360,23 @@ then none of the above are true and the list of QA Test will be displayed with
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = "SELECT prodspecs.testid,
+	$sql = "SELECT weberp_prodspecs.testid,
 				name,
 				method,
 				units,
 				type,
 				numericvalue,
-				prodspecs.defaultvalue,
-				prodspecs.targetvalue,
-				prodspecs.rangemin,
-				prodspecs.rangemax,
-				prodspecs.showoncert,
-				prodspecs.showonspec,
-				prodspecs.showontestplan,
-				prodspecs.active
-			FROM prodspecs INNER JOIN qatests
-			ON qatests.testid=prodspecs.testid
-			WHERE prodspecs.keyval='" .$KeyValue."'
+				weberp_prodspecs.defaultvalue,
+				weberp_prodspecs.targetvalue,
+				weberp_prodspecs.rangemin,
+				weberp_prodspecs.rangemax,
+				weberp_prodspecs.showoncert,
+				weberp_prodspecs.showonspec,
+				weberp_prodspecs.showontestplan,
+				weberp_prodspecs.active
+			FROM weberp_prodspecs INNER JOIN weberp_qatests
+			ON weberp_qatests.testid=weberp_prodspecs.testid
+			WHERE weberp_prodspecs.keyval='" .$KeyValue."'
 			ORDER BY name";
 	$result = DB_query($sql);
 
@@ -501,24 +501,24 @@ if (! isset($_GET['delete'])) {
 	if (isset($SelectedQATest)) {
 		//editing an existing Prod Spec
 
-		$sql = "SELECT prodspecs.testid,
+		$sql = "SELECT weberp_prodspecs.testid,
 						name,
 						method,
 						units,
 						type,
 						numericvalue,
-						prodspecs.defaultvalue,
-						prodspecs.targetvalue,
-						prodspecs.rangemin,
-						prodspecs.rangemax,
-						prodspecs.showoncert,
-						prodspecs.showonspec,
-						prodspecs.showontestplan,
-						prodspecs.active
-				FROM prodspecs INNER JOIN qatests
-				ON qatests.testid=prodspecs.testid
-				WHERE prodspecs.keyval='".$KeyValue."'
-				AND prodspecs.testid='".$SelectedQATest."'";
+						weberp_prodspecs.defaultvalue,
+						weberp_prodspecs.targetvalue,
+						weberp_prodspecs.rangemin,
+						weberp_prodspecs.rangemax,
+						weberp_prodspecs.showoncert,
+						weberp_prodspecs.showonspec,
+						weberp_prodspecs.showontestplan,
+						weberp_prodspecs.active
+				FROM weberp_prodspecs INNER JOIN weberp_qatests
+				ON weberp_qatests.testid=weberp_prodspecs.testid
+				WHERE weberp_prodspecs.keyval='".$KeyValue."'
+				AND weberp_prodspecs.testid='".$SelectedQATest."'";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: EDIMessageFormat.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('EDI Message Format');
@@ -26,7 +26,7 @@ if (isset($_GET['SelectedMessageLine'])){
 
 
 if (isset($_POST['NewEDIInvMsg'])){
-	$sql = "INSERT INTO edimessageformat (partnercode,
+	$sql = "INSERT INTO weberp_edimessageformat (partnercode,
 						messagetype,
 						sequenceno,
 						section,
@@ -36,7 +36,7 @@ if (isset($_POST['NewEDIInvMsg'])){
 				sequenceno,
 				section,
 				linetext
-			FROM edimessageformat
+			FROM weberp_edimessageformat
 			WHERE partnercode='DEFAULT'
 			AND messagetype='INVOIC'";
 
@@ -51,7 +51,7 @@ if ($InputError !=1 AND isset($_POST['update'])) {
 	if (!isset($SelectedMessageLine)) {
 		$SelectedMessageLine='';
 	}
-	$sql = "UPDATE edimessageformat
+	$sql = "UPDATE weberp_edimessageformat
 			SET partnercode='" . $PartnerCode . "',
 				messagetype='" . $MessageType . "',
 				section='" . $_POST['Section'] . "',
@@ -66,7 +66,7 @@ if ($InputError !=1 AND isset($_POST['update'])) {
 
 /*Selected group is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new message line form */
 
-	$sql = "INSERT INTO edimessageformat (
+	$sql = "INSERT INTO weberp_edimessageformat (
 				partnercode,
 				messagetype,
 				section,
@@ -88,7 +88,7 @@ if ($InputError !=1 AND isset($_POST['update'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
 
-	$sql="DELETE FROM edimessageformat WHERE id='" . $_GET['delete']."'";
+	$sql="DELETE FROM weberp_edimessageformat WHERE id='" . $_GET['delete']."'";
 	$result = DB_query($sql);
 	$msg=_('The selected message line has been deleted');
 
@@ -116,7 +116,7 @@ or deletion of the records*/
 				section,
 				sequenceno,
 				linetext
-			FROM edimessageformat
+			FROM weberp_edimessageformat
 			WHERE partnercode='" . $PartnerCode . "'
 			AND messagetype='" . $MessageType . "'
 			ORDER BY sequenceno";
@@ -179,7 +179,7 @@ if (isset($SelectedMessageLine)) {
 			section,
 			sequenceno,
 			linetext
-		FROM edimessageformat
+		FROM weberp_edimessageformat
 		WHERE id='" . $SelectedMessageLine . "'";
 
 	$result = DB_query($sql);

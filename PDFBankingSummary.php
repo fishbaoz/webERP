@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFBankingSummary.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 include ('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -23,7 +23,7 @@ if (!isset($_POST['BatchNo'])){
 	$sql="SELECT DISTINCT
 			transno,
 			transdate
-		FROM banktrans
+		FROM weberp_banktrans
 		WHERE type=12
 		ORDER BY transno DESC";
 	$result=DB_query($sql);
@@ -59,16 +59,16 @@ if (isset($_POST['BatchNo']) and $_POST['BatchNo']!='') {
 				transdate,
 				banktranstype,
 				bankact,
-				banktrans.exrate,
-				banktrans.functionalexrate,
-				banktrans.currcode,
-				currencies.decimalplaces AS currdecimalplaces
-			FROM bankaccounts INNER JOIN banktrans
-			ON bankaccounts.accountcode=banktrans.bankact
-			INNER JOIN currencies
-			ON bankaccounts.currcode=currencies.currabrev
-			WHERE banktrans.transno='" . $_POST['BatchNo'] . "'
-			AND banktrans.type=12";
+				weberp_banktrans.exrate,
+				weberp_banktrans.functionalexrate,
+				weberp_banktrans.currcode,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_bankaccounts INNER JOIN weberp_banktrans
+			ON weberp_bankaccounts.accountcode=weberp_banktrans.bankact
+			INNER JOIN weberp_currencies
+			ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
+			WHERE weberp_banktrans.transno='" . $_POST['BatchNo'] . "'
+			AND weberp_banktrans.type=12";
 
 	$ErrMsg = _('An error occurred getting the header information about the receipt batch number') . ' ' . $_POST['BatchNo'];
 	$DbgMsg = _('The SQL used to get the receipt header information that failed was');
@@ -93,14 +93,14 @@ if (isset($_POST['BatchNo']) and $_POST['BatchNo']!='') {
 	$BankingReference = $myrow['ref'];
     $BankCurrDecimalPlaces = $myrow['currdecimalplaces'];
 
-	$SQL = "SELECT debtorsmaster.name,
+	$SQL = "SELECT weberp_debtorsmaster.name,
 			ovamount,
 			invtext,
 			reference
-		FROM debtorsmaster INNER JOIN debtortrans
-		ON debtorsmaster.debtorno=debtortrans.debtorno
-		WHERE debtortrans.transno='" . $_POST['BatchNo'] . "'
-		AND debtortrans.type=12";
+		FROM weberp_debtorsmaster INNER JOIN weberp_debtortrans
+		ON weberp_debtorsmaster.debtorno=weberp_debtortrans.debtorno
+		WHERE weberp_debtortrans.transno='" . $_POST['BatchNo'] . "'
+		AND weberp_debtortrans.type=12";
 
 	$CustRecs=DB_query($SQL,'','',false,false);
 	if (DB_error_no()!=0){
@@ -115,11 +115,11 @@ if (isset($_POST['BatchNo']) and $_POST['BatchNo']!='') {
 	}
 	$SQL = "SELECT narrative,
 			amount
-		FROM gltrans
-		WHERE gltrans.typeno='" . $_POST['BatchNo'] . "'
-		AND gltrans.type=12 and gltrans.amount <0
-		AND gltrans.account !='" . $myrow['bankact'] . "'
-		AND gltrans.account !='" . $_SESSION['CompanyRecord']['debtorsact'] . "'";
+		FROM weberp_gltrans
+		WHERE weberp_gltrans.typeno='" . $_POST['BatchNo'] . "'
+		AND weberp_gltrans.type=12 and weberp_gltrans.amount <0
+		AND weberp_gltrans.account !='" . $myrow['bankact'] . "'
+		AND weberp_gltrans.account !='" . $_SESSION['CompanyRecord']['debtorsact'] . "'";
 
 	$GLRecs=DB_query($SQL,'','',false,false);
 	if (DB_error_no()!=0){

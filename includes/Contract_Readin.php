@@ -3,9 +3,9 @@
 /*Contract_Readin.php is used by the modify existing Contract in Contracts.php and also by ContractCosting.php */
 
 $ContractHeaderSQL = "SELECT contractdescription,
-							contracts.debtorno,
-							contracts.branchcode,
-							contracts.loccode,
+							weberp_contracts.debtorno,
+							weberp_contracts.branchcode,
+							weberp_contracts.loccode,
 							status,
 							categoryid,
 							orderno,
@@ -14,17 +14,17 @@ $ContractHeaderSQL = "SELECT contractdescription,
 							requireddate,
 							drawing,
 							exrate,
-							debtorsmaster.name,
-							custbranch.brname,
-							debtorsmaster.currcode
-						FROM contracts INNER JOIN debtorsmaster
-						ON contracts.debtorno=debtorsmaster.debtorno
-						INNER JOIN currencies
-						ON debtorsmaster.currcode=currencies.currabrev
-						INNER JOIN custbranch
-						ON debtorsmaster.debtorno=custbranch.debtorno
-						AND contracts.branchcode=custbranch.branchcode
-						INNER JOIN locationusers ON locationusers.loccode=contracts.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+							weberp_debtorsmaster.name,
+							weberp_custbranch.brname,
+							weberp_debtorsmaster.currcode
+						FROM weberp_contracts INNER JOIN weberp_debtorsmaster
+						ON weberp_contracts.debtorno=weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_custbranch
+						ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+						AND weberp_contracts.branchcode=weberp_custbranch.branchcode
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_contracts.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 						WHERE contractref= '" . $ContractRef . "'";
 
 $ErrMsg =  _('The contract cannot be retrieved because');
@@ -55,15 +55,15 @@ if (DB_num_rows($ContractHdrResult)==1 and !isset($_SESSION['Contract'.$identifi
 
 /*now populate the contract BOM array with the items required for the contract */
 
-	$ContractBOMsql = "SELECT contractbom.stockid,
-							stockmaster.description,
-							contractbom.workcentreadded,
-							contractbom.quantity,
-							stockmaster.units,
-							stockmaster.decimalplaces,
-							stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS cost
-						FROM contractbom INNER JOIN stockmaster
-						ON contractbom.stockid=stockmaster.stockid
+	$ContractBOMsql = "SELECT weberp_contractbom.stockid,
+							weberp_stockmaster.description,
+							weberp_contractbom.workcentreadded,
+							weberp_contractbom.quantity,
+							weberp_stockmaster.units,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS cost
+						FROM weberp_contractbom INNER JOIN weberp_stockmaster
+						ON weberp_contractbom.stockid=weberp_stockmaster.stockid
 						WHERE contractref ='" . $ContractRef . "'";
 
 	$ErrMsg =  _('The bill of material cannot be retrieved because');
@@ -86,7 +86,7 @@ if (DB_num_rows($ContractHdrResult)==1 and !isset($_SESSION['Contract'.$identifi
 								quantity,
 								costperunit,
 								contractreqid
-						FROM contractreqts
+						FROM weberp_contractreqts
 						WHERE contractref ='" . $ContractRef . "'
 						ORDER BY contractreqid";
 

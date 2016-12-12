@@ -13,27 +13,27 @@ if ((isset($_POST['ShowLabels']) OR isset($_POST['SelectAll']))
 	$Title = _('Print Labels');
 	include('includes/header.inc');
 
-	$SQL = "SELECT prices.stockid,
-					stockmaster.description,
-					stockmaster.barcode,
-					prices.price,
-					currencies.decimalplaces
-			FROM stockmaster INNER JOIN	stockcategory
-   			     ON stockmaster.categoryid=stockcategory.categoryid
-			INNER JOIN prices
-				ON stockmaster.stockid=prices.stockid
-			INNER JOIN currencies
-				ON prices.currabrev=currencies.currabrev
-			WHERE stockmaster.categoryid = '" . $_POST['StockCategory'] . "'
-			AND prices.typeabbrev='" . $_POST['SalesType'] . "'
-			AND prices.currabrev='" . $_POST['Currency'] . "'
-			AND prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
-			AND (prices.enddate='0000-00-00' OR prices.enddate>'" . FormatDateForSQL($_POST['EffectiveDate']) . "')
-			AND prices.debtorno=''
-			ORDER BY prices.currabrev,
-				stockmaster.categoryid,
-				stockmaster.stockid,
-				prices.startdate";
+	$SQL = "SELECT weberp_prices.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.barcode,
+					weberp_prices.price,
+					weberp_currencies.decimalplaces
+			FROM weberp_stockmaster INNER JOIN	weberp_stockcategory
+   			     ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			INNER JOIN weberp_prices
+				ON weberp_stockmaster.stockid=weberp_prices.stockid
+			INNER JOIN weberp_currencies
+				ON weberp_prices.currabrev=weberp_currencies.currabrev
+			WHERE weberp_stockmaster.categoryid = '" . $_POST['StockCategory'] . "'
+			AND weberp_prices.typeabbrev='" . $_POST['SalesType'] . "'
+			AND weberp_prices.currabrev='" . $_POST['Currency'] . "'
+			AND weberp_prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
+			AND (weberp_prices.enddate='0000-00-00' OR weberp_prices.enddate>'" . FormatDateForSQL($_POST['EffectiveDate']) . "')
+			AND weberp_prices.debtorno=''
+			ORDER BY weberp_prices.currabrev,
+				weberp_stockmaster.categoryid,
+				weberp_stockmaster.stockid,
+				weberp_prices.startdate";
 
 	$LabelsResult = DB_query($SQL,'','',false,false);
 
@@ -137,7 +137,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 								columnwidth*" . $PtsPerMM . " as label_columnwidth,
 								topmargin*" . $PtsPerMM . " as label_topmargin,
 								leftmargin*" . $PtsPerMM . " as label_leftmargin
-						FROM labels
+						FROM weberp_labels
 						WHERE labelid='" . $_POST['LabelID'] . "'");
 	$LabelDimensions = DB_fetch_array($result);
 
@@ -146,7 +146,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 								hpos,
 								fontsize,
 								barcode
-						FROM labelfields
+						FROM weberp_labelfields
 						WHERE labelid = '" . $_POST['LabelID'] . "'");
 	$LabelFields = array();
 	$i=0;
@@ -288,7 +288,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 					<td>' . _('Label to print') . ':</td>
 					<td><select required="required" autofocus="autofocus" name="LabelID">';
 
-		$LabelResult = DB_query("SELECT labelid, description FROM labels");
+		$LabelResult = DB_query("SELECT labelid, description FROM weberp_labels");
 		while ($LabelRow = DB_fetch_array($LabelResult)){
 			echo '<option value="' . $LabelRow['labelid'] . '">' . $LabelRow['description'] . '</option>';
 		}
@@ -298,7 +298,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 				<td>' .  _('For Stock Category') .':</td>
 				<td><select name="StockCategory">';
 
-		$CatResult= DB_query("SELECT categoryid, categorydescription FROM stockcategory ORDER BY categorydescription");
+		$CatResult= DB_query("SELECT categoryid, categorydescription FROM weberp_stockcategory ORDER BY categorydescription");
 		while ($myrow = DB_fetch_array($CatResult)){
 			echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
 		}
@@ -306,7 +306,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 
 		echo '<tr><td>' . _('For Sales Type/Price List').':</td>
                   <td><select name="SalesType">';
-		$sql = "SELECT sales_type, typeabbrev FROM salestypes";
+		$sql = "SELECT sales_type, typeabbrev FROM weberp_salestypes";
 		$SalesTypesResult=DB_query($sql);
 
 		while ($myrow=DB_fetch_array($SalesTypesResult)){
@@ -320,7 +320,7 @@ if (isset($_POST['PrintLabels']) AND $NoOfLabels>0) {
 
 		echo '<tr><td>' . _('For Currency').':</td>
                   <td><select name="Currency">';
-		$sql = "SELECT currabrev, country, currency FROM currencies";
+		$sql = "SELECT currabrev, country, currency FROM weberp_currencies";
 		$CurrenciesResult=DB_query($sql);
 
 		while ($myrow=DB_fetch_array($CurrenciesResult)){

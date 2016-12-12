@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PO_OrderDetails.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -14,10 +14,10 @@ include('includes/header.inc');
 
 if (isset($_GET['FromGRNNo'])){
 
-	$SQL= "SELECT purchorderdetails.orderno
-			FROM purchorderdetails INNER JOIN grns
-			ON purchorderdetails.podetailitem=grns.podetailitem
-			WHERE grns.grnno='" . $_GET['FromGRNNo'] ."'";
+	$SQL= "SELECT weberp_purchorderdetails.orderno
+			FROM weberp_purchorderdetails INNER JOIN weberp_grns
+			ON weberp_purchorderdetails.podetailitem=weberp_grns.podetailitem
+			WHERE weberp_grns.grnno='" . $_GET['FromGRNNo'] ."'";
 
 	$ErrMsg = _('The search of the GRNs was unsuccessful') . ' - ' . _('the SQL statement returned the error');
 	$OrderResult = DB_query($SQL, $ErrMsg);
@@ -41,24 +41,24 @@ if (!isset($_GET['OrderNo'])) {
 }
 
 $ErrMsg = _('The order requested could not be retrieved') . ' - ' . _('the SQL returned the following error');
-$OrderHeaderSQL = "SELECT purchorders.*,
-						suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.currcode,
-						www_users.realname,
-						locations.locationname,
-						currencies.decimalplaces AS currdecimalplaces
-					FROM purchorders
-					INNER JOIN locationusers ON locationusers.loccode=purchorders.intostocklocation AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-					INNER JOIN locations
-					ON locations.loccode=purchorders.intostocklocation
-					INNER JOIN suppliers
-					ON purchorders.supplierno = suppliers.supplierid
-					INNER JOIN currencies
-					ON suppliers.currcode = currencies.currabrev
-					LEFT JOIN www_users
-					ON purchorders.initiator=www_users.userid
-					WHERE purchorders.orderno = '" . $_GET['OrderNo'] ."'";
+$OrderHeaderSQL = "SELECT weberp_purchorders.*,
+						weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_www_users.realname,
+						weberp_locations.locationname,
+						weberp_currencies.decimalplaces AS currdecimalplaces
+					FROM weberp_purchorders
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+					INNER JOIN weberp_locations
+					ON weberp_locations.loccode=weberp_purchorders.intostocklocation
+					INNER JOIN weberp_suppliers
+					ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+					INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode = weberp_currencies.currabrev
+					LEFT JOIN weberp_www_users
+					ON weberp_purchorders.initiator=weberp_www_users.userid
+					WHERE weberp_purchorders.orderno = '" . $_GET['OrderNo'] ."'";
 
 $GetOrdHdrResult = DB_query($OrderHeaderSQL, $ErrMsg);
 
@@ -167,12 +167,12 @@ $CurrDecimalPlaces = $myrow['currdecimalplaces'];
 echo '<br />';
 /*Now get the line items */
 $ErrMsg = _('The line items of the purchase order could not be retrieved');
-$LineItemsSQL = "SELECT purchorderdetails.*,
-						stockmaster.decimalplaces
-				FROM purchorderdetails
-				LEFT JOIN stockmaster
-				ON purchorderdetails.itemcode=stockmaster.stockid
-				WHERE purchorderdetails.orderno = '" . $_GET['OrderNo'] ."'
+$LineItemsSQL = "SELECT weberp_purchorderdetails.*,
+						weberp_stockmaster.decimalplaces
+				FROM weberp_purchorderdetails
+				LEFT JOIN weberp_stockmaster
+				ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
+				WHERE weberp_purchorderdetails.orderno = '" . $_GET['OrderNo'] ."'
 				ORDER BY itemcode";	/*- ADDED: Sort by our item code -*/
 
 $LineItemsResult = DB_query($LineItemsSQL, $ErrMsg);

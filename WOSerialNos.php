@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: WOSerialNos.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 /*This page shows the serial numbers created for a works order
  * - creating automatically from the last serial number counter in the stockmaster or by manual entry
@@ -54,11 +54,11 @@ if (isset($_POST['AddControlledItems'])){
 			prnMsg(_('The quantity of controlled items to add was not numeric - a number is expected'),'error');
 		} else {
 			DB_Txn_Begin();
-			/*Process the additional controlled items into woserialnos and update the quantity on the work order order in woitems*/
+			/*Process the additional controlled items into woserialnos and update the quantity on the work order order in weberp_woitems*/
 
 			$InputError = false;
 
-			$sql = "INSERT INTO woserialnos (stockid,
+			$sql = "INSERT INTO weberp_woserialnos (stockid,
 											wo,
 											qualitytext,
 											serialno)
@@ -69,7 +69,7 @@ if (isset($_POST['AddControlledItems'])){
 			$ValueLine = '';
 			for ($i=0;$i< filter_number_format($_POST['NumberToAdd']);$i++){
 				$NextItemNumber = $NextSerialNo + $i;
-				$result = DB_query("SELECT serialno FROM woserialnos
+				$result = DB_query("SELECT serialno FROM weberp_woserialnos
 									WHERE wo='" . $WO . "'
 									AND stockid='" . $StockID ."'
 									AND serialno='" . $NextItemNumber . "'");
@@ -77,7 +77,7 @@ if (isset($_POST['AddControlledItems'])){
 					$InputError=true;
 					prnMsg($NextItemNumber . ' ' . _('is already entered on this work order'),'error');
 				}
-				$result = DB_query("SELECT serialno FROM stockserialitems
+				$result = DB_query("SELECT serialno FROM weberp_stockserialitems
 									WHERE serialno='" . $NextItemNumber . "'
 									AND stockid='" . $StockID ."'");
 				if (DB_num_rows($result)!=0){
@@ -97,10 +97,10 @@ if (isset($_POST['AddControlledItems'])){
 			$ErrMsg = _('Unable to add the serial numbers requested');
 			$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 			// update the nextserialno in the stockmaster for the item
-			$result = DB_query("UPDATE stockmaster
+			$result = DB_query("UPDATE weberp_stockmaster
 								SET nextserialno='" . $NextSerialNo . "'
 								WHERE stockid='" . $StockID . "'");
-			$result = DB_query("UPDATE woitems SET qtyreqd=qtyreqd+" . filter_number_format($_POST['NumberToAdd']) . "
+			$result = DB_query("UPDATE weberp_woitems SET qtyreqd=qtyreqd+" . filter_number_format($_POST['NumberToAdd']) . "
 								WHERE stockid='" . $StockID . "'
 								AND wo='" . $WO . "'",
 								$ErrMsg,
@@ -119,7 +119,7 @@ if (isset($_POST['AddControlledItems'])){
 				prnMsg(_('The quantity for the batch must be numeric'),'error');
 				$InputError=true;
 			}
-			$result = DB_query("SELECT serialno FROM woserialnos
+			$result = DB_query("SELECT serialno FROM weberp_woserialnos
 								WHERE wo='" . $WO . "'
 								AND stockid='" . $StockID ."'
 								AND serialno='" . $_POST['Reference'] . "'");
@@ -127,7 +127,7 @@ if (isset($_POST['AddControlledItems'])){
 				$InputError=true;
 				prnMsg(_('The serial number or batch reference must be unique to the item - the reference entered is already entered on this work order'),'error');
 			}
-			$result = DB_query("SELECT serialno FROM stockserialitems
+			$result = DB_query("SELECT serialno FROM weberp_stockserialitems
 								WHERE serialno='" . $_POST['Reference'] . "'
 								AND stockid='" . $StockID ."'");
 			if (DB_num_rows($result)!=0){
@@ -137,14 +137,14 @@ if (isset($_POST['AddControlledItems'])){
 			if (!$InputError){
 				DB_Txn_Begin();
 				$ErrMsg = _('Could not add a new serial number/batch');
-				$result = DB_query("UPDATE woitems
+				$result = DB_query("UPDATE weberp_woitems
 									SET qtyreqd=qtyreqd+" . filter_number_format($_POST['Quantity']) . "
 									WHERE stockid='" . $StockID . "'
 									AND wo='" . $WO . "'",
 									$ErrMsg,
 									$DbgMsg,
 									true);
-				$sql = "INSERT INTO woserialnos (stockid,
+				$sql = "INSERT INTO weberp_woserialnos (stockid,
 												 wo,
 												 qualitytext,
 												 quantity,
@@ -166,12 +166,12 @@ if (isset($_POST['AddControlledItems'])){
 if (isset($_GET['Delete'])){ //user hit delete link
 
 /*when serial numbers /lots received they are removed from the woserialnos table so no need to check if already received - they will only show here if they are in progress */
-	$result = DB_query("DELETE FROM woserialnos
+	$result = DB_query("DELETE FROM weberp_woserialnos
 						WHERE wo='" . $WO . "'
 						AND stockid='" . $StockID . "'
 						AND serialno='" . $_GET['Reference'] ."'");
 
-	$result = DB_query("UPDATE woitems SET qtyreqd=qtyreqd-" . filter_number_format($_GET['Quantity']) . "
+	$result = DB_query("UPDATE weberp_woitems SET qtyreqd=qtyreqd-" . filter_number_format($_GET['Quantity']) . "
 						WHERE wo='" . $WO . "'
 						AND stockid = '" . $StockID . "'");
 
@@ -194,7 +194,7 @@ if (isset($_POST['UpdateItems'])){
 				$InputError=true;
 			}
 			if ($_POST['Reference' .$i] != $_POST['OldReference' .$i]){
-				$result = DB_query("SELECT serialno FROM woserialnos
+				$result = DB_query("SELECT serialno FROM weberp_woserialnos
 									WHERE wo='" . $WO . "'
 									AND stockid='" . $StockID ."'
 									AND serialno='" . $_POST['Reference' . $i] . "'");
@@ -202,7 +202,7 @@ if (isset($_POST['UpdateItems'])){
 					$InputError=true;
 					prnMsg($_POST['Reference' .$i] . ': ' . _('The reference entered is already entered on this work order'),'error');
 				}
-				$result = DB_query("SELECT serialno FROM stockserialitems
+				$result = DB_query("SELECT serialno FROM weberp_stockserialitems
 									WHERE serialno='" . $_POST['Reference' .$i] . "'
 									AND stockid='" . $StockID ."'");
 				if (DB_num_rows($result)!=0){
@@ -211,7 +211,7 @@ if (isset($_POST['UpdateItems'])){
 				}
 			}
 			if (!$InputError){
-				$sql[] = "UPDATE woserialnos SET serialno='" . $_POST['Reference'.$i] . "',
+				$sql[] = "UPDATE weberp_woserialnos SET serialno='" . $_POST['Reference'.$i] . "',
 													quantity='" . filter_number_format($_POST['Quantity'.$i]) ."',
 													qualitytext='" . $_POST['Notes'.$i] . "'
 										WHERE    wo='" . $WO . "'
@@ -228,7 +228,7 @@ if (isset($_POST['UpdateItems'])){
 		foreach ($sql as $SQLStatement){
 				$result = DB_query($SQLStatement,$ErrMsg,$DbgMsg,true);
 		}
-		$result = DB_query("UPDATE woitems SET qtyreqd = '" . $WOQuantityTotal . "'
+		$result = DB_query("UPDATE weberp_woitems SET qtyreqd = '" . $WOQuantityTotal . "'
 							WHERE wo = '" .$WO . "'
 							AND stockid='" . $StockID . "'",
 							$ErrMsg,
@@ -288,7 +288,7 @@ echo '<td><input type="submit" name="AddControlledItems" value="' . _('Add') . '
 $sql = "SELECT serialno,
 				quantity,
 				qualitytext
-		FROM woserialnos
+		FROM weberp_woserialnos
 		WHERE wo='" . $WO . "'
 		AND stockid='" . $StockID . "'";
 

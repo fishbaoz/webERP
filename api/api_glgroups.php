@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_glgroups.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Check that the account group doesn't already exist'*/
 	function VerifyAccountGroup($AccountGroup, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(groupname)
-				FROM accountgroups
+				FROM weberp_accountgroups
 				WHERE groupname='".$AccountGroup."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -17,7 +17,7 @@
 /* Check that the account sectiont already exists'*/
 	function VerifyAccountSectionExists($AccountSection, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(sectionid)
-				FROM accountsection
+				FROM weberp_accountsection
 				WHERE sectionid='".$AccountSection."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -46,7 +46,7 @@
 /* Check that the parent group exists*/
 	function VerifyParentGroupExists($AccountGroup, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(groupname)
-				FROM accountgroups
+				FROM weberp_accountgroups
 				WHERE groupname='".$AccountGroup."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -79,7 +79,7 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$sql = "INSERT INTO accountgroups ('" .mb_substr($FieldNames,0,-2) . "')
+			$sql = "INSERT INTO weberp_accountgroups ('" .mb_substr($FieldNames,0,-2) . "')
 					VALUES ('" . mb_substr($FieldValues,0,-2) . "' ) ";
 			$result = DB_Query($sql, $db);
 			if (DB_error_no() != 0) {

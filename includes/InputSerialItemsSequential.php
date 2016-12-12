@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: InputSerialItemsSequential.php 6310 2013-08-29 10:42:50Z daintree $*/
 /*Input Serial Items - used for inputing serial numbers or batch/roll/bundle references
 for controlled items - used in:
 - ConfirmDispatchControlledInvoice.php

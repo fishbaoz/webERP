@@ -19,30 +19,30 @@ if (sizeOf($Recipients) == 0) {
 	exit;
 }
 
-$sql= "SELECT salesorders.orderno,
-			  salesorders.orddate,
-			  salesorderdetails.stkcode,
-			  salesorderdetails.unitprice,
-			  stockmaster.description,
-			  stockmaster.units,
-			  stockmaster.decimalplaces,
-			  salesorderdetails.quantity,
-			  salesorderdetails.qtyinvoiced,
-			  salesorderdetails.completed,
-			  salesorderdetails.discountpercent,
-			  stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standardcost,
-			  debtorsmaster.name
-		 FROM salesorders
-			 INNER JOIN salesorderdetails
-			 ON salesorders.orderno = salesorderdetails.orderno
-			 INNER JOIN stockmaster
-			 ON salesorderdetails.stkcode = stockmaster.stockid
-			 INNER JOIN debtorsmaster
-			 ON salesorders.debtorno=debtorsmaster.debtorno
-		 WHERE salesorders.orddate >='" . FormatDateForSQL($WeekStartDate) . "'
-			  AND salesorders.orddate <='" . $_POST['ToDate'] . "'
-		 AND salesorders.quotation=0
-		 ORDER BY salesorders.orderno";
+$sql= "SELECT weberp_salesorders.orderno,
+			  weberp_salesorders.orddate,
+			  weberp_salesorderdetails.stkcode,
+			  weberp_salesorderdetails.unitprice,
+			  weberp_stockmaster.description,
+			  weberp_stockmaster.units,
+			  weberp_stockmaster.decimalplaces,
+			  weberp_salesorderdetails.quantity,
+			  weberp_salesorderdetails.qtyinvoiced,
+			  weberp_salesorderdetails.completed,
+			  weberp_salesorderdetails.discountpercent,
+			  weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standardcost,
+			  weberp_debtorsmaster.name
+		 FROM weberp_salesorders
+			 INNER JOIN weberp_salesorderdetails
+			 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			 INNER JOIN weberp_stockmaster
+			 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+			 INNER JOIN weberp_debtorsmaster
+			 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+		 WHERE weberp_salesorders.orddate >='" . FormatDateForSQL($WeekStartDate) . "'
+			  AND weberp_salesorders.orddate <='" . $_POST['ToDate'] . "'
+		 AND weberp_salesorders.quotation=0
+		 ORDER BY weberp_salesorders.orderno";
 
 $Result=DB_query($sql,$db,'','',false,false); //dont trap errors here
 
@@ -154,18 +154,18 @@ $TotalGP=0;
 $sql = "SELECT 	trandate,
 				(price*(1-discountpercent)* (-qty)) as salesvalue,
 				(CASE WHEN mbflag='A' THEN 0 ELSE (standardcost * -qty) END) as cost,
-				stockmoves.stockid,
+				weberp_stockmoves.stockid,
 				description,
 				reference,
 				qty,
 				transno
-			FROM stockmoves
-			INNER JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			INNER JOIN custbranch
-			ON stockmoves.debtorno=custbranch.debtorno
-				AND stockmoves.branchcode=custbranch.branchcode
-			WHERE (stockmoves.type=10 or stockmoves.type=11)
+			FROM weberp_stockmoves
+			INNER JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_custbranch
+			ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+				AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+			WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 			AND trandate>='" . $_POST['FromDate']  . "'
 			AND trandate<='" . $_POST['ToDate']  . "'";
 

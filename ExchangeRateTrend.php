@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: ExchangeRateTrend.php 7677 2016-11-23 16:05:02Z rchacon $*/
 /* This script shows the trend in exchange rates as retrieved from ECB. */
 
 include('includes/session.inc');
@@ -29,7 +29,7 @@ if ( isset($_GET['CurrencyToShow']) ){
 		_('View Currency Trend'), '</p>';// Page title.
 	echo '<table>'; // First column
 
-	$SQL = "SELECT currabrev FROM currencies";
+	$SQL = "SELECT currabrev FROM weberp_currencies";
 	$result=DB_query($SQL);
 	include('includes/CurrenciesArray.php'); // To get the currency name from the currency code.
 

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFDeliveryDifferences.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 include ('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -42,7 +42,7 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 
 	$sql = "SELECT categorydescription,
 					categoryid
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE stocktype<>'D'
 			AND stocktype<>'L'";
 
@@ -63,7 +63,7 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 			<td><select name="Location">
 				<option selected="selected" value="All">' . _('All Locations')  . '</option>';
 
-	$result= DB_query("SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1");
+	$result= DB_query("SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1");
 	while ($myrow=DB_fetch_array($result)){
 		echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname']  . '</option>';
 	}
@@ -95,94 +95,94 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 
 if ($_POST['CategoryID']=='All' AND $_POST['Location']=='All'){
 	$sql= "SELECT invoiceno,
-			orderdeliverydifferenceslog.orderno,
-			orderdeliverydifferenceslog.stockid,
-			stockmaster.description,
-			stockmaster.decimalplaces,
+			weberp_orderdeliverydifferenceslog.orderno,
+			weberp_orderdeliverydifferenceslog.stockid,
+			weberp_stockmaster.description,
+			weberp_stockmaster.decimalplaces,
 			quantitydiff,
 			trandate,
-			orderdeliverydifferenceslog.debtorno,
-			orderdeliverydifferenceslog.branch
-		FROM orderdeliverydifferenceslog INNER JOIN stockmaster
-			ON orderdeliverydifferenceslog.stockid=stockmaster.stockid
-		INNER JOIN salesorders ON orderdeliverydifferenceslog.orderno = salesorders.orderno
-		INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		INNER JOIN debtortrans ON orderdeliverydifferenceslog.invoiceno=debtortrans.transno
-			AND debtortrans.type=10
+			weberp_orderdeliverydifferenceslog.debtorno,
+			weberp_orderdeliverydifferenceslog.branch
+		FROM weberp_orderdeliverydifferenceslog INNER JOIN weberp_stockmaster
+			ON weberp_orderdeliverydifferenceslog.stockid=weberp_stockmaster.stockid
+		INNER JOIN weberp_salesorders ON weberp_orderdeliverydifferenceslog.orderno = weberp_salesorders.orderno
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		INNER JOIN weberp_debtortrans ON weberp_orderdeliverydifferenceslog.invoiceno=weberp_debtortrans.transno
+			AND weberp_debtortrans.type=10
 			AND trandate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 			AND trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 } elseif ($_POST['CategoryID']!='All' AND $_POST['Location']=='All') {
 	$sql= "SELECT invoiceno,
-			orderdeliverydifferenceslog.orderno,
-			orderdeliverydifferenceslog.stockid,
-			stockmaster.description,
-			stockmaster.decimalplaces,
+			weberp_orderdeliverydifferenceslog.orderno,
+			weberp_orderdeliverydifferenceslog.stockid,
+			weberp_stockmaster.description,
+			weberp_stockmaster.decimalplaces,
 			quantitydiff,
 			trandate,
-			orderdeliverydifferenceslog.debtorno,
-			orderdeliverydifferenceslog.branch
-		FROM orderdeliverydifferenceslog INNER JOIN stockmaster
-			ON orderdeliverydifferenceslog.stockid=stockmaster.stockid
-			INNER JOIN salesorders ON orderdeliverydifferenceslog.orderno = salesorders.orderno
-			INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			INNER JOIN debtortrans ON orderdeliverydifferenceslog.invoiceno=debtortrans.transno
-			AND debtortrans.type=10
+			weberp_orderdeliverydifferenceslog.debtorno,
+			weberp_orderdeliverydifferenceslog.branch
+		FROM weberp_orderdeliverydifferenceslog INNER JOIN weberp_stockmaster
+			ON weberp_orderdeliverydifferenceslog.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_salesorders ON weberp_orderdeliverydifferenceslog.orderno = weberp_salesorders.orderno
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			INNER JOIN weberp_debtortrans ON weberp_orderdeliverydifferenceslog.invoiceno=weberp_debtortrans.transno
+			AND weberp_debtortrans.type=10
 			AND trandate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 			AND trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'
 			AND categoryid='" . $_POST['CategoryID'] ."'";
 
 } elseif ($_POST['CategoryID']=='All' AND $_POST['Location']!='All') {
 	$sql = "SELECT invoiceno,
-			orderdeliverydifferenceslog.orderno,
-			orderdeliverydifferenceslog.stockid,
-			stockmaster.description,
-			stockmaster.decimalplaces,
+			weberp_orderdeliverydifferenceslog.orderno,
+			weberp_orderdeliverydifferenceslog.stockid,
+			weberp_stockmaster.description,
+			weberp_stockmaster.decimalplaces,
 			quantitydiff,
 			trandate,
-			orderdeliverydifferenceslog.debtorno,
-			orderdeliverydifferenceslog.branch
-		FROM orderdeliverydifferenceslog INNER JOIN stockmaster
-			ON orderdeliverydifferenceslog.stockid=stockmaster.stockid
-			INNER JOIN debtortrans
-				ON orderdeliverydifferenceslog.invoiceno=debtortrans.transno
-				INNER JOIN salesorders
-					ON orderdeliverydifferenceslog.orderno=salesorders.orderno
-				INNER JOIN locationusers 
-					ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE debtortrans.type=10
-		AND salesorders.fromstkloc='". $_POST['Location'] . "'
+			weberp_orderdeliverydifferenceslog.debtorno,
+			weberp_orderdeliverydifferenceslog.branch
+		FROM weberp_orderdeliverydifferenceslog INNER JOIN weberp_stockmaster
+			ON weberp_orderdeliverydifferenceslog.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_debtortrans
+				ON weberp_orderdeliverydifferenceslog.invoiceno=weberp_debtortrans.transno
+				INNER JOIN weberp_salesorders
+					ON weberp_orderdeliverydifferenceslog.orderno=weberp_salesorders.orderno
+				INNER JOIN weberp_locationusers 
+					ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_debtortrans.type=10
+		AND weberp_salesorders.fromstkloc='". $_POST['Location'] . "'
 		AND trandate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 		AND trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 } elseif ($_POST['CategoryID']!='All' AND $_POST['location']!='All'){
 
 	$sql = "SELECT invoiceno,
-			orderdeliverydifferenceslog.orderno,
-			orderdeliverydifferenceslog.stockid,
-			stockmaster.description,
-			stockmaster.decimalplaces,
+			weberp_orderdeliverydifferenceslog.orderno,
+			weberp_orderdeliverydifferenceslog.stockid,
+			weberp_stockmaster.description,
+			weberp_stockmaster.decimalplaces,
 			quantitydiff,
 			trandate,
-			orderdeliverydifferenceslog.debtorno,
-			orderdeliverydifferenceslog.branch
-		FROM orderdeliverydifferenceslog INNER JOIN stockmaster
-			ON orderdeliverydifferenceslog.stockid=stockmaster.stockid
-			INNER JOIN debtortrans
-				ON orderdeliverydifferenceslog.invoiceno=debtortrans.transno
-				AND debtortrans.type=10
-				INNER JOIN salesorders
-					ON orderdeliverydifferenceslog.orderno = salesorders.orderno
-				INNER JOIN locationusers 
-					ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE salesorders.fromstkloc='" . $_POST['Location'] . "'
+			weberp_orderdeliverydifferenceslog.debtorno,
+			weberp_orderdeliverydifferenceslog.branch
+		FROM weberp_orderdeliverydifferenceslog INNER JOIN weberp_stockmaster
+			ON weberp_orderdeliverydifferenceslog.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_debtortrans
+				ON weberp_orderdeliverydifferenceslog.invoiceno=weberp_debtortrans.transno
+				AND weberp_debtortrans.type=10
+				INNER JOIN weberp_salesorders
+					ON weberp_orderdeliverydifferenceslog.orderno = weberp_salesorders.orderno
+				INNER JOIN weberp_locationusers 
+					ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_salesorders.fromstkloc='" . $_POST['Location'] . "'
 		AND categoryid='" . $_POST['CategoryID'] . "'
 		AND trandate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 		AND trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'";
 }
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
 $Result=DB_query($sql,'','',false,false); //dont error check - see below
@@ -245,44 +245,44 @@ $YPos-=$line_height;
 $LeftOvers = $pdf->addTextWrap($Left_Margin,$YPos,200,$FontSize,_('Total number of differences') . ' ' . locale_number_format($TotalDiffs), 'left');
 
 if ($_POST['CategoryID']=='All' AND $_POST['Location']=='All'){
-	$sql = "SELECT COUNT(salesorderdetails.orderno)
-			FROM salesorderdetails INNER JOIN debtortrans
-				ON salesorderdetails.orderno=debtortrans.order_ INNER JOIN salesorders 
-				ON salesorderdetails.orderno = salesorders.orderno INNER JOIN locationusers 
-				ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE debtortrans.trandate>='" . FormatDateForSQL($_POST['FromDate']) . "'
-			AND debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
+	$sql = "SELECT COUNT(weberp_salesorderdetails.orderno)
+			FROM weberp_salesorderdetails INNER JOIN weberp_debtortrans
+				ON weberp_salesorderdetails.orderno=weberp_debtortrans.order_ INNER JOIN weberp_salesorders 
+				ON weberp_salesorderdetails.orderno = weberp_salesorders.orderno INNER JOIN weberp_locationusers 
+				ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_debtortrans.trandate>='" . FormatDateForSQL($_POST['FromDate']) . "'
+			AND weberp_debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 } elseif ($_POST['CategoryID']!='All' AND $_POST['Location']=='All') {
-	$sql = "SELECT COUNT(salesorderdetails.orderno)
-		FROM salesorderdetails INNER JOIN debtortrans
-			ON salesorderdetails.orderno=debtortrans.order_ INNER JOIN stockmaster
-			ON salesorderdetails.stkcode=stockmaster.stockid INNER JOIN salesorders 
-			ON salesorderdetails.orderno = salesorders.orderno INNER JOIN locationusers 
-			ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE debtortrans.trandate>='" . FormatDateForSQL($_POST['FromDate']) . "'
-		AND debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'
-		AND stockmaster.categoryid='" . $_POST['CategoryID'] . "'";
+	$sql = "SELECT COUNT(weberp_salesorderdetails.orderno)
+		FROM weberp_salesorderdetails INNER JOIN weberp_debtortrans
+			ON weberp_salesorderdetails.orderno=weberp_debtortrans.order_ INNER JOIN weberp_stockmaster
+			ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid INNER JOIN weberp_salesorders 
+			ON weberp_salesorderdetails.orderno = weberp_salesorders.orderno INNER JOIN weberp_locationusers 
+			ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_debtortrans.trandate>='" . FormatDateForSQL($_POST['FromDate']) . "'
+		AND weberp_debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'
+		AND weberp_stockmaster.categoryid='" . $_POST['CategoryID'] . "'";
 
 } elseif ($_POST['CategoryID']=='All' AND $_POST['Location']!='All'){
 
-	$sql = "SELECT COUNT(salesorderdetails.orderno)
-		FROM salesorderdetails INNER JOIN debtortrans
-			ON salesorderdetails.orderno=debtortrans.order_ INNER JOIN salesorders
-			ON salesorderdetails.orderno = salesorders.orderno INNER JOIN locationusers 
-			ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE debtortrans.trandate>='". FormatDateForSQL($_POST['FromDate']) . "'
-		AND debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'
-		AND salesorders.fromstkloc='" . $_POST['Location'] . "'";
+	$sql = "SELECT COUNT(weberp_salesorderdetails.orderno)
+		FROM weberp_salesorderdetails INNER JOIN weberp_debtortrans
+			ON weberp_salesorderdetails.orderno=weberp_debtortrans.order_ INNER JOIN weberp_salesorders
+			ON weberp_salesorderdetails.orderno = weberp_salesorders.orderno INNER JOIN weberp_locationusers 
+			ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_debtortrans.trandate>='". FormatDateForSQL($_POST['FromDate']) . "'
+		AND weberp_debtortrans.trandate <='" . FormatDateForSQL($_POST['ToDate']) . "'
+		AND weberp_salesorders.fromstkloc='" . $_POST['Location'] . "'";
 
 } elseif ($_POST['CategoryID'] !='All' AND $_POST['Location'] !='All'){
 
-	$sql = "SELECT COUNT(salesorderdetails.orderno)
-		FROM salesorderdetails INNER JOIN debtortrans ON salesorderdetails.orderno=debtortrans.order_
-			INNER JOIN salesorders ON salesorderdetails.orderno = salesorders.orderno
-			INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			INNER JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-		WHERE salesorders.fromstkloc ='" . $_POST['Location'] . "'
+	$sql = "SELECT COUNT(weberp_salesorderdetails.orderno)
+		FROM weberp_salesorderdetails INNER JOIN weberp_debtortrans ON weberp_salesorderdetails.orderno=weberp_debtortrans.order_
+			INNER JOIN weberp_salesorders ON weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			INNER JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+		WHERE weberp_salesorders.fromstkloc ='" . $_POST['Location'] . "'
 		AND categoryid='" . $_POST['CategoryID'] . "'
 		AND trandate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 		AND trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'";
@@ -290,7 +290,7 @@ if ($_POST['CategoryID']=='All' AND $_POST['Location']=='All'){
 }
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
 $ErrMsg = _('Could not retrieve the count of sales order lines in the period under review');

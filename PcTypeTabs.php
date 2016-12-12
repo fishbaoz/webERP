@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: PcTypeTabs.php 6941 2014-10-26 23:18:08Z daintree $ */
 
 include('includes/session.inc');
 $Title = _('Maintenance Of Petty Cash Type of Tabs');
@@ -56,7 +56,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedTab) AND $InputError !=1) {
 
-		$sql = "UPDATE pctypetabs
+		$sql = "UPDATE weberp_pctypetabs
 			SET typetabdescription = '" . $_POST['TypeTabDescription'] . "'
 			WHERE typetabcode = '".$SelectedTab."'";
 
@@ -66,7 +66,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-				 FROM pctypetabs
+				 FROM weberp_pctypetabs
 				 WHERE typetabcode = '" . $_POST['TypeTabCode'] . "'";
 
 		$checkresult = DB_query($checkSql);
@@ -79,7 +79,7 @@ if (isset($_POST['submit'])) {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO pctypetabs
+			$sql = "INSERT INTO weberp_pctypetabs
 						(typetabcode,
 			 			 typetabdescription)
 				VALUES ('" . $_POST['TypeTabCode'] . "',
@@ -105,7 +105,7 @@ if (isset($_POST['submit'])) {
 	// PREVENT DELETES IF DEPENDENT RECORDS IN 'PcTabExpenses'
 
 	$SQLPcTabExpenses= "SELECT COUNT(*)
-		FROM pctabexpenses
+		FROM weberp_pctabexpenses
 		WHERE typetabcode='".$SelectedTab."'";
 
 	$ErrMsg = _('The number of tabs using this Tab type could not be retrieved');
@@ -114,7 +114,7 @@ if (isset($_POST['submit'])) {
 	$myrowPcTabExpenses = DB_fetch_row($ResultPcTabExpenses);
 
 	$SqlPcTabs= "SELECT COUNT(*)
-		FROM pctabs
+		FROM weberp_pctabs
 		WHERE typetabcode='".$SelectedTab."'";
 
 	$ErrMsg = _('The number of tabs using this Tab type could not be retrieved');
@@ -137,7 +137,7 @@ if (isset($_POST['submit'])) {
 		exit;
 	} else {
 
-			$sql="DELETE FROM pctypetabs WHERE typetabcode='".$SelectedTab."'";
+			$sql="DELETE FROM weberp_pctypetabs WHERE typetabcode='".$SelectedTab."'";
 			$ErrMsg = _('The Tab Type record could not be deleted because');
 			$result = DB_query($sql,$ErrMsg);
 			prnMsg(_('Tab type') .  ' ' . $SelectedTab  . ' ' . _('has been deleted') ,'success');
@@ -155,7 +155,7 @@ then none of the above are true and the list of sales types will be displayed wi
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = 'SELECT * FROM pctypetabs';
+	$sql = 'SELECT * FROM weberp_pctypetabs';
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -206,7 +206,7 @@ if (! isset($_GET['delete'])) {
 
 		$sql = "SELECT typetabcode,
 						typetabdescription
-				FROM pctypetabs
+				FROM weberp_pctypetabs
 				WHERE typetabcode='".$SelectedTab."'";
 
 		$result = DB_query($sql);

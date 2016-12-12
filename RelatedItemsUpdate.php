@@ -26,9 +26,9 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/i
 echo '<a href="' . $RootPath . '/SelectProduct.php">' . _('Back to Items') . '</a><br />';
 
 
-$result = DB_query("SELECT stockmaster.description
-					FROM stockmaster
-					WHERE stockmaster.stockid='".$Item."'");
+$result = DB_query("SELECT weberp_stockmaster.description
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='".$Item."'");
 $myrow = DB_fetch_row($result);
 
 if (DB_num_rows($result)==0){
@@ -53,10 +53,10 @@ if (isset($_POST['submit'])) {
 
 	//first off validate inputs sensible
 
-	$result_related = DB_query("SELECT stockmaster.description,
-							stockmaster.mbflag
-					FROM stockmaster
-					WHERE stockmaster.stockid='".$_POST['Related']."'");
+	$result_related = DB_query("SELECT weberp_stockmaster.description,
+							weberp_stockmaster.mbflag
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='".$_POST['Related']."'");
 	$myrow_related = DB_fetch_row($result_related);
 
 	if (DB_num_rows($result_related)==0){
@@ -65,7 +65,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	$sql = "SELECT related
-				FROM relateditems
+				FROM weberp_relateditems
 			WHERE stockid='".$Item."'
 				AND related = '" . $_POST['Related'] . "'";
 	$result = DB_query($sql);
@@ -82,7 +82,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	if ($InputError !=1) {
-		$sql = "INSERT INTO relateditems (stockid,
+		$sql = "INSERT INTO weberp_relateditems (stockid,
 									related)
 							VALUES ('" . $Item . "',
 								'" . $_POST['Related'] . "')";
@@ -93,14 +93,14 @@ if (isset($_POST['submit'])) {
 
 		/* It is safe to assume that, if A is related to B, B is related to A */
 		$sql_reverse = "SELECT related
-					FROM relateditems
+					FROM weberp_relateditems
 				WHERE stockid='".$_POST['Related']."'
 					AND related = '" . $Item . "'";
 		$result_reverse = DB_query($sql_reverse);
 		$myrow_reverse = DB_fetch_row($result_reverse);
 
 		if (DB_num_rows($result_reverse)==0){
-			$sql = "INSERT INTO relateditems (stockid,
+			$sql = "INSERT INTO weberp_relateditems (stockid,
 										related)
 								VALUES ('" . $_POST['Related'] . "',
 									'" . $Item . "')";
@@ -117,7 +117,7 @@ if (isset($_POST['submit'])) {
 
 	/* Again it is safe to assume that we have to delete both relations A to B and B to A */
 
-	$sql="DELETE FROM relateditems
+	$sql="DELETE FROM weberp_relateditems
 			WHERE (stockid = '". $Item ."' AND related ='". $_GET['Related'] ."')
 			OR (stockid = '". $_GET['Related'] ."' AND related ='". $Item ."')";
 	$ErrMsg = _('Could not delete this relationshop');
@@ -128,11 +128,11 @@ if (isset($_POST['submit'])) {
 
 //Always do this stuff
 
-$sql = "SELECT stockmaster.stockid,
-			stockmaster.description
-		FROM stockmaster, relateditems
-		WHERE stockmaster.stockid = relateditems.related
-			AND relateditems.stockid='".$Item."'";
+$sql = "SELECT weberp_stockmaster.stockid,
+			weberp_stockmaster.description
+		FROM weberp_stockmaster, weberp_relateditems
+		WHERE weberp_stockmaster.stockid = weberp_relateditems.related
+			AND weberp_relateditems.stockid='".$Item."'";
 
 $result = DB_query($sql);
 

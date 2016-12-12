@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_webERPsettings.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* This function returns the default currency code in webERP.
  */
@@ -11,7 +11,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT currencydefault FROM companies WHERE coycode=1";
+		$sql = "SELECT currencydefault FROM weberp_companies WHERE coycode=1";
 		$result = DB_query($sql);
 		$answer=DB_fetch_array($result);
 		$ReturnValue[0]=0;
@@ -29,7 +29,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT confvalue FROM config WHERE confname='DefaultPriceList'";
+		$sql = "SELECT confvalue FROM weberp_config WHERE confname='DefaultPriceList'";
 		$result = DB_query($sql);
 		$answer=DB_fetch_array($result);
 		$ReturnValue[0]=0;
@@ -47,7 +47,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql = "SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result = DB_query($sql);
 		$answer=DB_fetch_array($result);
 		$ReturnValue[0]=0;
@@ -64,7 +64,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT confvalue FROM config WHERE confname='reports_dir'";
+		$sql = "SELECT confvalue FROM weberp_config WHERE confname='reports_dir'";
 		$result = DB_query($sql);
 		$answer=DB_fetch_array($result);
 		$ReturnValue[0]=0;
@@ -81,7 +81,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "select defaultlocation from www_users where userid='".$user."'";
+		$sql = "select defaultlocation from weberp_www_users where userid='".$user."'";
 		$result = DB_query($sql);
 		$answer=DB_fetch_array($result);
 		$ReturnValue[0]=0;

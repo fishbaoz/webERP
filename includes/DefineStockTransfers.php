@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineStockTransfers.php 7296 2015-05-10 04:54:12Z rchacon $*/
 
 /*Class to hold stock transfer records */
 

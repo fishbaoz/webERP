@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GeocodeSetup.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Geocode Maintenance');
@@ -29,7 +29,7 @@ if (isset($_POST['submit'])) {
 	//first off validate inputs are sensible
 
 	$sql="SELECT count(geocodeid)
-			FROM geocode_param WHERE geocodeid='".$_POST['GeoCodeID']."'";
+			FROM weberp_geocode_param WHERE geocodeid='".$_POST['GeoCodeID']."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 
@@ -47,7 +47,7 @@ if (isset($_POST['submit'])) {
 		/*SelectedParam could also exist if submit had not been clicked this code would not run in this case cos submit is false of course see the delete code below*/
 
 		if (isset($_POST['GeoCode_Key']) and isset($_POST['GeoCode_Key']) ){
-			$sql = "UPDATE geocode_param SET
+			$sql = "UPDATE weberp_geocode_param SET
 					geocode_key='" . $_POST['GeoCode_Key'] . "',
 					center_long='" . $_POST['Center_Long'] . "',
 					center_lat='" . $_POST['Center_Lat'] . "',
@@ -64,7 +64,7 @@ if (isset($_POST['submit'])) {
 
 		if (isset($_POST['GeoCode_Key']) and $_POST['GeoCode_Key']>0){
 
-			$sql = "INSERT INTO geocode_param (geocodeid,
+			$sql = "INSERT INTO weberp_geocode_param (geocodeid,
 												geocode_key,
 												center_long,
 												center_lat,
@@ -79,7 +79,7 @@ if (isset($_POST['submit'])) {
 							'" . $_POST['Map_Width'] . "',
 							'" . $_POST['Map_Host'] . "')";
 		} else {
-			$sql = "INSERT INTO geocode_param (geocodeid,
+			$sql = "INSERT INTO weberp_geocode_param (geocodeid,
 												geocode_key,
 												center_long,
 												center_lat,
@@ -106,7 +106,7 @@ if (isset($_POST['submit'])) {
 	}
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
-$sql = "DELETE FROM geocode_param WHERE geocodeid = '" . $_GET['delete'] . "' LIMIT 1";
+$sql = "DELETE FROM weberp_geocode_param WHERE geocodeid = '" . $_GET['delete'] . "' LIMIT 1";
 $result = DB_query($sql);
 	prnMsg( _('Geocode deleted'), 'success' );
 	//end if status code used in customer or supplier accounts
@@ -129,7 +129,7 @@ or deletion of the records*/
 					map_height,
 					map_width,
 					map_host
-			FROM geocode_param";
+			FROM weberp_geocode_param";
 	$result = DB_query($sql);
 
 	echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/maintenance.png" title="' . _('Geocode Setup') . '" alt="" />' . 
@@ -211,7 +211,7 @@ if (!isset($_GET['delete'])) {
 					map_height,
 					map_width,
 					map_host
-				FROM geocode_param
+				FROM weberp_geocode_param
 				WHERE geocodeid='" . $SelectedParam . "'";
 
 		$result = DB_query($sql);

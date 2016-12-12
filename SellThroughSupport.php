@@ -25,7 +25,7 @@ if (isset($_GET['Edit'])) {
 
 /*Deleting a supplier sell through support record */
 if (isset($_GET['Delete'])){
-	$Result = DB_query("DELETE FROM sellthroughsupport WHERE id='" . intval($_GET['SellSupportID']) . "'");
+	$Result = DB_query("DELETE FROM weberp_sellthroughsupport WHERE id='" . intval($_GET['SellSupportID']) . "'");
 	prnMsg(_('Deleted the supplier sell through support record'),'success');
 }
 
@@ -58,7 +58,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 	}
 
     if ($InputError == 0 AND isset($_POST['AddRecord'])) {
-        $sql = "INSERT INTO sellthroughsupport (supplierno,
+        $sql = "INSERT INTO weberp_sellthroughsupport (supplierno,
 												debtorno,
 												categoryid,
 												stockid,
@@ -83,7 +83,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
         prnMsg(_('This sell through support has been added to the database'), 'success');
     }
     if ($InputError == 0 AND isset($_POST['UpdateRecord'])) {
-        $sql = "UPDATE sellthroughsupport SET debtorno='" . $_POST['DebtorNo'] . "',
+        $sql = "UPDATE weberp_sellthroughsupport SET debtorno='" . $_POST['DebtorNo'] . "',
 											categoryid='" . $_POST['CategoryID'] . "',
 											stockid='" . $_POST['StockID'] . "',
 											narrative='" . $_POST['Narrative'] . "',
@@ -127,24 +127,24 @@ if (isset($_POST['SearchSupplier'])) {
         //insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.currcode,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3
-				FROM suppliers
-				WHERE suppliers.suppname " . LIKE  . " '".$SearchString."'";
+		$SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3
+				FROM weberp_suppliers
+				WHERE weberp_suppliers.suppname " . LIKE  . " '".$SearchString."'";
 
     } elseif (mb_strlen($_POST['SupplierCode']) > 0) {
-        $SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.currcode,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3
-				FROM suppliers
-				WHERE suppliers.supplierid " . LIKE . " '%" . $_POST['SupplierCode'] . "%'";
+        $SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3
+				FROM weberp_suppliers
+				WHERE weberp_suppliers.supplierid " . LIKE . " '%" . $_POST['SupplierCode'] . "%'";
 
     } //one of keywords or SupplierCode was more than a zero length string
     $ErrMsg = _('The suppliers matching the criteria entered could not be retrieved because');
@@ -221,8 +221,8 @@ if (isset($SupplierID)) { /* Then display all the sell through support for the s
 	$SuppResult = DB_query("SELECT suppname,
 									currcode,
 									decimalplaces
-							FROM suppliers INNER JOIN currencies
-							ON suppliers.currcode=currencies.currabrev
+							FROM weberp_suppliers INNER JOIN weberp_currencies
+							ON weberp_suppliers.currcode=weberp_currencies.currabrev
 							WHERE supplierid='" . $SupplierID . "'",$db);
 	$SuppRow = DB_fetch_array($SuppResult);
 	
@@ -232,25 +232,25 @@ if (isset($SupplierID)) { /* Then display all the sell through support for the s
 if (isset($SupplierID) AND $Edit == false) {
 	
     $sql = "SELECT	id,
-					sellthroughsupport.debtorno,
-					debtorsmaster.name,
+					weberp_sellthroughsupport.debtorno,
+					weberp_debtorsmaster.name,
 					rebateamount,
 					rebatepercent,
 					effectivefrom,
 					effectiveto,
-					sellthroughsupport.stockid,
+					weberp_sellthroughsupport.stockid,
 					description,
 					categorydescription,
-					sellthroughsupport.categoryid,
+					weberp_sellthroughsupport.categoryid,
 					narrative
-			FROM sellthroughsupport LEFT JOIN stockmaster
-			ON sellthroughsupport.stockid=stockmaster.stockid
-			LEFT JOIN stockcategory
-			ON sellthroughsupport.categoryid = stockcategory.categoryid
-			LEFT JOIN debtorsmaster
-			ON sellthroughsupport.debtorno=debtorsmaster.debtorno
+			FROM weberp_sellthroughsupport LEFT JOIN weberp_stockmaster
+			ON weberp_sellthroughsupport.stockid=weberp_stockmaster.stockid
+			LEFT JOIN weberp_stockcategory
+			ON weberp_sellthroughsupport.categoryid = weberp_stockcategory.categoryid
+			LEFT JOIN weberp_debtorsmaster
+			ON weberp_sellthroughsupport.debtorno=weberp_debtorsmaster.debtorno
 			WHERE supplierno = '" . $SupplierID . "'
-			ORDER BY sellthroughsupport.effectivefrom DESC";
+			ORDER BY weberp_sellthroughsupport.effectivefrom DESC";
     $ErrMsg = _('The supplier sell through support deals could not be retrieved because');
     $Result = DB_query($sql, $ErrMsg);
     if (DB_num_rows($Result)==0) {
@@ -329,7 +329,7 @@ if (isset($SupplierID)) { //not selecting a supplier
 						stockid,
 						categoryid,
 						narrative
-				FROM sellthroughsupport 
+				FROM weberp_sellthroughsupport 
 				WHERE id='" . floatval($_GET['SellSupportID']) . "'";
 		
 		$ErrMsg = _('The supplier sell through support could not be retrieved because');
@@ -386,7 +386,7 @@ if (isset($SupplierID)) { //not selecting a supplier
 		echo '<option value="">' . _('All Customers') . '</option>';
 	}
 
-	$CustomerResult = DB_query("SELECT debtorno, name FROM debtorsmaster");
+	$CustomerResult = DB_query("SELECT debtorno, name FROM weberp_debtorsmaster");
 
 	while ($CustomerRow = DB_fetch_array($CustomerResult)){
 		if ($CustomerRow['debtorno'] == $_POST['DebtorNo']){
@@ -407,7 +407,7 @@ if (isset($SupplierID)) { //not selecting a supplier
 		echo '<option value="">' . _('Specific Item Only') . '</option>';
 	}
 
-	$CategoriesResult = DB_query("SELECT categoryid, categorydescription FROM stockcategory WHERE stocktype='F'");
+	$CategoriesResult = DB_query("SELECT categoryid, categorydescription FROM weberp_stockcategory WHERE stocktype='F'");
 
 	while ($CategoriesRow = DB_fetch_array($CategoriesResult)){
 		if ($CategoriesRow['categoryid'] == $_POST['CategoryID']){
@@ -429,10 +429,10 @@ if (isset($SupplierID)) { //not selecting a supplier
 	}
 
 
-	$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description
-			FROM purchdata INNER JOIN stockmaster
-			ON purchdata.stockid=stockmaster.stockid
+	$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description
+			FROM weberp_purchdata INNER JOIN weberp_stockmaster
+			ON weberp_purchdata.stockid=weberp_stockmaster.stockid
 			WHERE supplierno ='" . $SupplierID . "'
 			AND preferred=1";
 	$ErrMsg = _('Could not retrieve the items that the supplier provides');

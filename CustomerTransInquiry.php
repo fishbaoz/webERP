@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: CustomerTransInquiry.php 7184 2015-03-04 00:06:20Z rchacon $*/
 
 include('includes/session.inc');
 $Title = _('Customer Transactions Inquiry');
@@ -23,7 +23,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
 
 $sql = "SELECT typeid,
 				typename
-		FROM systypes
+		FROM weberp_systypes
 		WHERE typeid >= 10
 		AND typeid <= 14";
 
@@ -65,20 +65,20 @@ if (isset($_POST['ShowResults']) && $_POST['TransType'] != ''){
    $SQL_ToDate = FormatDateForSQL($_POST['ToDate']);
    $sql = "SELECT transno,
 		   		trandate,
-				debtortrans.debtorno,
+				weberp_debtortrans.debtorno,
 				branchcode,
 				reference,
 				invtext,
 				order_,
-				debtortrans.rate,
+				weberp_debtortrans.rate,
 				ovamount+ovgst+ovfreight+ovdiscount as totalamt,
 				currcode,
 				typename,
 				decimalplaces AS currdecimalplaces
-			FROM debtortrans
-			INNER JOIN debtorsmaster ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN currencies ON debtorsmaster.currcode=currencies.currabrev
-			INNER JOIN systypes ON debtortrans.type = systypes.typeid
+			FROM weberp_debtortrans
+			INNER JOIN weberp_debtorsmaster ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_currencies ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			INNER JOIN weberp_systypes ON weberp_debtortrans.type = weberp_systypes.typeid
 			WHERE ";
 
    $sql = $sql . "trandate >='" . $SQL_FromDate . "' AND trandate <= '" . $SQL_ToDate . "'";

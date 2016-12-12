@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_shippers.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* This function returns a list of the stock shipper id's
  * currently setup on webERP
@@ -12,7 +12,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT shipper_id FROM shippers';
+		$sql = 'SELECT shipper_id FROM weberp_shippers';
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -34,7 +34,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM shippers WHERE shipper_id='" . $Shipper."'";
+		$sql = "SELECT * FROM weberp_shippers WHERE shipper_id='" . $Shipper."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}

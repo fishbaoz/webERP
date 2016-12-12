@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SalesAnalReptCols.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -106,7 +106,7 @@ if (isset($_POST['submit'])) {
 	if (isset($SelectedCol) AND $InputError !=1) {
 
 
-		$sql = "UPDATE reportcolumns SET heading1='" . $_POST['Heading1'] . "',
+		$sql = "UPDATE weberp_reportcolumns SET heading1='" . $_POST['Heading1'] . "',
                                      heading2='" . $_POST['Heading2'] . "',
                                      calculation='" . $_POST['Calculation'] . "',
                                      periodfrom='" . $_POST['PeriodFrom'] . "',
@@ -149,7 +149,7 @@ if (isset($_POST['submit'])) {
 
 	/*SelectedReport is null cos no item selected on first time round so must be adding a new column to the report */
 
-		$sql = "INSERT INTO reportcolumns (reportid,
+		$sql = "INSERT INTO weberp_reportcolumns (reportid,
                                        colno,
                                        heading1,
                                        heading2,
@@ -206,7 +206,7 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	$sql="DELETE FROM reportcolumns WHERE reportid='".$ReportID."' AND colno='".$SelectedCol."'";
+	$sql="DELETE FROM weberp_reportcolumns WHERE reportid='".$ReportID."' AND colno='".$SelectedCol."'";
 
 	$ErrMsg = _('The deletion of the column failed because');
 	$DbgMsg = _('The SQL used to delete this report column was');
@@ -219,25 +219,25 @@ if (isset($_POST['submit'])) {
 /* List of Columns will be displayed with links to delete or edit each.
 These will call the same page again and allow update/input or deletion of the records*/
 
-$sql = "SELECT reportheaders.reportheading,
-               reportcolumns.colno,
-               reportcolumns.heading1,
-               reportcolumns.heading2,
-               reportcolumns.calculation,
-               reportcolumns.periodfrom,
-               reportcolumns.periodto,
-               reportcolumns.datatype,
-               reportcolumns.colnumerator,
-               reportcolumns.coldenominator,
-               reportcolumns.calcoperator,
-               reportcolumns.budgetoractual,
-               reportcolumns.constant
+$sql = "SELECT weberp_reportheaders.reportheading,
+               weberp_reportcolumns.colno,
+               weberp_reportcolumns.heading1,
+               weberp_reportcolumns.heading2,
+               weberp_reportcolumns.calculation,
+               weberp_reportcolumns.periodfrom,
+               weberp_reportcolumns.periodto,
+               weberp_reportcolumns.datatype,
+               weberp_reportcolumns.colnumerator,
+               weberp_reportcolumns.coldenominator,
+               weberp_reportcolumns.calcoperator,
+               weberp_reportcolumns.budgetoractual,
+               weberp_reportcolumns.constant
          FROM
-               reportheaders,
-               reportcolumns
-        WHERE  reportheaders.reportid = reportcolumns.reportid
-	AND    reportcolumns.reportid='".$ReportID. "'
-        ORDER BY reportcolumns.colno";
+               weberp_reportheaders,
+               weberp_reportcolumns
+        WHERE  weberp_reportheaders.reportid = weberp_reportcolumns.reportid
+	AND    weberp_reportcolumns.reportid='".$ReportID. "'
+        ORDER BY weberp_reportcolumns.colno";
 
 $ErrMsg = _('The column definitions could not be retrieved from the database because');
 $DbgMsg = _('The SQL used to retrieve the columns for the report was');
@@ -329,7 +329,7 @@ if (DB_num_rows($result)>10){
 
 if (!isset($_GET['delete'])) {
 
-	$sql = "SELECT reportheading FROM reportheaders WHERE reportid='".$ReportID."'";
+	$sql = "SELECT reportheading FROM weberp_reportheaders WHERE reportid='".$ReportID."'";
 	$result = DB_query($sql);
 	$myrow=DB_fetch_array($result);
 	$ReportHeading=$myrow['reportheading'];
@@ -356,10 +356,10 @@ if (!isset($_GET['delete'])) {
                    	budgetoractual,
                    	valformat
                    	FROM
-                   	reportcolumns
+                   	weberp_reportcolumns
                    	WHERE
-                   	reportcolumns.reportid='".$ReportID."' AND
-                   	reportcolumns.colno='". $SelectedCol ."'";
+                   	weberp_reportcolumns.reportid='".$ReportID."' AND
+                   	weberp_reportcolumns.colno='". $SelectedCol ."'";
 
 
 		$ErrMsg =  _('The column') . ' ' . $SelectedCol . ' ' . _('could not be retrieved because');
@@ -430,7 +430,7 @@ if (!isset($_GET['delete'])) {
 		echo '<tr>
 				<td>' . _('From Period') . ':</td>
 				<td><select name="PeriodFrom">';
-		$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+		$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 		$ErrMsg = _('Could not load periods table');
 		$result = DB_query($sql,$ErrMsg);
 		while ($PeriodRow = DB_fetch_row($result)){
@@ -446,7 +446,7 @@ if (!isset($_GET['delete'])) {
 		echo '<tr>
 				<td>' . _('ToPeriod') . ':</td>
 				<td><select name="PeriodTo">';
-		$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+		$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 		$ErrMsg = _('Could not load periods table');
 		$result = DB_query($sql,$ErrMsg);
 		while ($PeriodRow = DB_fetch_row($result)){

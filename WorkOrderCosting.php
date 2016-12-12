@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WorkOrderCosting.php 7576 2016-07-27 10:10:03Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Work Order Costing');
@@ -40,16 +40,16 @@ if (!isset($SelectedWO)) {
 
 
 $ErrMsg = _('Could not retrieve the details of the selected work order');
-$WOResult = DB_query("SELECT workorders.loccode,
-							locations.locationname,
-							workorders.requiredby,
-							workorders.startdate,
-							workorders.closed,
+$WOResult = DB_query("SELECT weberp_workorders.loccode,
+							weberp_locations.locationname,
+							weberp_workorders.requiredby,
+							weberp_workorders.startdate,
+							weberp_workorders.closed,
 							closecomments
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-						WHERE workorders.wo='" . $_POST['WO'] . "'",
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+						WHERE weberp_workorders.wo='" . $_POST['WO'] . "'",
 						$ErrMsg);
 
 if (DB_num_rows($WOResult)==0){
@@ -73,23 +73,23 @@ echo '<table class="selection">
 	<br />';
 
 
-$WOItemsResult = DB_query("SELECT woitems.stockid,
-									stockmaster.description,
-									stockmaster.decimalplaces,
-									stockmaster.units,
-									stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS currcost,
-									woitems.qtyreqd,
-									woitems.qtyrecd,
-									woitems.stdcost,
-									stockcategory.materialuseagevarac,
-									stockcategory.purchpricevaract,
-									stockcategory.wipact,
-									stockcategory.stockact
-							FROM woitems INNER JOIN stockmaster
-							ON woitems.stockid=stockmaster.stockid
-							INNER JOIN stockcategory
-							ON stockmaster.categoryid=stockcategory.categoryid
-							WHERE woitems.wo='". $_POST['WO'] . "'",
+$WOItemsResult = DB_query("SELECT weberp_woitems.stockid,
+									weberp_stockmaster.description,
+									weberp_stockmaster.decimalplaces,
+									weberp_stockmaster.units,
+									weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS currcost,
+									weberp_woitems.qtyreqd,
+									weberp_woitems.qtyrecd,
+									weberp_woitems.stdcost,
+									weberp_stockcategory.materialuseagevarac,
+									weberp_stockcategory.purchpricevaract,
+									weberp_stockcategory.wipact,
+									weberp_stockcategory.stockact
+							FROM weberp_woitems INNER JOIN weberp_stockmaster
+							ON weberp_woitems.stockid=weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+							WHERE weberp_woitems.wo='". $_POST['WO'] . "'",
 							$ErrMsg);
 
 echo  '<table class="selection">
@@ -137,21 +137,21 @@ echo '<tr>
 		<th>' . _('Cost Variance') . '</th>
 	</tr>';
 
-$RequirementsResult = DB_query("SELECT worequirements.stockid,
-									   stockmaster.description,
- 									   stockmaster.decimalplaces,
- 									   worequirements.stdcost,
-									   SUM(worequirements.qtypu*woitems.qtyrecd) AS requiredqty,
-									   SUM(worequirements.stdcost*worequirements.qtypu*woitems.qtyrecd) AS expectedcost,
-									   AVG(worequirements.qtypu) as qtypu
-								FROM worequirements INNER JOIN stockmaster
-								 ON worequirements.stockid=stockmaster.stockid
-								 INNER JOIN woitems ON woitems.stockid=worequirements.parentstockid AND woitems.wo=worequirements.wo
-								WHERE worequirements.wo='" . $_POST['WO'] . "'
-								GROUP BY worequirements.stockid,
-										stockmaster.description,
-										stockmaster.decimalplaces,
-										worequirements.stdcost");
+$RequirementsResult = DB_query("SELECT weberp_worequirements.stockid,
+									   weberp_stockmaster.description,
+ 									   weberp_stockmaster.decimalplaces,
+ 									   weberp_worequirements.stdcost,
+									   SUM(weberp_worequirements.qtypu*weberp_woitems.qtyrecd) AS requiredqty,
+									   SUM(weberp_worequirements.stdcost*weberp_worequirements.qtypu*weberp_woitems.qtyrecd) AS expectedcost,
+									   AVG(weberp_worequirements.qtypu) as qtypu
+								FROM weberp_worequirements INNER JOIN weberp_stockmaster
+								 ON weberp_worequirements.stockid=weberp_stockmaster.stockid
+								 INNER JOIN weberp_woitems ON weberp_woitems.stockid=weberp_worequirements.parentstockid AND weberp_woitems.wo=weberp_worequirements.wo
+								WHERE weberp_worequirements.wo='" . $_POST['WO'] . "'
+								GROUP BY weberp_worequirements.stockid,
+										weberp_stockmaster.description,
+										weberp_stockmaster.decimalplaces,
+										weberp_worequirements.stdcost");
 
 $k=0;
 $TotalUsageVar =0;
@@ -172,15 +172,15 @@ while ($RequirementsRow = DB_fetch_array($RequirementsResult)){
 		<td>' .  $RequirementsRow['description'] . '</td>
         </tr>';
 
-	$IssuesResult = DB_query("SELECT stockmoves.trandate,
-									stockmoves.qty,
-									stockmoves.standardcost,
-									stockmaster.decimalplaces
-								FROM stockmoves INNER JOIN stockmaster
-								ON stockmoves.stockid = stockmaster.stockid
-								WHERE stockmoves.type=28
-								AND stockmoves.reference = '" . $_POST['WO'] . "'
-								AND stockmoves.stockid = '" . $RequirementsRow['stockid'] . "'",
+	$IssuesResult = DB_query("SELECT weberp_stockmoves.trandate,
+									weberp_stockmoves.qty,
+									weberp_stockmoves.standardcost,
+									weberp_stockmaster.decimalplaces
+								FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+								ON weberp_stockmoves.stockid = weberp_stockmaster.stockid
+								WHERE weberp_stockmoves.type=28
+								AND weberp_stockmoves.reference = '" . $_POST['WO'] . "'
+								AND weberp_stockmoves.stockid = '" . $RequirementsRow['stockid'] . "'",
 								_('Could not retrieve the issues of the item because:'));
 	$IssueQty =0;
 	$IssueCost=0;
@@ -247,20 +247,20 @@ while ($RequirementsRow = DB_fetch_array($RequirementsResult)){
 
 //Now need to run through the issues to the work order that weren't in the requirements
 
-$sql = "SELECT stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
+$sql = "SELECT weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
 				trandate,
 				qty,
-				stockmoves.standardcost
-		FROM stockmoves INNER JOIN stockmaster
-		ON stockmoves.stockid=stockmaster.stockid
-		WHERE stockmoves.type=28
+				weberp_stockmoves.standardcost
+		FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+		ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+		WHERE weberp_stockmoves.type=28
 		AND reference = '" . $_POST['WO'] . "'
-		AND stockmoves.stockid NOT IN
-					(SELECT worequirements.stockid
-						FROM worequirements
-					WHERE worequirements.wo='" . $_POST['WO'] . "')";
+		AND weberp_stockmoves.stockid NOT IN
+					(SELECT weberp_worequirements.stockid
+						FROM weberp_worequirements
+					WHERE weberp_worequirements.wo='" . $_POST['WO'] . "')";
 
 $WOIssuesResult = DB_query($sql,_('Could not get issues that were not required by the BOM because'));
 
@@ -337,7 +337,7 @@ If (isset($_POST['Close'])) {
 			*/
 
 			$TotOnHandResult =DB_query("SELECT SUM(quantity)
-										FROM locstock
+										FROM weberp_locstock
 										WHERE stockid='" . $WORow['stockid'] . "'");
 			$TotOnHandRow = DB_fetch_row($TotOnHandResult);
 			$TotalOnHand = $TotOnHandRow[0];
@@ -353,7 +353,7 @@ If (isset($_POST['Close'])) {
 				//need to get the current cost of the item
 				if ($ProportionOnHand < 1){
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -374,7 +374,7 @@ If (isset($_POST['Close'])) {
 				}
 
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 							typeno,
 							trandate,
 							periodno,
@@ -393,7 +393,7 @@ If (isset($_POST['Close'])) {
 				$DbgMsg = _('The following SQL to insert the GLTrans record was used');
 				$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 							typeno,
 							trandate,
 							periodno,
@@ -419,7 +419,7 @@ If (isset($_POST['Close'])) {
 				$NewCost = $WORow['currcost'];
 			}
 
-			$SQL = "UPDATE stockmaster SET
+			$SQL = "UPDATE weberp_stockmaster SET
 						materialcost='" . $NewCost . "',
 						labourcost=0,
 						overheadcost=0,
@@ -434,7 +434,7 @@ If (isset($_POST['Close'])) {
 		} else { //we are standard costing post the variances
 			if ($_SESSION['CompanyRecord']['gllink_stock']==1 AND $TotalUsageVar!=0){
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -453,7 +453,7 @@ If (isset($_POST['Close'])) {
 				$DbgMsg = _('The following SQL to insert the GLTrans record was used');
 				$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -476,7 +476,7 @@ If (isset($_POST['Close'])) {
 
 			if ($_SESSION['CompanyRecord']['gllink_stock']==1 AND $TotalCostVar!=0){
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -495,7 +495,7 @@ If (isset($_POST['Close'])) {
 				$DbgMsg = _('The following SQL to insert the GLTrans record was used');
 				$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -518,11 +518,11 @@ If (isset($_POST['Close'])) {
 		} //end of standard costing section
 	} // end loop around the items on the work order
 
-	$CloseWOResult =DB_query("UPDATE workorders SET closed=1, closecomments = '". $_POST['CloseComments'] ."' WHERE wo='" .$_POST['WO'] . "'",
+	$CloseWOResult =DB_query("UPDATE weberp_workorders SET closed=1, closecomments = '". $_POST['CloseComments'] ."' WHERE wo='" .$_POST['WO'] . "'",
 				_('Could not update the work order to closed because:'),
 				_('The SQL used to close the work order was:'),
 				true);
-	$DeleteAnyWOSerialNos = DB_query("DELETE FROM woserialnos WHERE wo='" . $_POST['WO'] . "'",
+	$DeleteAnyWOSerialNos = DB_query("DELETE FROM weberp_woserialnos WHERE wo='" . $_POST['WO'] . "'",
 									_('Could not delete the predefined work order serial numbers'),
 									_('The SQL used to delete the predefined serial numbers was:'),
 									true);

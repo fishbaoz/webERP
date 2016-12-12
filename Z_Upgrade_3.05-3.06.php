@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_Upgrade_3.05-3.06.php 6941 2014-10-26 23:18:08Z daintree $*/
 //$PageSecurity = 15;
 include('includes/session.inc');
 $Title = _('Upgrade webERP 3.06 - 3.07');

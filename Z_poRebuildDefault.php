@@ -1,5 +1,5 @@
 <?php
-/*	$Id$*/
+/*	$Id: Z_poRebuildDefault.php 6810 2014-08-13 02:55:08Z rchacon $*/
 /*	This script runs xgettext on the sources to produce a .pot (Portable Object 
 	Template) file, which contains a list of all the translatable strings 
 	extracted from the sources. The resultant system default language file 

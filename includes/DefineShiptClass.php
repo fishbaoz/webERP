@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineShiptClass.php 6941 2014-10-26 23:18:08Z daintree $*/
 /* Definition of the Shipment class to hold all the information for a shipment*/
 
 Class Shipment {
@@ -50,7 +50,7 @@ Class Shipment {
 														$StdCostUnit,
 														$DecimalPlaces);
 
-		$sql = "UPDATE purchorderdetails SET shiptref = '" . $this->ShiptRef . "'
+		$sql = "UPDATE weberp_purchorderdetails SET shiptref = '" . $this->ShiptRef . "'
 			WHERE podetailitem = '" . $PODetailItem . "'";
 		$ErrMsg = _('There was an error updating the purchase order detail record to make it part of shipment') . ' ' . $this->ShiptRef . ' ' . _('the error reported was');
 		$result = DB_query($sql, $ErrMsg);
@@ -64,7 +64,7 @@ Class Shipment {
 		if ($this->LineItems[$PODetailItem]->QtyInvoiced==0){
 
 			unset($this->LineItems[$PODetailItem]);
-			$sql = "UPDATE purchorderdetails SET shiptref = 0 WHERE podetailitem='" . $PODetailItem . "'";
+			$sql = "UPDATE weberp_purchorderdetails SET shiptref = 0 WHERE podetailitem='" . $PODetailItem . "'";
 			$Result = DB_query($sql);
 		} else {
 			prnMsg(_('This shipment line has a quantity invoiced and already charged to the shipment - it cannot now be removed'),'warn');

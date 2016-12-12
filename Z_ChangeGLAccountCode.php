@@ -21,7 +21,7 @@ if(isset($_POST['ProcessGLAccountCode'])) {
 	$_POST['NewAccountCode'] = mb_strtoupper($_POST['NewAccountCode']);
 
 /*First check the code exists */
-	$result=DB_query("SELECT accountcode FROM chartmaster WHERE accountcode='" . $_POST['OldAccountCode'] . "'");
+	$result=DB_query("SELECT accountcode FROM weberp_chartmaster WHERE accountcode='" . $_POST['OldAccountCode'] . "'");
 	if(DB_num_rows($result)==0) {
 		prnMsg(_('The GL account code') . ': ' . $_POST['OldAccountCode'] . ' ' . _('does not currently exist as a GL account code in the system'),'error');
 		$InputError =1;
@@ -39,7 +39,7 @@ if(isset($_POST['ProcessGLAccountCode'])) {
 
 
 /*Now check that the new code doesn't already exist */
-	$result=DB_query("SELECT accountcode FROM chartmaster WHERE accountcode='" . $_POST['NewAccountCode'] . "'");
+	$result=DB_query("SELECT accountcode FROM weberp_chartmaster WHERE accountcode='" . $_POST['NewAccountCode'] . "'");
 	if(DB_num_rows($result)!=0) {
 		echo '<br /><br />';
 		prnMsg(_('The replacement GL account code') . ': ' . $_POST['NewAccountCode'] . ' ' . _('already exists as a GL account code in the system') . ' - ' . _('a unique GL account code must be entered for the new code'),'error');
@@ -49,14 +49,14 @@ if(isset($_POST['ProcessGLAccountCode'])) {
 
 	if($InputError ==0) {// no input errors
 		$result = DB_Txn_Begin();
-		echo '<br />' . _('Adding the new chartmaster record');
-		$sql = "INSERT INTO chartmaster (accountcode,
+		echo '<br />' . _('Adding the new weberp_chartmaster record');
+		$sql = "INSERT INTO weberp_chartmaster (accountcode,
 										accountname,
 										group_)
 				SELECT '" . $_POST['NewAccountCode'] . "',
 					accountname,
 					group_
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='" . $_POST['OldAccountCode'] . "'";
 
 		$DbgMsg = _('The SQL statement that failed was');
@@ -66,69 +66,69 @@ if(isset($_POST['ProcessGLAccountCode'])) {
 
 		DB_IgnoreForeignKeys();
 
-		ChangeFieldInTable("bankaccounts", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_bankaccounts", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("bankaccountusers", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_bankaccountusers", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("banktrans", "bankact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_banktrans", "bankact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("chartdetails", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_chartdetails", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("cogsglpostings", "glcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_cogsglpostings", "glcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("companies", "debtorsact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "pytdiscountact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "creditorsact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "payrollact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "grnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "exchangediffact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "purchasesexchangediffact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "retainedearnings", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("companies", "freightact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "debtorsact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "pytdiscountact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "creditorsact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "payrollact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "grnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "exchangediffact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "purchasesexchangediffact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "retainedearnings", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_companies", "freightact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("fixedassetcategories", "costact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("fixedassetcategories", "depnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("fixedassetcategories", "disposalact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("fixedassetcategories", "accumdepnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_fixedassetcategories", "costact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_fixedassetcategories", "depnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_fixedassetcategories", "disposalact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_fixedassetcategories", "accumdepnact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("glaccountusers", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_glaccountusers", "accountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 		
-		ChangeFieldInTable("gltrans", "account", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_gltrans", "account", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("lastcostrollup", "stockact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("lastcostrollup", "adjglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_lastcostrollup", "stockact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_lastcostrollup", "adjglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("locations", "glaccountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);// Location's ledger account.
+		ChangeFieldInTable("weberp_locations", "glaccountcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);// Location's ledger account.
 
-		ChangeFieldInTable("pcexpenses", "glaccount", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_pcexpenses", "glaccount", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("pctabs", "glaccountassignment", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("pctabs", "glaccountpcash", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_pctabs", "glaccountassignment", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_pctabs", "glaccountpcash", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("purchorderdetails", "glcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_purchorderdetails", "glcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("salesglpostings", "discountglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("salesglpostings", "salesglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_salesglpostings", "discountglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_salesglpostings", "salesglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("stockcategory", "stockact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("stockcategory", "adjglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("stockcategory", "issueglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("stockcategory", "purchpricevaract", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("stockcategory", "materialuseagevarac", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("stockcategory", "wipact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "stockact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "adjglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "issueglact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "purchpricevaract", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "materialuseagevarac", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_stockcategory", "wipact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("taxauthorities", "taxglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("taxauthorities", "purchtaxglaccount", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
-		ChangeFieldInTable("taxauthorities", "bankacctype", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_taxauthorities", "taxglcode", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_taxauthorities", "purchtaxglaccount", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_taxauthorities", "bankacctype", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
-		ChangeFieldInTable("workcentres", "overheadrecoveryact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
+		ChangeFieldInTable("weberp_workcentres", "overheadrecoveryact", $_POST['OldAccountCode'], $_POST['NewAccountCode'], $db);
 
 		DB_ReinstateForeignKeys();
 
 		$result = DB_Txn_Commit();
 
-		echo '<br />' . _('Deleting the old chartmaster record');
-		$sql = "DELETE FROM chartmaster WHERE accountcode='" . $_POST['OldAccountCode'] . "'";
+		echo '<br />' . _('Deleting the old weberp_chartmaster record');
+		$sql = "DELETE FROM weberp_chartmaster WHERE accountcode='" . $_POST['OldAccountCode'] . "'";
 		$ErrMsg = _('The SQL to delete the old chartmaster record failed');
 		$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 		echo ' ... ' . _('completed');

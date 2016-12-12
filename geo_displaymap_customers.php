@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: geo_displaymap_customers.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 $Title = _('Geocoded Customers Report');
 
@@ -8,7 +8,7 @@ include ('includes/session.inc');
 include ('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 
-$sql="SELECT * FROM geocode_param WHERE 1";
+$sql="SELECT * FROM weberp_geocode_param WHERE 1";
 $ErrMsg = _('An error occurred in retrieving the currency information');
 $result = DB_query($sql, $ErrMsg);
 $myrow = DB_fetch_array($result);

@@ -1,62 +1,62 @@
 <?php
 
-/* $Id$ */
+/* $Id: InventoryValuation.php 7336 2015-08-10 01:43:46Z tehonu $ */
 
 include('includes/session.inc');
 if (isset($_POST['PrintPDF']) OR isset($_POST['CSV'])){
 
 /*Now figure out the inventory data to report for the category range under review */
 	if ($_POST['Location']=='All'){
-		$SQL = "SELECT stockmaster.categoryid,
-					stockcategory.categorydescription,
-					stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.decimalplaces,
-					SUM(locstock.quantity) AS qtyonhand,
-					stockmaster.units,
-					stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS unitcost,
-					SUM(locstock.quantity) *(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS itemtotal
-				FROM stockmaster,
-					stockcategory,
-					locstock
-				INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE stockmaster.stockid=locstock.stockid
-				AND stockmaster.categoryid=stockcategory.categoryid
-				GROUP BY stockmaster.categoryid,
-					stockcategory.categorydescription,
+		$SQL = "SELECT weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.decimalplaces,
+					SUM(weberp_locstock.quantity) AS qtyonhand,
+					weberp_stockmaster.units,
+					weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS unitcost,
+					SUM(weberp_locstock.quantity) *(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS itemtotal
+				FROM weberp_stockmaster,
+					weberp_stockcategory,
+					weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+				AND weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+				GROUP BY weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
 					unitcost,
-					stockmaster.units,
-					stockmaster.decimalplaces,
-					stockmaster.materialcost,
-					stockmaster.labourcost,
-					stockmaster.overheadcost,
-					stockmaster.stockid,
-					stockmaster.description
-				HAVING SUM(locstock.quantity)!=0
-				AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-				ORDER BY stockcategory.categorydescription,
-					stockmaster.stockid";
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.materialcost,
+					weberp_stockmaster.labourcost,
+					weberp_stockmaster.overheadcost,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.description
+				HAVING SUM(weberp_locstock.quantity)!=0
+				AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+				ORDER BY weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid";
 	} else {
-		$SQL = "SELECT stockmaster.categoryid,
-					stockcategory.categorydescription,
-					stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.decimalplaces,
-					locstock.quantity AS qtyonhand,
-					stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS unitcost,
-					locstock.quantity *(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS itemtotal
-				FROM stockmaster,
-					stockcategory,
-					locstock
-				INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE stockmaster.stockid=locstock.stockid
-				AND stockmaster.categoryid=stockcategory.categoryid
-				AND locstock.quantity!=0
-				AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-				AND locstock.loccode = '" . $_POST['Location'] . "'
-				ORDER BY stockcategory.categorydescription,
-					stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces,
+					weberp_locstock.quantity AS qtyonhand,
+					weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS unitcost,
+					weberp_locstock.quantity *(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS itemtotal
+				FROM weberp_stockmaster,
+					weberp_stockcategory,
+					weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+				AND weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+				AND weberp_locstock.quantity!=0
+				AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+				AND weberp_locstock.loccode = '" . $_POST['Location'] . "'
+				ORDER BY weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid";
 	}
 	$InventoryResult = DB_query($SQL,'','',false,true);
 
@@ -226,7 +226,7 @@ if (isset($_POST['PrintPDF'])){
 				<td>' . _('Select Inventory Categories') . ':</td>
 				<td><select autofocus="autofocus" required="required" minlength="1" size="12" name="Categories[]"multiple="multiple">';
 	$SQL = 'SELECT categoryid, categorydescription 
-			FROM stockcategory 
+			FROM weberp_stockcategory 
 			ORDER BY categorydescription';
 	$CatResult = DB_query($SQL);
 	while ($MyRow = DB_fetch_array($CatResult)) {
@@ -244,10 +244,10 @@ if (isset($_POST['PrintPDF'])){
 			<td>' . _('For Inventory in Location') . ':</td>
 			<td><select name="Location">';
 
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 					locationname
-			FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+			FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			ORDER BY locationname";
 
 	$LocnResult=DB_query($sql);

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: TaxCategories.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Tax Categories');
@@ -40,7 +40,7 @@ if(isset($_POST['submit'])) {
 
 		/*SelectedTaxCategory could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 		// Check the name does not clash
-		$sql = "SELECT count(*) FROM taxcategories
+		$sql = "SELECT count(*) FROM weberp_taxcategories
 				WHERE taxcatid <> '" . $SelectedTaxCategory ."'
 				AND taxcatname ".LIKE." '" . $_POST['TaxCategoryName'] . "'";
 		$result = DB_query($sql);
@@ -51,14 +51,14 @@ if(isset($_POST['submit'])) {
 		} else {
 			// Get the old name and check that the record still exists
 
-			$sql = "SELECT taxcatname FROM taxcategories
+			$sql = "SELECT taxcatname FROM weberp_taxcategories
 					WHERE taxcatid = '" . $SelectedTaxCategory . "'";
 			$result = DB_query($sql);
 			if( DB_num_rows($result) != 0 ) {
 				// This is probably the safest way there is
 				$myrow = DB_fetch_row($result);
 				$OldTaxCategoryName = $myrow[0];
-				$sql = "UPDATE taxcategories
+				$sql = "UPDATE weberp_taxcategories
 						SET taxcatname='" . $_POST['TaxCategoryName'] . "'
 						WHERE taxcatname ".LIKE." '".$OldTaxCategoryName."'";
 				$ErrMsg = _('The tax category could not be updated');
@@ -71,7 +71,7 @@ if(isset($_POST['submit'])) {
 		$msg = _('Tax category name changed');
 	} elseif($InputError !=1) {
 		/*SelectedTaxCategory is null cos no item selected on first time round so must be adding a record*/
-		$sql = "SELECT count(*) FROM taxcategories
+		$sql = "SELECT count(*) FROM weberp_taxcategories
 				WHERE taxcatname " .LIKE. " '".$_POST['TaxCategoryName'] ."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -80,7 +80,7 @@ if(isset($_POST['submit'])) {
 			prnMsg( _('The tax category cannot be created because another with the same name already exists'),'error');
 		} else {
 			$result = DB_Txn_Begin();
-			$sql = "INSERT INTO taxcategories (
+			$sql = "INSERT INTO weberp_taxcategories (
 						taxcatname )
 					VALUES (
 						'" . $_POST['TaxCategoryName'] ."'
@@ -88,15 +88,15 @@ if(isset($_POST['submit'])) {
 			$ErrMsg = _('The new tax category could not be added');
 			$result = DB_query($sql,$ErrMsg,true);
 
-			$LastTaxCatID = DB_Last_Insert_ID($db, 'taxcategories','taxcatid');
+			$LastTaxCatID = DB_Last_Insert_ID($db, 'weberp_taxcategories','taxcatid');
 
-			$sql = "INSERT INTO taxauthrates (taxauthority,
+			$sql = "INSERT INTO weberp_taxauthrates (taxauthority,
 					dispatchtaxprovince,
 					taxcatid)
-				SELECT taxauthorities.taxid,
- 					taxprovinces.taxprovinceid,
+				SELECT weberp_taxauthorities.taxid,
+ 					weberp_taxprovinces.taxprovinceid,
 					'" . $LastTaxCatID . "'
-				FROM taxauthorities CROSS JOIN taxprovinces";
+				FROM weberp_taxauthorities CROSS JOIN weberp_taxprovinces";
 			$result = DB_query($sql,$ErrMsg,true);
 
 			$result = DB_Txn_Commit();
@@ -115,7 +115,7 @@ if(isset($_POST['submit'])) {
 //the link to delete a selected record was clicked instead of the submit button
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'stockmaster'
 	// Get the original name of the tax category the ID is just a secure way to find the tax category
-	$sql = "SELECT taxcatname FROM taxcategories
+	$sql = "SELECT taxcatname FROM weberp_taxcategories
 		WHERE taxcatid = '" . $SelectedTaxCategory . "'";
 	$result = DB_query($sql);
 	if( DB_num_rows($result) == 0 ) {
@@ -124,16 +124,16 @@ if(isset($_POST['submit'])) {
 	} else {
 		$myrow = DB_fetch_array($result);
 		$TaxCatName = $myrow['taxcatname'];
-		$sql= "SELECT COUNT(*) FROM stockmaster WHERE taxcatid = '" . $SelectedTaxCategory . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_stockmaster WHERE taxcatid = '" . $SelectedTaxCategory . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if($myrow[0]>0) {
 			prnMsg( _('Cannot delete this tax category because inventory items have been created using this tax category'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('inventory items that refer to this tax category') . '</font>';
 		} else {
-			$sql = "DELETE FROM taxauthrates WHERE taxcatid  = '" . $SelectedTaxCategory . "'";
+			$sql = "DELETE FROM weberp_taxauthrates WHERE taxcatid  = '" . $SelectedTaxCategory . "'";
 			$result = DB_query($sql);
-			$sql = "DELETE FROM taxcategories WHERE taxcatid = '" . $SelectedTaxCategory . "'";
+			$sql = "DELETE FROM weberp_taxcategories WHERE taxcatid = '" . $SelectedTaxCategory . "'";
 			$result = DB_query($sql);
 			prnMsg( $TaxCatName . ' ' . _('tax category and any tax rates set for it have been deleted'),'success');
 		}
@@ -157,7 +157,7 @@ if(isset($_POST['submit'])) {
 
 	$sql = "SELECT taxcatid,
 			taxcatname
-			FROM taxcategories
+			FROM weberp_taxcategories
 			ORDER BY taxcatid";
 
 	$ErrMsg = _('Could not get tax categories because');
@@ -213,7 +213,7 @@ if(! isset($_GET['delete'])) {
 
 		$sql = "SELECT taxcatid,
 				taxcatname
-				FROM taxcategories
+				FROM weberp_taxcategories
 				WHERE taxcatid='" . $SelectedTaxCategory . "'";
 
 		$result = DB_query($sql);

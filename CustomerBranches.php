@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: CustomerBranches.php 7413 2015-12-11 04:04:13Z exsonqu $*/
 /* Defines the details of customer branches such as delivery address and contact details - also sales area, representative etc.*/
 
 include('includes/session.inc');
@@ -97,7 +97,7 @@ if (isset($_POST['submit'])) {
 	}
 	if ($_SESSION['geocode_integration']==1 ){
 		// Get the lat/long from our geocoding host
-		$SQL = "SELECT * FROM geocode_param WHERE 1";
+		$SQL = "SELECT * FROM weberp_geocode_param WHERE 1";
 		$ErrMsg = _('An error occurred in retrieving the information');
 		$resultgeo = DB_query($SQL, $ErrMsg);
 		$row = DB_fetch_array($resultgeo);
@@ -140,7 +140,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedBranch could also exist if submit had not been clicked this code would not run in this case cos submit is false of course see the 	delete code below*/
 
-		$SQL = "UPDATE custbranch SET brname = '" . $_POST['BrName'] . "',
+		$SQL = "UPDATE weberp_custbranch SET brname = '" . $_POST['BrName'] . "',
 						braddress1 = '" . $_POST['BrAddress1'] . "',
 						braddress2 = '" . $_POST['BrAddress2'] . "',
 						braddress3 = '" . $_POST['BrAddress3'] . "',
@@ -172,7 +172,7 @@ if (isset($_POST['submit'])) {
 					WHERE branchcode = '".$SelectedBranch."' AND debtorno='".$DebtorNo."'";
 
 		if ($_SESSION['SalesmanLogin'] != '') {
-			$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+			$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 		}
 
 		$msg = $_POST['BrName'] . ' '._('branch has been updated.');
@@ -181,7 +181,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected branch is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new Customer Branches form */
 
-		$SQL = "INSERT INTO custbranch (branchcode,
+		$SQL = "INSERT INTO weberp_custbranch (branchcode,
 						debtorno,
 						brname,
 						braddress1,
@@ -291,7 +291,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'DebtorTrans'
 
-	$SQL= "SELECT COUNT(*) FROM debtortrans WHERE debtortrans.branchcode='".$SelectedBranch."' AND debtorno = '".$DebtorNo."'";
+	$SQL= "SELECT COUNT(*) FROM weberp_debtortrans WHERE weberp_debtortrans.branchcode='".$SelectedBranch."' AND debtorno = '".$DebtorNo."'";
 
 	$result = DB_query($SQL);
 	$myrow = DB_fetch_row($result);
@@ -300,7 +300,7 @@ if (isset($_POST['submit'])) {
 			 _('There are').' ' . $myrow[0] . ' '._('transactions with this Branch Code'),'error');
 
 	} else {
-		$SQL= "SELECT COUNT(*) FROM salesanalysis WHERE salesanalysis.custbranch='".$SelectedBranch."' AND salesanalysis.cust = '".$DebtorNo."'";
+		$SQL= "SELECT COUNT(*) FROM weberp_salesanalysis WHERE weberp_salesanalysis.custbranch='".$SelectedBranch."' AND weberp_salesanalysis.cust = '".$DebtorNo."'";
 
 		$result = DB_query($SQL);
 
@@ -311,7 +311,7 @@ if (isset($_POST['submit'])) {
 
 		} else {
 
-			$SQL= "SELECT COUNT(*) FROM salesorders WHERE salesorders.branchcode='".$SelectedBranch."' AND salesorders.debtorno = '".$DebtorNo."'";
+			$SQL= "SELECT COUNT(*) FROM weberp_salesorders WHERE weberp_salesorders.branchcode='".$SelectedBranch."' AND weberp_salesorders.debtorno = '".$DebtorNo."'";
 			$result = DB_query($SQL);
 
 			$myrow = DB_fetch_row($result);
@@ -320,7 +320,7 @@ if (isset($_POST['submit'])) {
 				echo '<br />' . _('There are').' ' . $myrow[0] . ' '._('sales orders for this Branch/customer');
 			} else {
 				// Check if there are any users that refer to this branch code
-				$SQL= "SELECT COUNT(*) FROM www_users WHERE www_users.branchcode='".$SelectedBranch."' AND www_users.customerid = '".$DebtorNo."'";
+				$SQL= "SELECT COUNT(*) FROM weberp_www_users WHERE weberp_www_users.branchcode='".$SelectedBranch."' AND weberp_www_users.customerid = '".$DebtorNo."'";
 
 				$result = DB_query($SQL);
 				$myrow = DB_fetch_row($result);
@@ -330,7 +330,7 @@ if (isset($_POST['submit'])) {
 					echo '<br />' . _('There are') . ' ' . $myrow[0] . ' '._('users referring to this Branch/customer');
 				} else {
 						// Check if there are any contract that refer to this branch code
-					$SQL = "SELECT COUNT(*) FROM contracts WHERE contracts.branchcode='" . $SelectedBranch . "' AND contracts.debtorno = '" . $DebtorNo . "'";
+					$SQL = "SELECT COUNT(*) FROM weberp_contracts WHERE weberp_contracts.branchcode='" . $SelectedBranch . "' AND weberp_contracts.debtorno = '" . $DebtorNo . "'";
 
 					$result = DB_query($SQL);
 					$myrow = DB_fetch_row($result);
@@ -340,7 +340,7 @@ if (isset($_POST['submit'])) {
 						echo '<br />' . _('There are') . ' ' . $myrow[0] . ' '._('contracts referring to this branch/customer');
 					} else {
 						//check if this it the last customer branch - don't allow deletion of the last branch
-						$SQL = "SELECT COUNT(*) FROM custbranch WHERE debtorno='" . $DebtorNo . "'";
+						$SQL = "SELECT COUNT(*) FROM weberp_custbranch WHERE debtorno='" . $DebtorNo . "'";
 
 						$result = DB_query($SQL);
 						$myrow = DB_fetch_row($result);
@@ -348,9 +348,9 @@ if (isset($_POST['submit'])) {
 						if ($myrow[0]==1) {
 							prnMsg(_('Cannot delete this branch because it is the only branch defined for this customer.'),'warn');
 						} else {
-							$SQL="DELETE FROM custbranch WHERE branchcode='" . $SelectedBranch . "' AND debtorno='" . $DebtorNo . "'";
+							$SQL="DELETE FROM weberp_custbranch WHERE branchcode='" . $SelectedBranch . "' AND debtorno='" . $DebtorNo . "'";
 							if ($_SESSION['SalesmanLogin'] != '') {
-								$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+								$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 							}
 							$ErrMsg = _('The branch record could not be deleted') . ' - ' . _('the SQL server returned the following message');
 							$result = DB_query($SQL,$ErrMsg);
@@ -369,29 +369,29 @@ if (!isset($SelectedBranch)){
 
 /* It could still be the second time the page has been run and a record has been selected for modification - SelectedBranch will exist because it was sent with the new call. If its the first time the page has been displayed with no parameters then none of the above are true and the list of branches will be displayed with links to delete or edit each. These will call the same page again and allow update/input or deletion of the records*/
 
-	$SQL = "SELECT debtorsmaster.name,
-					custbranch.branchcode,
+	$SQL = "SELECT weberp_debtorsmaster.name,
+					weberp_custbranch.branchcode,
 					brname,
-					salesman.salesmanname,
-					areas.areadescription,
+					weberp_salesman.salesmanname,
+					weberp_areas.areadescription,
 					contactname,
 					phoneno,
 					faxno,
-					custbranch.email,
-					taxgroups.taxgroupdescription,
-					custbranch.disabletrans
-				FROM custbranch INNER JOIN debtorsmaster
-				ON custbranch.debtorno=debtorsmaster.debtorno
-				INNER JOIN areas
-				ON custbranch.area=areas.areacode
-				INNER JOIN salesman
-				ON custbranch.salesman=salesman.salesmancode
-				INNER JOIN taxgroups
-				ON custbranch.taxgroupid=taxgroups.taxgroupid
-				WHERE custbranch.debtorno = '".$DebtorNo."'";
+					weberp_custbranch.email,
+					weberp_taxgroups.taxgroupdescription,
+					weberp_custbranch.disabletrans
+				FROM weberp_custbranch INNER JOIN weberp_debtorsmaster
+				ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+				INNER JOIN weberp_areas
+				ON weberp_custbranch.area=weberp_areas.areacode
+				INNER JOIN weberp_salesman
+				ON weberp_custbranch.salesman=weberp_salesman.salesmancode
+				INNER JOIN weberp_taxgroups
+				ON weberp_custbranch.taxgroupid=weberp_taxgroups.taxgroupid
+				WHERE weberp_custbranch.debtorno = '".$DebtorNo."'";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
 	$result = DB_query($SQL);
@@ -478,14 +478,14 @@ if (!isset($SelectedBranch)){
 			</tr>
 			</table>';
 	} else {
-		$SQL = "SELECT debtorsmaster.name,
+		$SQL = "SELECT weberp_debtorsmaster.name,
 						address1,
 						address2,
 						address3,
 						address4,
 						address5,
 						address6
-					FROM debtorsmaster
+					FROM weberp_debtorsmaster
 					WHERE debtorno = '".$DebtorNo."'";
 
 		$result = DB_query($SQL);
@@ -539,12 +539,12 @@ if (!isset($_GET['delete'])) {
 						defaultshipvia,
 						custbranchcode,
 						deliverblind
-					FROM custbranch
+					FROM weberp_custbranch
 					WHERE branchcode='".$SelectedBranch."'
 					AND debtorno='".$DebtorNo."'";
 
 		if ($_SESSION['SalesmanLogin'] != '') {
-			$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+			$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 		}
 
 		$result = DB_query($SQL);
@@ -615,7 +615,7 @@ if (!isset($_GET['delete'])) {
 						address5,
 						address6
 					FROM
-					debtorsmaster
+					weberp_debtorsmaster
 					WHERE debtorno='".$_GET['BranchCode']."'";
 			$result = DB_query($SQL);
 			$myrow = DB_fetch_array($result);
@@ -740,7 +740,7 @@ if (!isset($_GET['delete'])) {
 		//SQL to poulate account selection boxes
 		$SQL = "SELECT salesmanname,
 						salesmancode
-				FROM salesman
+				FROM weberp_salesman
 				WHERE current = 1
 				ORDER BY salesmanname";
 
@@ -773,7 +773,7 @@ if (!isset($_GET['delete'])) {
 
 	//	DB_data_seek($result,0);//by thumb
 	}
-	$SQL = "SELECT areacode, areadescription FROM areas ORDER BY areadescription";
+	$SQL = "SELECT areacode, areadescription FROM weberp_areas ORDER BY areadescription";
 	$result = DB_query($SQL);
 	if (DB_num_rows($result)==0){
 		echo '</table>';
@@ -801,13 +801,13 @@ if (!isset($_GET['delete'])) {
 		</tr>';
 	DB_data_seek($result,0);
 
-	$SQL = "SELECT locations.loccode, locationname
-		FROM locations
-		INNER JOIN locationusers
-		ON locationusers.loccode=locations.loccode
-			AND locationusers.userid='" . $_SESSION['UserID'] . "'
-			AND locationusers.canupd=1
-		WHERE locations.allowinvoicing='1'
+	$SQL = "SELECT weberp_locations.loccode, locationname
+		FROM weberp_locations
+		INNER JOIN weberp_locationusers
+		ON weberp_locationusers.loccode=weberp_locations.loccode
+			AND weberp_locationusers.userid='" . $_SESSION['UserID'] . "'
+			AND weberp_locationusers.canupd=1
+		WHERE weberp_locations.allowinvoicing='1'
 		ORDER BY locationname";
 	$result = DB_query($SQL);
 
@@ -862,7 +862,7 @@ if (!isset($_GET['delete'])) {
 
 	DB_data_seek($result,0);
 
-	$SQL = "SELECT taxgroupid, taxgroupdescription FROM taxgroups";
+	$SQL = "SELECT taxgroupid, taxgroupdescription FROM weberp_taxgroups";
 	$TaxGroupResults = DB_query($SQL);
 	if (DB_num_rows($TaxGroupResults)==0){
 		echo '</table>';
@@ -903,7 +903,7 @@ if (!isset($_GET['delete'])) {
 
 
 
-	$SQL = "SELECT shipper_id, shippername FROM shippers";
+	$SQL = "SELECT shipper_id, shippername FROM weberp_shippers";
 	$ShipperResults = DB_query($SQL);
 	if (DB_num_rows($ShipperResults)==0){
 		echo '</table>';
@@ -942,7 +942,7 @@ if (!isset($_GET['delete'])) {
 	echo '</select></td>
 		</tr>';
 
-	if (!isset($_POST['BrPostAddr1'])) {// Postal address, line 1. Database: custbranch.brpostaddr1, varchar(40)
+	if (!isset($_POST['BrPostAddr1'])) {// Postal address, line 1. Database: weberp_custbranch.brpostaddr1, varchar(40)
 		$_POST['BrPostAddr1']='';
 	}
 	echo '<tr>
@@ -950,7 +950,7 @@ if (!isset($_GET['delete'])) {
 		<td><input maxlength="40" name="BrPostAddr1" size="41" tabindex="23" type="text" value="', $_POST['BrPostAddr1'].'" /></td>
 		</tr>';
 
-	if (!isset($_POST['BrPostAddr2'])){// Postal address, line 2. Database: custbranch.brpostaddr2, varchar(40)
+	if (!isset($_POST['BrPostAddr2'])){// Postal address, line 2. Database: weberp_custbranch.brpostaddr2, varchar(40)
 		$_POST['BrPostAddr2']='';
 	}
 	echo '<tr>
@@ -958,7 +958,7 @@ if (!isset($_GET['delete'])) {
 		<td><input maxlength="40" name="BrPostAddr2" size="41" tabindex="24" type="text" value="', $_POST['BrPostAddr2'].'" /></td>
 		</tr>';
 
-	if (!isset($_POST['BrPostAddr3'])) {// Postal address, line 3. Database: custbranch.brpostaddr3, varchar(40)
+	if (!isset($_POST['BrPostAddr3'])) {// Postal address, line 3. Database: weberp_custbranch.brpostaddr3, varchar(40)
 		$_POST['BrPostAddr3']='';
 	}
 	echo '<tr>
@@ -966,7 +966,7 @@ if (!isset($_GET['delete'])) {
 		<td><input maxlength="40" name="BrPostAddr3" size="41" tabindex="25" type="text" value="', $_POST['BrPostAddr3'].'" /></td>
 		</tr>';
 
-	if (!isset($_POST['BrPostAddr4'])) {// Postal address, line 4. Database: custbranch.brpostaddr4, varchar(40)
+	if (!isset($_POST['BrPostAddr4'])) {// Postal address, line 4. Database: weberp_custbranch.brpostaddr4, varchar(40)
 		$_POST['BrPostAddr4']='';
 	}
 	echo '<tr>
@@ -974,7 +974,7 @@ if (!isset($_GET['delete'])) {
 		<td><input maxlength="40" name="BrPostAddr4" size="41" tabindex="26" type="text" value="', $_POST['BrPostAddr4'].'" /></td>
 		</tr>';
 
-	if (!isset($_POST['BrPostAddr5'])) {// Postal address, line 5. Database: custbranch.brpostaddr5, varchar(20)
+	if (!isset($_POST['BrPostAddr5'])) {// Postal address, line 5. Database: weberp_custbranch.brpostaddr5, varchar(20)
 		$_POST['BrPostAddr5']='';
 	}
 	echo '<tr>

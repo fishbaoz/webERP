@@ -24,46 +24,46 @@ if (isset($_POST['PrintPDF'])) {
 	}
 
 	  /*Now figure out the data to report for the category range under review */
-	$SQL = "SELECT sellthroughsupport.supplierno,
-					suppliers.suppname,
-					suppliers.currcode,
-					currencies.decimalplaces as currdecimalplaces,
-					stockmaster.stockid,
-					stockmaster.decimalplaces,
-					stockmaster.description,
-					stockmoves.transno,
-					stockmoves.trandate,
-					systypes.typename,
-					stockmoves.qty,
-					stockmoves.debtorno,
-					debtorsmaster.name,
-					stockmoves.price*(1-stockmoves.discountpercent) as sellingprice,
-					purchdata.price as fxcost,
-					sellthroughsupport.rebatepercent,
-					sellthroughsupport.rebateamount
-				FROM stockmaster INNER JOIN stockmoves
-					ON stockmaster.stockid=stockmoves.stockid
-				INNER JOIN systypes
-					ON stockmoves.type=systypes.typeid
-				INNER JOIN debtorsmaster
-					ON stockmoves.debtorno=debtorsmaster.debtorno
-				INNER JOIN purchdata
-					ON purchdata.stockid = stockmaster.stockid
-				INNER JOIN suppliers
-					ON suppliers.supplierid = purchdata.supplierno
-				INNER JOIN sellthroughsupport
-					ON sellthroughsupport.supplierno=suppliers.supplierid
-				INNER JOIN currencies
-					ON currencies.currabrev=suppliers.currcode
-				WHERE stockmoves.trandate >= '" . FormatDateForSQL($_POST['FromDate']) . "'
-				AND stockmoves.trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'
-				AND sellthroughsupport.effectivefrom <= stockmoves.trandate
-				AND sellthroughsupport.effectiveto >= stockmoves.trandate
-				AND (stockmoves.type=10 OR stockmoves.type=11)
-				AND (sellthroughsupport.stockid=stockmoves.stockid OR sellthroughsupport.categoryid=stockmaster.categoryid)
-				AND (sellthroughsupport.debtorno=stockmoves.debtorno OR sellthroughsupport.debtorno='')
-				ORDER BY sellthroughsupport.supplierno,
-					stockmaster.stockid";
+	$SQL = "SELECT weberp_sellthroughsupport.supplierno,
+					weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.decimalplaces as currdecimalplaces,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.description,
+					weberp_stockmoves.transno,
+					weberp_stockmoves.trandate,
+					weberp_systypes.typename,
+					weberp_stockmoves.qty,
+					weberp_stockmoves.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_stockmoves.price*(1-weberp_stockmoves.discountpercent) as sellingprice,
+					weberp_purchdata.price as fxcost,
+					weberp_sellthroughsupport.rebatepercent,
+					weberp_sellthroughsupport.rebateamount
+				FROM weberp_stockmaster INNER JOIN weberp_stockmoves
+					ON weberp_stockmaster.stockid=weberp_stockmoves.stockid
+				INNER JOIN weberp_systypes
+					ON weberp_stockmoves.type=weberp_systypes.typeid
+				INNER JOIN weberp_debtorsmaster
+					ON weberp_stockmoves.debtorno=weberp_debtorsmaster.debtorno
+				INNER JOIN weberp_purchdata
+					ON weberp_purchdata.stockid = weberp_stockmaster.stockid
+				INNER JOIN weberp_suppliers
+					ON weberp_suppliers.supplierid = weberp_purchdata.supplierno
+				INNER JOIN weberp_sellthroughsupport
+					ON weberp_sellthroughsupport.supplierno=weberp_suppliers.supplierid
+				INNER JOIN weberp_currencies
+					ON weberp_currencies.currabrev=weberp_suppliers.currcode
+				WHERE weberp_stockmoves.trandate >= '" . FormatDateForSQL($_POST['FromDate']) . "'
+				AND weberp_stockmoves.trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'
+				AND weberp_sellthroughsupport.effectivefrom <= weberp_stockmoves.trandate
+				AND weberp_sellthroughsupport.effectiveto >= weberp_stockmoves.trandate
+				AND (weberp_stockmoves.type=10 OR weberp_stockmoves.type=11)
+				AND (weberp_sellthroughsupport.stockid=weberp_stockmoves.stockid OR weberp_sellthroughsupport.categoryid=weberp_stockmaster.categoryid)
+				AND (weberp_sellthroughsupport.debtorno=weberp_stockmoves.debtorno OR weberp_sellthroughsupport.debtorno='')
+				ORDER BY weberp_sellthroughsupport.supplierno,
+					weberp_stockmaster.stockid";
 
 	$ClaimsResult = DB_query($SQL,'','',false,false);
 

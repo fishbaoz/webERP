@@ -73,7 +73,7 @@ if (isset($_POST['Submit']) AND (!empty($_SESSION['Request']->LineItems))) {
 	}
 	if ($InputError==0) {
 		$RequestNo = GetNextTransNo(38, $db);
-		$HeaderSQL="INSERT INTO stockrequest (dispatchid,
+		$HeaderSQL="INSERT INTO weberp_stockrequest (dispatchid,
 											loccode,
 											departmentid,
 											despatchdate,
@@ -91,7 +91,7 @@ if (isset($_POST['Submit']) AND (!empty($_SESSION['Request']->LineItems))) {
 		$Result = DB_query($HeaderSQL,$ErrMsg,$DbgMsg,true);
 
 		foreach ($_SESSION['Request']->LineItems as $LineItems) {
-			$LineSQL="INSERT INTO stockrequestitems (dispatchitemsid,
+			$LineSQL="INSERT INTO weberp_stockrequestitems (dispatchitemsid,
 													dispatchid,
 													stockid,
 													quantity,
@@ -110,9 +110,9 @@ if (isset($_POST['Submit']) AND (!empty($_SESSION['Request']->LineItems))) {
 		}
 
 		$EmailSQL="SELECT email
-					FROM www_users, departments
-					WHERE departments.authoriser = www_users.userid
-						AND departments.departmentid = '" . $_SESSION['Request']->Department ."'";
+					FROM weberp_www_users, weberp_departments
+					WHERE weberp_departments.authoriser = weberp_www_users.userid
+						AND weberp_departments.departmentid = '" . $_SESSION['Request']->Department ."'";
 		$EmailResult = DB_query($EmailSQL);
 		if ($myEmail=DB_fetch_array($EmailResult)){
 			$ConfirmationText = _('An internal stock request has been created and is waiting for your authoritation');
@@ -197,13 +197,13 @@ if($_SESSION['AllowedDepartment'] == 0){
 	// any internal department allowed
 	$sql="SELECT departmentid,
 				description
-			FROM departments
+			FROM weberp_departments
 			ORDER BY description";
 }else{
 	// just 1 internal department allowed
 	$sql="SELECT departmentid,
 				description
-			FROM departments
+			FROM weberp_departments
 			WHERE departmentid = '". $_SESSION['AllowedDepartment'] ."'
 			ORDER BY description";
 }
@@ -220,10 +220,10 @@ echo '</select></td>
 	</tr>
 	<tr>
 		<td>' . _('Location from which to request stock') . ':</td>';
-$sql="SELECT locations.loccode,
+$sql="SELECT weberp_locations.loccode,
 			locationname
-		FROM locations
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+		FROM weberp_locations
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 		WHERE internalrequest = 1
 		ORDER BY locationname";
 
@@ -314,12 +314,12 @@ echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . _('Search for Inventory Items'). '</p>';
-$SQL = "SELECT stockcategory.categoryid,
-				stockcategory.categorydescription
-			FROM stockcategory, internalstockcatrole
-			WHERE stockcategory.categoryid = internalstockcatrole.categoryid
-				AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-			ORDER BY stockcategory.categorydescription";
+$SQL = "SELECT weberp_stockcategory.categoryid,
+				weberp_stockcategory.categorydescription
+			FROM weberp_stockcategory, weberp_internalstockcatrole
+			WHERE weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+				AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+			ORDER BY weberp_stockcategory.categorydescription";
 $result1 = DB_query($SQL);
 if (DB_num_rows($result1) == 0) {
 	echo '<p class="bad">' . _('Problem Report') . ':<br />' . _('There are no stock categories currently defined please use the link below to set them up') . '</p>';
@@ -388,36 +388,36 @@ if (isset($_POST['Search']) or isset($_POST['Next']) or isset($_POST['Prev'])){
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-						AND stockmaster.discontinued=0
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+						AND weberp_stockmaster.discontinued=0
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.discontinued=0
-						AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.discontinued=0
+						AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif (mb_strlen($_POST['StockCode'])>0){
@@ -426,68 +426,68 @@ if (isset($_POST['Search']) or isset($_POST['Next']) or isset($_POST['Prev'])){
 		$SearchString = '%' . $_POST['StockCode'] . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.discontinued=0
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.discontinued=0
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.discontinued=0
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.discontinued=0
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} else {
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.discontinued=0
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.discontinued=0
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units as stockunits,
-							stockmaster.decimalplaces
-					FROM stockmaster,
-						stockcategory,
-						internalstockcatrole
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-						AND stockcategory.categoryid = internalstockcatrole.categoryid
-						AND internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
-						AND stockmaster.mbflag <>'G'
-						AND stockmaster.discontinued=0
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units as stockunits,
+							weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster,
+						weberp_stockcategory,
+						weberp_internalstockcatrole
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						AND weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
+						AND weberp_internalstockcatrole.secroleid= " . $_SESSION['AccessLevel'] . "
+						AND weberp_stockmaster.mbflag <>'G'
+						AND weberp_stockmaster.discontinued=0
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 	}
 
@@ -646,7 +646,7 @@ if (isset($SearchResult)) {
 	while ($myrow=DB_fetch_array($SearchResult)) {
 		if ($myrow['decimalplaces']=='') {
 			$DecimalPlacesSQL="SELECT decimalplaces
-								FROM stockmaster
+								FROM weberp_stockmaster
 								WHERE stockid='" .$myrow['stockid'] . "'";
 			$DecimalPlacesResult = DB_query($DecimalPlacesSQL);
 			$DecimalPlacesRow = DB_fetch_array($DecimalPlacesResult);
@@ -655,22 +655,22 @@ if (isset($SearchResult)) {
 			$DecimalPlaces=$myrow['decimalplaces'];
 		}
 
-		$QOHSQL = "SELECT sum(locstock.quantity) AS qoh
-							   FROM locstock
-							   WHERE locstock.stockid='" .$myrow['stockid'] . "' AND
+		$QOHSQL = "SELECT sum(weberp_locstock.quantity) AS qoh
+							   FROM weberp_locstock
+							   WHERE weberp_locstock.stockid='" .$myrow['stockid'] . "' AND
 							   loccode = '" . $_SESSION['Request']->Location . "'";
 		$QOHResult =  DB_query($QOHSQL);
 		$QOHRow = DB_fetch_array($QOHResult);
 		$QOH = $QOHRow['qoh'];
 
 		// Find the quantity on outstanding sales orders
-		$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-				 FROM salesorderdetails INNER JOIN salesorders
-				 ON salesorders.orderno = salesorderdetails.orderno
-				 WHERE salesorders.fromstkloc='" . $_SESSION['Request']->Location . "'
-				 AND salesorderdetails.completed=0
-				 AND salesorders.quotation=0
-				 AND salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
+		$sql = "SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+				 FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				 WHERE weberp_salesorders.fromstkloc='" . $_SESSION['Request']->Location . "'
+				 AND weberp_salesorderdetails.completed=0
+				 AND weberp_salesorders.quotation=0
+				 AND weberp_salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
 		$ErrMsg = _('The demand for this product from') . ' ' . $_SESSION['Request']->Location . ' ' . _('cannot be retrieved because');
 		$DemandResult = DB_query($sql,$ErrMsg);
 
@@ -682,14 +682,14 @@ if (isset($SearchResult)) {
 		}
 
 		// Find the quantity on purchase orders
-		$sql = "SELECT SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd)*purchorderdetails.conversionfactor AS dem
-				 FROM purchorderdetails LEFT JOIN purchorders
-					ON purchorderdetails.orderno=purchorders.orderno
-				 WHERE purchorderdetails.completed=0
-				 AND purchorders.status<>'Cancelled'
-				 AND purchorders.status<>'Rejected'
-				 AND purchorders.status<>'Completed'
-				AND purchorderdetails.itemcode='" . $myrow['stockid'] . "'";
+		$sql = "SELECT SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd)*weberp_purchorderdetails.conversionfactor AS dem
+				 FROM weberp_purchorderdetails LEFT JOIN weberp_purchorders
+					ON weberp_purchorderdetails.orderno=weberp_purchorders.orderno
+				 WHERE weberp_purchorderdetails.completed=0
+				 AND weberp_purchorders.status<>'Cancelled'
+				 AND weberp_purchorders.status<>'Rejected'
+				 AND weberp_purchorders.status<>'Completed'
+				AND weberp_purchorderdetails.itemcode='" . $myrow['stockid'] . "'";
 
 		$ErrMsg = _('The order details for this product cannot be retrieved because');
 		$PurchResult = DB_query($sql,$ErrMsg);
@@ -702,8 +702,8 @@ if (isset($SearchResult)) {
 		}
 
 		// Find the quantity on works orders
-		$sql = "SELECT SUM(woitems.qtyreqd - woitems.qtyrecd) AS dedm
-			   FROM woitems
+		$sql = "SELECT SUM(weberp_woitems.qtyreqd - weberp_woitems.qtyrecd) AS dedm
+			   FROM weberp_woitems
 			   WHERE stockid='" . $myrow['stockid'] ."'";
 		$ErrMsg = _('The order details for this product cannot be retrieved because');
 		$WoResult = DB_query($sql,$ErrMsg);

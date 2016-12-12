@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefinePaymentClass.php 5768 2012-12-20 08:38:22Z daintree $*/
 /* definition of the Payment class */
 
 Class Payment {

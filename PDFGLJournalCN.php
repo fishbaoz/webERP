@@ -32,26 +32,26 @@ $pdf->SetProtection(array('modify','copy','annot-forms'), '');
 if ($JournalNo=='Preview') {
 	$LineCount = 2; // UldisN
 } else {
-	$sql="SELECT gltrans.type,
-	            gltrans.typeno,
-				gltrans.trandate,
-				gltrans.account,
-				systypes.typename,
-				chartmaster.accountname,
-				gltrans.narrative,
-				gltrans.amount,
-				gltrans.tag,
-				tags.tagdescription,
-				gltrans.jobref
-			FROM gltrans
-			INNER JOIN chartmaster
-				ON gltrans.account=chartmaster.accountcode
-			INNER JOIN systypes
-				ON gltrans.type=systypes.typeid 
-			LEFT JOIN tags
-				ON gltrans.tag=tags.tagref
-			WHERE gltrans.type='".$TypeID."'
-				AND gltrans.typeno='" . $JournalNo . "'";
+	$sql="SELECT weberp_gltrans.type,
+	            weberp_gltrans.typeno,
+				weberp_gltrans.trandate,
+				weberp_gltrans.account,
+				weberp_systypes.typename,
+				weberp_chartmaster.accountname,
+				weberp_gltrans.narrative,
+				weberp_gltrans.amount,
+				weberp_gltrans.tag,
+				weberp_tags.tagdescription,
+				weberp_gltrans.jobref
+			FROM weberp_gltrans
+			INNER JOIN weberp_chartmaster
+				ON weberp_gltrans.account=weberp_chartmaster.accountcode
+			INNER JOIN weberp_systypes
+				ON weberp_gltrans.type=weberp_systypes.typeid 
+			LEFT JOIN weberp_tags
+				ON weberp_gltrans.tag=weberp_tags.tagref
+			WHERE weberp_gltrans.type='".$TypeID."'
+				AND weberp_gltrans.typeno='" . $JournalNo . "'";
 	$result=DB_query($sql);
 	$LineCount = DB_num_rows($result); // UldisN
 	$myrow=DB_fetch_array($result);

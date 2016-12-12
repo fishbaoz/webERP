@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockSerialItemResearch.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Serial Item Research');
@@ -53,15 +53,15 @@ if ($SerialNo!='') {
 			ssm.moveqty,
 			sm.type, st.typename,
 			sm.transno, sm.loccode, l.locationname, sm.trandate, sm.debtorno, sm.branchcode, sm.reference, sm.qty TotalMoveQty
-			FROM stockserialitems ssi INNER JOIN stockserialmoves ssm
+			FROM weberp_stockserialitems ssi INNER JOIN weberp_stockserialmoves ssm
 				ON ssi.serialno = ssm.serialno AND ssi.stockid=ssm.stockid
-			INNER JOIN stockmoves sm
+			INNER JOIN weberp_stockmoves sm
 				ON ssm.stockmoveno = sm.stkmoveno and ssi.loccode=sm.loccode
-			INNER JOIN systypes st
+			INNER JOIN weberp_systypes st
 				ON sm.type=st.typeid
-			INNER JOIN locations l
+			INNER JOIN weberp_locations l
 				on sm.loccode = l.loccode
-			INNER JOIN locationusers ON locationusers.loccode=l.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=l.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			WHERE ssi.serialno " . LIKE . " '" . $SerialNo . "'
 			ORDER BY stkmoveno";
 

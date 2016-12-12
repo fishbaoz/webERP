@@ -56,7 +56,7 @@ if (isset($_POST['submit'])) {
 		$SQLStartDate = FormatDateForSQL($_POST['StartDate']);
 	}
 	$sql = "SELECT COUNT(salestype)
-				FROM pricematrix
+				FROM weberp_pricematrix
 			WHERE stockid='".$StockID."'
 			AND startdate='".$SQLStartDate."'
 			AND enddate='".$SQLEndDate."'
@@ -73,7 +73,7 @@ if (isset($_POST['submit'])) {
 	if (isset($_POST['OldTypeAbbrev']) AND isset($_POST['OldCurrAbrev']) AND mb_strlen($StockID)>1 AND $InputError !=1){
 
 		/* Update existing prices */
-		$sql = "UPDATE pricematrix SET 
+		$sql = "UPDATE weberp_pricematrix SET 
 					salestype='" . $_POST['SalesType'] . "',
 					currabrev='" . $_POST['CurrAbrev'] . "',
 					price='" . filter_number_format($_POST['Price']) . "',
@@ -98,7 +98,7 @@ if (isset($_POST['submit'])) {
 	/* actions to take once the user has clicked the submit button
 	ie the page has called itself with some user input */
 
-		$sql = "INSERT INTO pricematrix (salestype,
+		$sql = "INSERT INTO weberp_pricematrix (salestype,
 							stockid,
 							quantitybreak,
 							price,
@@ -129,7 +129,7 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['Delete']) and $_GET['Delete']=='yes') {
 /*the link to delete a selected record was clicked instead of the submit button */
 
-	$sql="DELETE FROM pricematrix
+	$sql="DELETE FROM weberp_pricematrix
 		WHERE stockid='" .$_GET['StockID'] . "'
 		AND salestype='" . $_GET['SalesType'] . "'
 		AND quantitybreak='" . $_GET['QuantityBreak']."'
@@ -159,7 +159,7 @@ if (isset($_GET['Edit'])){
 	$_POST['EndDate'] = ConvertSQLDate($_GET['EndDate']);
        	$_POST['QuantityBreak'] = $_GET['QuantityBreak'];
 }	
-$SQL = "SELECT currabrev FROM currencies";
+$SQL = "SELECT currabrev FROM weberp_currencies";
 $result = DB_query($SQL);
 require_once('includes/CurrenciesArray.php');
 echo '<table class="selection">';
@@ -177,7 +177,7 @@ echo '</select></td>';
 
 $sql = "SELECT typeabbrev,
 		sales_type
-		FROM salestypes";
+		FROM weberp_salestypes";
 
 $result = DB_query($sql);
 
@@ -244,15 +244,15 @@ $sql = "SELECT sales_type,
 			enddate,
 			quantitybreak,
 			price,
-			currencies.currabrev,
-			currencies.currency,
-			currencies.decimalplaces AS currdecimalplaces
-		FROM pricematrix INNER JOIN salestypes
-			ON pricematrix.salestype=salestypes.typeabbrev
-		INNER JOIN currencies
-		ON pricematrix.currabrev=currencies.currabrev
-		WHERE pricematrix.stockid='" . $StockID . "'
-		ORDER BY pricematrix.currabrev, 
+			weberp_currencies.currabrev,
+			weberp_currencies.currency,
+			weberp_currencies.decimalplaces AS currdecimalplaces
+		FROM weberp_pricematrix INNER JOIN weberp_salestypes
+			ON weberp_pricematrix.salestype=weberp_salestypes.typeabbrev
+		INNER JOIN weberp_currencies
+		ON weberp_pricematrix.currabrev=weberp_currencies.currabrev
+		WHERE weberp_pricematrix.stockid='" . $StockID . "'
+		ORDER BY weberp_pricematrix.currabrev, 
 			salestype,
 			stockid,
 			quantitybreak";
@@ -350,7 +350,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $QuantityBrea
 		$SQL = "SELECT price,
 						startdate,
 						enddate
-				FROM pricematrix
+				FROM weberp_pricematrix
 				WHERE stockid='" . $Item . "'
 				AND currabrev='" . $CurrAbbrev . "'
 				AND salestype='" . $PriceList . "'
@@ -365,7 +365,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $QuantityBrea
 					//Only if the previous enddate is after the new start date do we need to look at updates
 					if (Date1GreaterThanDate2(ConvertSQLDate($EndDate),ConvertSQLDate($myrow['startdate']))) {
 						/*Need to make the end date the new start date less 1 day */
-						$SQL = "UPDATE pricematrix SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
+						$SQL = "UPDATE weberp_pricematrix SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
 										WHERE stockid ='" .$Item . "'
 										AND currabrev='" . $CurrAbbrev . "'
 										AND salestype='" . $PriceList . "'

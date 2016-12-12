@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFTopItems.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include ('includes/session.inc');
 include ('includes/PDFStarter.php');
@@ -14,74 +14,74 @@ $FromDate = FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']),'d', -
 
 //the situation if the location and customer type selected "All"
 if (($_GET['Location'] == 'All') AND ($_GET['Customers'] == 'All')) {
-	$SQL = "SELECT 	salesorderdetails.stkcode,
-				SUM(salesorderdetails.qtyinvoiced) totalinvoiced,
-				SUM(salesorderdetails.qtyinvoiced * salesorderdetails.unitprice ) AS valuesales,
-				stockmaster.description,
-				stockmaster.units,
-				stockmaster.decimalplaces
-			FROM 	salesorderdetails, salesorders INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1, 
-			debtorsmaster,stockmaster
-			WHERE 	salesorderdetails.orderno = salesorders.orderno
-				AND salesorderdetails.stkcode = stockmaster.stockid
-				AND salesorders.debtorno = debtorsmaster.debtorno
-				AND salesorderdetails.actualdispatchdate >='" . $FromDate . "'
-			GROUP BY salesorderdetails.stkcode
+	$SQL = "SELECT 	weberp_salesorderdetails.stkcode,
+				SUM(weberp_salesorderdetails.qtyinvoiced) totalinvoiced,
+				SUM(weberp_salesorderdetails.qtyinvoiced * weberp_salesorderdetails.unitprice ) AS valuesales,
+				weberp_stockmaster.description,
+				weberp_stockmaster.units,
+				weberp_stockmaster.decimalplaces
+			FROM 	weberp_salesorderdetails, weberp_salesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1, 
+			weberp_debtorsmaster,weberp_stockmaster
+			WHERE 	weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+				AND weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+				AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+				AND weberp_salesorderdetails.actualdispatchdate >='" . $FromDate . "'
+			GROUP BY weberp_salesorderdetails.stkcode
 			ORDER BY `" . $_GET['Sequence'] . "` DESC
 			LIMIT " . intval($_GET['NumberOfTopItems']) ;
 } else { //the situation if only location type selected "All"
 	if ($_GET['Location'] == 'All') {
-		$SQL = "SELECT 	salesorderdetails.stkcode,
-					SUM(salesorderdetails.qtyinvoiced) totalinvoiced,
-					SUM(salesorderdetails.qtyinvoiced * salesorderdetails.unitprice ) AS valuesales,
-					stockmaster.description,
-					stockmaster.units
-				FROM 	salesorderdetails, salesorders INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1, 
-				debtorsmaster,stockmaster
-				WHERE 	salesorderdetails.orderno = salesorders.orderno
-						AND salesorderdetails.stkcode = stockmaster.stockid
-						AND salesorders.debtorno = debtorsmaster.debtorno
-						AND debtorsmaster.typeid = '" . $_GET['Customers'] . "'
-						AND salesorderdetails.ActualDispatchDate >= '" . $FromDate . "'
-				GROUP BY salesorderdetails.stkcode
+		$SQL = "SELECT 	weberp_salesorderdetails.stkcode,
+					SUM(weberp_salesorderdetails.qtyinvoiced) totalinvoiced,
+					SUM(weberp_salesorderdetails.qtyinvoiced * weberp_salesorderdetails.unitprice ) AS valuesales,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				FROM 	weberp_salesorderdetails, weberp_salesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1, 
+				weberp_debtorsmaster,weberp_stockmaster
+				WHERE 	weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+						AND weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+						AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						AND weberp_debtorsmaster.typeid = '" . $_GET['Customers'] . "'
+						AND weberp_salesorderdetails.ActualDispatchDate >= '" . $FromDate . "'
+				GROUP BY weberp_salesorderdetails.stkcode
 				ORDER BY `" . $_GET['Sequence'] . "` DESC
 				LIMIT " . intval($_GET['NumberOfTopItems']);
 	} else {
 		//the situation if the customer type selected "All"
 		if ($_GET['Customers'] == 'All') {
-			$SQL = "SELECT 	salesorderdetails.stkcode,
-						SUM(salesorderdetails.qtyinvoiced) totalinvoiced,
-						SUM(salesorderdetails.qtyinvoiced * salesorderdetails.unitprice ) AS valuesales,
-						stockmaster.description,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM 	salesorderdetails, salesorders INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1,
-					debtorsmaster,stockmaster
-					WHERE 	salesorderdetails.orderno = salesorders.orderno
-						AND salesorderdetails.stkcode = stockmaster.stockid
-						AND salesorders.debtorno = debtorsmaster.debtorno
-						AND salesorders.fromstkloc = '" . $_GET['Location'] . "'
-						AND salesorderdetails.ActualDispatchDate >= '" . $FromDate . "'
-					GROUP BY salesorderdetails.stkcode
+			$SQL = "SELECT 	weberp_salesorderdetails.stkcode,
+						SUM(weberp_salesorderdetails.qtyinvoiced) totalinvoiced,
+						SUM(weberp_salesorderdetails.qtyinvoiced * weberp_salesorderdetails.unitprice ) AS valuesales,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM 	weberp_salesorderdetails, weberp_salesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1,
+					weberp_debtorsmaster,weberp_stockmaster
+					WHERE 	weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+						AND weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+						AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						AND weberp_salesorders.fromstkloc = '" . $_GET['Location'] . "'
+						AND weberp_salesorderdetails.ActualDispatchDate >= '" . $FromDate . "'
+					GROUP BY weberp_salesorderdetails.stkcode
 					ORDER BY `" . $_GET['Sequence'] . "` DESC
 					LIMIT 0," . intval($_GET['NumberOfTopItems']);
 		} else {
 			//the situation if the location and customer type not selected "All"
-			$SQL = "SELECT 	salesorderdetails.stkcode,
-						SUM(salesorderdetails.qtyinvoiced) totalinvoiced,
-						SUM(salesorderdetails.qtyinvoiced * salesorderdetails.unitprice ) AS valuesales,
-						stockmaster.description,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM 	salesorderdetails, salesorders INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1,
-					debtorsmaster,stockmaster
-					WHERE 	salesorderdetails.orderno = salesorders.orderno
-						AND salesorderdetails.stkcode = stockmaster.stockid
-						AND salesorders.debtorno = debtorsmaster.debtorno
-						AND salesorders.fromstkloc = '" . $_GET['Location'] . "'
-						AND debtorsmaster.typeid = '" . $_GET['Customers'] . "'
-						AND salesorderdetails.actualdispatchdate >= '" . $FromDate . "'
-					GROUP BY salesorderdetails.stkcode
+			$SQL = "SELECT 	weberp_salesorderdetails.stkcode,
+						SUM(weberp_salesorderdetails.qtyinvoiced) totalinvoiced,
+						SUM(weberp_salesorderdetails.qtyinvoiced * weberp_salesorderdetails.unitprice ) AS valuesales,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM 	weberp_salesorderdetails, weberp_salesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1,
+					weberp_debtorsmaster,weberp_stockmaster
+					WHERE 	weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+						AND weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+						AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						AND weberp_salesorders.fromstkloc = '" . $_GET['Location'] . "'
+						AND weberp_debtorsmaster.typeid = '" . $_GET['Customers'] . "'
+						AND weberp_salesorderdetails.actualdispatchdate >= '" . $FromDate . "'
+					GROUP BY weberp_salesorderdetails.stkcode
 					ORDER BY `" . $_GET['Sequence'] . "` DESC
 					LIMIT " . intval($_GET['NumberOfTopItems']);
 		}
@@ -93,8 +93,8 @@ if (DB_num_rows($result)>0){
 	while ($myrow = DB_fetch_array($result)) {
 		//find the quantity onhand item
 		$sqloh = "SELECT sum(quantity)as qty
-					FROM locstock
-					INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+					FROM weberp_locstock
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 					WHERE stockid='" . DB_escape_string($myrow['stkcode']) . "'";
 		$oh = DB_query($sqloh);
 		$ohRow = DB_fetch_row($oh);

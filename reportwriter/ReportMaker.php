@@ -6,8 +6,8 @@ $PathPrefix = '../';
 // TBD The followiung line needs to be replace when more translations are available
 $ReportLanguage = 'en_US';					// default language file
 
-define('DBReports','reports');			// name of the databse table holding the main report information (ReportID)
-define('DBRptFields','reportfields');	// name of the database table holding the report fields
+define('DBReports','weberp_reports');			// name of the databse table holding the main report information (ReportID)
+define('DBRptFields','weberp_reportfields');	// name of the database table holding the report fields
 //define('FPDF_FONTPATH','../fonts/');  FPDF path to fonts directory
 
 // Fetch necessary include files - Host application specific (webERP)
@@ -538,7 +538,7 @@ function SaveNewReport($ReportID, $AllowOverwrite) {
 	$sql = "INSERT INTO ".DBReports." SELECT * FROM ".DBReports." WHERE id=0;";
 	$Result=DB_query($sql,'','',false,true);
 	// Fetch the id entered
-	$ReportID = DB_Last_Insert_ID($db,'reports','id');
+	$ReportID = DB_Last_Insert_ID($db,'weberp_reports','id');
 	// Restore original report ID from 0
 	$sql = "UPDATE ".DBReports." SET id='".$OrigID."' WHERE id=0;";
 	$Result=DB_query($sql,'','',false,true);

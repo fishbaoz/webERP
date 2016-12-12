@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: BankAccounts.php 7092 2015-01-22 14:17:10Z rchacon $*/
 /* This script defines the general ledger code for bank accounts and specifies that bank transactions be created for these accounts for the purposes of reconciliation. */
 
 include('includes/session.inc');
@@ -38,7 +38,7 @@ if (isset($_POST['submit'])) {
 	$i=1;
 
 	$sql="SELECT count(accountcode)
-			FROM bankaccounts WHERE accountcode='".$_POST['AccountCode']."'";
+			FROM weberp_bankaccounts WHERE accountcode='".$_POST['AccountCode']."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 
@@ -83,10 +83,10 @@ if (isset($_POST['submit'])) {
 
 		/*Check if there are already transactions against this account - cant allow change currency if there are*/
 
-		$sql = "SELECT banktransid FROM banktrans WHERE bankact='" . $SelectedBankAccount . "'";
+		$sql = "SELECT banktransid FROM weberp_banktrans WHERE bankact='" . $SelectedBankAccount . "'";
 		$BankTransResult = DB_query($sql);
 		if (DB_num_rows($BankTransResult)>0) {
-			$sql = "UPDATE bankaccounts SET bankaccountname='" . $_POST['BankAccountName'] . "',
+			$sql = "UPDATE weberp_bankaccounts SET bankaccountname='" . $_POST['BankAccountName'] . "',
 											bankaccountcode='" . $_POST['BankAccountCode'] . "',
 											bankaccountnumber='" . $_POST['BankAccountNumber'] . "',
 											bankaddress='" . $_POST['BankAddress'] . "',
@@ -96,7 +96,7 @@ if (isset($_POST['submit'])) {
 			prnMsg(_('Note that it is not possible to change the currency of the account once there are transactions against it'),'warn');
 	echo '<br />';
 		} else {
-			$sql = "UPDATE bankaccounts SET bankaccountname='" . $_POST['BankAccountName'] . "',
+			$sql = "UPDATE weberp_bankaccounts SET bankaccountname='" . $_POST['BankAccountName'] . "',
 											bankaccountcode='" . $_POST['BankAccountCode'] . "',
 											bankaccountnumber='" . $_POST['BankAccountNumber'] . "',
 											bankaddress='" . $_POST['BankAddress'] . "',
@@ -111,7 +111,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selectedbank account is null cos no item selected on first time round so must be adding a    record must be submitting new entries in the new bank account form */
 
-		$sql = "INSERT INTO bankaccounts (accountcode,
+		$sql = "INSERT INTO weberp_bankaccounts (accountcode,
 										bankaccountname,
 										bankaccountcode,
 										bankaccountnumber,
@@ -156,7 +156,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'BankTrans'
 
-	$sql= "SELECT COUNT(bankact) AS accounts FROM banktrans WHERE banktrans.bankact='" . $SelectedBankAccount . "'";
+	$sql= "SELECT COUNT(bankact) AS accounts FROM weberp_banktrans WHERE weberp_banktrans.bankact='" . $SelectedBankAccount . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 	if ($myrow['accounts']>0) {
@@ -166,7 +166,7 @@ if (isset($_POST['submit'])) {
 
 	}
 	if (!$CancelDelete) {
-		$sql="DELETE FROM bankaccounts WHERE accountcode='" . $SelectedBankAccount . "'";
+		$sql="DELETE FROM weberp_bankaccounts WHERE accountcode='" . $SelectedBankAccount . "'";
 		$result = DB_query($sql);
 		prnMsg(_('Bank account deleted'),'success');
 	} //end if Delete bank account
@@ -177,17 +177,17 @@ if (isset($_POST['submit'])) {
 
 /* Always show the list of accounts */
 if (!isset($SelectedBankAccount)) {
-	$sql = "SELECT bankaccounts.accountcode,
-					bankaccounts.bankaccountcode,
-					chartmaster.accountname,
+	$sql = "SELECT weberp_bankaccounts.accountcode,
+					weberp_bankaccounts.bankaccountcode,
+					weberp_chartmaster.accountname,
 					bankaccountname,
 					bankaccountnumber,
 					bankaddress,
 					currcode,
 					invoice,
 					importformat
-			FROM bankaccounts INNER JOIN chartmaster
-			ON bankaccounts.accountcode = chartmaster.accountcode";
+			FROM weberp_bankaccounts INNER JOIN weberp_chartmaster
+			ON weberp_bankaccounts.accountcode = weberp_chartmaster.accountcode";
 
 	$ErrMsg = _('The bank accounts set up could not be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the bank account details was') . '<br />' . $sql;
@@ -284,8 +284,8 @@ if (isset($SelectedBankAccount) AND !isset($_GET['delete'])) {
 					bankaddress,
 					currcode,
 					invoice
-			FROM bankaccounts
-			WHERE bankaccounts.accountcode='" . $SelectedBankAccount . "'";
+			FROM weberp_bankaccounts
+			WHERE weberp_bankaccounts.accountcode='" . $SelectedBankAccount . "'";
 
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
@@ -313,9 +313,9 @@ if (isset($SelectedBankAccount) AND !isset($_GET['delete'])) {
 
 	$sql = "SELECT accountcode,
 					accountname
-			FROM chartmaster LEFT JOIN accountgroups
-			ON chartmaster.group_ = accountgroups.groupname
-			WHERE accountgroups.pandl = 0
+			FROM weberp_chartmaster LEFT JOIN weberp_accountgroups
+			ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
+			WHERE weberp_accountgroups.pandl = 0
 			ORDER BY accountcode";
 
 	$result = DB_query($sql);
@@ -382,7 +382,7 @@ if (!isset($_POST['CurrCode']) or $_POST['CurrCode']==''){
 }
 $result = DB_query("SELECT currabrev,
 							currency
-					FROM currencies");
+					FROM weberp_currencies");
 
 while ($myrow = DB_fetch_array($result)) {
 	if ($myrow['currabrev']==$_POST['CurrCode']) {
@@ -404,7 +404,7 @@ if (!isset($_POST['DefAccount']) OR $_POST['DefAccount']==''){
 }
 
 if (isset($SelectedBankAccount)) {
-	$result = DB_query("SELECT invoice FROM bankaccounts where accountcode =" . $SelectedBankAccount );
+	$result = DB_query("SELECT invoice FROM weberp_bankaccounts where accountcode =" . $SelectedBankAccount );
 	while ($myrow = DB_fetch_array($result)) {
 		if ($myrow['invoice']== 1) {
 			echo '<option selected="selected" value="1">' . _('Fall Back Default') . '</option>

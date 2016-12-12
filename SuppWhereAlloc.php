@@ -63,19 +63,19 @@ if(isset($_POST['ShowResults']) AND  $_POST['TransNo']=='') {
 if(isset($_POST['ShowResults']) AND $_POST['TransNo']!='') {
 
 /*First off get the DebtorTransID of the transaction (invoice normally) selected */
-	$sql = "SELECT supptrans.id,
+	$sql = "SELECT weberp_supptrans.id,
 				ovamount+ovgst AS totamt,
-				currencies.decimalplaces AS currdecimalplaces,
-				suppliers.currcode
-			FROM supptrans INNER JOIN suppliers
-			ON supptrans.supplierno=suppliers.supplierid
-			INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_suppliers.currcode
+			FROM weberp_supptrans INNER JOIN weberp_suppliers
+			ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+			INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
 			WHERE type='" . $_POST['TransType'] . "'
 			AND transno = '" . $_POST['TransNo']."'";
 	
 	if($_SESSION['SalesmanLogin'] != '') {
-			$sql .= " AND supptrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+			$sql .= " AND weberp_supptrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 	$result = DB_query($sql);
 
@@ -87,22 +87,22 @@ if(isset($_POST['ShowResults']) AND $_POST['TransNo']!='') {
 		$sql = "SELECT type,
 					transno,
 					trandate,
-					supptrans.supplierno,
+					weberp_supptrans.supplierno,
 					suppreference,
-					supptrans.rate,
+					weberp_supptrans.rate,
 					ovamount+ovgst as totalamt,
-					suppallocs.amt
-				FROM supptrans
-				INNER JOIN suppallocs ";
+					weberp_suppallocs.amt
+				FROM weberp_supptrans
+				INNER JOIN weberp_suppallocs ";
 		if($_POST['TransType']==22 OR $_POST['TransType'] == 21) {
 
 			$TitleInfo = ($_POST['TransType'] == 22)?_('Payment'):_('Debit Note');
-			$sql .= "ON supptrans.id = suppallocs.transid_allocto 
-				WHERE suppallocs.transid_allocfrom = '" . $AllocToID . "'";
+			$sql .= "ON weberp_supptrans.id = weberp_suppallocs.transid_allocto 
+				WHERE weberp_suppallocs.transid_allocfrom = '" . $AllocToID . "'";
 		} else {
 			$TitleInfo = _('invoice');
-			$sql .= "ON supptrans.id = suppallocs.transid_allocfrom
-				WHERE suppallocs.transid_allocto = '" . $AllocToID . "'";
+			$sql .= "ON weberp_supptrans.id = weberp_suppallocs.transid_allocfrom
+				WHERE weberp_suppallocs.transid_allocto = '" . $AllocToID . "'";
 		}
 		$sql .= " ORDER BY transno ";
 

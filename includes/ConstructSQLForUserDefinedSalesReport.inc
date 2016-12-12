@@ -1,26 +1,26 @@
 <?php
-/* $Id$*/
+/* $Id: ConstructSQLForUserDefinedSalesReport.inc 6941 2014-10-26 23:18:08Z daintree $*/
 Function GetDataSQL($SQLData){
 
 /*This function determines the SQL to use to get the value for the columns defined */
 switch ($SQLData) {
 Case 'Quantity':
-	Return 'salesanalysis.qty';
+	Return 'weberp_salesanalysis.qty';
 	break;
 Case 'Gross Value':
-	Return 'salesanalysis.amt';
+	Return 'weberp_salesanalysis.amt';
 	break;
 Case 'Net Value':
-	Return 'salesanalysis.amt - salesanalysis.disc';
+	Return 'weberp_salesanalysis.amt - weberp_salesanalysis.disc';
 	break;
 Case 'Gross Profit':
-	Return 'salesanalysis.amt - salesanalysis.disc - salesanalysis.cost';
+	Return 'weberp_salesanalysis.amt - weberp_salesanalysis.disc - weberp_salesanalysis.cost';
 	break;
 Case 'Cost':
-	Return 'salesanalysis.cost';
+	Return 'weberp_salesanalysis.cost';
 	break;
 Case 'Discount':
-	Return 'salesanalysis.disc';
+	Return 'weberp_salesanalysis.disc';
 	break;
 } /*end of switch stmt block*/
 }
@@ -33,31 +33,31 @@ and allocates a Colxx to each  */
 
 Switch ($Data) {
 Case 'Sales Area':
-	$SQL= 'salesanalysis.area AS col'. $ColNo . ', areas.areadescription AS col' . ($ColNo+1);
+	$SQL= 'weberp_salesanalysis.area AS col'. $ColNo . ', weberp_areas.areadescription AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Product Code':
-	$SQL=	'salesanalysis.stockid AS col'. $ColNo . ', stockmaster.description AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.stockid AS col'. $ColNo . ', weberp_stockmaster.description AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Customer Code':
-	$SQL=	'salesanalysis.cust AS col'. $ColNo . ', debtorsmaster.name AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.cust AS col'. $ColNo . ', weberp_debtorsmaster.name AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Sales Type':
-	$SQL=	'salesanalysis.typeabbrev AS col'. $ColNo . ', salestypes.sales_type AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.typeabbrev AS col'. $ColNo . ', weberp_salestypes.sales_type AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Product Type':
-	$SQL=	'salesanalysis.stkcategory AS col' . $ColNo . ', stockcategory.categorydescription AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.stkcategory AS col' . $ColNo . ', weberp_stockcategory.categorydescription AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Customer Branch':
-	$SQL=	'salesanalysis.custbranch AS col' . $ColNo . ', custbranch.brname AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.custbranch AS col' . $ColNo . ', weberp_custbranch.brname AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 Case 'Sales Person':
-	$SQL=	'salesanalysis.salesperson AS col' . $ColNo . ', salesman.salesmanname AS col' . ($ColNo+1);
+	$SQL=	'weberp_salesanalysis.salesperson AS col' . $ColNo . ', weberp_salesman.salesmanname AS col' . ($ColNo+1);
 	Return $SQL;
 	break;
 } /* end of switch statement */
@@ -70,25 +70,25 @@ Function GetHavingSQL($Data){
 
 Switch ($Data) {
 Case 'Sales Area':
-	Return 'salesanalysis.area';
+	Return 'weberp_salesanalysis.area';
 	break;
 Case 'Product Code':
-	Return 'salesanalysis.stockid';
+	Return 'weberp_salesanalysis.stockid';
 	break;
 Case 'Customer Code':
-	Return 'salesanalysis.cust';
+	Return 'weberp_salesanalysis.cust';
 	break;
 Case 'Sales Type':
-	Return 'salesanalysis.typeabbrev';
+	Return 'weberp_salesanalysis.typeabbrev';
 	break;
 Case 'Product Type':
-	Return 'salesanalysis.stkcategory';
+	Return 'weberp_salesanalysis.stkcategory';
 	break;
 Case 'Customer Branch':
-	Return 'salesanalysis.custbranch';
+	Return 'weberp_salesanalysis.custbranch';
 	break;
 Case 'Sales Person':
-	Return 'salesanalysis.salesperson';
+	Return 'weberp_salesanalysis.salesperson';
 	break;
 } /* end of switch statement */
 
@@ -100,25 +100,25 @@ Function GetGroupBySQL($GByData){
 
 Switch ($GByData) {
 Case 'Sales Area':
-	Return 'salesanalysis.area, areas.areadescription';
+	Return 'weberp_salesanalysis.area, weberp_areas.areadescription';
 	break;
 Case 'Product Code':
-	Return 'salesanalysis.stockid, stockmaster.description';
+	Return 'weberp_salesanalysis.stockid, weberp_stockmaster.description';
 	break;
 Case 'Customer Code':
-	Return 'salesanalysis.cust, debtorsmaster.name';
+	Return 'weberp_salesanalysis.cust, weberp_debtorsmaster.name';
 	break;
 Case 'Sales Type':
-	Return 'salesanalysis.typeabbrev, salestypes.sales_type';
+	Return 'weberp_salesanalysis.typeabbrev, weberp_salestypes.sales_type';
 	break;
 Case 'Product Type':
-	Return 'salesanalysis.stkcategory, stockcategory.categorydescription';
+	Return 'weberp_salesanalysis.stkcategory, weberp_stockcategory.categorydescription';
 	break;
 Case 'Customer Branch':
-	Return 'salesanalysis.custbranch, custbranch.brname';
+	Return 'weberp_salesanalysis.custbranch, weberp_custbranch.brname';
 	break;
 Case 'Sales Person':
-	Return 'salesanalysis.salesperson, salesman.salesmanname';
+	Return 'weberp_salesanalysis.salesperson, weberp_salesman.salesmanname';
 	break;
 } /* end of switch statement */
 }
@@ -148,7 +148,7 @@ $GetReportSpecSQL="SELECT reportheading,
 				newpageafter4,
 				lower4,
 				upper4
-			FROM reportheaders
+			FROM weberp_reportheaders
 			WHERE reportid='" . $_GET['ReportID'] . "'";
 
 $SpecResult= DB_query($GetReportSpecSQL);
@@ -167,7 +167,7 @@ $GetColsSQL = "SELECT colno,
 			constant,
 			budgetoractual,
 			valformat
-		FROM reportcolumns
+		FROM weberp_reportcolumns
 		WHERE reportid='" . $_GET['ReportID'] . "'";
 
 $ColsResult = DB_query($GetColsSQL);
@@ -191,7 +191,7 @@ If (DB_num_rows($ColsResult)== 0) {
 }
 
 
-$SQLFromCls = " FROM ((((((salesanalysis LEFT JOIN salestypes ON salesanalysis.typeabbrev = salestypes.typeabbrev) LEFT JOIN stockmaster ON salesanalysis.stockid = stockmaster.stockid) LEFT JOIN areas ON salesanalysis.area = areas.areacode) LEFT JOIN debtorsmaster ON salesanalysis.cust = debtorsmaster.debtorno) LEFT JOIN custbranch ON (salesanalysis.custbranch = custbranch.branchcode AND salesanalysis.cust=custbranch.debtorno)) LEFT JOIN stockcategory ON salesanalysis.stkcategory = stockcategory.categoryid) LEFT JOIN salesman ON salesanalysis.salesperson = salesman.salesmancode ";
+$SQLFromCls = " FROM ((((((weberp_salesanalysis LEFT JOIN weberp_salestypes ON weberp_salesanalysis.typeabbrev = weberp_salestypes.typeabbrev) LEFT JOIN weberp_stockmaster ON weberp_salesanalysis.stockid = weberp_stockmaster.stockid) LEFT JOIN weberp_areas ON weberp_salesanalysis.area = weberp_areas.areacode) LEFT JOIN weberp_debtorsmaster ON weberp_salesanalysis.cust = weberp_debtorsmaster.debtorno) LEFT JOIN weberp_custbranch ON (weberp_salesanalysis.custbranch = weberp_custbranch.branchcode AND weberp_salesanalysis.cust=weberp_custbranch.debtorno)) LEFT JOIN weberp_stockcategory ON weberp_salesanalysis.stkcategory = weberp_stockcategory.categoryid) LEFT JOIN weberp_salesman ON weberp_salesanalysis.salesperson = weberp_salesman.salesmancode ";
 $SQLSelectCls = 'SELECT ';
 $SQLGroupCls = 'GROUP BY ';
 
@@ -238,8 +238,8 @@ If ($ReportSpec['groupbydata4'] != 'Not Used') {
 
 while ($Cols = DB_fetch_array($ColsResult)){
     If ($Cols['calculation']==0){
-	 $SQLSelectCls = $SQLSelectCls . ', SUM(CASE WHEN salesanalysis.periodno >= ' . $Cols['periodfrom'] . ' AND salesanalysis.periodno <= ' . $Cols['periodto'];
-	 $SQLSelectCls = $SQLSelectCls . ' AND salesanalysis.budgetoractual = ' . $Cols['budgetoractual'] . ' THEN ' . GetDataSQL($Cols['datatype']) . ' ELSE 0 END) AS col' . ($Cols['colno'] + 8);
+	 $SQLSelectCls = $SQLSelectCls . ', SUM(CASE WHEN weberp_salesanalysis.periodno >= ' . $Cols['periodfrom'] . ' AND weberp_salesanalysis.periodno <= ' . $Cols['periodto'];
+	 $SQLSelectCls = $SQLSelectCls . ' AND weberp_salesanalysis.budgetoractual = ' . $Cols['budgetoractual'] . ' THEN ' . GetDataSQL($Cols['datatype']) . ' ELSE 0 END) AS col' . ($Cols['colno'] + 8);
     }
 }
 
@@ -321,7 +321,7 @@ while ($Cols = DB_fetch_array($ColsResult)){
 } /* end of loop through defined columns */
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$SQLWhereCls .= " AND salesanalysis.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$SQLWhereCls .= " AND weberp_salesanalysis.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 $SQLTheLot =	$SQLSelectCls . ' ' . $SQLFromCls . ' ' . $SQLWhereCls . ' ' . $SQLGroupCls ;
 

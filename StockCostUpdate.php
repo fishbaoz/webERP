@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockCostUpdate.php 7436 2016-01-04 00:16:55Z tehonu $*/
 
 $UpdateSecurity =10;
 
@@ -28,9 +28,9 @@ if (isset($_POST['UpdateData'])){
 					overheadcost,
 					mbflag,
 					sum(quantity) as totalqoh
-			FROM stockmaster INNER JOIN locstock
-			ON stockmaster.stockid=locstock.stockid
-			WHERE stockmaster.stockid='".$StockID."'
+			FROM weberp_stockmaster INNER JOIN weberp_locstock
+			ON weberp_stockmaster.stockid=weberp_locstock.stockid
+			WHERE weberp_stockmaster.stockid='".$StockID."'
 			GROUP BY description,
 					units,
 					lastcost,
@@ -58,7 +58,7 @@ if (isset($_POST['UpdateData'])){
  	$OldCost = $_POST['OldMaterialCost'] + $_POST['OldLabourCost'] + $_POST['OldOverheadCost'];
    	$NewCost = filter_number_format($_POST['MaterialCost']) + filter_number_format($_POST['LabourCost']) + filter_number_format($_POST['OverheadCost']);
 
-	$result = DB_query("SELECT * FROM stockmaster WHERE stockid='" . $StockID . "'");
+	$result = DB_query("SELECT * FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 	$myrow = DB_fetch_row($result);
 	if (DB_num_rows($result)==0) {
 		prnMsg (_('The entered item code does not exist'),'error',_('Non-existent Item'));
@@ -67,7 +67,7 @@ if (isset($_POST['UpdateData'])){
 		$Result = DB_Txn_Begin();
 		ItemCostUpdateGL($db, $StockID, $NewCost, $OldCost, $_POST['QOH']);
 
-		$SQL = "UPDATE stockmaster SET	materialcost='" . filter_number_format($_POST['MaterialCost']) . "',
+		$SQL = "UPDATE weberp_stockmaster SET	materialcost='" . filter_number_format($_POST['MaterialCost']) . "',
 										labourcost='" . filter_number_format($_POST['LabourCost']) . "',
 										overheadcost='" . filter_number_format($_POST['OverheadCost']) . "',
 										lastcost='" . $OldCost . "',
@@ -98,11 +98,11 @@ $result = DB_query("SELECT description,
 							stocktype,
 							lastcostupdate,
 							sum(quantity) as totalqoh
-						FROM stockmaster INNER JOIN locstock
-							ON stockmaster.stockid=locstock.stockid
-							INNER JOIN stockcategory
-							ON stockmaster.categoryid = stockcategory.categoryid
-						WHERE stockmaster.stockid='" . $StockID . "'
+						FROM weberp_stockmaster INNER JOIN weberp_locstock
+							ON weberp_stockmaster.stockid=weberp_locstock.stockid
+							INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+						WHERE weberp_stockmaster.stockid='" . $StockID . "'
 						GROUP BY description,
 							units,
 							lastcost,

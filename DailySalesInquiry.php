@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: DailySalesInquiry.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Daily Sales Inquiry');
@@ -16,7 +16,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 
 if (!isset($_POST['MonthToShow'])){
 	$_POST['MonthToShow'] = GetPeriod(Date($_SESSION['DefaultDateFormat']),$db);
-	$Result = DB_query("SELECT lastdate_in_period FROM periods WHERE periodno='" . $_POST['MonthToShow'] . "'");
+	$Result = DB_query("SELECT lastdate_in_period FROM weberp_periods WHERE periodno='" . $_POST['MonthToShow'] . "'");
 	$myrow = DB_fetch_array($Result);
 	$EndDateSQL = $myrow['lastdate_in_period'];
 }
@@ -26,7 +26,7 @@ echo '<table class="selection">
 		<td>' . _('Month to Show') . ':</td>
 		<td><select tabindex="1" name="MonthToShow">';
 
-$PeriodsResult = DB_query("SELECT periodno, lastdate_in_period FROM periods");
+$PeriodsResult = DB_query("SELECT periodno, lastdate_in_period FROM weberp_periods");
 
 while ($PeriodRow = DB_fetch_array($PeriodsResult)){
 	if ($_POST['MonthToShow']==$PeriodRow['periodno']) {
@@ -46,7 +46,7 @@ if($_SESSION['SalesmanLogin'] != '') {
 }else{
 	echo '<td><select tabindex="2" name="Salesperson">';
 
-	$SalespeopleResult = DB_query("SELECT salesmancode, salesmanname FROM salesman");
+	$SalespeopleResult = DB_query("SELECT salesmancode, salesmanname FROM weberp_salesman");
 	if (!isset($_POST['Salesperson'])){
 		$_POST['Salesperson'] = 'All';
 		echo '<option selected="selected" value="All">' . _('All') . '</option>';
@@ -90,23 +90,23 @@ $StartDateSQL =  date('Y-m-d', mktime(0,0,0, (int)$Date_Array[1],1,(int)$Date_Ar
 $sql = "SELECT 	trandate,
 				SUM(price*(1-discountpercent)* (-qty)) as salesvalue,
 				SUM(CASE WHEN mbflag='A' THEN 0 ELSE (standardcost * -qty) END) as cost
-			FROM stockmoves
-			INNER JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			INNER JOIN custbranch
-			ON stockmoves.debtorno=custbranch.debtorno
-				AND stockmoves.branchcode=custbranch.branchcode
-			WHERE (stockmoves.type=10 or stockmoves.type=11)
+			FROM weberp_stockmoves
+			INNER JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_custbranch
+			ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+				AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+			WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 			AND trandate>='" . $StartDateSQL . "'
 			AND trandate<='" . $EndDateSQL . "'";
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+	$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 }elseif ($_POST['Salesperson']!='All') {
-	$sql .= " AND custbranch.salesman='" . $_POST['Salesperson'] . "'";
+	$sql .= " AND weberp_custbranch.salesman='" . $_POST['Salesperson'] . "'";
 }
 
-$sql .= " GROUP BY stockmoves.trandate ORDER BY stockmoves.trandate";
+$sql .= " GROUP BY weberp_stockmoves.trandate ORDER BY weberp_stockmoves.trandate";
 $ErrMsg = _('The sales data could not be retrieved because') . ' - ' . DB_error_msg();
 $SalesResult = DB_query($sql,$ErrMsg);
 

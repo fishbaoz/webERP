@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: geocode_genxml_customers.php 6941 2014-10-26 23:18:08Z daintree $*/
 //$PageSecurity = 3;
 $Title = _('Geocode Generate XML');
 
@@ -17,7 +17,7 @@ function parseToXML($htmlStr)
     return $xmlStr;
 }
 
-$sql = "SELECT * FROM custbranch WHERE 1";
+$sql = "SELECT * FROM weberp_custbranch WHERE 1";
 $ErrMsg = _('An error occurred in retrieving the information');;
 $result = DB_query($sql, $ErrMsg);
 

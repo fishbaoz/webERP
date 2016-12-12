@@ -1,45 +1,45 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CreateChartDetails.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 include ('includes/session.inc');
 $Title = _('Create Chart Details Records');
 include ('includes/header.inc');
 
 /*Script to insert ChartDetails records where one should already exist
-only necessary where manual entry of chartdetails has stuffed the system */
+only necessary where manual entry of weberp_chartdetails has stuffed the system */
 
-$FirstPeriodResult = DB_query("SELECT MIN(periodno) FROM periods");
+$FirstPeriodResult = DB_query("SELECT MIN(periodno) FROM weberp_periods");
 $FirstPeriodRow = DB_fetch_row($FirstPeriodResult);
 
-$LastPeriodResult = DB_query("SELECT MAX(periodno) FROM periods");
+$LastPeriodResult = DB_query("SELECT MAX(periodno) FROM weberp_periods");
 $LastPeriodRow = DB_fetch_row($LastPeriodResult);
 
 $CreateFrom = $FirstPeriodRow[0];
 $CreateTo = $LastPeriodRow[0];;
 
 
-/*First off see if there are any chartdetails missing create recordset of */
+/*First off see if there are any weberp_chartdetails missing create recordset of */
 
-$sql = "SELECT chartmaster.accountcode, MIN(periods.periodno) AS startperiod
-		FROM chartmaster CROSS JOIN periods
-			LEFT JOIN chartdetails ON chartmaster.accountcode = chartdetails.accountcode
-				AND periods.periodno = chartdetails.period
-		WHERE (periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
-		AND chartdetails.accountcode IS NULL
-		GROUP BY chartmaster.accountcode";
+$sql = "SELECT weberp_chartmaster.accountcode, MIN(weberp_periods.periodno) AS startperiod
+		FROM weberp_chartmaster CROSS JOIN weberp_periods
+			LEFT JOIN weberp_chartdetails ON weberp_chartmaster.accountcode = weberp_chartdetails.accountcode
+				AND weberp_periods.periodno = weberp_chartdetails.period
+		WHERE (weberp_periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
+		AND weberp_chartdetails.accountcode IS NULL
+		GROUP BY weberp_chartmaster.accountcode";
 
 $ChartDetailsNotSetUpResult = DB_query($sql,_('Could not test to see that all chart detail records properly initiated'));
 
 if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 
-	/*Now insert the chartdetails records that do not already exist */
-	$sql = "INSERT INTO chartdetails (accountcode, period)
-			SELECT chartmaster.accountcode, periods.periodno
-		FROM chartmaster CROSS JOIN periods
-			LEFT JOIN chartdetails ON chartmaster.accountcode = chartdetails.accountcode
-				AND periods.periodno = chartdetails.period
-		WHERE (periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
-		AND chartdetails.accountcode IS NULL";
+	/*Now insert the weberp_chartdetails records that do not already exist */
+	$sql = "INSERT INTO weberp_chartdetails (accountcode, period)
+			SELECT weberp_chartmaster.accountcode, weberp_periods.periodno
+		FROM weberp_chartmaster CROSS JOIN weberp_periods
+			LEFT JOIN weberp_chartdetails ON weberp_chartmaster.accountcode = weberp_chartdetails.accountcode
+				AND weberp_periods.periodno = weberp_chartdetails.period
+		WHERE (weberp_periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
+		AND weberp_chartdetails.accountcode IS NULL";
 
 	$ErrMsg = _('Inserting new chart details records required failed because');
 	$InsChartDetailsRecords = DB_query($sql,$ErrMsg);
@@ -54,7 +54,7 @@ if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 				budget,
 				bfwdbudget,
 				period
-			FROM chartdetails
+			FROM weberp_chartdetails
 			WHERE period >='" . ($AccountRow['period']-1) . "'
 			AND accountcode='" . $AccountRow['accountcode'] . "'
 			ORDER BY period";
@@ -72,7 +72,7 @@ if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 			} else {
 				$BFwd +=$myrow['actual'];
 				$BFwdBudget += $myrow['budget'];
-				$sql = "UPDATE chartdetails SET bfwd ='" . $BFwd . "',
+				$sql = "UPDATE weberp_chartdetails SET bfwd ='" . $BFwd . "',
 							bfwdbudget ='" . $BFwdBudget . "'
 					WHERE accountcode = '" . $AccountRow['accountcode'] . "'
 					AND period ='" . ($myrow['period']+1) . "'";

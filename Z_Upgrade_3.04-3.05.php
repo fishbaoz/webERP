@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_Upgrade_3.04-3.05.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 //$PageSecurity = 15;
 include('includes/session.inc');
@@ -61,9 +61,9 @@ if ($_POST['DoUpgrade'] == _('Perform Upgrade')){
 
 	/*Now run the data conversions required. */
 
-	prnMsg(_('Upgrade script to put cost information against GRN records from purchorderdetails records .... please wait'),'info');
+	prnMsg(_('Upgrade script to put cost information against GRN records from weberp_purchorderdetails records .... please wait'),'info');
 
-	$TestAlreadyDoneResult = DB_query('SELECT * FROM grns WHERE stdcostunit<>0');
+	$TestAlreadyDoneResult = DB_query('SELECT * FROM weberp_grns WHERE stdcostunit<>0');
 	if (DB_num_rows($TestAlreadyDoneResult)>0){
 		prnMsg(_('The upgrade script appears to have been run already successfully - there is no need to re-run it'),'info');
 		include('includes/footer.inc');
@@ -71,10 +71,10 @@ if ($_POST['DoUpgrade'] == _('Perform Upgrade')){
 	}
 
 
-	$UpdateGRNCosts = DB_query('UPDATE grns INNER JOIN purchorderdetails ON grns.podetailitem=purchorderdetails.podetailitem SET grns.stdcostunit = purchorderdetails.stdcostunit');
+	$UpdateGRNCosts = DB_query('UPDATE weberp_grns INNER JOIN weberp_purchorderdetails ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem SET weberp_grns.stdcostunit = weberp_purchorderdetails.stdcostunit');
 
 
-	prnMsg(_('The GRN records have been updated with cost information from purchorderdetails successfully'),'success');
+	prnMsg(_('The GRN records have been updated with cost information from weberp_purchorderdetails successfully'),'success');
 } /*Dont do upgrade */
 
 include('includes/footer.inc');

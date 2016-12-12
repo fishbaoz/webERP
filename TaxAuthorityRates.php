@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: TaxAuthorityRates.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Tax Rates');
@@ -28,15 +28,15 @@ if(!isset($TaxAuthority)) {
 }
 
 if(isset($_POST['UpdateRates'])) {
-	$TaxRatesResult = DB_query("SELECT taxauthrates.taxcatid,
-										taxauthrates.taxrate,
-										taxauthrates.dispatchtaxprovince
-								FROM taxauthrates
-								WHERE taxauthrates.taxauthority='" . $TaxAuthority . "'");
+	$TaxRatesResult = DB_query("SELECT weberp_taxauthrates.taxcatid,
+										weberp_taxauthrates.taxrate,
+										weberp_taxauthrates.dispatchtaxprovince
+								FROM weberp_taxauthrates
+								WHERE weberp_taxauthrates.taxauthority='" . $TaxAuthority . "'");
 
 	while($myrow=DB_fetch_array($TaxRatesResult)) {
 
-		$sql = "UPDATE taxauthrates SET taxrate=" . (filter_number_format($_POST[$myrow['dispatchtaxprovince'] . '_' . $myrow['taxcatid']])/100) . "
+		$sql = "UPDATE weberp_taxauthrates SET taxrate=" . (filter_number_format($_POST[$myrow['dispatchtaxprovince'] . '_' . $myrow['taxcatid']])/100) . "
 						WHERE taxcatid = '" . $myrow['taxcatid'] . "'
 						AND dispatchtaxprovince = '" . $myrow['dispatchtaxprovince'] . "'
 						AND taxauthority = '" . $TaxAuthority . "'";
@@ -50,7 +50,7 @@ if(isset($_POST['UpdateRates'])) {
 /*Display updated rates*/
 
 $TaxAuthDetail = DB_query("SELECT description
-							FROM taxauthorities WHERE taxid='" . $TaxAuthority . "'");
+							FROM weberp_taxauthorities WHERE taxid='" . $TaxAuthority . "'");
 $myrow = DB_fetch_row($TaxAuthDetail);
 
 echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
@@ -58,20 +58,20 @@ echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'
 	<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
 	<input type="hidden" name="TaxAuthority" value="' . $TaxAuthority . '" />';
 
-$TaxRatesResult = DB_query("SELECT taxauthrates.taxcatid,
-									taxcategories.taxcatname,
-									taxauthrates.taxrate,
-									taxauthrates.dispatchtaxprovince,
-									taxprovinces.taxprovincename
-							FROM taxauthrates INNER JOIN taxauthorities
-							ON taxauthrates.taxauthority=taxauthorities.taxid
-							INNER JOIN taxprovinces
-							ON taxauthrates.dispatchtaxprovince= taxprovinces.taxprovinceid
-							INNER JOIN taxcategories
-							ON taxauthrates.taxcatid=taxcategories.taxcatid
-							WHERE taxauthrates.taxauthority='" . $TaxAuthority . "'
-							ORDER BY taxauthrates.dispatchtaxprovince,
-							taxauthrates.taxcatid");
+$TaxRatesResult = DB_query("SELECT weberp_taxauthrates.taxcatid,
+									weberp_taxcategories.taxcatname,
+									weberp_taxauthrates.taxrate,
+									weberp_taxauthrates.dispatchtaxprovince,
+									weberp_taxprovinces.taxprovincename
+							FROM weberp_taxauthrates INNER JOIN weberp_taxauthorities
+							ON weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+							INNER JOIN weberp_taxprovinces
+							ON weberp_taxauthrates.dispatchtaxprovince= weberp_taxprovinces.taxprovinceid
+							INNER JOIN weberp_taxcategories
+							ON weberp_taxauthrates.taxcatid=weberp_taxcategories.taxcatid
+							WHERE weberp_taxauthrates.taxauthority='" . $TaxAuthority . "'
+							ORDER BY weberp_taxauthrates.dispatchtaxprovince,
+							weberp_taxauthrates.taxcatid");
 
 if(DB_num_rows($TaxRatesResult)>0) {
 	echo '<div class="centre"><h1>' . $myrow[0] . '</h1></div>';// TaxAuthorityRates table title.

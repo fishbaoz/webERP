@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_workorders.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 /* Check that the stock code exists*/
 	function VerifyWorkOrderExists($WorkOrder, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(wo)
-				FROM workorders
+				FROM weberp_workorders
 				WHERE wo='".$WorkOrder."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -17,7 +17,7 @@
 /* Check that the stock location is set up in the weberp database */
 	function VerifyStockLocation($location, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(loccode)
-					 FROM locations
+					 FROM weberp_locations
 					  WHERE loccode='" . $location . "'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -44,7 +44,7 @@
 	}
 
 	function VerifyRequiredByDate($RequiredByDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -77,7 +77,7 @@
 	}
 
 	function VerifyStartDate($StartDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -145,7 +145,7 @@
 	}
 
 	function VerifyBatch($batch, $stockid, $location, $i, $Errors, $db) {
-		$sql="SELECT controlled, serialised FROM stockmaster WHERE stockid='".$stockid."'";
+		$sql="SELECT controlled, serialised FROM weberp_stockmaster WHERE stockid='".$stockid."'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_row($result);
 		if ($myrow[0]!=1) {
@@ -155,7 +155,7 @@
 			$Errors[$i] = ItemSerialised;
 			return $Errors;
 		}
-		$sql="SELECT quantity FROM stockserialitems
+		$sql="SELECT quantity FROM weberp_stockserialitems
               WHERE stockid='".$stockid. "'
               AND loccode='".$location."'
               AND serialno='".$batch."'";
@@ -238,11 +238,11 @@
 			$ItemFieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$wosql = 'INSERT INTO workorders ('.mb_substr($WOFieldNames,0,-2).') '.
+			$wosql = 'INSERT INTO weberp_workorders ('.mb_substr($WOFieldNames,0,-2).') '.
 				'VALUES ('.mb_substr($WOFieldValues,0,-2).') ';
-			$itemsql = 'INSERT INTO woitems ('.mb_substr($ItemFieldNames,0,-2).') '.
+			$itemsql = 'INSERT INTO weberp_woitems ('.mb_substr($ItemFieldNames,0,-2).') '.
 				'VALUES ('.mb_substr($ItemFieldValues,0,-2).') ';
-			$systypessql = 'UPDATE systypes set typeno='.GetNextTransactionNo(40, $db).' where typeid=40';
+			$systypessql = 'UPDATE weberp_systypes set typeno='.GetNextTransactionNo(40, $db).' where typeid=40';
 			DB_Txn_Begin();
 			$woresult = DB_Query($wosql, $db);
 			$itemresult = DB_Query($itemsql, $db);
@@ -288,7 +288,7 @@
 			$cost=$itemdetails[1]['materialcost']+$itemdetails[1]['labourcost']+$itemdetails[1]['overheadcost'];
 			$TransactionNo=GetNextTransactionNo(28, $db);
 
-			$stockmovesql="INSERT INTO stockmoves (stockid,
+			$stockmovesql="INSERT INTO weberp_stockmoves (stockid,
                                                    type,
                                                    transno,
                                                    loccode,
@@ -310,10 +310,10 @@
                                                 '".$newqoh."',
                                                 '".$cost."',
                                                 '".$cost."')";
-			$locstocksql="UPDATE locstock SET quantity = quantity + " . $Quantity ."
+			$locstocksql="UPDATE weberp_locstock SET quantity = quantity + " . $Quantity ."
 			                           WHERE loccode='". $Location."'
 			                           AND stockid='".$StockID."'";
-			$glupdatesql1="INSERT INTO gltrans (type,
+			$glupdatesql1="INSERT INTO weberp_gltrans (type,
 						                                               typeno,
 						                                               trandate,
 						                                               periodno,
@@ -327,7 +327,7 @@
 						                                              '".$wipglact."',
 						                                              '".$cost*-$Quantity."',
 						                                              '".$StockID.' x '.$Quantity.' @ '.$cost."')";
-			$glupdatesql2="INSERT INTO gltrans (type,
+			$glupdatesql2="INSERT INTO weberp_gltrans (type,
 						                                                typeno,
 						                                                trandate,
 						                                                periodno,
@@ -341,11 +341,11 @@
 						                                        '".$stockact."',
 						                                        '".$cost*$Quantity."',
 						                                        '".$StockID.' x '.$Quantity.' @ '.$cost."')";
-			$systypessql = "UPDATE systypes set typeno='".$TransactionNo."' where typeid=28";
-			$batchsql="UPDATE stockserialitems SET quantity=quantity-" . $Quantity.
+			$systypessql = "UPDATE weberp_systypes set typeno='".$TransactionNo."' where typeid=28";
+			$batchsql="UPDATE weberp_stockserialitems SET quantity=quantity-" . $Quantity.
 				              " WHERE stockid='".$StockID."'
                               AND loccode='".$Location."' AND serialno='".$Batch."'";
-			$costsql = "UPDATE workorders SET costissued=costissued+".$cost." WHERE wo='".$WONumber . "'";
+			$costsql = "UPDATE weberp_workorders SET costissued=costissued+".$cost." WHERE wo='".$WONumber . "'";
 
 			DB_Txn_Begin();
 			DB_query($stockmovesql);
@@ -391,12 +391,12 @@
 			$newqoh = $Quantity + $balance;
 			$wipglact=GetCategoryGLCode($itemdetails['categoryid'], 'wipact', $db);
 			$stockact=GetCategoryGLCode($itemdetails['categoryid'], 'stockact', $db);
-			$costsql="SELECT costissued FROM workorders WHERE wo='".$WONumber . "'";
+			$costsql="SELECT costissued FROM weberp_workorders WHERE wo='".$WONumber . "'";
 			$costresult=DB_query($costsql);
 			$myrow=DB_fetch_row($costresult);
 			$cost=$myrow[0];
 			$TransactionNo=GetNextTransactionNo(26, $db);
-			$stockmovesql="INSERT INTO stockmoves (stockid,
+			$stockmovesql="INSERT INTO weberp_stockmoves (stockid,
                                                    type,
                                                    transno,
                                                    loccode,
@@ -418,10 +418,10 @@
                                                 '".$newqoh."',
                                                 '".$cost."',
                                                 '".$cost."')";
-			$locstocksql="UPDATE locstock SET quantity = quantity + ".$Quantity."
+			$locstocksql="UPDATE weberp_locstock SET quantity = quantity + ".$Quantity."
                                  WHERE loccode='". $Location."'
                                  AND stockid='".$StockID."'";
-			$glupdatesql1="INSERT INTO gltrans (type,
+			$glupdatesql1="INSERT INTO weberp_gltrans (type,
                                                typeno,
                                                trandate,
                                                periodno,
@@ -435,7 +435,7 @@
                                                '".$wipglact."',
                                                '".$cost*$Quantity. "',
                                                '".$StockID.' x '.$Quantity.' @ '.$cost."')";
-			$glupdatesql2="INSERT INTO gltrans (type,
+			$glupdatesql2="INSERT INTO weberp_gltrans (type,
                                                 typeno,
                                                 trandate,
                                                 periodno,
@@ -448,7 +448,7 @@
                                                '".GetPeriodFromTransactionDate($TranDate, sizeof($Errors), $Errors, $db)."',
                                                '".$stockact.','.$cost*-$Quantity. "',
                                                '".$StockID.' x '.$Quantity.' @ '.$cost."')";
-			$systypessql = "UPDATE systypes set typeno='".$TransactionNo."' where typeid=26";
+			$systypessql = "UPDATE weberp_systypes set typeno='".$TransactionNo."' where typeid=26";
 			DB_Txn_Begin();
 			DB_query($stockmovesql);
 			DB_query($locstocksql);
@@ -473,7 +473,7 @@
 			return $Errors;
 		}
 		$sql="SELECT wo
-			  FROM woitems
+			  FROM weberp_woitems
 			  WHERE " . $Field ." " . LIKE  . " '%".$Criteria."%'";
 		$result = DB_Query($sql, $db);
 		$i=0;

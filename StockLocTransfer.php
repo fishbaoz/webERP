@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockLocTransfer.php 6945 2014-10-27 07:20:48Z daintree $*/
 /* Inventory Transfer - Bulk Dispatch */
 
 include('includes/session.inc');
@@ -15,7 +15,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 	$InputError = False; /*Start off hoping for the best */
 	$TotalItems = 0;
 	//Make sure this Transfer has not already been entered... aka one way around the refresh & insert new records problem
-	$result = DB_query("SELECT * FROM loctransfers WHERE reference='" . $_POST['Trf_ID'] . "'");
+	$result = DB_query("SELECT * FROM weberp_loctransfers WHERE reference='" . $_POST['Trf_ID'] . "'");
 	if (DB_num_rows($result)!=0){
 		$InputError = true;
 		$ErrorMessage = _('This transaction has already been entered') . '. ' . _('Please start over now') . '<br />';
@@ -50,7 +50,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 				switch ($i) {
 					case 0:
 						$StockID = trim(mb_strtoupper($myrow[$i]));
-						$result = DB_query("SELECT COUNT(stockid) FROM stockmaster WHERE stockid='" . $StockID . "'");
+						$result = DB_query("SELECT COUNT(stockid) FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 						$StockIDCheck = DB_fetch_row($result);
 						if ($StockIDCheck[0]==0){
 							$InputError = True;
@@ -67,7 +67,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 				} // end switch statement
 				if ($_SESSION['ProhibitNegativeStock']==1){
 					$InTransitSQL="SELECT SUM(shipqty-recqty) as intransit
-									FROM loctransfers
+									FROM weberp_loctransfers
 									WHERE stockid='" . $StockID . "'
 										AND shiploc='".$_POST['FromStockLocation']."'
 										AND shipqty>recqty";
@@ -76,7 +76,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 					$InTransitQuantity=$InTransitRow['intransit'];
 					// Only if stock exists at this location
 					$result = DB_query("SELECT quantity
-										FROM locstock
+										FROM weberp_locstock
 										WHERE stockid='" . $StockID . "'
 										AND loccode='".$_POST['FromStockLocation']."'");
 					$CheckStockRow = DB_fetch_array($result);
@@ -114,7 +114,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 				}
 				if (isset($_POST['StockID' . $i]) AND $_POST['StockID' . $i]!=''){
 					$_POST['StockID' . $i]=trim(mb_strtoupper($_POST['StockID' . $i]));
-					$result = DB_query("SELECT COUNT(stockid) FROM stockmaster WHERE stockid='" . $_POST['StockID' . $i] . "'");
+					$result = DB_query("SELECT COUNT(stockid) FROM weberp_stockmaster WHERE stockid='" . $_POST['StockID' . $i] . "'");
 					$myrow = DB_fetch_row($result);
 					if ($myrow[0]==0){
 						$InputError = True;
@@ -134,7 +134,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 					}
 					if ($_SESSION['ProhibitNegativeStock']==1){
 						$InTransitSQL="SELECT SUM(shipqty-recqty) as intransit
-										FROM loctransfers
+										FROM weberp_loctransfers
 										WHERE stockid='" . $_POST['StockID' . $i] . "'
 											AND shiploc='".$_POST['FromStockLocation']."'
 											AND shipqty>recqty";
@@ -143,7 +143,7 @@ if (isset($_POST['Submit']) OR isset($_POST['EnterMoreItems'])){
 						$InTransitQuantity=$InTransitRow['intransit'];
 						// Only if stock exists at this location
 						$result = DB_query("SELECT quantity
-											FROM locstock
+											FROM weberp_locstock
 											WHERE stockid='" . $_POST['StockID' . $i] . "'
 											AND loccode='".$_POST['FromStockLocation']."'");
 
@@ -195,11 +195,11 @@ if(isset($_POST['Submit']) AND $InputError==False){
 
 		if($_POST['StockID' . $i] != ''){
 			$DecimalsSql = "SELECT decimalplaces
-							FROM stockmaster
+							FROM weberp_stockmaster
 							WHERE stockid='" . $_POST['StockID' . $i] . "'";
 			$DecimalResult = DB_query($DecimalsSql);
 			$DecimalRow = DB_fetch_array($DecimalResult);
-			$sql = "INSERT INTO loctransfers (reference,
+			$sql = "INSERT INTO weberp_loctransfers (reference,
 								stockid,
 								shipqty,
 								shipdate,
@@ -253,7 +253,7 @@ if(isset($_POST['Submit']) AND $InputError==False){
 			<th colspan="4"><input type="hidden" name="Trf_ID" value="' . $Trf_ID . '" /><h3>' .  _('Inventory Location Transfer Shipment Reference').' # '. $Trf_ID. '</h3></th>
 		</tr>';
 
-	$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1 ORDER BY locationname";
+	$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1 ORDER BY locationname";
 	$resultStkLocs = DB_query($sql);
 
 	echo '<tr>

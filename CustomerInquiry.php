@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: CustomerInquiry.php 7597 2016-08-19 12:03:21Z tehonu $*/
 /* Shows the customers account transactions with balances outstanding, links available to drill down to invoice/credit note or email invoices/credit notes. */
 
 include('includes/session.inc');
@@ -24,7 +24,7 @@ if (!isset($_GET['CustomerID']) and !isset($_SESSION['CustomerID'])) {
 //Check if the users have proper authority
 if ($_SESSION['SalesmanLogin'] != '') {
 	$ViewAllowed = false;
-	$sql = "SELECT salesman FROM custbranch WHERE debtorno = '" . $CustomerID . "'";
+	$sql = "SELECT salesman FROM weberp_custbranch WHERE debtorno = '" . $CustomerID . "'";
 	$ErrMsg = _('Failed to retrieve sales data');
 	$result = DB_query($sql,$ErrMsg);
 	if(DB_num_rows($result)>0) {
@@ -65,53 +65,53 @@ if (!isset($_POST['TransAfterDate'])) {
 	$_POST['TransAfterDate'] = Date($_SESSION['DefaultDateFormat'], Mktime(0, 0, 0, Date('m') - $_SESSION['NumberOfMonthMustBeShown'], Date('d'), Date('Y')));
 }
 
-$SQL = "SELECT debtorsmaster.name,
-		currencies.currency,
-		currencies.decimalplaces,
-		paymentterms.terms,
-		debtorsmaster.creditlimit,
-		holdreasons.dissallowinvoices,
-		holdreasons.reasondescription,
-		SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) AS balance,
-		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
-			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) >= paymentterms.daysbeforedue
-			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+$SQL = "SELECT weberp_debtorsmaster.name,
+		weberp_currencies.currency,
+		weberp_currencies.decimalplaces,
+		weberp_paymentterms.terms,
+		weberp_debtorsmaster.creditlimit,
+		weberp_holdreasons.dissallowinvoices,
+		weberp_holdreasons.reasondescription,
+		SUM(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc) AS balance,
+		SUM(CASE WHEN (weberp_paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) >= weberp_paymentterms.daysbeforedue
+			THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= 0 THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 		END) AS due,
-		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
-			AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		SUM(CASE WHEN (weberp_paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue
+			AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+			THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount
-			- debtortrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+			THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount
+			- weberp_debtortrans.alloc ELSE 0 END
 		END) AS overdue1,
-		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
-			AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		SUM(CASE WHEN (weberp_paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue
+			AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 		END) AS overdue2
-		FROM debtorsmaster,
-	 			paymentterms,
-	 			holdreasons,
-	 			currencies,
-	 			debtortrans
-		WHERE  debtorsmaster.paymentterms = paymentterms.termsindicator
-	 		AND debtorsmaster.currcode = currencies.currabrev
-	 		AND debtorsmaster.holdreason = holdreasons.reasoncode
-	 		AND debtorsmaster.debtorno = '" . $CustomerID . "'
-	 		AND debtorsmaster.debtorno = debtortrans.debtorno
-			GROUP BY debtorsmaster.name,
-			currencies.currency,
-			paymentterms.terms,
-			paymentterms.daysbeforedue,
-			paymentterms.dayinfollowingmonth,
-			debtorsmaster.creditlimit,
-			holdreasons.dissallowinvoices,
-			holdreasons.reasondescription";
+		FROM weberp_debtorsmaster,
+	 			weberp_paymentterms,
+	 			weberp_holdreasons,
+	 			weberp_currencies,
+	 			weberp_debtortrans
+		WHERE  weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+	 		AND weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+	 		AND weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+	 		AND weberp_debtorsmaster.debtorno = '" . $CustomerID . "'
+	 		AND weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+			GROUP BY weberp_debtorsmaster.name,
+			weberp_currencies.currency,
+			weberp_paymentterms.terms,
+			weberp_paymentterms.daysbeforedue,
+			weberp_paymentterms.dayinfollowingmonth,
+			weberp_debtorsmaster.creditlimit,
+			weberp_holdreasons.dissallowinvoices,
+			weberp_holdreasons.reasondescription";
 
 $ErrMsg = _('The customer details could not be retrieved by the SQL because');
 $CustomerResult = DB_query($SQL, $ErrMsg);
@@ -122,21 +122,21 @@ if (DB_num_rows($CustomerResult) == 0) {
 
 	$NIL_BALANCE = True;
 
-	$SQL = "SELECT debtorsmaster.name,
-					debtorsmaster.currcode,
-					currencies.currency,
-					currencies.decimalplaces,
-					paymentterms.terms,
-					debtorsmaster.creditlimit,
-					holdreasons.dissallowinvoices,
-					holdreasons.reasondescription
-			FROM debtorsmaster INNER JOIN paymentterms
-			ON debtorsmaster.paymentterms = paymentterms.termsindicator
-			INNER JOIN currencies
-			ON debtorsmaster.currcode = currencies.currabrev
-			INNER JOIN holdreasons
-			ON debtorsmaster.holdreason = holdreasons.reasoncode
-			WHERE debtorsmaster.debtorno = '" . $CustomerID . "'";
+	$SQL = "SELECT weberp_debtorsmaster.name,
+					weberp_debtorsmaster.currcode,
+					weberp_currencies.currency,
+					weberp_currencies.decimalplaces,
+					weberp_paymentterms.terms,
+					weberp_debtorsmaster.creditlimit,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_holdreasons.reasondescription
+			FROM weberp_debtorsmaster INNER JOIN weberp_paymentterms
+			ON weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+			INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+			WHERE weberp_debtorsmaster.debtorno = '" . $CustomerID . "'";
 
 	$ErrMsg = _('The customer details could not be retrieved by the SQL because');
 	$CustomerResult = DB_query($SQL, $ErrMsg);
@@ -211,28 +211,28 @@ echo '<input class="noprint" name="Refresh Inquiry" type="submit" value="', _('R
 
 $DateAfterCriteria = FormatDateForSQL($_POST['TransAfterDate']);
 
-$SQL = "SELECT systypes.typename,
-				debtortrans.id,
-				debtortrans.type,
-				debtortrans.transno,
-				debtortrans.branchcode,
-				debtortrans.trandate,
-				debtortrans.reference,
-				debtortrans.invtext,
-				debtortrans.order_,
-				salesorders.customerref,
-				debtortrans.rate,
-				(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount) AS totalamount,
-				debtortrans.alloc AS allocated
-			FROM debtortrans
-			INNER JOIN systypes
-				ON debtortrans.type = systypes.typeid
-			LEFT JOIN salesorders
-				ON salesorders.orderno=debtortrans.order_
-			WHERE debtortrans.debtorno = '" . $CustomerID . "'
-				AND debtortrans.trandate >= '" . $DateAfterCriteria . "'
-				ORDER BY debtortrans.trandate,
-					debtortrans.id";
+$SQL = "SELECT weberp_systypes.typename,
+				weberp_debtortrans.id,
+				weberp_debtortrans.type,
+				weberp_debtortrans.transno,
+				weberp_debtortrans.branchcode,
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.reference,
+				weberp_debtortrans.invtext,
+				weberp_debtortrans.order_,
+				weberp_salesorders.customerref,
+				weberp_debtortrans.rate,
+				(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount) AS totalamount,
+				weberp_debtortrans.alloc AS allocated
+			FROM weberp_debtortrans
+			INNER JOIN weberp_systypes
+				ON weberp_debtortrans.type = weberp_systypes.typeid
+			LEFT JOIN weberp_salesorders
+				ON weberp_salesorders.orderno=weberp_debtortrans.order_
+			WHERE weberp_debtortrans.debtorno = '" . $CustomerID . "'
+				AND weberp_debtortrans.trandate >= '" . $DateAfterCriteria . "'
+				ORDER BY weberp_debtortrans.trandate,
+					weberp_debtortrans.id";
 
 $ErrMsg = _('No transactions were returned by the SQL because');
 $TransResult = DB_query($SQL, $ErrMsg);

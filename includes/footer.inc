@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: footer.inc 6594 2014-03-02 23:15:39Z turbopt $*/
 
 echo '</div>'; // BodyWrapDiv
 echo '</div>'; // BodyDiv

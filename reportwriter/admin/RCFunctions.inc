@@ -734,7 +734,7 @@ function CreateLinkList($ReportID,$Table) {
 	/* Get list of link tables from foreign keys */
 	for ($i = 0; $i < $Table; $i++) {
 		$comments = '';
-		$sql = "SELECT table1, table2 FROM reportlinks WHERE table1 = '" . $myrow[$i] . "'";
+		$sql = "SELECT table1, table2 FROM weberp_reportlinks WHERE table1 = '" . $myrow[$i] . "'";
 		$Result=DB_query($sql,'','',false,true);
 		while($mytable=DB_fetch_row($Result)) {
 			if ($myrow[$Table]) {
@@ -775,7 +775,7 @@ function CreateLinkEqList($ReportID,$Table) {
 	/* Get list of foreign key constraints */
 	for ($i = 0; $i < $Table; $i++) {
 		$comments = '';
-		$sql = "SELECT table1, table2, equation FROM reportlinks WHERE table1 = '" . $myrow[$i] . "'";
+		$sql = "SELECT table1, table2, equation FROM weberp_reportlinks WHERE table1 = '" . $myrow[$i] . "'";
 		$Result=DB_query($sql,'','',false,true);
 		while($mytable=DB_fetch_row($Result)) {
 			if ($myrow[$Table+3]) {

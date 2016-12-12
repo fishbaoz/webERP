@@ -1,6 +1,6 @@
 <?php
 /* $Id: UserBankAccounts.php 7398 2015-11-24 19:59:10Z tehonu $*/
-/* Maintains table bankaccountusers (Authorized users to work with a bank account in webERP) */
+/* Maintains table weberp_bankaccountusers (Authorized users to work with a bank account in webERP) */
 
 include('includes/session.inc');
 $Title = _('Bank Account Users');
@@ -57,7 +57,7 @@ if (isset($_POST['submit'])) {
 		// First check the user is not being duplicated
 
 		$CheckSql = "SELECT count(*)
-			     FROM bankaccountusers
+			     FROM weberp_bankaccountusers
 			     WHERE accountcode= '" . $_POST['SelectedBankAccount'] . "'
 				 AND userid = '" . $_POST['SelectedUser'] . "'";
 
@@ -69,7 +69,7 @@ if (isset($_POST['submit'])) {
 			prnMsg(_('The Bank Account') . ' ' . $_POST['SelectedBankAccount'] . ' ' . _('is already authorised for this user'), 'error');
 		} else {
 			// Add new record on submit
-			$SQL = "INSERT INTO bankaccountusers (accountcode,
+			$SQL = "INSERT INTO weberp_bankaccountusers (accountcode,
 												userid)
 										VALUES ('" . $_POST['SelectedBankAccount'] . "',
 												'" . $_POST['SelectedUser'] . "')";
@@ -81,7 +81,7 @@ if (isset($_POST['submit'])) {
 		}
 	}
 } elseif (isset($_GET['delete'])) {
-	$SQL = "DELETE FROM bankaccountusers
+	$SQL = "DELETE FROM weberp_bankaccountusers
 		WHERE accountcode='" . $SelectedBankAccount . "'
 		AND userid='" . $SelectedUser . "'";
 
@@ -104,7 +104,7 @@ if (!isset($SelectedUser)) {
 
 	$Result = DB_query("SELECT userid,
 								realname
-						FROM www_users
+						FROM weberp_www_users
 						ORDER BY userid");
 
 	echo '<option value="">' . _('Not Yet Selected') . '</option>';
@@ -135,7 +135,7 @@ if (!isset($SelectedUser)) {
 //end of ifs and buts!
 if (isset($_POST['process']) or isset($SelectedUser)) {
 	$SQLName = "SELECT realname
-			FROM www_users
+			FROM weberp_www_users
 			WHERE userid='" . $SelectedUser . "'";
 	$Result = DB_query($SQLName);
 	$MyRow = DB_fetch_array($Result);
@@ -146,12 +146,12 @@ if (isset($_POST['process']) or isset($SelectedUser)) {
 		<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
 		<input type="hidden" name="SelectedUser" value="' . $SelectedUser . '" />';
 
-	$SQL = "SELECT bankaccountusers.accountcode,
-					bankaccounts.bankaccountname
-			FROM bankaccountusers INNER JOIN bankaccounts
-			ON bankaccountusers.accountcode=bankaccounts.accountcode
-			WHERE bankaccountusers.userid='" . $SelectedUser . "'
-			ORDER BY bankaccounts.bankaccountname ASC";
+	$SQL = "SELECT weberp_bankaccountusers.accountcode,
+					weberp_bankaccounts.bankaccountname
+			FROM weberp_bankaccountusers INNER JOIN weberp_bankaccounts
+			ON weberp_bankaccountusers.accountcode=weberp_bankaccounts.accountcode
+			WHERE weberp_bankaccountusers.userid='" . $SelectedUser . "'
+			ORDER BY weberp_bankaccounts.bankaccountname ASC";
 
 	$Result = DB_query($SQL);
 
@@ -200,11 +200,11 @@ if (isset($_POST['process']) or isset($SelectedUser)) {
 
 		$Result = DB_query("SELECT accountcode,
 									bankaccountname
-							FROM bankaccounts
-							WHERE NOT EXISTS (SELECT bankaccountusers.accountcode
-											FROM bankaccountusers
-											WHERE bankaccountusers.userid='" . $SelectedUser . "'
-												AND bankaccountusers.accountcode=bankaccounts.accountcode)
+							FROM weberp_bankaccounts
+							WHERE NOT EXISTS (SELECT weberp_bankaccountusers.accountcode
+											FROM weberp_bankaccountusers
+											WHERE weberp_bankaccountusers.userid='" . $SelectedUser . "'
+												AND weberp_bankaccountusers.accountcode=weberp_bankaccounts.accountcode)
 							ORDER BY bankaccountname");
 
 		if (!isset($_POST['SelectedBankAccount'])) {

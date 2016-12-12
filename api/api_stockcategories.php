@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_stockcategories.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 	function VerifyCategoryID($CategoryID, $i, $Errors) {
 		if (mb_strlen($CategoryID)>6 or $CategoryID=='') {
@@ -11,7 +11,7 @@
 /* Verify the category doesnt exist */
 	function VerifyStockCategoryAlreadyExists($StockCategory, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(categoryid)
-				      FROM stockcategory
+				      FROM weberp_stockcategory
 				      WHERE categoryid='".$StockCategory."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -63,7 +63,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = "INSERT INTO stockcategory ('" . mb_substr($FieldNames,0,-2) . "')
+		$sql = "INSERT INTO weberp_stockcategory ('" . mb_substr($FieldNames,0,-2) . "')
 				VALUES ('" . mb_substr($FieldValues,0,-2) . "') ";
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -101,7 +101,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql="UPDATE stockcategory SET ";
+		$sql="UPDATE weberp_stockcategory SET ";
 		foreach ($CategoryDetails as $key => $value) {
 			$sql .= $key . "='" .$value. "', ";
 		}
@@ -133,7 +133,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM stockcategory WHERE categoryid='".$Categoryid."'";
+		$sql="SELECT * FROM weberp_stockcategory WHERE categoryid='".$Categoryid."'";
 		$result = DB_Query($sql, $db);
 		if (sizeof($Errors)==0) {
 			return DB_fetch_array($result);
@@ -154,7 +154,7 @@
 		}
 		$sql="SELECT categoryid,
 					categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE " . $Field ." " . LIKE  . " '%".$Criteria."%'";
 		$result = DB_Query($sql, $db);
 		$i=0;
@@ -174,15 +174,15 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql="SELECT stockitemproperties.stockid,
+		$sql="SELECT weberp_stockitemproperties.stockid,
 					description
-			FROM stockitemproperties
-			      INNER JOIN stockcatproperties
-			      ON stockitemproperties.stkcatpropid=stockcatproperties.stkcatpropid
-			      INNER JOIN stockmaster
-			      ON stockitemproperties.stockid=stockmaster.stockid
-			      WHERE stockitemproperties.value like '".$Label."'
-				AND stockcatproperties.categoryid='".$Category."'";
+			FROM weberp_stockitemproperties
+			      INNER JOIN weberp_stockcatproperties
+			      ON weberp_stockitemproperties.stkcatpropid=weberp_stockcatproperties.stkcatpropid
+			      INNER JOIN weberp_stockmaster
+			      ON weberp_stockitemproperties.stockid=weberp_stockmaster.stockid
+			      WHERE weberp_stockitemproperties.value like '".$Label."'
+				AND weberp_stockcatproperties.categoryid='".$Category."'";
 		$result = DB_Query($sql, $db);
 		$i=0;
 		$ItemList = array();
@@ -202,7 +202,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql="SELECT value FROM stockitemproperties
+		$sql="SELECT value FROM weberp_stockitemproperties
 		               WHERE stockid='".$StockID."'
 		               AND stkcatpropid='".$Property . "'";
 		$result = DB_Query($sql, $db);
@@ -221,7 +221,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT categoryid FROM stockcategory";
+		$sql = "SELECT categoryid FROM weberp_stockcategory";
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {

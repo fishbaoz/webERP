@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFReceipt.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -49,7 +49,7 @@ $YPos -= (1.5 * $line_height);
 
 $PageNumber++;
 
-$sql="SELECT MIN(id) as start FROM debtortrans WHERE type=12 AND transno='". $_GET['BatchNumber']. "'";
+$sql="SELECT MIN(id) as start FROM weberp_debtortrans WHERE type=12 AND transno='". $_GET['BatchNumber']. "'";
 $result=DB_query($sql);
 $myrow=DB_fetch_array($result);
 $StartReceiptNumber=$myrow['start'];
@@ -57,7 +57,7 @@ $StartReceiptNumber=$myrow['start'];
 $sql="SELECT debtorno,
 			ovamount,
 			invtext
-		FROM debtortrans
+		FROM weberp_debtortrans
 		WHERE type=12
 		AND transno='" . $_GET['BatchNumber'] . "'
 		AND id='". ($StartReceiptNumber-1+$_GET['ReceiptNumber']) ."'";
@@ -69,9 +69,9 @@ $Narrative = $myrow['invtext'];
 
 $sql = "SELECT 	currabrev,
 				decimalplaces
-			FROM currencies
+			FROM weberp_currencies
 			WHERE currabrev=(SELECT currcode
-				FROM banktrans
+				FROM weberp_banktrans
 				WHERE type=12
 				AND transno='" . $_GET['BatchNumber']."')";
 $result=DB_query($sql);
@@ -86,7 +86,7 @@ $sql="SELECT name,
 			 address4,
 			 address5,
 			 address6
-		FROM debtorsmaster
+		FROM weberp_debtorsmaster
 		WHERE debtorno='".$DebtorNo."'";
 
 $result=DB_query($sql);

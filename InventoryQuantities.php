@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: InventoryQuantities.php 6944 2014-10-27 07:15:34Z daintree $ */
 
 // InventoryQuantities.php - Report of parts with quantity. Sorts by part and shows
 // all locations where there are quantities of the part
@@ -19,10 +19,10 @@ If (isset($_POST['PrintPDF'])) {
 	$WhereCategory = ' ';
 	$CatDescription = ' ';
 	if ($_POST['StockCat'] != 'All') {
-	    $WhereCategory = " AND stockmaster.categoryid='" . $_POST['StockCat'] . "'";
+	    $WhereCategory = " AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'";
 		$sql= "SELECT categoryid,
 					categorydescription
-				FROM stockcategory
+				FROM weberp_stockcategory
 				WHERE categoryid='" . $_POST['StockCat'] . "' ";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -30,51 +30,51 @@ If (isset($_POST['PrintPDF'])) {
 	}
 
     if ($_POST['Selection'] == 'All') {
-		$sql = "SELECT locstock.stockid,
-					stockmaster.description,
-					locstock.loccode,
-					locations.locationname,
-					locstock.quantity,
-					locstock.reorderlevel,
-					stockmaster.decimalplaces,
-					stockmaster.serialised,
-					stockmaster.controlled
-				FROM locstock INNER JOIN stockmaster
-				ON locstock.stockid=stockmaster.stockid
-				INNER JOIN locations
-				ON locstock.loccode=locations.loccode
-				WHERE locstock.quantity <> 0
-				AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M') " .
+		$sql = "SELECT weberp_locstock.stockid,
+					weberp_stockmaster.description,
+					weberp_locstock.loccode,
+					weberp_locations.locationname,
+					weberp_locstock.quantity,
+					weberp_locstock.reorderlevel,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.serialised,
+					weberp_stockmaster.controlled
+				FROM weberp_locstock INNER JOIN weberp_stockmaster
+				ON weberp_locstock.stockid=weberp_stockmaster.stockid
+				INNER JOIN weberp_locations
+				ON weberp_locstock.loccode=weberp_locations.loccode
+				WHERE weberp_locstock.quantity <> 0
+				AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M') " .
 				$WhereCategory . "
-				ORDER BY locstock.stockid,
-						locstock.loccode";
+				ORDER BY weberp_locstock.stockid,
+						weberp_locstock.loccode";
 	} else {
 		// sql to only select parts in more than one location
 		// The SELECT statement at the beginning of the WHERE clause limits the selection to
 		// parts with quantity in more than one location
-		$sql = "SELECT locstock.stockid,
-					stockmaster.description,
-					locstock.loccode,
-					locations.locationname,
-					locstock.quantity,
-					locstock.reorderlevel,
-					stockmaster.decimalplaces,
-					stockmaster.serialised,
-					stockmaster.controlled
-				FROM locstock INNER JOIN stockmaster
-				ON locstock.stockid=stockmaster.stockid
-				INNER JOIN locations
-				ON locstock.loccode=locations.loccode
+		$sql = "SELECT weberp_locstock.stockid,
+					weberp_stockmaster.description,
+					weberp_locstock.loccode,
+					weberp_locations.locationname,
+					weberp_locstock.quantity,
+					weberp_locstock.reorderlevel,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.serialised,
+					weberp_stockmaster.controlled
+				FROM weberp_locstock INNER JOIN weberp_stockmaster
+				ON weberp_locstock.stockid=weberp_stockmaster.stockid
+				INNER JOIN weberp_locations
+				ON weberp_locstock.loccode=weberp_locations.loccode
 				WHERE (SELECT count(*)
-					  FROM locstock
-					  WHERE stockmaster.stockid = locstock.stockid
-					  AND locstock.quantity <> 0
-					  GROUP BY locstock.stockid) > 1
-				AND locstock.quantity <> 0
-				AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M') " .
+					  FROM weberp_locstock
+					  WHERE weberp_stockmaster.stockid = weberp_locstock.stockid
+					  AND weberp_locstock.quantity <> 0
+					  GROUP BY weberp_locstock.stockid) > 1
+				AND weberp_locstock.quantity <> 0
+				AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M') " .
 				$WhereCategory . "
-				ORDER BY locstock.stockid,
-						locstock.loccode";
+				ORDER BY weberp_locstock.stockid,
+						weberp_locstock.loccode";
 	}
 
 
@@ -172,7 +172,7 @@ echo '<div class="page_help_text">' . _('Use this report to display the quantity
 
 	$SQL="SELECT categoryid,
 				categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 	if (DB_num_rows($result1)==0){

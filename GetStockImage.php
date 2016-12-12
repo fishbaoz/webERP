@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GetStockImage.php 7494 2016-04-25 09:53:53Z daintree $*/
 
 include ('includes/session.inc');
 /*

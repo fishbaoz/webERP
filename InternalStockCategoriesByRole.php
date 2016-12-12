@@ -60,7 +60,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-			     FROM internalstockcatrole
+			     FROM weberp_internalstockcatrole
 			     WHERE secroleid= '" .  $_POST['SelectedRole'] . "'
 				 AND categoryid = '" .  $_POST['SelectedCategory'] . "'";
 
@@ -72,14 +72,14 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('The Stock Category') . ' ' . $_POST['categoryid'] . ' ' ._('already allowed as internal for this security role'),'error');
 		} else {
 			// Add new record on submit
-			$sql = "INSERT INTO internalstockcatrole (secroleid,
+			$sql = "INSERT INTO weberp_internalstockcatrole (secroleid,
 												categoryid)
 										VALUES ('" . $_POST['SelectedRole'] . "',
 												'" . $_POST['SelectedCategory'] . "')";
 
 			$msg = _('Stock Category:') . ' ' . $_POST['SelectedCategory'].' '._('has been allowed to user role') .' '. $_POST['SelectedRole'] .  ' ' . _('as internal');
 			$checkSql = "SELECT count(secroleid)
-							FROM securityroles";
+							FROM weberp_securityroles";
 			$result = DB_query($checkSql);
 			$row = DB_fetch_row($result);
 		}
@@ -93,7 +93,7 @@ if (isset($_POST['submit'])) {
 	}
 
 } elseif ( isset($_GET['delete']) ) {
-	$sql="DELETE FROM internalstockcatrole
+	$sql="DELETE FROM weberp_internalstockcatrole
 		WHERE secroleid='".$SelectedRole."'
 		AND categoryid='".$SelectedType."'";
 
@@ -114,7 +114,7 @@ if (!isset($SelectedRole)){
 
 	$SQL = "SELECT secroleid,
 					secrolename
-			FROM securityroles";
+			FROM weberp_securityroles";
 
 	$result = DB_query($SQL);
 	echo '<option value="">' . _('Not Yet Selected') . '</option>';
@@ -151,12 +151,12 @@ if (isset($_POST['process'])OR isset($SelectedRole)) {
 
 	echo '<input type="hidden" name="SelectedRole" value="' . $SelectedRole . '" />';
 
-	$sql = "SELECT internalstockcatrole.categoryid,
-					stockcategory.categorydescription
-			FROM internalstockcatrole INNER JOIN stockcategory
-			ON internalstockcatrole.categoryid=stockcategory.categoryid
-			WHERE internalstockcatrole.secroleid='".$SelectedRole."'
-			ORDER BY internalstockcatrole.categoryid ASC";
+	$sql = "SELECT weberp_internalstockcatrole.categoryid,
+					weberp_stockcategory.categorydescription
+			FROM weberp_internalstockcatrole INNER JOIN weberp_stockcategory
+			ON weberp_internalstockcatrole.categoryid=weberp_stockcategory.categoryid
+			WHERE weberp_internalstockcatrole.secroleid='".$SelectedRole."'
+			ORDER BY weberp_internalstockcatrole.categoryid ASC";
 
 	$result = DB_query($sql);
 
@@ -202,7 +202,7 @@ while ($myrow = DB_fetch_array($result)) {
 
 		$SQL = "SELECT categoryid,
 						categorydescription
-				FROM stockcategory";
+				FROM weberp_stockcategory";
 
 		$result = DB_query($SQL);
 		if (!isset($_POST['SelectedCategory'])){

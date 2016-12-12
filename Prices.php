@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Prices.php 7077 2015-01-12 10:48:34Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Item Prices');
@@ -32,10 +32,10 @@ if (!isset($_POST['CurrAbrev'])) {
 	$_POST['CurrAbrev'] = $_SESSION['CompanyRecord']['currencydefault'];
 }
 
-$result = DB_query("SELECT stockmaster.description,
-							stockmaster.mbflag
-					FROM stockmaster
-					WHERE stockmaster.stockid='".$Item."'");
+$result = DB_query("SELECT weberp_stockmaster.description,
+							weberp_stockmaster.mbflag
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='".$Item."'");
 $myrow = DB_fetch_row($result);
 
 if (DB_num_rows($result)==0) {
@@ -96,12 +96,12 @@ if (isset($_POST['submit'])) {
 	}
 
 	$sql = "SELECT COUNT(typeabbrev)
-				FROM prices
-			WHERE prices.stockid='".$Item."'
+				FROM weberp_prices
+			WHERE weberp_prices.stockid='".$Item."'
 			AND startdate='" .FormatDateForSQL($_POST['StartDate']) . "'
 			AND enddate ='" . $SQLEndDate . "'
-			AND prices.typeabbrev='" . $_POST['TypeAbbrev'] . "'
-			AND prices.currabrev='" . $_POST['CurrAbrev'] . "'";
+			AND weberp_prices.typeabbrev='" . $_POST['TypeAbbrev'] . "'
+			AND weberp_prices.currabrev='" . $_POST['CurrAbrev'] . "'";
 
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
@@ -117,18 +117,18 @@ if (isset($_POST['submit'])) {
 		/* Need to see if there is also a price entered that has an end date after the start date of this price and if so we will need to update it so there is no ambiguity as to which price will be used*/
 
 		//editing an existing price
-		$sql = "UPDATE prices SET
+		$sql = "UPDATE weberp_prices SET
 					typeabbrev='" . $_POST['TypeAbbrev'] . "',
 					currabrev='" . $_POST['CurrAbrev'] . "',
 					price='" . filter_number_format($_POST['Price']) . "',
 					startdate='" . FormatDateForSQL($_POST['StartDate']) . "',
 					enddate='" . $SQLEndDate . "'
-				WHERE prices.stockid='".$Item."'
+				WHERE weberp_prices.stockid='".$Item."'
 				AND startdate='" .$_POST['OldStartDate'] . "'
 				AND enddate ='" . $_POST['OldEndDate'] . "'
-				AND prices.typeabbrev='" . $_POST['OldTypeAbbrev'] . "'
-				AND prices.currabrev='" . $_POST['OldCurrAbrev'] . "'
-				AND prices.debtorno=''";
+				AND weberp_prices.typeabbrev='" . $_POST['OldTypeAbbrev'] . "'
+				AND weberp_prices.currabrev='" . $_POST['OldCurrAbrev'] . "'
+				AND weberp_prices.debtorno=''";
 
 		$ErrMsg = _('Could not be update the existing prices');
 		$result = DB_query($sql,$ErrMsg);
@@ -141,7 +141,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected price is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new price form */
 
-		$sql = "INSERT INTO prices (stockid,
+		$sql = "INSERT INTO weberp_prices (stockid,
 									typeabbrev,
 									currabrev,
 									startdate,
@@ -167,13 +167,13 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	$sql="DELETE FROM prices
-			WHERE prices.stockid = '". $Item ."'
-			AND prices.typeabbrev='". $_GET['TypeAbbrev'] ."'
-			AND prices.currabrev ='". $_GET['CurrAbrev'] ."'
-			AND  prices.startdate = '" .$_GET['StartDate'] . "'
-			AND  prices.enddate = '" . $_GET['EndDate'] . "'
-			AND prices.debtorno=''";
+	$sql="DELETE FROM weberp_prices
+			WHERE weberp_prices.stockid = '". $Item ."'
+			AND weberp_prices.typeabbrev='". $_GET['TypeAbbrev'] ."'
+			AND weberp_prices.currabrev ='". $_GET['CurrAbrev'] ."'
+			AND  weberp_prices.startdate = '" .$_GET['StartDate'] . "'
+			AND  weberp_prices.enddate = '" . $_GET['EndDate'] . "'
+			AND weberp_prices.debtorno=''";
 	$ErrMsg = _('Could not delete this price');
 	$result = DB_query($sql,$ErrMsg);
 	prnMsg( _('The selected price has been deleted'),'success');
@@ -183,25 +183,25 @@ if (isset($_POST['submit'])) {
 //Always do this stuff
 
 $sql = "SELECT
-		currencies.currency,
-        salestypes.sales_type,
-		prices.price,
-		prices.stockid,
-		prices.typeabbrev,
-		prices.currabrev,
-		prices.startdate,
-		prices.enddate,
-		currencies.decimalplaces AS currdecimalplaces
-	FROM prices
-	INNER JOIN salestypes
-		ON prices.typeabbrev = salestypes.typeabbrev
-	INNER JOIN currencies
-		ON prices.currabrev=currencies.currabrev
-	WHERE prices.stockid='".$Item."'
-	AND prices.debtorno=''
-	ORDER BY prices.currabrev,
-		prices.typeabbrev,
-		prices.startdate";
+		weberp_currencies.currency,
+        weberp_salestypes.sales_type,
+		weberp_prices.price,
+		weberp_prices.stockid,
+		weberp_prices.typeabbrev,
+		weberp_prices.currabrev,
+		weberp_prices.startdate,
+		weberp_prices.enddate,
+		weberp_currencies.decimalplaces AS currdecimalplaces
+	FROM weberp_prices
+	INNER JOIN weberp_salestypes
+		ON weberp_prices.typeabbrev = weberp_salestypes.typeabbrev
+	INNER JOIN weberp_currencies
+		ON weberp_prices.currabrev=weberp_currencies.currabrev
+	WHERE weberp_prices.stockid='".$Item."'
+	AND weberp_prices.debtorno=''
+	ORDER BY weberp_prices.currabrev,
+		weberp_prices.typeabbrev,
+		weberp_prices.startdate";
 
 $result = DB_query($sql);
 require_once('includes/CurrenciesArray.php');
@@ -284,7 +284,7 @@ if (isset($_GET['Edit'])){
 	}
 }
 
-$SQL = "SELECT currabrev FROM currencies";
+$SQL = "SELECT currabrev FROM weberp_currencies";
 $result = DB_query($SQL);
 
 echo '<br /><table class="selection">';
@@ -306,7 +306,7 @@ echo '<tr>
 			<td>' . _('Sales Type Price List') . ':</td>
 			<td><select name="TypeAbbrev">';
 
-$SQL = "SELECT typeabbrev, sales_type FROM salestypes";
+$SQL = "SELECT typeabbrev, sales_type FROM weberp_salestypes";
 $result = DB_query($SQL);
 
 while ($myrow = DB_fetch_array($result)) {
@@ -361,7 +361,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $db) {
 		$SQL = "SELECT price,
 						startdate,
 						enddate
-				FROM prices
+				FROM weberp_prices
 				WHERE debtorno=''
 				AND stockid='" . $Item . "'
 				AND currabrev='" . $CurrAbbrev . "'
@@ -377,7 +377,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $db) {
 					//Only if the previous enddate is after the new start date do we need to look at updates
 					if (Date1GreaterThanDate2(ConvertSQLDate($EndDate),ConvertSQLDate($myrow['startdate']))) {
 						/*Need to make the end date the new start date less 1 day */
-						$SQL = "UPDATE prices SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
+						$SQL = "UPDATE weberp_prices SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
 										WHERE stockid ='" .$Item . "'
 										AND currabrev='" . $CurrAbbrev . "'
 										AND typeabbrev='" . $PriceList . "'
@@ -399,7 +399,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $db) {
 		$SQL = "SELECT price,
 						startdate,
 						enddate
-					FROM prices
+					FROM weberp_prices
 					WHERE debtorno=''
 					AND stockid='" . $Item . "'
 					AND currabrev='" . $CurrAbbrev . "'
@@ -412,7 +412,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $db) {
 			if (isset($OldStartDate)){
 			/*Need to make the end date the new start date less 1 day */
 				$NewEndDate = FormatDateForSQL(DateAdd(ConvertSQLDate($myrow['startdate']),'d',-1));
-				$SQL = "UPDATE prices SET enddate = '" . $NewEndDate  . "'
+				$SQL = "UPDATE weberp_prices SET enddate = '" . $NewEndDate  . "'
 							WHERE stockid ='" .$Item . "'
 							AND currabrev='" . $CurrAbbrev . "'
 							AND typeabbrev='" . $PriceList . "'

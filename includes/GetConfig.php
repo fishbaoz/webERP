@@ -1,11 +1,11 @@
 <?php
 // Systems can temporarily force a reload by setting the variable
 // $ForceConfigReload to true
-/* $Id$*/
+/* $Id: GetConfig.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 if(isset($ForceConfigReload) AND $ForceConfigReload==true OR !isset($_SESSION['CompanyDefaultsLoaded'])) {
 	global  $db;		// It is global, we may not be.
-	$sql = "SELECT confname, confvalue FROM config";
+	$sql = "SELECT confname, confvalue FROM weberp_config";
 	$ErrMsg = _('Could not get the configuration parameters from the database because');
 	$ConfigResult = DB_query($sql,$ErrMsg);
 	while( $myrow = DB_fetch_array($ConfigResult) ) {
@@ -26,7 +26,7 @@ if(isset($ForceConfigReload) AND $ForceConfigReload==true OR !isset($_SESSION['C
 	}
 
 	/*Load the pagesecurity settings from the database */
-	$sql="SELECT script, pagesecurity FROM scripts";
+	$sql="SELECT script, pagesecurity FROM weberp_scripts";
 	$result=DB_query($sql,'','',false,false);
 	if (DB_error_no()!=0){
 		/* the table may not exist with the pagesecurity field in it if it is an older webERP database
@@ -42,9 +42,9 @@ if(isset($ForceConfigReload) AND $ForceConfigReload==true OR !isset($_SESSION['C
 	/*
 	 check the decimalplaces field exists in currencies - this was added in 4.0 but is required in 4.04 as it is used everywhere as the default decimal places to show on all home currency amounts
 	*/
-	$result = DB_query("SELECT decimalplaces FROM currencies",'','',false,false);
+	$result = DB_query("SELECT decimalplaces FROM weberp_currencies",'','',false,false);
 	if (DB_error_no()!=0) { //then decimalplaces not already a field in currencies
-		$result = DB_query("ALTER TABLE `currencies`
+		$result = DB_query("ALTER TABLE `weberp_currencies`
 							ADD COLUMN `decimalplaces` tinyint(3) NOT NULL DEFAULT 2 AFTER `hundredsname`",$db);
 	}
 /* Also reads all the company data set up in the company record and returns an array */
@@ -74,8 +74,8 @@ if(isset($ForceConfigReload) AND $ForceConfigReload==true OR !isset($_SESSION['C
 					gllink_creditors,
 					gllink_stock,
 					decimalplaces
-				FROM companies
-				INNER JOIN currencies ON companies.currencydefault=currencies.currabrev
+				FROM weberp_companies
+				INNER JOIN weberp_currencies ON weberp_companies.currencydefault=weberp_currencies.currabrev
 				WHERE coycode=1";
 
 	$ErrMsg = _('An error occurred accessing the database to retrieve the company information');
@@ -99,10 +99,10 @@ if(isset($ForceConfigReload) AND $ForceConfigReload==true OR !isset($_SESSION['C
 				password,
 				timeout,
 				auth
-			FROM emailsettings";
+			FROM weberp_emailsettings";
 	$result=DB_query($sql,'','',false,false);
 	if (DB_error_no()==0) {
-		/*test to ensure that the emailsettings table exists!!
+		/*test to ensure that the weberp_emailsettings table exists!!
 		 * if it doesn't exist then we are into an UpgradeDatabase scenario anyway
 		*/
 		$myrow=DB_fetch_array($result);

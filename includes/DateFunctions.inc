@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DateFunctions.inc 7600 2016-08-24 09:03:08Z exsonqu $*/
 
 /*
 date validation and parsing functions
@@ -978,7 +978,7 @@ function CalcEarliestDispatchDate (){
 }
 
 function CreatePeriod($PeriodNo, $PeriodEnd, &$db) {
-				$GetPrdSQL = "INSERT INTO periods (periodno,
+				$GetPrdSQL = "INSERT INTO weberp_periods (periodno,
 													lastdate_in_period)
 												VALUES (
 													'" . $PeriodNo . "',
@@ -993,7 +993,7 @@ function PeriodExists($TransDate, &$db) {
 	/* Find the date a month on */
 	$MonthAfterTransDate = Mktime(0,0,0,Date('m',$TransDate)+1,Date('d',$TransDate),Date('Y',$TransDate));
 
-	$GetPrdSQL = "SELECT periodno FROM periods WHERE lastdate_in_period < '" . Date('Y/m/d', $MonthAfterTransDate) . "' AND lastdate_in_period >= '" . Date('Y/m/d', $TransDate) . "'";
+	$GetPrdSQL = "SELECT periodno FROM weberp_periods WHERE lastdate_in_period < '" . Date('Y/m/d', $MonthAfterTransDate) . "' AND lastdate_in_period >= '" . Date('Y/m/d', $TransDate) . "'";
 
 	$ErrMsg = _('An error occurred in retrieving the period number');
 	$GetPrdResult = DB_query($GetPrdSQL,$ErrMsg);
@@ -1036,13 +1036,13 @@ function GetPeriod ($TransDate, &$db, $UseProhibit=true) {
 		}
 	}
 	/* Find the unix timestamp of the last period end date in periods table */
-	$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from periods";
+	$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from weberp_periods";
 	$result = DB_query($sql);
 	$myrow=DB_fetch_row($result);
 
 	if (is_null($myrow[0])){ //then no periods are currently defined - so set a couple up starting at 0
-		$InsertFirstPeriodResult = DB_query("INSERT INTO periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')",_('Could not insert first period'));
-		$InsertFirstPeriodResult = DB_query("INSERT INTO periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')",_('Could not insert second period'));
+		$InsertFirstPeriodResult = DB_query("INSERT INTO weberp_periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')",_('Could not insert first period'));
+		$InsertFirstPeriodResult = DB_query("INSERT INTO weberp_periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')",_('Could not insert second period'));
 		$LastPeriod=1;
 		$LastPeriodEnd = mktime(0,0,0,Date('m')+2,0,Date('Y'));
 	} else {
@@ -1051,7 +1051,7 @@ function GetPeriod ($TransDate, &$db, $UseProhibit=true) {
 		$LastPeriod = $myrow[1];
 	}
 	/* Find the unix timestamp of the first period end date in periods table */
-	$sql = "SELECT MIN(lastdate_in_period), MIN(periodno) from periods";
+	$sql = "SELECT MIN(lastdate_in_period), MIN(periodno) from weberp_periods";
 	$result = DB_query($sql);
 	$myrow=DB_fetch_row($result);
 	$Date_Array = explode('-', $myrow[0]);
@@ -1091,7 +1091,7 @@ function GetPeriod ($TransDate, &$db, $UseProhibit=true) {
 		}
 	} else if (!PeriodExists(mktime(0,0,0,Date('m',$TransDate)+1,Date('d',$TransDate),Date('Y',$TransDate)), $db)) {
 		/* Make sure the following months period exists */
-		$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from periods";
+		$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from weberp_periods";
 		$result = DB_query($sql);
 		$myrow=DB_fetch_row($result);
 		$Date_Array = explode('-', $myrow[0]);
@@ -1104,7 +1104,7 @@ function GetPeriod ($TransDate, &$db, $UseProhibit=true) {
 
 	$MonthAfterTransDate = Mktime(0,0,0,Date('m',$TransDate)+1,Date('d',$TransDate),Date('Y',$TransDate));
 	$GetPrdSQL = "SELECT periodno
-					FROM periods
+					FROM weberp_periods
 					WHERE lastdate_in_period < '" . Date('Y-m-d', $MonthAfterTransDate) . "'
 					AND lastdate_in_period >= '" . Date('Y-m-d', $TransDate) . "'";
 

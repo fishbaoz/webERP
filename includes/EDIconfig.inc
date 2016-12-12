@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: EDIconfig.inc 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*EDI configuration variables definition */
 
@@ -44,7 +44,7 @@ Need code of supplier or customer and the type of message INVOIC or ORDERS*/
 
 $sql = "SELECT section,
 		linetext
-	FROM edimessageformat
+	FROM weberp_edimessageformat
 	WHERE partnercode='" . $PartnerCode . "'
 	AND messagetype='" . $MessageType . "'
 	ORDER BY sequenceno";

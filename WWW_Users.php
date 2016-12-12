@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WWW_Users.php 7691 2016-12-02 07:56:18Z exsonqu $*/
 /* Entry of users and security settings of users */
 
 if(isset($_POST['UserID']) AND isset($_POST['ID'])) {
@@ -56,7 +56,7 @@ include('includes/SQL_CommonFunctions.inc');
 // Make an array of the security roles
 $sql = "SELECT secroleid,
 				secrolename
-		FROM securityroles
+		FROM weberp_securityroles
 		ORDER BY secrolename";
 
 $Sec_Result = DB_query($sql);
@@ -107,7 +107,7 @@ if(isset($_POST['submit'])) {
 
 	if(!isset($SelectedUser)) {
 		/* check to ensure the user id is not already entered */
-		$result = DB_query("SELECT userid FROM www_users WHERE userid='" . $_POST['UserID'] . "'");
+		$result = DB_query("SELECT userid FROM weberp_www_users WHERE userid='" . $_POST['UserID'] . "'");
 		if(DB_num_rows($result)==1) {
 			$InputError =1;
 			prnMsg(_('The user ID') . ' ' . $_POST['UserID'] . ' ' . _('already exists and cannot be used again'),'error');
@@ -116,10 +116,10 @@ if(isset($_POST['submit'])) {
 
 	if((mb_strlen($_POST['BranchCode'])>0) AND ($InputError !=1)) {
 		// check that the entered branch is valid for the customer code
-		$sql = "SELECT custbranch.debtorno
-				FROM custbranch
-				WHERE custbranch.debtorno='" . $_POST['Cust'] . "'
-				AND custbranch.branchcode='" . $_POST['BranchCode'] . "'";
+		$sql = "SELECT weberp_custbranch.debtorno
+				FROM weberp_custbranch
+				WHERE weberp_custbranch.debtorno='" . $_POST['Cust'] . "'
+				AND weberp_custbranch.branchcode='" . $_POST['BranchCode'] . "'";
 
 		$ErrMsg = _('The check on validity of the customer code and branch failed because');
 		$DbgMsg = _('The SQL that was used to check the customer code and branch was');
@@ -157,7 +157,7 @@ if(isset($_POST['submit'])) {
 			$UpdatePassword = "password='" . CryptPass($_POST['Password']) . "',";
 		}
 
-		$sql = "UPDATE www_users SET realname='" . $_POST['RealName'] . "',
+		$sql = "UPDATE weberp_www_users SET realname='" . $_POST['RealName'] . "',
 						customerid='" . $_POST['Cust'] ."',
 						phone='" . $_POST['Phone'] ."',
 						email='" . $_POST['Email'] ."',
@@ -181,7 +181,7 @@ if(isset($_POST['submit'])) {
 		prnMsg( _('The selected user record has been updated'), 'success' );
 	} elseif($InputError !=1) {
 
-		$sql = "INSERT INTO www_users (userid,
+		$sql = "INSERT INTO weberp_www_users (userid,
 						realname,
 						customerid,
 						branchcode,
@@ -221,7 +221,7 @@ if(isset($_POST['submit'])) {
 						'" . $_POST['Department'] . "')";
 		prnMsg( _('A new user record has been inserted'), 'success' );
 
-		$LocationSql = "INSERT INTO locationusers (loccode,
+		$LocationSql = "INSERT INTO weberp_locationusers (loccode,
 													userid,
 													canview,
 													canupd
@@ -236,9 +236,9 @@ if(isset($_POST['submit'])) {
 		$Result = DB_query($LocationSql, $ErrMsg, $DbgMsg);
 		prnMsg( _('User has been authorized to use and update only his / her default location'), 'success' );
 
-		$GLAccountsSql = "INSERT INTO glaccountusers (userid, accountcode, canview, canupd)
-						  SELECT '" . $_POST['UserID'] . "', chartmaster.accountcode,1,1
-						  FROM chartmaster;	";
+		$GLAccountsSql = "INSERT INTO weberp_glaccountusers (userid, accountcode, canview, canupd)
+						  SELECT '" . $_POST['UserID'] . "', weberp_chartmaster.accountcode,1,1
+						  FROM weberp_chartmaster;	";
 
 		$ErrMsg = _('The default user GL Accounts could not be processed because');
 		$DbgMsg = _('The SQL that was used to create the user GL Accounts and failed was');
@@ -282,24 +282,24 @@ if(isset($_POST['submit'])) {
 	if($AllowDemoMode AND $SelectedUser == 'admin') {
 		prnMsg(_('The demonstration user called demo cannot be deleted'),'error');
 	} else {
-		$sql="SELECT userid FROM audittrail where userid='" . $SelectedUser ."'";
+		$sql="SELECT userid FROM weberp_audittrail where userid='" . $SelectedUser ."'";
 		$result=DB_query($sql);
 		if(DB_num_rows($result)!=0) {
 			prnMsg(_('Cannot delete user as entries already exist in the audit trail'), 'warn');
 		} else {
-			$sql="DELETE FROM locationusers WHERE userid='" . $SelectedUser . "'";
+			$sql="DELETE FROM weberp_locationusers WHERE userid='" . $SelectedUser . "'";
 			$ErrMsg = _('The Location - User could not be deleted because');;
 			$result = DB_query($sql,$ErrMsg);
 
-			$sql="DELETE FROM glaccountusers WHERE userid='" . $SelectedUser . "'";
+			$sql="DELETE FROM weberp_glaccountusers WHERE userid='" . $SelectedUser . "'";
 			$ErrMsg = _('The GL Account - User could not be deleted because');;
 			$result = DB_query($sql,$ErrMsg);
 
-			$sql="DELETE FROM bankaccountusers WHERE userid='" . $SelectedUser . "'";
+			$sql="DELETE FROM weberp_bankaccountusers WHERE userid='" . $SelectedUser . "'";
 			$ErrMsg = _('The Bank Accounts - User could not be deleted because');;
 			$result = DB_query($sql,$ErrMsg);
 
-			$sql="DELETE FROM www_users WHERE userid='" . $SelectedUser . "'";
+			$sql="DELETE FROM weberp_www_users WHERE userid='" . $SelectedUser . "'";
 			$ErrMsg = _('The User could not be deleted because');;
 			$result = DB_query($sql,$ErrMsg);
 			prnMsg(_('User Deleted'),'info');
@@ -345,7 +345,7 @@ if(!isset($SelectedUser)) {
 					pagesize,
 					theme,
 					language
-				FROM www_users";
+				FROM weberp_www_users";
 	$Result = DB_query($Sql);
 
 	$k = 1;// Row colour counter.
@@ -416,7 +416,7 @@ if(isset($SelectedUser)) {
 			language,
 			pdflanguage,
 			department
-		FROM www_users
+		FROM weberp_www_users
 		WHERE userid='" . $SelectedUser . "'";
 
 	$result = DB_query($sql);
@@ -536,7 +536,7 @@ echo '<tr>
 		<td>' . _('Default Location') . ':</td>
 		<td><select name="DefaultLocation">';
 
-$sql = "SELECT loccode, locationname FROM locations";
+$sql = "SELECT loccode, locationname FROM weberp_locations";
 $result = DB_query($sql);
 
 while($myrow=DB_fetch_array($result)) {
@@ -578,7 +578,7 @@ echo '<tr>
 		<td>' . _('Restrict to Sales Person') . ':</td>
 		<td><select name="Salesman">';
 
-$sql = "SELECT salesmancode, salesmanname FROM salesman WHERE current = 1 ORDER BY salesmanname";
+$sql = "SELECT salesmancode, salesmanname FROM weberp_salesman WHERE current = 1 ORDER BY salesmanname";
 $result = DB_query($sql);
 if((isset($_POST['Salesman']) AND $_POST['Salesman']=='') OR !isset($_POST['Salesman'])) {
 	echo '<option selected="selected" value="">' .  _('Not a salesperson only login') . '</option>';
@@ -742,7 +742,7 @@ echo '<tr>
 
 $sql="SELECT departmentid,
 			description
-		FROM departments
+		FROM weberp_departments
 		ORDER BY description";
 
 $result=DB_query($sql);

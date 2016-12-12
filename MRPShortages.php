@@ -1,12 +1,12 @@
 <?php
 
-/*$Id$ */
+/*$Id: MRPShortages.php 6944 2014-10-27 07:15:34Z daintree $ */
 // MRPShortages.php - Report of parts with demand greater than supply as determined by MRP
 
 include('includes/session.inc');
 
 //ANSI SQL???
-$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='mrprequirements'";
+$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='weberp_mrprequirements'";
 
 $result=DB_query($sql);
 if (DB_num_rows($result)==0) {
@@ -37,73 +37,73 @@ if (isset($_POST['PrintPDF'])) {
 // total for either supply or demand. Did this to simplify main sql where used
 // several subqueries.
 
-	$sql = "CREATE TEMPORARY TABLE demandtotal (
+	$sql = "CREATE TEMPORARY TABLE weberp_demandtotal (
 				part char(20),
 				demand double,
 				KEY `PART` (`part`)) DEFAULT CHARSET=utf8";
-	$result = DB_query($sql,_('Create of demandtotal failed because'));
+	$result = DB_query($sql,_('Create of weberp_demandtotal failed because'));
 
-	$sql = "INSERT INTO demandtotal
+	$sql = "INSERT INTO weberp_demandtotal
 						(part,
 						 demand)
 			   SELECT part,
 					  SUM(quantity) as demand
-				FROM mrprequirements
+				FROM weberp_mrprequirements
 				GROUP BY part";
 	$result = DB_query($sql);
 
-	$sql = "CREATE TEMPORARY TABLE supplytotal (
+	$sql = "CREATE TEMPORARY TABLE weberp_supplytotal (
 				part char(20),
 				supply double,
 				KEY `PART` (`part`)) DEFAULT CHARSET=utf8";
-	$result = DB_query($sql,_('Create of supplytotal failed because'));
+	$result = DB_query($sql,_('Create of weberp_supplytotal failed because'));
 
 /* 21/03/2010: Ricard modification to allow items with total supply = 0 be included in the report */
 
-	$sql = "INSERT INTO supplytotal
+	$sql = "INSERT INTO weberp_supplytotal
 						(part,
 						 supply)
 			SELECT stockid,
 				  0
-			FROM stockmaster";
+			FROM weberp_stockmaster";
 	$result = DB_query($sql);
 
-	$sql = "UPDATE supplytotal
-			SET supply = (SELECT SUM(mrpsupplies.supplyquantity)
-							FROM mrpsupplies
-							WHERE supplytotal.part = mrpsupplies.part
-								AND mrpsupplies.supplyquantity > 0)";
+	$sql = "UPDATE weberp_supplytotal
+			SET supply = (SELECT SUM(weberp_mrpsupplies.supplyquantity)
+							FROM weberp_mrpsupplies
+							WHERE weberp_supplytotal.part = weberp_mrpsupplies.part
+								AND weberp_mrpsupplies.supplyquantity > 0)";
 	$result = DB_query($sql);
 
-	$sql = "UPDATE supplytotal SET supply = 0 WHERE supply IS NULL";
+	$sql = "UPDATE weberp_supplytotal SET supply = 0 WHERE supply IS NULL";
 	$result = DB_query($sql);
 
 
 	// Only include directdemand mrprequirements so don't have demand for top level parts and also
 	// show demand for the lower level parts that the upper level part generates. See MRP.php for
 	// more notes - Decided not to exclude derived demand so using $sql, not $sqlexclude
-	$sqlexclude = "SELECT stockmaster.stockid,
-					   stockmaster.description,
-					   stockmaster.mbflag,
-					   stockmaster.actualcost,
-					   stockmaster.decimalplaces,
-					   (stockmaster.materialcost + stockmaster.labourcost +
-						stockmaster.overheadcost ) as computedcost,
-					   demandtotal.demand,
-					   supplytotal.supply,
-					   (demandtotal.demand - supplytotal.supply) *
-					   (stockmaster.materialcost + stockmaster.labourcost +
-						stockmaster.overheadcost ) as extcost
-					FROM stockmaster
-						LEFT JOIN demandtotal ON stockmaster.stockid = demandtotal.part
-						LEFT JOIN supplytotal ON stockmaster.stockid = supplytotal.part
-					  GROUP BY stockmaster.stockid,
-							   stockmaster.description,
-							   stockmaster.mbflag,
-							   stockmaster.actualcost,
-							   stockmaster.decimalplaces,
-							   supplytotal.supply,
-							   demandtotal.demand,
+	$sqlexclude = "SELECT weberp_stockmaster.stockid,
+					   weberp_stockmaster.description,
+					   weberp_stockmaster.mbflag,
+					   weberp_stockmaster.actualcost,
+					   weberp_stockmaster.decimalplaces,
+					   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+						weberp_stockmaster.overheadcost ) as computedcost,
+					   weberp_demandtotal.demand,
+					   weberp_supplytotal.supply,
+					   (weberp_demandtotal.demand - weberp_supplytotal.supply) *
+					   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+						weberp_stockmaster.overheadcost ) as extcost
+					FROM weberp_stockmaster
+						LEFT JOIN weberp_demandtotal ON weberp_stockmaster.stockid = weberp_demandtotal.part
+						LEFT JOIN weberp_supplytotal ON weberp_stockmaster.stockid = weberp_supplytotal.part
+					  GROUP BY weberp_stockmaster.stockid,
+							   weberp_stockmaster.description,
+							   weberp_stockmaster.mbflag,
+							   weberp_stockmaster.actualcost,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_supplytotal.supply,
+							   weberp_demandtotal.demand,
 							   extcost
 					  HAVING demand > supply
 					  ORDER BY '" . $_POST['Sort']."'";
@@ -111,42 +111,42 @@ if (isset($_POST['PrintPDF'])) {
 	  if ($_POST['CategoryID'] == 'All'){
 		$SQLCategory = ' ';
 	  }else{
-		$SQLCategory = "WHERE stockmaster.categoryid = '" . $_POST['CategoryID'] . "'";
+		$SQLCategory = "WHERE weberp_stockmaster.categoryid = '" . $_POST['CategoryID'] . "'";
 	  }
 
 	  if ($_POST['ReportType'] == 'Shortage'){
-		$SQLHaving = " HAVING demandtotal.demand > supplytotal.supply ";
+		$SQLHaving = " HAVING weberp_demandtotal.demand > weberp_supplytotal.supply ";
 	  }else{
-		$SQLHaving = " HAVING demandtotal.demand <= supplytotal.supply ";
+		$SQLHaving = " HAVING weberp_demandtotal.demand <= weberp_supplytotal.supply ";
 	  }
 
-	  $sql = "SELECT stockmaster.stockid,
-		stockmaster.description,
-		stockmaster.mbflag,
-		stockmaster.actualcost,
-		stockmaster.decimalplaces,
-		(stockmaster.materialcost + stockmaster.labourcost +
-		 stockmaster.overheadcost ) as computedcost,
-		demandtotal.demand,
-		supplytotal.supply,
-	   (demandtotal.demand - supplytotal.supply) *
-	   (stockmaster.materialcost + stockmaster.labourcost +
-		stockmaster.overheadcost ) as extcost
-		   FROM stockmaster
-			 LEFT JOIN demandtotal ON stockmaster.stockid = demandtotal.part
-			 LEFT JOIN supplytotal ON stockmaster.stockid = supplytotal.part "
+	  $sql = "SELECT weberp_stockmaster.stockid,
+		weberp_stockmaster.description,
+		weberp_stockmaster.mbflag,
+		weberp_stockmaster.actualcost,
+		weberp_stockmaster.decimalplaces,
+		(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+		 weberp_stockmaster.overheadcost ) as computedcost,
+		weberp_demandtotal.demand,
+		weberp_supplytotal.supply,
+	   (weberp_demandtotal.demand - weberp_supplytotal.supply) *
+	   (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost +
+		weberp_stockmaster.overheadcost ) as extcost
+		   FROM weberp_stockmaster
+			 LEFT JOIN weberp_demandtotal ON weberp_stockmaster.stockid = weberp_demandtotal.part
+			 LEFT JOIN weberp_supplytotal ON weberp_stockmaster.stockid = weberp_supplytotal.part "
 			 . $SQLCategory .
-			 "GROUP BY stockmaster.stockid,
-			   stockmaster.description,
-			   stockmaster.mbflag,
-			   stockmaster.actualcost,
-			   stockmaster.decimalplaces,
-			   stockmaster.materialcost,
-			   stockmaster.labourcost,
-			   stockmaster.overheadcost,
+			 "GROUP BY weberp_stockmaster.stockid,
+			   weberp_stockmaster.description,
+			   weberp_stockmaster.mbflag,
+			   weberp_stockmaster.actualcost,
+			   weberp_stockmaster.decimalplaces,
+			   weberp_stockmaster.materialcost,
+			   weberp_stockmaster.labourcost,
+			   weberp_stockmaster.overheadcost,
 			   computedcost,
-			   supplytotal.supply,
-			   demandtotal.demand "
+			   weberp_supplytotal.supply,
+			   weberp_demandtotal.demand "
 			   . $SQLHaving .
 			   " ORDER BY '" . $_POST['Sort'] . "'";
 	$result = DB_query($sql,'','',false,true);
@@ -268,7 +268,7 @@ if (isset($_POST['PrintPDF'])) {
 	echo '<option selected="selected" value="All">' . _('All Stock Categories')  . '</option>';
 	$sql = "SELECT categoryid,
 			categorydescription
-			FROM stockcategory";
+			FROM weberp_stockcategory";
 	$result = DB_query($sql);
 	while ($myrow = DB_fetch_array($result)) {
 		echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categoryid'] . ' - ' .$myrow['categorydescription'] . '</option>';

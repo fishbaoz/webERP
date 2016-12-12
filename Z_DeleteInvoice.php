@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_DeleteInvoice.php 6969 2014-11-08 00:42:31Z exsonqu $*/
 
 /* Script to delete an invoice expects and invoice number to delete
 not included on any menu for obvious reasons
@@ -23,8 +23,8 @@ if (!isset($_GET['InvoiceNo'])){
 /*Get the order number that was invoiced */
 
 $SQL = "SELECT order_, id
-		FROM debtortrans
-		WHERE debtortrans.type = 10
+		FROM weberp_debtortrans
+		WHERE weberp_debtortrans.type = 10
 		AND transno = '" . $_GET['InvoiceNo'] . "'";
 
 $Result = DB_query($SQL);
@@ -45,15 +45,15 @@ $IDDebtorTrans = $myrow[1];
 //               mbflag
 
 // We now use fully qualified column names
-$SQL = "SELECT stockmoves.stockid,
-               stockmoves.loccode,
-               stockmoves.debtorno,
-               stockmoves.branchcode,
-               stockmoves.prd,
-               stockmoves.qty,
-               stockmaster.mbflag
-        FROM stockmoves INNER JOIN stockmaster
-             ON stockmoves.stockid = stockmaster.stockid
+$SQL = "SELECT weberp_stockmoves.stockid,
+               weberp_stockmoves.loccode,
+               weberp_stockmoves.debtorno,
+               weberp_stockmoves.branchcode,
+               weberp_stockmoves.prd,
+               weberp_stockmoves.qty,
+               weberp_stockmaster.mbflag
+        FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+             ON weberp_stockmoves.stockid = weberp_stockmaster.stockid
         WHERE transno ='" .$_GET['InvoiceNo'] . "' AND type=10";
 
 $Result = DB_query($SQL);
@@ -72,7 +72,7 @@ $result = DB_Txn_Begin();
 
 /*Delete any log entries */
 
-$SQL = "DELETE FROM orderdeliverydifferenceslog
+$SQL = "DELETE FROM weberp_orderdeliverydifferenceslog
                WHERE orderno = '". $ProcessingOrder . "'
                AND invoiceno = '" . $_GET['InvoiceNo'] . "'";
 
@@ -80,33 +80,33 @@ $ErrMsg = _('The SQL to delete the delivery differences records failed because')
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 prnMsg(_('Any order delivery differences records have been deleted'),'info');
 
-/*Now delete the custallocns */
+/*Now delete the weberp_custallocns */
 
-$SQL = "DELETE custallocns FROM custallocns
+$SQL = "DELETE weberp_custallocns FROM weberp_custallocns
         WHERE transid_allocto ='" . $IDDebtorTrans . "'";
 
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('The custallocns record could not be deleted') . ' - ' . _('the sql server returned the following error');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-prnMsg(_('The custallocns record has been deleted'),'info');
+prnMsg(_('The weberp_custallocns record has been deleted'),'info');
 
-/*Now delete the debtortranstaxes */
+/*Now delete the weberp_debtortranstaxes */
 
-$SQL = "DELETE debtortranstaxes FROM debtortranstaxes
+$SQL = "DELETE FROM weberp_debtortranstaxes
                WHERE debtortransid ='" . $IDDebtorTrans . "'";
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('The debtortranstaxes record could not be deleted') . ' - ' . _('the sql server returned the following error');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-prnMsg(_('The debtortranstaxes record has been deleted'),'info');
+prnMsg(_('The weberp_debtortranstaxes record has been deleted'),'info');
 
 
 /*Now delete the DebtorTrans */
 
-$SQL = "DELETE FROM debtortrans
+$SQL = "DELETE FROM weberp_debtortrans
                WHERE transno ='" . $_GET['InvoiceNo'] . "'
-               AND debtortrans.type=10";
+               AND weberp_debtortrans.type=10";
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('The debtorTrans record could not be deleted') . ' - ' . _('the sql server returned the following error');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
@@ -118,7 +118,7 @@ prnMsg(_('The debtor transaction record has been deleted'),'info');
 
 foreach ($StockMovement as $OrderLine) {
 
-	$SQL = "UPDATE salesorderdetails SET qtyinvoiced = qtyinvoiced + " . $OrderLine['qty'] . ",
+	$SQL = "UPDATE weberp_salesorderdetails SET qtyinvoiced = qtyinvoiced + " . $OrderLine['qty'] . ",
                                              completed = 0
                                 WHERE orderno = '" . $ProcessingOrder . "'
                                 AND stkcode = '" . $OrderLine['stockid'] . "'";
@@ -137,7 +137,7 @@ foreach ($StockMovement as $OrderLine) {
 /*This is a problem - should only update sales analysis what happens where there
 have been previous sales to the same customer/branch for the same item
 Delete Sales Analysis records */
-	$SQL = "DELETE FROM salesanalysis
+	$SQL = "DELETE FROM weberp_salesanalysis
 			   WHERE  periodno = '" . $OrderLine['prd'] . "'
 			   AND cust='" . $OrderLine['debtorno'] . "'
 			   AND custbranch = '" . $OrderLine['branchcode'] . "'
@@ -150,9 +150,9 @@ Delete Sales Analysis records */
 	prnMsg(_('Sales analysis records deleted') . ' - ' . _('this deleted all sales analysis for the customer/branch and items on this invoice'),'info');
 }
 
-$SQL = "DELETE stockmovestaxes.* FROM stockmovestaxes INNER JOIN stockmoves
-		ON stockmovestaxes.stkmoveno=stockmoves.stkmoveno
-		WHERE stockmoves.type=10 AND stockmoves.transno = '" . $_GET['InvoiceNo'] . "'";
+$SQL = "DELETE weberp_stockmovestaxes.* FROM weberp_stockmovestaxes INNER JOIN weberp_stockmoves
+		ON weberp_stockmovestaxes.stkmoveno=weberp_stockmoves.stkmoveno
+		WHERE weberp_stockmoves.type=10 AND weberp_stockmoves.transno = '" . $_GET['InvoiceNo'] . "'";
 
 $ErrMsg = _('SQL to delete the stock movement tax records failed with the message');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
@@ -160,7 +160,7 @@ prnMsg(_('Deleted the credit note stock move taxes').'info');
 echo '<br /><br />';
 
 /* Delete the stock movements  */
-$SQL = "DELETE FROM stockmoves WHERE type=10 AND transno = '" . $_GET['InvoiceNo'] . "'";
+$SQL = "DELETE FROM weberp_stockmoves WHERE type=10 AND transno = '" . $_GET['InvoiceNo'] . "'";
 
 $ErrMsg = _('The SQL to delete the stock movement records failed because');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
@@ -168,7 +168,7 @@ prnMsg(_('The stock movement records associated with the invoice have been delet
 echo '<br /><br />';
 
 /* Delete any GL Transaction records*/
-$SQL = "DELETE FROM gltrans WHERE gltrans.type=10 AND gltrans.typeno='" . $_GET['InvoiceNo'] . "'";
+$SQL = "DELETE FROM weberp_gltrans WHERE weberp_gltrans.type=10 AND weberp_gltrans.typeno='" . $_GET['InvoiceNo'] . "'";
 $ErrMsg = _('The SQL to delete the general ledger journal records failed because');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 prnMsg(_('The GL journal records associated with the invoice have been deleted'),'info');

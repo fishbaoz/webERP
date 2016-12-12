@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_glaccounts.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Check that the account code doesn't already exist'*/
 	function VerifyAccountCode($AccountCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(accountcode)
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='".$AccountCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -17,7 +17,7 @@
 /* Check that the account code already exists'*/
 	function VerifyAccountCodeExists($AccountCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(accountcode)
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='".$AccountCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -38,7 +38,7 @@
 /* Check that the account group exists*/
 	function VerifyAccountGroupExists($AccountGroup, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(groupname)
-				FROM accountgroups
+				FROM weberp_accountgroups
 				WHERE groupname='".$AccountGroup."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -70,14 +70,14 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$sql = 'INSERT INTO chartmaster ('.mb_substr($FieldNames,0,-2).') '.
+			$sql = 'INSERT INTO weberp_chartmaster ('.mb_substr($FieldNames,0,-2).') '.
 		  		"VALUES ('".mb_substr($FieldValues,0,-2)."') ";
 			$result = DB_Query($sql, $db);
-			$sql='INSERT INTO chartdetails (accountcode,
+			$sql='INSERT INTO weberp_chartdetails (accountcode,
 							period)
 				SELECT ' . $AccountDetails['accountcode'] . ',
 					periodno
-				FROM periods';
+				FROM weberp_periods';
 			$result = DB_query($sql,'','','',false);
 			if (DB_error_no() != 0) {
 				$Errors[0] = DatabaseUpdateFailed;
@@ -99,11 +99,11 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT chartmaster.accountcode,
-					chartmaster.accountname,
-					accountgroups.pandl
-				FROM chartmaster INNER JOIN accountgroups
-				ON chartmaster.group_=accountgroups.groupname
+		$sql = 'SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname,
+					weberp_accountgroups.pandl
+				FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+				ON weberp_chartmaster.group_=weberp_accountgroups.groupname
 				ORDER BY accountcode';
 		$result = DB_query($sql);
 		$i=0;
@@ -128,7 +128,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM chartmaster WHERE accountcode='".$AccountCode."'";
+		$sql = "SELECT * FROM weberp_chartmaster WHERE accountcode='".$AccountCode."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}

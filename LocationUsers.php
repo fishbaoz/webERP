@@ -53,7 +53,7 @@ if (isset($_POST['submit'])) {
 		// First check the user is not being duplicated
 
 		$CheckSql = "SELECT count(*)
-			     FROM locationusers
+			     FROM weberp_locationusers
 			     WHERE loccode= '" . $_POST['SelectedLocation'] . "'
 				 AND userid = '" . $_POST['SelectedUser'] . "'";
 
@@ -65,7 +65,7 @@ if (isset($_POST['submit'])) {
 			prnMsg(_('The user') . ' ' . $_POST['SelectedUser'] . ' ' . _('is already authorised to use this location'), 'error');
 		} else {
 			// Add new record on submit
-			$SQL = "INSERT INTO locationusers (loccode,
+			$SQL = "INSERT INTO weberp_locationusers (loccode,
 												userid,
 												canview,
 												canupd)
@@ -81,7 +81,7 @@ if (isset($_POST['submit'])) {
 		}
 	}
 } elseif (isset($_GET['delete'])) {
-	$SQL = "DELETE FROM locationusers
+	$SQL = "DELETE FROM weberp_locationusers
 		WHERE loccode='" . $SelectedLocation . "'
 		AND userid='" . $SelectedUser . "'";
 
@@ -90,7 +90,7 @@ if (isset($_POST['submit'])) {
 	prnMsg(_('User') . ' ' . $SelectedUser . ' ' . _('has had their authority to use the') . ' ' . $SelectedLocation . ' ' . _('location removed'), 'success');
 	unset($_GET['delete']);
 } elseif (isset($_GET['ToggleUpdate'])) {
-	$SQL = "UPDATE locationusers
+	$SQL = "UPDATE weberp_locationusers
 			SET canupd='" . $_GET['ToggleUpdate'] . "'
 			WHERE loccode='" . $SelectedLocation . "'
 			AND userid='" . $SelectedUser . "'";
@@ -114,7 +114,7 @@ if (!isset($SelectedLocation)) {
 
 	$Result = DB_query("SELECT loccode,
 								locationname
-						FROM locations");
+						FROM weberp_locations");
 
 	echo '<option value="">' . _('Not Yet Selected') . '</option>';
 	while ($MyRow = DB_fetch_array($Result)) {
@@ -144,7 +144,7 @@ if (!isset($SelectedLocation)) {
 //end of ifs and buts!
 if (isset($_POST['process']) or isset($SelectedLocation)) {
 	$SQLName = "SELECT locationname
-			FROM locations
+			FROM weberp_locations
 			WHERE loccode='" . $SelectedLocation . "'";
 	$Result = DB_query($SQLName);
 	$MyRow = DB_fetch_array($Result);
@@ -155,14 +155,14 @@ if (isset($_POST['process']) or isset($SelectedLocation)) {
 		<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
 		<input type="hidden" name="SelectedLocation" value="' . $SelectedLocation . '" />';
 
-	$SQL = "SELECT locationusers.userid,
+	$SQL = "SELECT weberp_locationusers.userid,
 					canview,
 					canupd,
-					www_users.realname
-			FROM locationusers INNER JOIN www_users
-			ON locationusers.userid=www_users.userid
-			WHERE locationusers.loccode='" . $SelectedLocation . "'
-			ORDER BY locationusers.userid ASC";
+					weberp_www_users.realname
+			FROM weberp_locationusers INNER JOIN weberp_www_users
+			ON weberp_locationusers.userid=weberp_www_users.userid
+			WHERE weberp_locationusers.loccode='" . $SelectedLocation . "'
+			ORDER BY weberp_locationusers.userid ASC";
 
 	$Result = DB_query($SQL);
 
@@ -224,11 +224,11 @@ if (isset($_POST['process']) or isset($SelectedLocation)) {
 
 		$Result = DB_query("SELECT userid,
 									realname
-							FROM www_users
-							WHERE NOT EXISTS (SELECT locationusers.userid
-											FROM locationusers
-											WHERE locationusers.loccode='" . $SelectedLocation . "'
-												AND locationusers.userid=www_users.userid)");
+							FROM weberp_www_users
+							WHERE NOT EXISTS (SELECT weberp_locationusers.userid
+											FROM weberp_locationusers
+											WHERE weberp_locationusers.loccode='" . $SelectedLocation . "'
+												AND weberp_locationusers.userid=weberp_www_users.userid)");
 
 		if (!isset($_POST['SelectedUser'])) {
 			echo '<option selected="selected" value="">' . _('Not Yet Selected') . '</option>';

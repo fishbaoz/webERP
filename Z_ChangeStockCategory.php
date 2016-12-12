@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: Z_ChangeStockCategory.php 7050 2014-12-28 20:48:56Z rchacon $ */
 /* This script is an utility to change a stock category code. */
 
 include ('includes/session.inc');
@@ -18,7 +18,7 @@ if (isset($_POST['ProcessStockChange'])) {
 	$_POST['NewStockCategory'] = mb_strtoupper($_POST['NewStockCategory']);
 
 	/*First check the stock code exists */
-	$result = DB_query("SELECT categoryid FROM stockcategory WHERE categoryid='" . $_POST['OldStockCategory'] . "'");
+	$result = DB_query("SELECT categoryid FROM weberp_stockcategory WHERE categoryid='" . $_POST['OldStockCategory'] . "'");
 
 	if (DB_num_rows($result) == 0) {
 		prnMsg(_('The stock Category') . ': ' . $_POST['OldStockCategory'] . ' ' . _('does not currently exist as a stock category in the system'), 'error');
@@ -39,7 +39,7 @@ if (isset($_POST['ProcessStockChange'])) {
 	}
 
 	/*Now check that the new code doesn't already exist */
-	$result = DB_query("SELECT categoryid FROM stockcategory WHERE categoryid='" . $_POST['NewStockCategory'] . "'");
+	$result = DB_query("SELECT categoryid FROM weberp_stockcategory WHERE categoryid='" . $_POST['NewStockCategory'] . "'");
 
 	if (DB_num_rows($result) != 0) {
 		echo '<br /><br />';
@@ -49,7 +49,7 @@ if (isset($_POST['ProcessStockChange'])) {
 	}
 	$result = DB_Txn_Begin();
 	echo '<br />' . _('Adding the new stock Category record');
-	$sql = "INSERT INTO stockcategory (categoryid,
+	$sql = "INSERT INTO weberp_stockcategory (categoryid,
 					categorydescription,
 					stocktype,
 					stockact,
@@ -69,30 +69,30 @@ if (isset($_POST['ProcessStockChange'])) {
 					materialuseagevarac,
 					defaulttaxcatid,
 					wipact
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
 	$DbgMsg = _('The SQL statement that failed was');
 	$ErrMsg = _('The SQL to insert the new stock category record failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	echo ' ... ' . _('completed');
 	echo '<br />' . _('Changing stock properties');
-	$sql = "UPDATE stockcatproperties SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
+	$sql = "UPDATE weberp_stockcatproperties SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
 	$ErrMsg = _('The SQL to update stock properties records failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	echo ' ... ' . _('completed');
 	echo '<br />' . _('Changing stock master records');
-	$sql = "UPDATE stockmaster SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
+	$sql = "UPDATE weberp_stockmaster SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
 	$ErrMsg = _('The SQL to update stock master transaction records failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	echo ' ... ' . _('completed');
 	echo '<br />' . _('Changing sales analysis records');
-	$sql = "UPDATE salesanalysis SET stkcategory='" . $_POST['NewStockCategory'] . "' WHERE stkcategory='" . $_POST['OldStockCategory'] . "'";
+	$sql = "UPDATE weberp_salesanalysis SET stkcategory='" . $_POST['NewStockCategory'] . "' WHERE stkcategory='" . $_POST['OldStockCategory'] . "'";
 	$ErrMsg = _('The SQL to update Sales Analysis records failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	echo ' ... ' . _('completed');
 
 	echo '<br />' . _('Changing internal stock category roles records');
-	$sql = "UPDATE internalstockcatrole SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
+	$sql = "UPDATE weberp_internalstockcatrole SET categoryid='" . $_POST['NewStockCategory'] . "' WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
 	$ErrMsg = _('The SQL to update internal stock category role records failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	echo ' ... ' . _('completed');
@@ -101,7 +101,7 @@ if (isset($_POST['ProcessStockChange'])) {
 	$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
 	$result = DB_Txn_Commit();
 	echo '<br />' . _('Deleting the old stock category record');
-	$sql = "DELETE FROM stockcategory WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
+	$sql = "DELETE FROM weberp_stockcategory WHERE categoryid='" . $_POST['OldStockCategory'] . "'";
 	$ErrMsg = _('The SQL to delete the old stock category record failed');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg);
 	echo ' ... ' . _('completed');

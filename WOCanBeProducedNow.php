@@ -13,21 +13,21 @@ if (isset($_POST['submit'])) {
 //####_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT####
 function submit(&$db, $RootPath, $Location) {
 
-	$WhereLocation 	= " AND workorders.loccode = '". $Location ."' ";
+	$WhereLocation 	= " AND weberp_workorders.loccode = '". $Location ."' ";
 	
-	$sql = "SELECT woitems.wo,
-				woitems.stockid,
-				woitems.qtyreqd,
-				woitems.qtyrecd,
-				stockmaster.decimalplaces,
-				stockmaster.units
-			FROM workorders, woitems, stockmaster
-			WHERE workorders.wo = woitems.wo
-				AND stockmaster.stockid = woitems.stockid 
-				AND workorders.closed = 0
-				AND woitems.qtyreqd > woitems.qtyrecd ".
+	$sql = "SELECT weberp_woitems.wo,
+				weberp_woitems.stockid,
+				weberp_woitems.qtyreqd,
+				weberp_woitems.qtyrecd,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmaster.units
+			FROM weberp_workorders, weberp_woitems, weberp_stockmaster
+			WHERE weberp_workorders.wo = weberp_woitems.wo
+				AND weberp_stockmaster.stockid = weberp_woitems.stockid 
+				AND weberp_workorders.closed = 0
+				AND weberp_woitems.qtyreqd > weberp_woitems.qtyrecd ".
 				$WhereLocation .
-			"ORDER BY woitems.wo, woitems.stockid"
+			"ORDER BY weberp_woitems.wo, weberp_woitems.stockid"
 			;
 	
 	$ErrMsg = _('The SQL to find the WO items to produce ');
@@ -93,20 +93,20 @@ function submit(&$db, $RootPath, $Location) {
 					);
 
 			// Get the BOM for this item
-			$sqlBOM = "SELECT bom.parent,
-						bom.component,
-						bom.quantity AS bomqty,
-						stockmaster.decimalplaces,
-						stockmaster.units,
-						stockmaster.shrinkfactor,
-						locstock.quantity AS qoh
-					FROM bom, stockmaster, locstock
-					WHERE bom.component = stockmaster.stockid
-						AND bom.component = locstock.stockid
-						AND locstock.loccode = '". $Location ."'
-						AND bom.parent = '" . $myItem['stockid'] . "'
-                        AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                        AND bom.effectiveto > '" . date('Y-m-d') . "'";
+			$sqlBOM = "SELECT weberp_bom.parent,
+						weberp_bom.component,
+						weberp_bom.quantity AS bomqty,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units,
+						weberp_stockmaster.shrinkfactor,
+						weberp_locstock.quantity AS qoh
+					FROM weberp_bom, weberp_stockmaster, weberp_locstock
+					WHERE weberp_bom.component = weberp_stockmaster.stockid
+						AND weberp_bom.component = weberp_locstock.stockid
+						AND weberp_locstock.loccode = '". $Location ."'
+						AND weberp_bom.parent = '" . $myItem['stockid'] . "'
+                        AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                        AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 					 
 			$ErrMsg = _('The bill of material could not be retrieved because');
 			$BOMResult = DB_query ($sqlBOM,$ErrMsg);
@@ -219,14 +219,14 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 				<td>' . _('For Factory Location') . ':</td>
 				<td><select name="Location">';
 
-		$sql = "SELECT locations.loccode,
+		$sql = "SELECT weberp_locations.loccode,
 					locationname
-				FROM locations
-				INNER JOIN locationusers
-					ON locationusers.loccode=locations.loccode
-					AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-					AND locationusers.canview=1
-				WHERE locations.usedforwo = 1";
+				FROM weberp_locations
+				INNER JOIN weberp_locationusers
+					ON weberp_locationusers.loccode=weberp_locations.loccode
+					AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_locationusers.canview=1
+				WHERE weberp_locations.usedforwo = 1";
 
 		$LocnResult=DB_query($sql);
 

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLTrialBalance_csv.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*Through deviousness and cunning, this system allows trial balances for any date range that recalcuates the p & l balances
 and shows the balance sheets as at the end of the period selected - so first off need to show the input of criteria screen
@@ -26,29 +26,29 @@ $NumberOfMonths = $_GET['ToPeriod'] - $_GET['FromPeriod'] + 1;
 
 $RetainedEarningsAct = $_SESSION['CompanyRecord']['retainedearnings'];
 
-$SQL = "SELECT accountgroups.groupname,
-			accountgroups.parentgroupname,
-			accountgroups.pandl,
-			chartdetails.accountcode ,
-			chartmaster.accountname,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['FromPeriod'] . "' THEN chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['FromPeriod'] . "' THEN chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['ToPeriod'] . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS lastprdcfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['ToPeriod'] . "' THEN chartdetails.actual ELSE 0 END) AS monthactual,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['ToPeriod'] . "' THEN chartdetails.budget ELSE 0 END) AS monthbudget,
-			Sum(CASE WHEN chartdetails.period='" . $_GET['ToPeriod'] . "' THEN chartdetails.bfwdbudget + chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
-		FROM chartmaster INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname
-			INNER JOIN chartdetails ON chartmaster.accountcode= chartdetails.accountcode
-		GROUP BY accountgroups.groupname,
-				accountgroups.parentgroupname,
-				accountgroups.pandl,
-				accountgroups.sequenceintb,
-				chartdetails.accountcode,
-				chartmaster.accountname
-		ORDER BY accountgroups.pandl desc,
-			accountgroups.sequenceintb,
-			accountgroups.groupname,
-			chartdetails.accountcode";
+$SQL = "SELECT weberp_accountgroups.groupname,
+			weberp_accountgroups.parentgroupname,
+			weberp_accountgroups.pandl,
+			weberp_chartdetails.accountcode ,
+			weberp_chartmaster.accountname,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['FromPeriod'] . "' THEN weberp_chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['FromPeriod'] . "' THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['ToPeriod'] . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS lastprdcfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['ToPeriod'] . "' THEN weberp_chartdetails.actual ELSE 0 END) AS monthactual,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['ToPeriod'] . "' THEN weberp_chartdetails.budget ELSE 0 END) AS monthbudget,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_GET['ToPeriod'] . "' THEN weberp_chartdetails.bfwdbudget + weberp_chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
+			INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode= weberp_chartdetails.accountcode
+		GROUP BY weberp_accountgroups.groupname,
+				weberp_accountgroups.parentgroupname,
+				weberp_accountgroups.pandl,
+				weberp_accountgroups.sequenceintb,
+				weberp_chartdetails.accountcode,
+				weberp_chartmaster.accountname
+		ORDER BY weberp_accountgroups.pandl desc,
+			weberp_accountgroups.sequenceintb,
+			weberp_accountgroups.groupname,
+			weberp_chartdetails.accountcode";
 
 $AccountsResult = DB_query($SQL);
 

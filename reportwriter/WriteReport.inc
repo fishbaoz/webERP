@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WriteReport.inc 7698 2016-12-02 23:02:33Z turbopt $*/
 
 require_once($PathPrefix .'/includes/class.pdf.php');
 

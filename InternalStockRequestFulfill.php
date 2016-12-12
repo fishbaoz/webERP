@@ -30,7 +30,7 @@ if (isset($_POST['UpdateAll'])) {
 				$Completed=False;
 			}
 
-			$sql="SELECT materialcost, labourcost, overheadcost, decimalplaces FROM stockmaster WHERE stockid='".$StockID."'";
+			$sql="SELECT materialcost, labourcost, overheadcost, decimalplaces FROM weberp_stockmaster WHERE stockid='".$StockID."'";
 			$result=DB_query($sql);
 			$myrow=DB_fetch_array($result);
 			$StandardCost=$myrow['materialcost']+$myrow['labourcost']+$myrow['overheadcost'];
@@ -45,9 +45,9 @@ if (isset($_POST['UpdateAll'])) {
 			$Result = DB_Txn_Begin();
 
 			// Need to get the current location quantity will need it later for the stock movement
-			$SQL="SELECT locstock.quantity
-					FROM locstock
-					WHERE locstock.stockid='" . $StockID . "'
+			$SQL="SELECT weberp_locstock.quantity
+					FROM weberp_locstock
+					WHERE weberp_locstock.stockid='" . $StockID . "'
 						AND loccode= '" . $Location . "'";
 			$Result = DB_query($SQL);
 			if (DB_num_rows($Result)==1){
@@ -60,7 +60,7 @@ if (isset($_POST['UpdateAll'])) {
 
 			if ($_SESSION['ProhibitNegativeStock']==0 OR ($_SESSION['ProhibitNegativeStock']==1 AND $QtyOnHandPrior >= $Quantity)) {
 
-				$SQL = "INSERT INTO stockmoves (
+				$SQL = "INSERT INTO weberp_stockmoves (
 									stockid,
 									type,
 									transno,
@@ -91,9 +91,9 @@ if (isset($_POST['UpdateAll'])) {
 
 
 				/*Get the ID of the StockMove... */
-				$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+				$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
-				$SQL="UPDATE stockrequestitems
+				$SQL="UPDATE weberp_stockrequestitems
 						SET qtydelivered=qtydelivered+" . $Quantity . "
 						WHERE dispatchid='" . $RequestID . "'
 							AND dispatchitemsid='" . $LineID . "'";
@@ -102,7 +102,7 @@ if (isset($_POST['UpdateAll'])) {
 				$DbgMsg = _('The following SQL to update the stock record was used');
 				$Result = DB_query($SQL, $ErrMsg, $DbgMsg,true);
 
-				$SQL = "UPDATE locstock SET quantity = quantity - '" . $Quantity . "'
+				$SQL = "UPDATE weberp_locstock SET quantity = quantity - '" . $Quantity . "'
 									WHERE stockid='" . $StockID . "'
 										AND loccode='" . $Location . "'";
 
@@ -115,7 +115,7 @@ if (isset($_POST['UpdateAll'])) {
 
 					$StockGLCodes = GetStockGLCode($StockID,$db);
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -137,7 +137,7 @@ if (isset($_POST['UpdateAll'])) {
 					$DbgMsg = _('The following SQL to insert the GL entries was used');
 					$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -161,7 +161,7 @@ if (isset($_POST['UpdateAll'])) {
 				}
 
 				if (($Quantity >= $RequestedQuantity) OR $Completed==True) {
-					$SQL="UPDATE stockrequestitems
+					$SQL="UPDATE weberp_stockrequestitems
 								SET completed=1
 							WHERE dispatchid='".$RequestID."'
 								AND dispatchitemsid='".$LineID."'";
@@ -196,12 +196,12 @@ if (isset($_POST['UpdateAll'])) {
 			// Check if request can be closed and close if done.
 			if (isset($RequestID)) {
 				$SQL="SELECT dispatchid
-						FROM stockrequestitems
+						FROM weberp_stockrequestitems
 						WHERE dispatchid='".$RequestID."'
 							AND completed=0";
 				$Result=DB_query($SQL);
 				if (DB_num_rows($Result)==0) {
-					$SQL="UPDATE stockrequest
+					$SQL="UPDATE weberp_stockrequest
 						SET closed=1
 					WHERE dispatchid='".$RequestID."'";
 					$Result=DB_query($SQL);
@@ -219,9 +219,9 @@ if (!isset($_POST['Location'])) {
 			<tr>
 				<td>' . _('Choose a location to issue requests from') . '</td>
 				<td><select name="Location">';
-	$sql = "SELECT locations.loccode, locationname
-			FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+	$sql = "SELECT weberp_locations.loccode, locationname
+			FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 			WHERE internalrequest = 1
 			ORDER BY locationname";
 	$resultStkLocs = DB_query($sql);
@@ -251,23 +251,23 @@ if (!isset($_POST['Location'])) {
 /* Retrieve the requisition header information
  */
 if (isset($_POST['Location'])) {
-	$sql="SELECT stockrequest.dispatchid,
-			locations.locationname,
-			stockrequest.despatchdate,
-			stockrequest.narrative,
-			departments.description,
-			www_users.realname,
-			www_users.email
-		FROM stockrequest
-		LEFT JOIN departments
-			ON stockrequest.departmentid=departments.departmentid
-		LEFT JOIN locations
-			ON stockrequest.loccode=locations.loccode
-		LEFT JOIN www_users
-			ON www_users.userid=departments.authoriser
-	WHERE stockrequest.authorised=1
-		AND stockrequest.closed=0
-		AND stockrequest.loccode='".$_POST['Location']."'";
+	$sql="SELECT weberp_stockrequest.dispatchid,
+			weberp_locations.locationname,
+			weberp_stockrequest.despatchdate,
+			weberp_stockrequest.narrative,
+			weberp_departments.description,
+			weberp_www_users.realname,
+			weberp_www_users.email
+		FROM weberp_stockrequest
+		LEFT JOIN weberp_departments
+			ON weberp_stockrequest.departmentid=weberp_departments.departmentid
+		LEFT JOIN weberp_locations
+			ON weberp_stockrequest.loccode=weberp_locations.loccode
+		LEFT JOIN weberp_www_users
+			ON weberp_www_users.userid=weberp_departments.authoriser
+	WHERE weberp_stockrequest.authorised=1
+		AND weberp_stockrequest.closed=0
+		AND weberp_stockrequest.loccode='".$_POST['Location']."'";
 	$result=DB_query($sql);
 
 	if (DB_num_rows($result)==0) {
@@ -299,17 +299,17 @@ if (isset($_POST['Location'])) {
 				<td>' . ConvertSQLDate($myrow['despatchdate']) . '</td>
 				<td>' . $myrow['narrative'] . '</td>
 			</tr>';
-		$LineSQL="SELECT stockrequestitems.dispatchitemsid,
-						stockrequestitems.dispatchid,
-						stockrequestitems.stockid,
-						stockrequestitems.decimalplaces,
-						stockrequestitems.uom,
-						stockmaster.description,
-						stockrequestitems.quantity,
-						stockrequestitems.qtydelivered
-				FROM stockrequestitems
-				LEFT JOIN stockmaster
-				ON stockmaster.stockid=stockrequestitems.stockid
+		$LineSQL="SELECT weberp_stockrequestitems.dispatchitemsid,
+						weberp_stockrequestitems.dispatchid,
+						weberp_stockrequestitems.stockid,
+						weberp_stockrequestitems.decimalplaces,
+						weberp_stockrequestitems.uom,
+						weberp_stockmaster.description,
+						weberp_stockrequestitems.quantity,
+						weberp_stockrequestitems.qtydelivered
+				FROM weberp_stockrequestitems
+				LEFT JOIN weberp_stockmaster
+				ON weberp_stockmaster.stockid=weberp_stockrequestitems.stockid
 			WHERE dispatchid='".$myrow['dispatchid'] . "'
 				AND completed=0";
 		$LineResult=DB_query($LineSQL);
@@ -338,7 +338,7 @@ if (isset($_POST['Location'])) {
 
 			$SQL = "SELECT tagref,
 							tagdescription
-						FROM tags
+						FROM weberp_tags
 						ORDER BY tagref";
 
 			$TagResult=DB_query($SQL);

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WWW_Access.php 7053 2014-12-28 23:21:24Z rchacon $*/
 /* This script is to maintaining access permissions. */
 
 include ('includes/session.inc');
@@ -39,12 +39,12 @@ if (isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	unset($sql);
 	if (isset($_POST['SecRoleName']) ){ // Update or Add Security Headings
 		if(isset($SelectedRole)) { // Update Security Heading
-			$sql = "UPDATE securityroles SET secrolename = '" . $_POST['SecRoleName'] . "'
+			$sql = "UPDATE weberp_securityroles SET secrolename = '" . $_POST['SecRoleName'] . "'
 					WHERE secroleid = '".$SelectedRole . "'";
 			$ErrMsg = _('The update of the security role description failed because');
 			$ResMsg = _('The Security role description was updated.');
 		} else { // Add Security Heading
-			$sql = "INSERT INTO securityroles (secrolename) VALUES ('" . $_POST['SecRoleName'] ."')";
+			$sql = "INSERT INTO weberp_securityroles (secrolename) VALUES ('" . $_POST['SecRoleName'] ."')";
 			$ErrMsg = _('The update of the security role failed because');
 			$ResMsg = _('The Security role was created.');
 		}
@@ -53,14 +53,14 @@ if (isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	} elseif (isset($SelectedRole) ) {
 		$PageTokenId = $_GET['PageToken'];
 		if( isset($_GET['add']) ) { // updating Security Groups add a page token
-			$sql = "INSERT INTO securitygroups (secroleid,
+			$sql = "INSERT INTO weberp_securitygroups (secroleid,
 											tokenid)
 									VALUES ('".$SelectedRole."',
 											'".$PageTokenId."' )";
 			$ErrMsg = _('The addition of the page group access failed because');
 			$ResMsg = _('The page group access was added.');
 		} elseif ( isset($_GET['remove']) ) { // updating Security Groups remove a page token
-			$sql = "DELETE FROM securitygroups
+			$sql = "DELETE FROM weberp_securitygroups
 					WHERE secroleid = '".$SelectedRole."'
 					AND tokenid = '".$PageTokenId . "'";
 			$ErrMsg = _('The removal of this page-group access failed because');
@@ -79,17 +79,17 @@ if (isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	}
 } elseif (isset($_GET['delete'])) {
 	//the Security heading wants to be deleted but some checks need to be performed fist
-	// PREVENT DELETES IF DEPENDENT RECORDS IN 'www_users'
-	$sql= "SELECT COUNT(*) FROM www_users WHERE fullaccess='" . $_GET['SelectedRole'] . "'";
+	// PREVENT DELETES IF DEPENDENT RECORDS IN 'weberp_www_users'
+	$sql= "SELECT COUNT(*) FROM weberp_www_users WHERE fullaccess='" . $_GET['SelectedRole'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg( _('Cannot delete this role because user accounts are setup using it'),'warn');
 		echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('user accounts that have this security role setting') . '</font>';
 	} else {
-		$sql="DELETE FROM securitygroups WHERE secroleid='" . $_GET['SelectedRole'] . "'";
+		$sql="DELETE FROM weberp_securitygroups WHERE secroleid='" . $_GET['SelectedRole'] . "'";
 		$result = DB_query($sql);
-		$sql="DELETE FROM securityroles WHERE secroleid='" . $_GET['SelectedRole'] . "'";
+		$sql="DELETE FROM weberp_securityroles WHERE secroleid='" . $_GET['SelectedRole'] . "'";
 		$result = DB_query($sql);
 		prnMsg( $_GET['SecRoleName'] . ' ' . _('security role has been deleted') . '!','success');
 
@@ -104,7 +104,7 @@ if (!isset($SelectedRole)) {
 
 	$sql = "SELECT secroleid,
 			secrolename
-		FROM securityroles
+		FROM weberp_securityroles
 		ORDER BY secrolename";
 	$result = DB_query($sql);
 
@@ -153,7 +153,7 @@ if (isset($SelectedRole)) {
 
 	$sql = "SELECT secroleid,
 			secrolename
-		FROM securityroles
+		FROM weberp_securityroles
 		WHERE secroleid='" . $SelectedRole . "'";
 	$result = DB_query($sql);
 	if ( DB_num_rows($result) == 0 ) {
@@ -189,9 +189,9 @@ echo '</table>
 
 if (isset($SelectedRole)) {
 	$sql = "SELECT tokenid, tokenname
-			FROM securitytokens";
+			FROM weberp_securitytokens";
 
-	$sqlUsed = "SELECT tokenid FROM securitygroups WHERE secroleid='". $SelectedRole . "'";
+	$sqlUsed = "SELECT tokenid FROM weberp_securitygroups WHERE secroleid='". $SelectedRole . "'";
 
 	$Result = DB_query($sql);
 

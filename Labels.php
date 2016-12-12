@@ -131,7 +131,7 @@ if (isset($_POST['SelectedLabelID'])){
 				AND ctype_digit($_POST['HPos' . $i])
 				AND ctype_digit($_POST['FontSize' . $i])){ // if all entries are integers
 
-				$result =DB_query("UPDATE labelfields SET fieldvalue='" . $_POST['FieldName' . $i] . "',
+				$result =DB_query("UPDATE weberp_labelfields SET fieldvalue='" . $_POST['FieldName' . $i] . "',
 														vpos='" . $_POST['VPos' . $i] . "',
 														hpos='" . $_POST['HPos' . $i] . "',
 														fontsize='" . $_POST['FontSize' . $i] . "',
@@ -148,7 +148,7 @@ if (isset($_POST['SelectedLabelID'])){
 
 		//insert the new label field entered
 
-		$result = DB_query("INSERT INTO labelfields (labelid,
+		$result = DB_query("INSERT INTO weberp_labelfields (labelid,
 													fieldvalue,
 													vpos,
 													hpos,
@@ -164,7 +164,7 @@ if (isset($_POST['SelectedLabelID'])){
 } elseif(isset($_GET['SelectedLabelID'])){
 	$SelectedLabelID =$_GET['SelectedLabelID'];
 	if (isset($_GET['DeleteField'])){ //then process any deleted fields
-		$result = DB_query("DELETE FROM labelfields WHERE labelfieldid='" . $_GET['DeleteField'] . "'");
+		$result = DB_query("DELETE FROM weberp_labelfields WHERE labelfieldid='" . $_GET['DeleteField'] . "'");
 	}
 }
 
@@ -195,7 +195,7 @@ if (isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE labels SET 	description = '" . $_POST['Description'] . "',
+		$sql = "UPDATE weberp_labels SET 	description = '" . $_POST['Description'] . "',
 									height = '" . $_POST['Height'] . "',
 									topmargin = '". $_POST['TopMargin'] . "',
 									width = '". $_POST['Width'] . "',
@@ -215,7 +215,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected label is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new label form */
 
-		$sql = "INSERT INTO labels (description,
+		$sql = "INSERT INTO weberp_labels (description,
 									height,
 									topmargin,
 									width,
@@ -257,9 +257,9 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	/*Cascade deletes in labelfields */
-	$result = DB_query("DELETE FROM labelfields WHERE labelid= '" . $SelectedLabelID . "'");
-	$result = DB_query("DELETE FROM labels WHERE labelid= '" . $SelectedLabelID . "'");
+	/*Cascade deletes in weberp_labelfields */
+	$result = DB_query("DELETE FROM weberp_labelfields WHERE labelid= '" . $SelectedLabelID . "'");
+	$result = DB_query("DELETE FROM weberp_labels WHERE labelid= '" . $SelectedLabelID . "'");
 	prnMsg(_('The selected label template has been deleted'),'success');
 	unset ($SelectedLabelID);
 }
@@ -278,7 +278,7 @@ if (!isset($SelectedLabelID)) {
 				leftmargin,
 				rowheight,
 				columnwidth
-			FROM labels";
+			FROM weberp_labels";
 
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The defined label templates could not be retrieved because');
 	$DbgMsg = _('The following SQL to retrieve the label templates was used');
@@ -403,7 +403,7 @@ if (isset($SelectedLabelID)) {
 					leftmargin,
 					rowheight,
 					columnwidth
-			FROM labels
+			FROM weberp_labels
 			WHERE labelid='" . $SelectedLabelID . "'";
 
 	$result = DB_query($sql);
@@ -540,7 +540,7 @@ if (isset($SelectedLabelID)) {
 					hpos,
 					fontsize,
 					barcode
-			FROM labelfields
+			FROM weberp_labelfields
 			WHERE labelid = '" . $SelectedLabelID . "'
 			ORDER BY vpos DESC";
 	$ErrMsg = _('Could not get the label fields because');

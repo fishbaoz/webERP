@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineReceiptClass.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* definition of the ReceiptBatch class */
 
@@ -70,7 +70,7 @@ Class Receipt {
 		$this->PayeeBankDetail=$PayeeBankDetail;
 		$this->ID = $id;
 		$this->tag = $Tag;
-		$result = DB_query("SELECT tagdescription FROM tags WHERE tagref='" . $Tag . "'");
+		$result = DB_query("SELECT tagdescription FROM weberp_tags WHERE tagref='" . $Tag . "'");
 		if (DB_num_rows($result)==1){
 			$TagRow = DB_fetch_array($result);
 			$this->TagName = $TagRow['tagdescription'];

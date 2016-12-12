@@ -20,9 +20,9 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 			 <td>:</td>
 			 <td><select name="Location[]" multiple="multiple">
 				<option value="All" selected="selected">' . _('All') . '</option>';;
-	$sql = "SELECT 	locations.loccode,locationname
-			FROM 	locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+	$sql = "SELECT 	weberp_locations.loccode,locationname
+			FROM 	weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			ORDER BY locationname";
 	$locationresult = DB_query($sql);
 	$i=0;
@@ -45,7 +45,7 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 
 	$sql = "SELECT typename,
 					typeid
-				FROM debtortype";
+				FROM weberp_debtortype";
 	$result = DB_query($sql);
 	echo '<option value="All">' . _('All') . '</option>';
 	while ($myrow = DB_fetch_array($result)) {
@@ -56,7 +56,7 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 
 	// stock category selection
 	$SQL="SELECT categoryid,categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 	echo '<tr>
@@ -98,46 +98,46 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 	if ($_POST['StockCat']=='All'){
 		$WhereStockCat = "";
 	}else{
-		$WhereStockCat = " AND stockmaster.categoryid = '" . $_POST['StockCat'] ."'";
+		$WhereStockCat = " AND weberp_stockmaster.categoryid = '" . $_POST['StockCat'] ."'";
 	}
 
 	if ($_POST['Location'][0] == 'All') {
-		$SQL = "SELECT 	stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-				FROM 	stockmaster,locstock
-				INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE 	stockmaster.stockid = locstock.stockid ".
+		$SQL = "SELECT 	weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				FROM 	weberp_stockmaster,weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE 	weberp_stockmaster.stockid = weberp_locstock.stockid ".
 						$WhereStockCat . "
-					AND (locstock.quantity > 0)
+					AND (weberp_locstock.quantity > 0)
 					AND NOT EXISTS (
 							SELECT *
-							FROM 	salesorderdetails, salesorders
-							INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-							WHERE 	stockmaster.stockid = salesorderdetails.stkcode
-									AND (salesorderdetails.orderno = salesorders.orderno)
-									AND salesorderdetails.actualdispatchdate > '" . $FromDate . "')
+							FROM 	weberp_salesorderdetails, weberp_salesorders
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode
+									AND (weberp_salesorderdetails.orderno = weberp_salesorders.orderno)
+									AND weberp_salesorderdetails.actualdispatchdate > '" . $FromDate . "')
 					AND NOT EXISTS (
 							SELECT *
-							FROM 	stockmoves
-							INNER JOIN locationusers ON locationusers.loccode=stockmoves.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-							WHERE 	stockmoves.stockid = stockmaster.stockid
-									AND stockmoves.trandate >= '" . $FromDate . "')
+							FROM 	weberp_stockmoves
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmoves.stockid = weberp_stockmaster.stockid
+									AND weberp_stockmoves.trandate >= '" . $FromDate . "')
 					AND EXISTS (
 							SELECT *
-							FROM 	stockmoves
-							INNER JOIN locationusers ON locationusers.loccode=stockmoves.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-							WHERE 	stockmoves.stockid = stockmaster.stockid
-									AND stockmoves.trandate < '" . $FromDate . "'
-									AND stockmoves.qty >0)
-				GROUP BY stockmaster.stockid
-				ORDER BY stockmaster.stockid";
+							FROM 	weberp_stockmoves
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmoves.stockid = weberp_stockmaster.stockid
+									AND weberp_stockmoves.trandate < '" . $FromDate . "'
+									AND weberp_stockmoves.qty >0)
+				GROUP BY weberp_stockmaster.stockid
+				ORDER BY weberp_stockmaster.stockid";
 	}else{
 		$WhereLocation = '';
 		if (sizeof($_POST['Location']) == 1) {
-			$WhereLocation = " AND locstock.loccode ='" . $_POST['Location'][0] . "' ";
+			$WhereLocation = " AND weberp_locstock.loccode ='" . $_POST['Location'][0] . "' ";
 		} else {
-			$WhereLocation = " AND locstock.loccode IN(";
+			$WhereLocation = " AND weberp_locstock.loccode IN(";
 			$commactr = 0;
 			foreach ($_POST['Location'] as $key => $value) {
 				$WhereLocation .= "'" . $value . "'";
@@ -148,39 +148,39 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 			} // End of foreach
 			$WhereLocation .= ')';
 		}
-		$SQL = "SELECT 	stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units,
-						locstock.quantity,
-						locations.locationname
-				FROM 	stockmaster,locstock,locations
-				INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE 	stockmaster.stockid = locstock.stockid
-						AND (locstock.loccode = locations.loccode)".
+		$SQL = "SELECT 	weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_locstock.quantity,
+						weberp_locations.locationname
+				FROM 	weberp_stockmaster,weberp_locstock,weberp_locations
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE 	weberp_stockmaster.stockid = weberp_locstock.stockid
+						AND (weberp_locstock.loccode = weberp_locations.loccode)".
 						$WhereLocation .
 						$WhereStockCat . "
-						AND (locstock.quantity > 0)
+						AND (weberp_locstock.quantity > 0)
 						AND NOT EXISTS (
 								SELECT *
-								FROM 	salesorderdetails, salesorders
-								WHERE 	stockmaster.stockid = salesorderdetails.stkcode
-										AND (salesorders.fromstkloc = locstock.loccode)
-										AND (salesorderdetails.orderno = salesorders.orderno)
-										AND salesorderdetails.actualdispatchdate > '" . $FromDate . "')
+								FROM 	weberp_salesorderdetails, weberp_salesorders
+								WHERE 	weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode
+										AND (weberp_salesorders.fromstkloc = weberp_locstock.loccode)
+										AND (weberp_salesorderdetails.orderno = weberp_salesorders.orderno)
+										AND weberp_salesorderdetails.actualdispatchdate > '" . $FromDate . "')
 						AND NOT EXISTS (
 								SELECT *
-								FROM 	stockmoves
-								WHERE 	stockmoves.loccode = locstock.loccode
-										AND stockmoves.stockid = stockmaster.stockid
-										AND stockmoves.trandate >= '" . $FromDate . "')
+								FROM 	weberp_stockmoves
+								WHERE 	weberp_stockmoves.loccode = weberp_locstock.loccode
+										AND weberp_stockmoves.stockid = weberp_stockmaster.stockid
+										AND weberp_stockmoves.trandate >= '" . $FromDate . "')
 						AND EXISTS (
 								SELECT *
-								FROM 	stockmoves
-								WHERE 	stockmoves.loccode = locstock.loccode
-										AND stockmoves.stockid = stockmaster.stockid
-										AND stockmoves.trandate < '" . $FromDate . "'
-										AND stockmoves.qty >0)
-				ORDER BY stockmaster.stockid";
+								FROM 	weberp_stockmoves
+								WHERE 	weberp_stockmoves.loccode = weberp_locstock.loccode
+										AND weberp_stockmoves.stockid = weberp_stockmaster.stockid
+										AND weberp_stockmoves.trandate < '" . $FromDate . "'
+										AND weberp_stockmoves.qty >0)
+				ORDER BY weberp_stockmaster.stockid";
 	}
 	$result = DB_query($SQL);
 	echo '<p class="page_title_text" align="center"><strong>' . _('No Sales Items') . '</strong></p>';
@@ -211,8 +211,8 @@ echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '
 			$k = 1;
 		}
 		$QOHResult = DB_query("SELECT sum(quantity)
-				FROM locstock
-				INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+				FROM weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 				WHERE stockid = '" . $myrow['stockid'] . "'" .
 				$WhereLocation);
 		$QOHRow = DB_fetch_row($QOHResult);

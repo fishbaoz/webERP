@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: ConnectDB_postgres.inc 7653 2016-10-24 01:18:52Z rchacon $ */
 /* Database abstraction for postgres */
 
 define ('LIKE','ILIKE');
@@ -129,13 +129,13 @@ function INTERVAL( $val, $Inter ) {
 	return "\n(CAST( (" . $val . ") as text ) || ' ". $Inter ."')::interval\n";
 }
 function DB_show_tables (&$Conn){
-	$Result =DB_query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+	$Result =DB_query("SELECT table_name FROM weberp_information_schema.tables WHERE table_schema = 'public'");
 	Return $Result;
 }
 function DB_show_fields($TableName,&$Conn){
-	$Result = DB_query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" . $TableName . "'");
+	$Result = DB_query("SELECT table_name FROM weberp_information_schema.tables WHERE table_schema='public' AND table_name='" . $TableName . "'");
 	if (DB_num_rows($Result)==1){
-		$Result = DB_query("SELECT column_name FROM information_schema.columns WHERE table_name ='$TableName'");
+		$Result = DB_query("SELECT column_name FROM weberp_information_schema.columns WHERE table_name ='$TableName'");
 		Return $Result;
 	}
 }
@@ -145,7 +145,7 @@ function DB_Maintenance(){
 
 	$Result = DB_query('VACUUM ANALYZE');
 
-	$Result = DB_query("UPDATE config
+	$Result = DB_query("UPDATE weberp_config
 				SET confvalue='" . Date('Y-m-d') . "'
 				WHERE confname='DB_Maintenance_LastRun'");
 }

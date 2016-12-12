@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SupplierContacts.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedContact could also exist if submit had not been clicked this code would not run in this case 'cos submit is false of course see the delete code below*/
 
-		$sql = "UPDATE suppliercontacts SET position='" . $_POST['Position'] . "',
+		$sql = "UPDATE weberp_suppliercontacts SET position='" . $_POST['Position'] . "',
 											tel='" . $_POST['Tel'] . "',
 											fax='" . $_POST['Fax'] . "',
 											email='" . $_POST['Email'] . "',
@@ -75,7 +75,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected contact is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new supplier  contacts form */
 
-		$sql = "INSERT INTO suppliercontacts (supplierid,
+		$sql = "INSERT INTO weberp_suppliercontacts (supplierid,
 											contact,
 											position,
 											tel,
@@ -111,7 +111,7 @@ if (isset($_POST['submit'])) {
 	}
 } elseif (isset($_GET['delete'])) {
 
-	$sql = "DELETE FROM suppliercontacts
+	$sql = "DELETE FROM weberp_suppliercontacts
 			WHERE contact='".$SelectedContact."'
 			AND supplierid = '".$SupplierID."'";
 
@@ -126,16 +126,16 @@ if (isset($_POST['submit'])) {
 
 
 if (!isset($SelectedContact)){
-	$sql = "SELECT suppliers.suppname,
+	$sql = "SELECT weberp_suppliers.suppname,
 					contact,
 					position,
 					tel,
-					suppliercontacts.fax,
-					suppliercontacts.email
-				FROM suppliercontacts,
+					weberp_suppliercontacts.fax,
+					weberp_suppliercontacts.email
+				FROM weberp_suppliercontacts,
 					suppliers
-				WHERE suppliercontacts.supplierid=suppliers.supplierid
-				AND suppliercontacts.supplierid = '".$SupplierID."'";
+				WHERE weberp_suppliercontacts.supplierid=weberp_suppliers.supplierid
+				AND weberp_suppliercontacts.supplierid = '".$SupplierID."'";
 
 	$result = DB_query($sql);
 
@@ -209,7 +209,7 @@ if (! isset($_GET['delete'])) {
 						fax,
 						mobile,
 						email
-					FROM suppliercontacts
+					FROM weberp_suppliercontacts
 					WHERE contact='" . $SelectedContact . "'
 					AND supplierid='" . $SupplierID . "'";
 

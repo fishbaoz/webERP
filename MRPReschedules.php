@@ -1,13 +1,13 @@
 <?php
 
-/*$Id$ */
+/*$Id: MRPReschedules.php 6944 2014-10-27 07:15:34Z daintree $ */
 
 // MRPReschedules.php - Report of purchase orders and work orders that MRP determines should be
 // rescheduled.
 
 include('includes/session.inc');
 
-$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='mrprequirements'";
+$sql="SHOW TABLES WHERE Tables_in_" . $_SESSION['DatabaseName'] . "='weberp_mrprequirements'";
 $result=DB_query($sql);
 if (DB_num_rows($result)==0) {
 	$Title='MRP error';
@@ -32,13 +32,13 @@ if (isset($_POST['PrintPDF'])) {
 	if ($_POST['Selection'] != 'All') {
 		 $selecttype = " AND ordertype = '" . $_POST['Selection'] . "'";
 	 }
-	$sql = "SELECT mrpsupplies.*,
-				   stockmaster.description,
-				   stockmaster.decimalplaces
-			  FROM mrpsupplies,stockmaster
-			  WHERE mrpsupplies.part = stockmaster.stockid AND duedate <> mrpdate
+	$sql = "SELECT weberp_mrpsupplies.*,
+				   weberp_stockmaster.description,
+				   weberp_stockmaster.decimalplaces
+			  FROM weberp_mrpsupplies,weberp_stockmaster
+			  WHERE weberp_mrpsupplies.part = weberp_stockmaster.stockid AND duedate <> mrpdate
 				 $selecttype
-			  ORDER BY mrpsupplies.part";
+			  ORDER BY weberp_mrpsupplies.part";
 	$result = DB_query($sql,'','',false,true);
 
 	if (DB_error_no() !=0) {

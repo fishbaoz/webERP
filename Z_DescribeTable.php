@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_DescribeTable.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Database table details');

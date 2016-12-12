@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_glsections.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Check that the account section doesn't already exist'*/
 	function VerifyAccountSection($AccountSection, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(sectionid)
-				FROM accountsection
+				FROM weberp_accountsection
 				WHERE sectionid='".$AccountSection."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -43,7 +43,7 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$sql = "INSERT INTO accountsection ('" . mb_substr($FieldNames,0,-2) . "')
+			$sql = "INSERT INTO weberp_accountsection ('" . mb_substr($FieldNames,0,-2) . "')
 					VALUES ('" . mb_substr($FieldValues,0,-2) . "')";
 			$result = DB_Query($sql, $db);
 			if (DB_error_no() != 0) {

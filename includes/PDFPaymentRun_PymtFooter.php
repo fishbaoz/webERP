@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFPaymentRun_PymtFooter.php 6945 2014-10-27 07:20:48Z daintree $*/
 /*Code to print footer details for each supplier being paid and process payment total for each supplier
 as necessary an include file used since the same code is used twice */
 $YPos -= (0.5*$line_height);
@@ -25,7 +25,7 @@ if (isset($_POST['PrintPDFAndProcess'])){
 
 	/*Do the inserts for the payment transaction into the Supp Trans table*/
 
-	$SQL = "INSERT INTO supptrans (type,
+	$SQL = "INSERT INTO weberp_supptrans (type,
 					transno,
 					suppreference,
 					supplierno,
@@ -65,13 +65,13 @@ if (isset($_POST['PrintPDFAndProcess'])){
 		exit;
 	}
 
-	$PaymentTransID = DB_Last_Insert_ID($db,'supptrans','id');
+	$PaymentTransID = DB_Last_Insert_ID($db,'weberp_supptrans','id');
 
 	/*Do the inserts for the allocation record against the payment for this charge */
 
 	foreach ($Allocs AS $AllocTrans){ /*loop through the array of allocations */
 
-		$SQL = "INSERT INTO suppallocs (amt,
+		$SQL = "INSERT INTO weberp_suppallocs (amt,
 						datealloc,
 						transid_allocfrom,
 						transid_allocto)
@@ -98,7 +98,7 @@ if (isset($_POST['PrintPDFAndProcess'])){
 
 
 	/*Do the inserts for the payment transaction into the BankTrans table*/
-	$SQL="INSERT INTO banktrans (bankact,
+	$SQL="INSERT INTO weberp_banktrans (bankact,
 					ref,
 					exrate,
 					transdate,
@@ -132,7 +132,7 @@ if (isset($_POST['PrintPDFAndProcess'])){
 
 		/*Do the GL trans for the payment CR bank */
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 						typeno,
 						trandate,
 						periodno,
@@ -164,7 +164,7 @@ if (isset($_POST['PrintPDFAndProcess'])){
 
 		/*Do the GL trans for the payment DR creditors */
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 						typeno,
 						trandate,
 						periodno,
@@ -195,7 +195,7 @@ if (isset($_POST['PrintPDFAndProcess'])){
 
 		/*Do the GL trans for the exch diff */
 		if ($AccumDiffOnExch != 0){
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,

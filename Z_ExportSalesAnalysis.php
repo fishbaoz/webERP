@@ -27,7 +27,7 @@ echo '<div class="centre">' . _('Making a comma separated values file of the sto
 
 $ErrMsg = _('The SQL to get the stock items failed with the message');
 
-$sql = "SELECT stockid, categoryid, description FROM stockmaster";
+$sql = "SELECT stockid, categoryid, description FROM weberp_stockmaster";
 $result = DB_query($sql, $ErrMsg);
 
 if (!file_exists($_SESSION['reports_dir'])){
@@ -60,7 +60,7 @@ echo '<div class="centre">' . _('Making a comma separated values file of the cus
 
 $ErrMsg = _('The SQL to get the customers failed with the message');
 
-$sql = "SELECT debtorsmaster.debtorno, debtorsmaster.name, custbranch.branchcode, brname, salestype, area, salesman FROM debtorsmaster INNER JOIN custbranch ON debtorsmaster.debtorno=custbranch.debtorno";
+$sql = "SELECT weberp_debtorsmaster.debtorno, weberp_debtorsmaster.name, weberp_custbranch.branchcode, brname, salestype, area, salesman FROM weberp_debtorsmaster INNER JOIN weberp_custbranch ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno";
 $result = DB_query($sql, $ErrMsg);
 
 $CustomersFileName = $_SESSION['reports_dir'] . '/Customers.csv';
@@ -90,19 +90,19 @@ echo '<div class="centre">' . _('Making a comma separated values file of the sal
 
 $ErrMsg = _('The SQL to get the sales data failed with the message');
 
-$sql = "SELECT 	stockmoves.debtorno,
-				stockmoves.branchcode,
+$sql = "SELECT 	weberp_stockmoves.debtorno,
+				weberp_stockmoves.branchcode,
 				stockid,
 				trandate,
 				-qty,
 				-price*(1-discountpercent)*qty,
 				-standardcost*qty,
 				transno
-			FROM stockmoves
-			INNER JOIN custbranch
-			ON stockmoves.debtorno=custbranch.debtorno
-				AND stockmoves.branchcode=custbranch.branchcode
-			WHERE (stockmoves.type=10 OR stockmoves.type=11)
+			FROM weberp_stockmoves
+			INNER JOIN weberp_custbranch
+			ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+				AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+			WHERE (weberp_stockmoves.type=10 OR weberp_stockmoves.type=11)
 			AND show_on_inv_crds=1";
 
 $result = DB_query($sql, $ErrMsg);

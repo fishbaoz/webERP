@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: ShipmentCosting.php 7204 2015-03-07 16:13:24Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Shipment Costing');
@@ -24,16 +24,16 @@ if (!isset($_GET['SelectedShipment'])){
 	exit;
 }
 
-$ShipmentHeaderSQL = "SELECT shipments.supplierid,
-							suppliers.suppname,
-							shipments.eta,
-							suppliers.currcode,
-							shipments.vessel,
-							shipments.voyageref,
-							shipments.closed
-						FROM shipments INNER JOIN suppliers
-							ON shipments.supplierid = suppliers.supplierid
-						WHERE shipments.shiptref = '" . $_GET['SelectedShipment'] . "'";
+$ShipmentHeaderSQL = "SELECT weberp_shipments.supplierid,
+							weberp_suppliers.suppname,
+							weberp_shipments.eta,
+							weberp_suppliers.currcode,
+							weberp_shipments.vessel,
+							weberp_shipments.voyageref,
+							weberp_shipments.closed
+						FROM weberp_shipments INNER JOIN weberp_suppliers
+							ON weberp_shipments.supplierid = weberp_suppliers.supplierid
+						WHERE weberp_shipments.shiptref = '" . $_GET['SelectedShipment'] . "'";
 
 $ErrMsg = _('Shipment').' '. $_GET['SelectedShipment'] . ' ' . _('cannot be retrieved because a database error occurred');
 $GetShiptHdrResult = DB_query($ShipmentHeaderSQL, $ErrMsg);
@@ -70,7 +70,7 @@ echo '<br />
 /*Get the total non-stock item shipment charges */
 
 $sql = "SELECT SUM(value)
-		FROM shipmentcharges
+		FROM weberp_shipmentcharges
 		WHERE stockid=''
 		AND shiptref ='" . $_GET['SelectedShipment']. "'";
 
@@ -90,7 +90,7 @@ $TotalCostsToApportion = $myrow[0];
 /*Now Get the total of stock items invoiced against the shipment */
 
 $sql = "SELECT SUM(value)
-		FROM shipmentcharges
+		FROM weberp_shipmentcharges
 		WHERE stockid<>''
 		AND shiptref ='" . $_GET['SelectedShipment'] . "'";
 
@@ -109,14 +109,14 @@ $TotalInvoiceValueOfShipment = $myrow[0];
 
 /*Now get the lines on the shipment */
 
-$LineItemsSQL = "SELECT purchorderdetails.itemcode,
-						purchorderdetails.itemdescription,
-						SUM(purchorderdetails.qtyinvoiced) as totqtyinvoiced,
-						SUM(purchorderdetails.quantityrecd) as totqtyrecd
-						FROM purchorderdetails
-					WHERE purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'
-					GROUP BY purchorderdetails.itemcode,
-						  purchorderdetails.itemdescription";
+$LineItemsSQL = "SELECT weberp_purchorderdetails.itemcode,
+						weberp_purchorderdetails.itemdescription,
+						SUM(weberp_purchorderdetails.qtyinvoiced) as totqtyinvoiced,
+						SUM(weberp_purchorderdetails.quantityrecd) as totqtyrecd
+						FROM weberp_purchorderdetails
+					WHERE weberp_purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'
+					GROUP BY weberp_purchorderdetails.itemcode,
+						  weberp_purchorderdetails.itemdescription";
 
 $ErrMsg = _('The lines on the shipment could not be retrieved from the database');
 $LineItemsResult = DB_query($LineItemsSQL, $ErrMsg);
@@ -173,10 +173,10 @@ if (DB_num_rows($LineItemsResult) > 0) {
 			$k=1;
 		}
 
-				$sql = "SELECT SUM(shipmentcharges.value) AS invoicedcharges
-						 FROM shipmentcharges
-						 WHERE shipmentcharges.stockid ='" . $myrow['itemcode'] . "'
-						 AND shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'";
+				$sql = "SELECT SUM(weberp_shipmentcharges.value) AS invoicedcharges
+						 FROM weberp_shipmentcharges
+						 WHERE weberp_shipmentcharges.stockid ='" . $myrow['itemcode'] . "'
+						 AND weberp_shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'";
 				$ItemChargesResult = DB_query($sql);
 				$ItemChargesRow = DB_fetch_row($ItemChargesResult);
 				$ItemCharges = $ItemChargesRow[0];
@@ -192,11 +192,11 @@ if (DB_num_rows($LineItemsResult) > 0) {
 		} else {
 			$ItemShipmentCost =0;
 		}
-		$sql = "SELECT SUM(grns.stdcostunit*grns.qtyrecd) AS costrecd
-				   FROM grns INNER JOIN purchorderdetails
-				   ON grns.podetailitem=purchorderdetails.podetailitem
-			 		WHERE purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'
-			 		AND purchorderdetails.itemcode = '" . $myrow['itemcode'] . "'";
+		$sql = "SELECT SUM(weberp_grns.stdcostunit*weberp_grns.qtyrecd) AS costrecd
+				   FROM weberp_grns INNER JOIN weberp_purchorderdetails
+				   ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+			 		WHERE weberp_purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'
+			 		AND weberp_purchorderdetails.itemcode = '" . $myrow['itemcode'] . "'";
 
 		$StdCostResult = DB_query($sql);
 		$StdCostRow = DB_fetch_row($StdCostResult);
@@ -245,7 +245,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 				The cost of these items - $ItemShipmentCost
 				*/
 
-				$sql ="SELECT SUM(quantity) FROM locstock WHERE stockid='" . $myrow['itemcode'] . "'";
+				$sql ="SELECT SUM(quantity) FROM weberp_locstock WHERE stockid='" . $myrow['itemcode'] . "'";
 				$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The quantity on hand could not be retrieved from the database');
 				$DbgMsg = _('The following SQL to retrieve the total stock quantity was used');
 				$Result = DB_query($sql, $ErrMsg, $DbgMsg);
@@ -276,7 +276,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 					if ($myrow['totqtyinvoiced'] > $TotalQuantityOnHand){
 
-						$sql = "INSERT INTO gltrans (type,
+						$sql = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -296,7 +296,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 					}
 				/*Now post any remaining price variance to stock rather than price variances */
-					$sql = "INSERT INTO gltrans (type,
+					$sql = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -332,7 +332,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 					$CostIncrement = ($myrow['totqtyinvoiced'] *($ItemShipmentCost - $StdCostUnit) - $WriteOffToVariances) / $TotalQuantityOnHand;
 
-					$sql = "UPDATE stockmaster
+					$sql = "UPDATE weberp_stockmaster
 								SET lastcost=materialcost+overheadcost+labourcost,
 									materialcost=materialcost+" . $CostIncrement . ",
 									lastcostupdate='" . Date('Y-m-d') . "'
@@ -341,7 +341,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 					$Result = DB_query($sql, $ErrMsg, $DbgMsg,'',TRUE);
 
 				} else {
-					$sql = "UPDATE stockmaster
+					$sql = "UPDATE weberp_stockmaster
 								SET lastcost=materialcost+overheadcost+labourcost,
 									materialcost='" . $ItemShipmentCost . "',
 									lastcostupdate='" . Date('Y-m-d') . "'
@@ -356,7 +356,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 			} else { /*We must be using standard costing do the journals for standard costing then */
 
 				 if ($_SESSION['CompanyRecord']['gllink_stock']==1){
-					$sql = "INSERT INTO gltrans (type,
+					$sql = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -379,7 +379,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 			if ($_SESSION['CompanyRecord']['gllink_stock']==1){
 						/*we always need to reverse entries relating to the GRN suspense during delivery and entry of shipment charges */
-				  $sql = "INSERT INTO gltrans (type,
+				  $sql = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -403,7 +403,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 												  Weighted average costing implies cost updates taking place automatically */
 
 					$QOHResult = DB_query("SELECT SUM(quantity)
-											FROM locstock
+											FROM weberp_locstock
 											WHERE stockid ='" . $myrow['itemcode'] . "'");
 					$QOHRow = DB_fetch_row($QOHResult);
 					$QOH=$QOHRow[0];
@@ -414,7 +414,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 						$ValueOfChange = $QOH * ($ItemShipmentCost - $StdCostUnit);
 
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -433,7 +433,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 
 						   $Result = DB_query($SQL, $ErrMsg,'',TRUE);
 
-						   $SQL = "INSERT INTO gltrans (type,
+						   $SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -455,7 +455,7 @@ if (DB_num_rows($LineItemsResult) > 0) {
 					} /*end of GL entries for a standard cost update */
 
 					/* Only the material cost is important for imported items */
-					$sql = "UPDATE stockmaster SET materialcost=" . $ItemShipmentCost . ",
+					$sql = "UPDATE weberp_stockmaster SET materialcost=" . $ItemShipmentCost . ",
 												labourcost=0,
 												overheadcost=0,
 												lastcost='" . $StdCostUnit . "',
@@ -502,27 +502,27 @@ echo '<br />
 	<tr>
 		<td valign="top">'; // put this shipment charges side by side in a table (major table 2 cols)
 
-$sql = "SELECT suppliers.suppname,
-			supptrans.suppreference,
-			systypes.typename,
-			supptrans.trandate,
-			supptrans.rate,
-			suppliers.currcode,
-			shipmentcharges.stockid,
-			shipmentcharges.value,
-			supptrans.transno,
-			supptrans.supplierno
-		FROM supptrans INNER JOIN shipmentcharges
-			ON shipmentcharges.transtype=supptrans.type
-			AND shipmentcharges.transno=supptrans.transno
-		INNER JOIN suppliers
-			ON suppliers.supplierid=supptrans.supplierno
-		INNER JOIN systypes ON systypes.typeid=supptrans.type
-		WHERE shipmentcharges.stockid<>''
-		AND shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'
-		ORDER BY supptrans.supplierno,
-			supptrans.transno,
-			shipmentcharges.stockid";
+$sql = "SELECT weberp_suppliers.suppname,
+			weberp_supptrans.suppreference,
+			weberp_systypes.typename,
+			weberp_supptrans.trandate,
+			weberp_supptrans.rate,
+			weberp_suppliers.currcode,
+			weberp_shipmentcharges.stockid,
+			weberp_shipmentcharges.value,
+			weberp_supptrans.transno,
+			weberp_supptrans.supplierno
+		FROM weberp_supptrans INNER JOIN weberp_shipmentcharges
+			ON weberp_shipmentcharges.transtype=weberp_supptrans.type
+			AND weberp_shipmentcharges.transno=weberp_supptrans.transno
+		INNER JOIN weberp_suppliers
+			ON weberp_suppliers.supplierid=weberp_supptrans.supplierno
+		INNER JOIN weberp_systypes ON weberp_systypes.typeid=weberp_supptrans.type
+		WHERE weberp_shipmentcharges.stockid<>''
+		AND weberp_shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'
+		ORDER BY weberp_supptrans.supplierno,
+			weberp_supptrans.transno,
+			weberp_shipmentcharges.stockid";
 
 $ChargesResult = DB_query($sql);
 
@@ -581,25 +581,25 @@ echo '</td><td valign="top">'; //major table
 
 /* Now the shipment freight/duty etc general charges */
 
-$sql = "SELECT suppliers.suppname,
-		supptrans.suppreference,
-		systypes.typename,
-		supptrans.trandate,
-		supptrans.rate,
-		suppliers.currcode,
-		shipmentcharges.stockid,
-		shipmentcharges.value
-	FROM supptrans INNER JOIN shipmentcharges
-		ON shipmentcharges.transtype=supptrans.type
-		AND shipmentcharges.transno=supptrans.transno
-	INNER JOIN suppliers
-		ON suppliers.supplierid=supptrans.supplierno
-	INNER JOIN systypes
-		ON systypes.typeid=supptrans.type
-	WHERE shipmentcharges.stockid=''
-	AND shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'
-	ORDER BY supptrans.supplierno,
-		supptrans.transno";
+$sql = "SELECT weberp_suppliers.suppname,
+		weberp_supptrans.suppreference,
+		weberp_systypes.typename,
+		weberp_supptrans.trandate,
+		weberp_supptrans.rate,
+		weberp_suppliers.currcode,
+		weberp_shipmentcharges.stockid,
+		weberp_shipmentcharges.value
+	FROM weberp_supptrans INNER JOIN weberp_shipmentcharges
+		ON weberp_shipmentcharges.transtype=weberp_supptrans.type
+		AND weberp_shipmentcharges.transno=weberp_supptrans.transno
+	INNER JOIN weberp_suppliers
+		ON weberp_suppliers.supplierid=weberp_supptrans.supplierno
+	INNER JOIN weberp_systypes
+		ON weberp_systypes.typeid=weberp_supptrans.type
+	WHERE weberp_shipmentcharges.stockid=''
+	AND weberp_shipmentcharges.shiptref='" . $_GET['SelectedShipment'] . "'
+	ORDER BY weberp_supptrans.supplierno,
+		weberp_supptrans.transno";
 
 $ChargesResult = DB_query($sql);
 
@@ -688,7 +688,7 @@ if ( isset($_POST['Close']) ){ /* OK do the shipment close journals */
 
 /*also need to make sure the purchase order lines that were on this shipment are completed so no more can be received in against the order line */
 
-		$result = DB_query("UPDATE purchorderdetails
+		$result = DB_query("UPDATE weberp_purchorderdetails
 								   SET quantityord=quantityrecd,
 									   completed=1
 							WHERE shiptref = '" . $_GET['SelectedShipment'] ."'",
@@ -696,7 +696,7 @@ if ( isset($_POST['Close']) ){ /* OK do the shipment close journals */
 							'',
 							TRUE);
 
-	$result = DB_query("UPDATE shipments SET closed=1 WHERE shiptref='" .$_GET['SelectedShipment']. "'",_('Could not update the shipment to closed'),'',TRUE);
+	$result = DB_query("UPDATE weberp_shipments SET closed=1 WHERE shiptref='" .$_GET['SelectedShipment']. "'",_('Could not update the shipment to closed'),'',TRUE);
 	$result = DB_Txn_Commit();
 
 	echo '<br /><br />';

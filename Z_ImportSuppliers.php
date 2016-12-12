@@ -197,7 +197,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 			$SQL_SupplierSince = FormatDateForSQL($_POST['SupplierSince']);
 
 			//first off validate inputs sensible
-			$sql="SELECT COUNT(supplierid) FROM suppliers WHERE supplierid='".$SupplierID."'";
+			$sql="SELECT COUNT(supplierid) FROM weberp_suppliers WHERE supplierid='".$SupplierID."'";
 			$result=DB_query($sql);
 			$myrow=DB_fetch_row($result);
 
@@ -208,18 +208,18 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 			}elseif($SuppExists) {
 				$UpdatedNum++;
 				$supptranssql = "SELECT supplierno
-								FROM supptrans
+								FROM weberp_supptrans
 								WHERE supplierno='".$SupplierID ."'";
 				$suppresult = DB_query($supptranssql);
 				$supptrans = DB_num_rows($suppresult);
 
 				$suppcurrssql = "SELECT currcode
-								FROM suppliers
+								FROM weberp_suppliers
 								WHERE supplierid='".$SupplierID ."'";
 				$currresult = DB_query($suppcurrssql);
 				$suppcurr = DB_fetch_row($currresult);
 
-				$sql = "UPDATE suppliers SET suppname='" . $_POST['SuppName'] . "',
+				$sql = "UPDATE weberp_suppliers SET suppname='" . $_POST['SuppName'] . "',
 							address1='" . $_POST['Address1'] . "',
 							address2='" . $_POST['Address2'] . "',
 							address3='" . $_POST['Address3'] . "',
@@ -255,7 +255,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 
 			} else { //its a new supplier
 				$InsertNum++;
-				$sql = "INSERT INTO suppliers (supplierid,
+				$sql = "INSERT INTO weberp_suppliers (supplierid,
 											suppname,
 											address1,
 											address2,

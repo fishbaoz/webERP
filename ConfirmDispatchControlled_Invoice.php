@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: ConfirmDispatchControlled_Invoice.php 6409 2013-11-18 07:53:20Z exsonqu $*/
 
 include('includes/DefineCartClass.php');
 include('includes/DefineSerialItems.php');

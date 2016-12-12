@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineSuppAllocsClass.php 5766 2012-12-19 06:45:03Z daintree $*/
 
 /* definition of the Supplier Payment/Credit Note allocation class */
 

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: TaxAuthorities.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Tax Authorities');
@@ -32,7 +32,7 @@ if(isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE taxauthorities
+		$sql = "UPDATE weberp_taxauthorities
 					SET taxglcode ='" . $_POST['TaxGLCode'] . "',
 					purchtaxglaccount ='" . $_POST['PurchTaxGLCode'] . "',
 					description = '" . $_POST['Description'] . "',
@@ -51,7 +51,7 @@ if(isset($_POST['submit'])) {
 
 	/*Selected tax authority is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new tax authority form */
 
-		$sql = "INSERT INTO taxauthorities (
+		$sql = "INSERT INTO weberp_taxauthorities (
 						taxglcode,
 						purchtaxglaccount,
 						description,
@@ -74,19 +74,19 @@ if(isset($_POST['submit'])) {
 
 		$msg = _('The new tax authority record has been added to the database');
 
-		$NewTaxID = DB_Last_Insert_ID($db,'taxauthorities','taxid');
+		$NewTaxID = DB_Last_Insert_ID($db,'weberp_taxauthorities','taxid');
 
-		$sql = "INSERT INTO taxauthrates (
+		$sql = "INSERT INTO weberp_taxauthrates (
 					taxauthority,
 					dispatchtaxprovince,
 					taxcatid
 					)
 				SELECT
 					'" . $NewTaxID  . "',
-					taxprovinces.taxprovinceid,
-					taxcategories.taxcatid
-				FROM taxprovinces,
-					taxcategories";
+					weberp_taxprovinces.taxprovinceid,
+					weberp_taxcategories.taxcatid
+				FROM weberp_taxprovinces,
+					weberp_taxcategories";
 
 			$InsertResult = DB_query($sql);
 	}
@@ -106,7 +106,7 @@ if(isset($_POST['submit'])) {
 // PREVENT DELETES IF DEPENDENT RECORDS IN OTHER TABLES
 
 	$sql= "SELECT COUNT(*)
-			FROM taxgrouptaxes
+			FROM weberp_taxgrouptaxes
 		WHERE taxauthid='" . $SelectedTaxAuthID . "'";
 
 	$result = DB_query($sql);
@@ -115,8 +115,8 @@ if(isset($_POST['submit'])) {
 		prnmsg(_('Cannot delete this tax authority because there are tax groups defined that use it'),'warn');
 	} else {
 		/*Cascade deletes in TaxAuthLevels */
-		$result = DB_query("DELETE FROM taxauthrates WHERE taxauthority= '" . $SelectedTaxAuthID . "'");
-		$result = DB_query("DELETE FROM taxauthorities WHERE taxid= '" . $SelectedTaxAuthID . "'");
+		$result = DB_query("DELETE FROM weberp_taxauthrates WHERE taxauthority= '" . $SelectedTaxAuthID . "'");
+		$result = DB_query("DELETE FROM weberp_taxauthorities WHERE taxid= '" . $SelectedTaxAuthID . "'");
 		prnMsg(_('The selected tax authority record has been deleted'),'success');
 		unset ($SelectedTaxAuthID);
 	} // end of related records testing
@@ -134,7 +134,7 @@ if(!isset($SelectedTaxAuthID)) {
 				bankacc,
 				bankacctype,
 				bankswift
-			FROM taxauthorities";
+			FROM weberp_taxauthorities";
 
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The defined tax authorities could not be retrieved because');
 	$DbgMsg = _('The following SQL to retrieve the tax authorities was used');
@@ -220,7 +220,7 @@ if(isset($SelectedTaxAuthID)) {
 				bankacc,
 				bankacctype,
 				bankswift
-			FROM taxauthorities
+			FROM weberp_taxauthorities
 			WHERE taxid='" . $SelectedTaxAuthID . "'";
 
 	$result = DB_query($sql);
@@ -242,9 +242,9 @@ if(isset($SelectedTaxAuthID)) {
 
 $SQL = "SELECT accountcode,
 				accountname
-		FROM chartmaster INNER JOIN accountgroups
-		ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl=0
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+		ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl=0
 		ORDER BY accountcode";
 $result = DB_query($SQL);
 

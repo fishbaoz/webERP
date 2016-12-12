@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: AddCustomerTypeNotes.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Customer Type (Group) Notes');
@@ -39,7 +39,7 @@ if (isset($_POST['submit']) ) {
 
 	if ($Id and $InputError !=1) {
 
-		$sql = "UPDATE debtortypenotes SET note='" . $_POST['Note'] . "',
+		$sql = "UPDATE weberp_debtortypenotes SET note='" . $_POST['Note'] . "',
 											date='" . FormatDateForSQL($_POST['NoteDate']) . "',
 											href='" . $_POST['Href'] . "',
 											priority='" . $_POST['Priority'] . "'
@@ -48,7 +48,7 @@ if (isset($_POST['submit']) ) {
 		$msg = _('Customer Group Notes') . ' ' . $DebtorType  . ' ' . _('has been updated');
 	} elseif ($InputError !=1) {
 
-		$sql = "INSERT INTO debtortypenotes (typeid,
+		$sql = "INSERT INTO weberp_debtortypenotes (typeid,
 											href,
 											note,
 											date,
@@ -75,7 +75,7 @@ if (isset($_POST['submit']) ) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'SalesOrders'
 
-	$sql="DELETE FROM debtortypenotes
+	$sql="DELETE FROM weberp_debtortypenotes
 			WHERE noteid='".$Id."'
 			AND typeid='".$DebtorType."'";
 	$result = DB_query($sql);
@@ -88,7 +88,7 @@ if (isset($_POST['submit']) ) {
 }
 
 if (!isset($Id)) {
-	$SQLname="SELECT typename from debtortype where typeid='".$DebtorType."'";
+	$SQLname="SELECT typename from weberp_debtortype where typeid='".$DebtorType."'";
 	$result = DB_query($SQLname);
 	$myrow = DB_fetch_array($result);
 	echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/customer.png" title="' . _('Search') . '" alt="" />'  . _('Notes for Customer Type').': <b>' .$myrow['typename'] . '</b></p>
@@ -100,7 +100,7 @@ if (!isset($Id)) {
 					note,
 					date,
 					priority
-				FROM debtortypenotes
+				FROM weberp_debtortypenotes
 				WHERE typeid='".$DebtorType."'
 				ORDER BY date DESC";
 	$result = DB_query($sql);
@@ -166,7 +166,7 @@ if (!isset($_GET['delete'])) {
 					note,
 					date,
 					priority
-				FROM debtortypenotes
+				FROM weberp_debtortypenotes
 				WHERE noteid=".$Id."
 					AND typeid='".$DebtorType."'";
 

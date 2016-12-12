@@ -1,5 +1,5 @@
 <?php
-/*	$Id$*/
+/*	$Id: CustomerAllocations.php 7693 2016-12-02 08:48:17Z exsonqu $*/
 
 /*	Call this page with:
 	1. A TransID to show the make up and to modify existing allocations.
@@ -88,7 +88,7 @@ if (isset($_POST['UpdateDatabase'])) {
 		foreach ($_SESSION['Alloc']->Allocs as $AllocnItem) {
 			if ($AllocnItem->PrevAllocRecordID != 'NA') {
 			// original allocation has changed so delete the old allocation record
-				$SQL = "DELETE FROM custallocns WHERE id = '" . $AllocnItem->PrevAllocRecordID . "'";
+				$SQL = "DELETE FROM weberp_custallocns WHERE id = '" . $AllocnItem->PrevAllocRecordID . "'";
 				if( !$Result = DB_query($SQL) ) {
 					$Error = _('Could not delete old allocation record');
 				}
@@ -96,7 +96,7 @@ if (isset($_POST['UpdateDatabase'])) {
 
 			if ($AllocnItem->AllocAmt > 0) {
 				$SQL = "INSERT INTO
-							custallocns (
+							weberp_custallocns (
 							datealloc,
 							amt,
 							transid_allocfrom,
@@ -115,7 +115,7 @@ if (isset($_POST['UpdateDatabase'])) {
 			$AllAllocations = $AllAllocations + $AllocnItem->AllocAmt;
 			$Settled = (abs($NewAllocTotal-$AllocnItem->TransAmount) < 0.005) ? 1 : 0;
 
-			$SQL = "UPDATE debtortrans
+			$SQL = "UPDATE weberp_debtortrans
 					SET diffonexch='" . $AllocnItem->DiffOnExch . "',
 					alloc = '" . $NewAllocTotal . "',
 					settled = '" . $Settled . "'
@@ -130,7 +130,7 @@ if (isset($_POST['UpdateDatabase'])) {
 			$Settled = 0;
 		}
 		// Update the receipt or credit note
-		$SQL = "UPDATE debtortrans
+		$SQL = "UPDATE weberp_debtortrans
 				SET alloc = '" .  -$AllAllocations . "',
 				diffonexch = '" . -$TotalDiffOnExch . "',
 				settled='" . $Settled . "'
@@ -148,7 +148,7 @@ if (isset($_POST['UpdateDatabase'])) {
 				$PeriodNo = GetPeriod($_SESSION['Alloc']->TransDate, $db);
 				$_SESSION['Alloc']->TransDate = FormatDateForSQL($_SESSION['Alloc']->TransDate);
 
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 								type,
 								typeno,
 								trandate,
@@ -169,7 +169,7 @@ if (isset($_POST['UpdateDatabase'])) {
 					$Error = _('Could not update exchange difference in General Ledger');
 				}
 
-		  		$SQL = "INSERT INTO gltrans (
+		  		$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,
@@ -217,27 +217,27 @@ if (isset($_GET['AllocTrans'])) {
 	$_SESSION['Alloc'] = new Allocation;
 	$_POST['AllocTrans'] = $_GET['AllocTrans']; // Set AllocTrans when page first called
 
-	$SQL= "SELECT systypes.typename,
-				debtortrans.type,
-				debtortrans.transno,
-				debtortrans.trandate,
-				debtortrans.debtorno,
-				debtorsmaster.name,
-				debtortrans.rate,
-				(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount) as total,
-				debtortrans.diffonexch,
-				debtortrans.alloc,
-				currencies.decimalplaces
-			FROM debtortrans INNER JOIN systypes
-			ON debtortrans.type = systypes.typeid
-			INNER JOIN debtorsmaster
-			ON debtortrans.debtorno = debtorsmaster.debtorno
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtortrans.id='" . $_POST['AllocTrans'] . "'";
+	$SQL= "SELECT weberp_systypes.typename,
+				weberp_debtortrans.type,
+				weberp_debtortrans.transno,
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtortrans.rate,
+				(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount) as total,
+				weberp_debtortrans.diffonexch,
+				weberp_debtortrans.alloc,
+				weberp_currencies.decimalplaces
+			FROM weberp_debtortrans INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type = weberp_systypes.typeid
+			INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno = weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtortrans.id='" . $_POST['AllocTrans'] . "'";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
 	$Result = DB_query($SQL);
@@ -256,7 +256,7 @@ if (isset($_GET['AllocTrans'])) {
 	$_SESSION['Alloc']->CurrDecimalPlaces = $myrow['decimalplaces'];
 
 	// First get transactions that have outstanding balances
-	$SQL = "SELECT debtortrans.id,
+	$SQL = "SELECT weberp_debtortrans.id,
 					typename,
 					transno,
 					trandate,
@@ -264,16 +264,16 @@ if (isset($_GET['AllocTrans'])) {
 					ovamount+ovgst+ovfreight+ovdiscount as total,
 					diffonexch,
 					alloc
-			FROM debtortrans INNER JOIN systypes
-			ON debtortrans.type = systypes.typeid
-			WHERE debtortrans.settled=0
+			FROM weberp_debtortrans INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type = weberp_systypes.typeid
+			WHERE weberp_debtortrans.settled=0
 			AND debtorno='" . $_SESSION['Alloc']->DebtorNo . "'";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
-	$SQL .= " ORDER BY debtortrans.trandate, debtortrans.transno";
+	$SQL .= " ORDER BY weberp_debtortrans.trandate, weberp_debtortrans.transno";
 
 	$Result = DB_query($SQL);
 
@@ -293,28 +293,28 @@ if (isset($_GET['AllocTrans'])) {
 	DB_free_result($Result);
 
 	// Get trans previously allocated to by this trans - this will overwrite incomplete allocations above
-	$SQL= "SELECT debtortrans.id,
+	$SQL= "SELECT weberp_debtortrans.id,
 					typename,
 					transno,
 					trandate,
 					rate,
 					ovamount+ovgst+ovfreight+ovdiscount AS total,
 					diffonexch,
-					debtortrans.alloc-custallocns.amt AS prevallocs,
+					weberp_debtortrans.alloc-weberp_custallocns.amt AS prevallocs,
 					amt,
-					custallocns.id AS allocid
-			FROM debtortrans INNER JOIN systypes
-			ON debtortrans.type = systypes.typeid
-			INNER JOIN custallocns
-			ON debtortrans.id=custallocns.transid_allocto
-			WHERE custallocns.transid_allocfrom='" . $_POST['AllocTrans'] . "'
+					weberp_custallocns.id AS allocid
+			FROM weberp_debtortrans INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type = weberp_systypes.typeid
+			INNER JOIN weberp_custallocns
+			ON weberp_debtortrans.id=weberp_custallocns.transid_allocto
+			WHERE weberp_custallocns.transid_allocfrom='" . $_POST['AllocTrans'] . "'
 			AND debtorno='" . $_SESSION['Alloc']->DebtorNo . "'";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
-	$SQL .= " ORDER BY debtortrans.trandate, debtortrans.transno";
+	$SQL .= " ORDER BY weberp_debtortrans.trandate, weberp_debtortrans.transno";
 
 	$Result=DB_query($SQL);
 
@@ -457,34 +457,34 @@ if (isset($_POST['AllocTrans'])) {
 	unset($_SESSION['Alloc']->Allocs);
 	unset($_SESSION['Alloc']);
 
-	$SQL = "SELECT debtortrans.id,
-				debtortrans.transno,
-				systypes.typename,
-				debtortrans.type,
-				debtortrans.debtorno,
-				debtorsmaster.name,
-				debtortrans.trandate,
-				debtortrans.reference,
-				debtortrans.rate,
-				debtortrans.ovamount+debtortrans.ovgst+debtortrans.ovdiscount+debtortrans.ovfreight as total,
-				debtortrans.alloc,
-				currencies.decimalplaces AS currdecimalplaces,
-				debtorsmaster.currcode
-			FROM debtortrans INNER JOIN debtorsmaster
-			ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN systypes
-			ON debtortrans.type=systypes.typeid
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtortrans.debtorno='" . $_GET['DebtorNo'] . "'
-			AND (debtortrans.type=12 OR debtortrans.type=11)
-			AND debtortrans.settled=0";
+	$SQL = "SELECT weberp_debtortrans.id,
+				weberp_debtortrans.transno,
+				weberp_systypes.typename,
+				weberp_debtortrans.type,
+				weberp_debtortrans.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.reference,
+				weberp_debtortrans.rate,
+				weberp_debtortrans.ovamount+weberp_debtortrans.ovgst+weberp_debtortrans.ovdiscount+weberp_debtortrans.ovfreight as total,
+				weberp_debtortrans.alloc,
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_debtorsmaster.currcode
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type=weberp_systypes.typeid
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtortrans.debtorno='" . $_GET['DebtorNo'] . "'
+			AND (weberp_debtortrans.type=12 OR weberp_debtortrans.type=11)
+			AND weberp_debtortrans.settled=0";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
-	$SQL .= " ORDER BY debtortrans.trandate, debtortrans.transno";
+	$SQL .= " ORDER BY weberp_debtortrans.trandate, weberp_debtortrans.transno";
 
 	$result = DB_query($SQL);
 
@@ -521,34 +521,34 @@ if (isset($_POST['AllocTrans'])) {
 	unset($_SESSION['Alloc']->Allocs);
 	unset($_SESSION['Alloc']);
 
-	$SQL = "SELECT debtortrans.id,
-				debtortrans.transno,
-				systypes.typename,
-				debtortrans.type,
-				debtortrans.debtorno,
-				debtorsmaster.name,
-				debtortrans.trandate,
-				debtortrans.reference,
-				debtortrans.rate,
-				debtortrans.ovamount+debtortrans.ovgst+debtortrans.ovdiscount+debtortrans.ovfreight as total,
-				debtortrans.alloc,
-				debtorsmaster.currcode,
-				currencies.decimalplaces AS currdecimalplaces
-			FROM debtortrans INNER JOIN debtorsmaster
-			ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN systypes
-			ON debtortrans.type=systypes.typeid
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE (debtortrans.type=12 OR debtortrans.type=11)
-			AND debtortrans.settled=0
-			AND debtortrans.ovamount<0";
+	$SQL = "SELECT weberp_debtortrans.id,
+				weberp_debtortrans.transno,
+				weberp_systypes.typename,
+				weberp_debtortrans.type,
+				weberp_debtortrans.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.reference,
+				weberp_debtortrans.rate,
+				weberp_debtortrans.ovamount+weberp_debtortrans.ovgst+weberp_debtortrans.ovdiscount+weberp_debtortrans.ovfreight as total,
+				weberp_debtortrans.alloc,
+				weberp_debtorsmaster.currcode,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type=weberp_systypes.typeid
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE (weberp_debtortrans.type=12 OR weberp_debtortrans.type=11)
+			AND weberp_debtortrans.settled=0
+			AND weberp_debtortrans.ovamount<0";
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
-	$SQL .= " ORDER BY debtortrans.trandate, debtortrans.transno";
+	$SQL .= " ORDER BY weberp_debtortrans.trandate, weberp_debtortrans.transno";
 
 	$result = DB_query($SQL);
 	$NoOfUnallocatedTrans = DB_num_rows($result);
@@ -575,7 +575,7 @@ if (isset($_POST['AllocTrans'])) {
 			$CurrentDebtor = $myrow['debtorno'];
 
 			$BalSQL= "SELECT SUM(ovamount+ovgst+ovfreight+ovdiscount-alloc) as total
-						FROM debtortrans
+						FROM weberp_debtortrans
 						WHERE (type=12 OR type=11)
 						AND debtorno='" . $myrow['debtorno'] . "'
 						AND ovamount<0";

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PaymentMethods.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Payment Methods');
@@ -51,7 +51,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedPaymentID could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 		// Check the name does not clash
-		$sql = "SELECT count(*) FROM paymentmethods
+		$sql = "SELECT count(*) FROM weberp_paymentmethods
 				WHERE paymentid <> '" . $SelectedPaymentID ."'
 				AND paymentname ".LIKE." '" . $_POST['MethodName'] . "'";
 		$result = DB_query($sql);
@@ -62,13 +62,13 @@ if (isset($_POST['submit'])) {
 		} else {
 			// Get the old name and check that the record still exists need to be very careful here
 
-			$sql = "SELECT paymentname FROM paymentmethods
+			$sql = "SELECT paymentname FROM weberp_paymentmethods
 					WHERE paymentid = '" . $SelectedPaymentID . "'";
 			$result = DB_query($sql);
 			if ( DB_num_rows($result) != 0 ) {
 				$myrow = DB_fetch_row($result);
 				$OldName = $myrow[0];
-				$sql = "UPDATE paymentmethods
+				$sql = "UPDATE weberp_paymentmethods
 						SET paymentname='" . $_POST['MethodName'] . "',
 							paymenttype = '" . $_POST['ForPayment'] . "',
 							receipttype = '" . $_POST['ForReceipt'] . "',
@@ -85,7 +85,7 @@ if (isset($_POST['submit'])) {
 		$ErrMsg = _('Could not update payment method');
 	} elseif ($InputError !=1) {
 		/*SelectedPaymentID is null cos no item selected on first time round so must be adding a record*/
-		$sql = "SELECT count(*) FROM paymentmethods
+		$sql = "SELECT count(*) FROM weberp_paymentmethods
 				WHERE paymentname LIKE'".$_POST['MethodName'] ."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -93,7 +93,7 @@ if (isset($_POST['submit'])) {
 			$InputError = 1;
 			prnMsg( _('The payment method can not be created because another with the same name already exists.'),'error');
 		} else {
-			$sql = "INSERT INTO paymentmethods (paymentname,
+			$sql = "INSERT INTO weberp_paymentmethods (paymentname,
 												paymenttype,
 												receipttype,
 												usepreprintedstationery,
@@ -125,7 +125,7 @@ if (isset($_POST['submit'])) {
 //the link to delete a selected record was clicked instead of the submit button
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'stockmaster'
 	// Get the original name of the payment method the ID is just a secure way to find the payment method
-	$sql = "SELECT paymentname FROM paymentmethods
+	$sql = "SELECT paymentname FROM weberp_paymentmethods
 			WHERE paymentid = '" . $SelectedPaymentID . "'";
 	$result = DB_query($sql);
 	if ( DB_num_rows($result) == 0 ) {
@@ -134,7 +134,7 @@ if (isset($_POST['submit'])) {
 	} else {
 		$myrow = DB_fetch_row($result);
 		$OldMeasureName = $myrow[0];
-		$sql= "SELECT COUNT(*) FROM banktrans
+		$sql= "SELECT COUNT(*) FROM weberp_banktrans
 				WHERE banktranstype LIKE '" . $OldMeasureName . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -142,7 +142,7 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('Cannot delete this payment method because bank transactions have been created using this payment method'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('bank transactions that refer to this payment method') . '</font>';
 		} else {
-			$sql="DELETE FROM paymentmethods WHERE paymentname " . LIKE  . " '" . $OldMeasureName . "'";
+			$sql="DELETE FROM weberp_paymentmethods WHERE paymentname " . LIKE  . " '" . $OldMeasureName . "'";
 			$result = DB_query($sql);
 			prnMsg( $OldMeasureName . ' ' . _('payment method has been deleted') . '!','success');
 			echo '<br />';
@@ -175,7 +175,7 @@ if (isset($_POST['submit'])) {
 					receipttype,
 					usepreprintedstationery,
 					opencashdrawer
-			FROM paymentmethods
+			FROM weberp_paymentmethods
 			ORDER BY paymentid";
 
 	$ErrMsg = _('Could not get payment methods because');
@@ -236,7 +236,7 @@ if (! isset($_GET['delete'])) {
 						paymenttype,
 						receipttype,
 						usepreprintedstationery
-				FROM paymentmethods
+				FROM weberp_paymentmethods
 				WHERE paymentid='" . $SelectedPaymentID . "'";
 
 		$result = DB_query($sql);

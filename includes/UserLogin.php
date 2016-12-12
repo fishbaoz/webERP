@@ -1,7 +1,7 @@
 <?php
 
 /*  Performs login checks and $_SESSION initialisation */
-/* $Id$*/
+/* $Id: UserLogin.php 7067 2015-01-05 03:41:43Z rchacon $*/
 
 define('UL_OK',  0);		/* User verified, session initialised */
 define('UL_NOTVALID', 1);	/* User/password do not agree */
@@ -42,8 +42,8 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 		}
 		/* The SQL to get the user info must use the * syntax because the field name could change between versions if the fields are specifed directly then the sql fails and the db upgrade will fail */
 		$sql = "SELECT *
-				FROM www_users
-				WHERE www_users.userid='" . $Name . "'";
+				FROM weberp_www_users
+				WHERE weberp_www_users.userid='" . $Name . "'";
 
 		$ErrMsg = _('Could not retrieve user details on login because');
 		$debug =1;
@@ -78,7 +78,7 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 						}
 				}
 				if ($PasswordVerified) {
-					$sql = "UPDATE www_users SET password = '" . CryptPass($Password) . "'"
+					$sql = "UPDATE weberp_www_users SET password = '" . CryptPass($Password) . "'"
 							. " WHERE userid = '" . $Name . "';";
 					DB_query($sql);
 				}
@@ -124,12 +124,12 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 				$_SESSION['DisplayRecordsMax'] = $_SESSION['DefaultDisplayRecordsMax'];  // default comes from config.php
 			}
 
-			$sql = "UPDATE www_users SET lastvisitdate='". date('Y-m-d H:i:s') ."'
-							WHERE www_users.userid='" . $Name . "'";
+			$sql = "UPDATE weberp_www_users SET lastvisitdate='". date('Y-m-d H:i:s') ."'
+							WHERE weberp_www_users.userid='" . $Name . "'";
 			$Auth_Result = DB_query($sql);
 			/*get the security tokens that the user has access to */
 			$sql = "SELECT tokenid
-					FROM securitygroups
+					FROM weberp_securitygroups
 					WHERE secroleid =  '" . $_SESSION['AccessLevel'] . "'";
 			$Sec_Result = DB_query($sql);
 			$_SESSION['AllowedPageSecurityTokens'] = array();
@@ -164,7 +164,7 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 
 						/* Audit trail purge only runs if DB_Maintenance is enabled */
 						if (isset($_SESSION['MonthsAuditTrail'])){
-							 $sql = "DELETE FROM audittrail
+							 $sql = "DELETE FROM weberp_audittrail
 									WHERE  transactiondate <= '" . Date('Y-m-d', mktime(0,0,0, Date('m')-$_SESSION['MonthsAuditTrail'])) . "'";
 							$ErrMsg = _('There was a problem deleting expired audit-trail history');
 							$result = DB_query($sql);
@@ -184,26 +184,26 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 							$CurrencyRates = GetECBCurrencyRates(); // gets rates from ECB see includes/MiscFunctions.php
 							/*Loop around the defined currencies and get the rate from ECB */
 							if ($CurrencyRates!=false) {
-								$CurrenciesResult = DB_query("SELECT currabrev FROM currencies");
+								$CurrenciesResult = DB_query("SELECT currabrev FROM weberp_currencies");
 								while ($CurrencyRow = DB_fetch_row($CurrenciesResult)){
 									if ($CurrencyRow[0]!=$_SESSION['CompanyRecord']['currencydefault']){
 
-										$UpdateCurrRateResult = DB_query("UPDATE currencies SET rate='" . GetCurrencyRate($CurrencyRow[0],$CurrencyRates) . "'
+										$UpdateCurrRateResult = DB_query("UPDATE weberp_currencies SET rate='" . GetCurrencyRate($CurrencyRow[0],$CurrencyRates) . "'
 																			WHERE currabrev='" . $CurrencyRow[0] . "'",$db);
 									}
 								}
 							}
 						} else {
-							$CurrenciesResult = DB_query("SELECT currabrev FROM currencies");
+							$CurrenciesResult = DB_query("SELECT currabrev FROM weberp_currencies");
 							while ($CurrencyRow = DB_fetch_row($CurrenciesResult)){
 								if ($CurrencyRow[0]!=$_SESSION['CompanyRecord']['currencydefault']){
-									$UpdateCurrRateResult = DB_query("UPDATE currencies SET rate='" . google_currency_rate($CurrencyRow[0]) . "'
+									$UpdateCurrRateResult = DB_query("UPDATE weberp_currencies SET rate='" . google_currency_rate($CurrencyRow[0]) . "'
 																		WHERE currabrev='" . $CurrencyRow[0] . "'",$db);
 								}
 							}
 						}
 						$_SESSION['UpdateCurrencyRatesDaily'] = Date('Y-m-d');
-						$UpdateConfigResult = DB_query("UPDATE config SET confvalue = '" . Date('Y-m-d') . "' WHERE confname='UpdateCurrencyRatesDaily'");
+						$UpdateConfigResult = DB_query("UPDATE weberp_config SET confvalue = '" . Date('Y-m-d') . "' WHERE confname='UpdateCurrencyRatesDaily'");
 					}
 				}
 			}
@@ -239,9 +239,9 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 				$_SESSION['AttemptsCounter'] = 0;
 			} elseif ($_SESSION['AttemptsCounter'] >= 5 AND isset($Name)) {
 				/*User blocked from future accesses until sysadmin releases */
-				$sql = "UPDATE www_users
+				$sql = "UPDATE weberp_www_users
 							SET blocked=1
-							WHERE www_users.userid='" . $Name . "'";
+							WHERE weberp_www_users.userid='" . $Name . "'";
 				$Auth_Result = DB_query($sql);
 
 				if ($SysAdminEmail != ''){

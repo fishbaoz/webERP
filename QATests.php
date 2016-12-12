@@ -45,8 +45,8 @@ if (isset($_POST['submit'])) {
 		$Errors[$i] = 'Type';
 		$i++;
 	}
-	$sql= "SELECT COUNT(*) FROM qatests WHERE qatests.name='".$_POST['QATestName']."'
-										AND qatests.testid <> '" .$SelectedQATest. "'";
+	$sql= "SELECT COUNT(*) FROM weberp_qatests WHERE weberp_qatests.name='".$_POST['QATestName']."'
+										AND weberp_qatests.testid <> '" .$SelectedQATest. "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -60,7 +60,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedQATest could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 
-		$sql = "UPDATE qatests SET name='" . $_POST['QATestName'] . "',
+		$sql = "UPDATE weberp_qatests SET name='" . $_POST['QATestName'] . "',
 									method='" . $_POST['Method'] . "',
 									groupby='" . $_POST['GroupBy'] . "',
 									units='" . $_POST['Units'] . "',
@@ -71,14 +71,14 @@ if (isset($_POST['submit'])) {
 									showonspec='" . $_POST['ShowOnSpec'] . "',
 									showontestplan='" . $_POST['ShowOnTestPlan'] . "',
 									active='" . $_POST['Active'] . "'
-				WHERE qatests.testid = '".$SelectedQATest."'";
+				WHERE weberp_qatests.testid = '".$SelectedQATest."'";
 
 		$msg = _('QA Test record for') . ' ' . $_POST['QATestName'] . ' ' . _('has been updated');
 	} elseif ($InputError !=1) {
 
 	/*Selected group is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new QA Test form */
 
-		$sql = "INSERT INTO qatests (name,
+		$sql = "INSERT INTO weberp_qatests (name,
 						method,
 						groupby,
 						units,
@@ -131,13 +131,13 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS
 
-	$sql= "SELECT COUNT(*) FROM prodspec WHERE  prodspec.testid='".$SelectedQATest."'";
+	$sql= "SELECT COUNT(*) FROM weberp_prodspec WHERE  weberp_prodspec.testid='".$SelectedQATest."'";
 	//$result = DB_query($sql,$db);
 	//$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this QA Test because Product Specs are using it'),'error');
 	} else {
-		$sql="DELETE FROM qatests WHERE testid='". $SelectedQATest."'";
+		$sql="DELETE FROM weberp_qatests WHERE testid='". $SelectedQATest."'";
 		$ErrMsg = _('The QA Test could not be deleted because');
 		$result = DB_query($sql,$ErrMsg);
 
@@ -173,7 +173,7 @@ if (! isset($_GET['delete'])) {
 				showonspec,
 				showontestplan,
 				active
-				FROM qatests
+				FROM weberp_qatests
 				WHERE testid='".$SelectedQATest."'";
 
 		$result = DB_query($sql);
@@ -381,7 +381,7 @@ or deletion of the records*/
 				showonspec,
 				showontestplan,
 				active
-			FROM qatests
+			FROM weberp_qatests
 			ORDER BY name";
 	$result = DB_query($sql);
 

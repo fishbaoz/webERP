@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GLTransInquiry.php 7385 2015-11-11 08:03:20Z tehonu $*/
 
 include ('includes/session.inc');
 $Title = _('General Ledger Transaction Inquiry');
@@ -15,7 +15,7 @@ if( !isset($_GET['TypeID']) OR !isset($_GET['TransNo']) ) {
 } else {
 	$typeSQL = "SELECT typename,
 						typeno
-				FROM systypes
+				FROM weberp_systypes
 				WHERE typeid = '" . $_GET['TypeID'] . "'";
 
 	$TypeResult = DB_query($typeSQL);
@@ -53,22 +53,22 @@ if( !isset($_GET['TypeID']) OR !isset($_GET['TransNo']) ) {
 			</tr>';
 
 		$SQL = "SELECT
-					gltrans.periodno,
-					gltrans.trandate,
-					gltrans.type,
-					gltrans.account,
-					chartmaster.accountname,
-					gltrans.narrative,
-					gltrans.amount,
-					gltrans.posted,
-					periods.lastdate_in_period
-				FROM gltrans INNER JOIN chartmaster
-				ON gltrans.account = chartmaster.accountcode
-				INNER JOIN periods
-				ON periods.periodno=gltrans.periodno
-				WHERE gltrans.type= '" . $_GET['TypeID'] . "'
-				AND gltrans.typeno = '" . $_GET['TransNo'] . "'
-				ORDER BY gltrans.counterindex";
+					weberp_gltrans.periodno,
+					weberp_gltrans.trandate,
+					weberp_gltrans.type,
+					weberp_gltrans.account,
+					weberp_chartmaster.accountname,
+					weberp_gltrans.narrative,
+					weberp_gltrans.amount,
+					weberp_gltrans.posted,
+					weberp_periods.lastdate_in_period
+				FROM weberp_gltrans INNER JOIN weberp_chartmaster
+				ON weberp_gltrans.account = weberp_chartmaster.accountcode
+				INNER JOIN weberp_periods
+				ON weberp_periods.periodno=weberp_gltrans.periodno
+				WHERE weberp_gltrans.type= '" . $_GET['TypeID'] . "'
+				AND weberp_gltrans.typeno = '" . $_GET['TransNo'] . "'
+				ORDER BY weberp_gltrans.counterindex";
 		$TransResult = DB_query($SQL);
 
 		$Posted = _('Yes');
@@ -96,37 +96,37 @@ if( !isset($_GET['TypeID']) OR !isset($_GET['TransNo']) ) {
 					$URL = $RootPath . '/CustomerInquiry.php?CustomerID=';
 					$FromDate = '&amp;TransAfterDate=' . $TranDate;
 
-					$DetailSQL = "SELECT debtortrans.debtorno AS otherpartycode,
-										debtortrans.ovamount,
-										debtortrans.ovgst,
-										debtortrans.ovfreight,
-										debtortrans.rate,
-										debtorsmaster.name AS otherparty
-									FROM debtortrans INNER JOIN debtorsmaster
-									ON debtortrans.debtorno = debtorsmaster.debtorno
-									WHERE debtortrans.type = '" . $TransRow['type'] . "'
-									AND debtortrans.transno = '" . $_GET['TransNo']. "'";
+					$DetailSQL = "SELECT weberp_debtortrans.debtorno AS otherpartycode,
+										weberp_debtortrans.ovamount,
+										weberp_debtortrans.ovgst,
+										weberp_debtortrans.ovfreight,
+										weberp_debtortrans.rate,
+										weberp_debtorsmaster.name AS otherparty
+									FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+									ON weberp_debtortrans.debtorno = weberp_debtorsmaster.debtorno
+									WHERE weberp_debtortrans.type = '" . $TransRow['type'] . "'
+									AND weberp_debtortrans.transno = '" . $_GET['TransNo']. "'";
 					$DetailResult = DB_query($DetailSQL);
 
 			} elseif( $TransRow['account'] == $_SESSION['CompanyRecord']['creditorsact'] AND $AnalysisCompleted == 'Not Yet' ) {
 					$URL = $RootPath . '/SupplierInquiry.php?SupplierID=';
 					$FromDate = '&amp;FromDate=' . $TranDate;
 
-					$DetailSQL = "SELECT supptrans.supplierno AS otherpartycode,
-										supptrans.ovamount,
-										supptrans.ovgst,
-										supptrans.rate,
-										suppliers.suppname AS otherparty
-									FROM supptrans INNER JOIN suppliers
-									ON supptrans.supplierno = suppliers.supplierid
-									WHERE supptrans.type = '" . $TransRow['type'] . "'
-									AND supptrans.transno = '" . $_GET['TransNo'] . "'";
+					$DetailSQL = "SELECT weberp_supptrans.supplierno AS otherpartycode,
+										weberp_supptrans.ovamount,
+										weberp_supptrans.ovgst,
+										weberp_supptrans.rate,
+										weberp_suppliers.suppname AS otherparty
+									FROM weberp_supptrans INNER JOIN weberp_suppliers
+									ON weberp_supptrans.supplierno = weberp_suppliers.supplierid
+									WHERE weberp_supptrans.type = '" . $TransRow['type'] . "'
+									AND weberp_supptrans.transno = '" . $_GET['TransNo'] . "'";
 					$DetailResult = DB_query($DetailSQL);
 
 			} else {
 					// if user is allowed to see the account we show it, other wise we show "OTHERS ACCOUNTS"
 					$CheckSql = "SELECT count(*)
-								 FROM glaccountusers
+								 FROM weberp_glaccountusers
 								 WHERE accountcode= '" . $TransRow['account'] . "'
 									 AND userid = '" . $_SESSION['UserID'] . "'
 									 AND canview = '1'";

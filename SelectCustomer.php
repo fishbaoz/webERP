@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectCustomer.php 7675 2016-11-21 14:55:36Z rchacon $*/
 /* Selection of customer - from where all customer related maintenance, transactions and inquiries start */
 
 include('includes/session.inc');
@@ -70,68 +70,68 @@ if(isset($_POST['Search']) OR isset($_POST['CSV']) OR isset($_POST['Go']) OR iss
 
 	if(($_POST['Keywords'] == '') AND ($_POST['CustCode'] == '') AND ($_POST['CustPhone'] == '') AND ($_POST['CustType'] == 'ALL') AND ($_POST['Area'] == 'ALL') AND ($_POST['CustAdd'] == '')) {
 		// no criteria set then default to all customers
-		$SQL = "SELECT debtorsmaster.debtorno,
-					debtorsmaster.name,
-					debtorsmaster.address1,
-					debtorsmaster.address2,
-					debtorsmaster.address3,
-					debtorsmaster.address4,
-					custbranch.branchcode,
-					custbranch.brname,
-					custbranch.contactname,
-					debtortype.typename,
-					custbranch.phoneno,
-					custbranch.faxno,
-					custbranch.email
-				FROM debtorsmaster LEFT JOIN custbranch
-				ON debtorsmaster.debtorno = custbranch.debtorno
-				INNER JOIN debtortype
-				ON debtorsmaster.typeid = debtortype.typeid";
+		$SQL = "SELECT weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_debtorsmaster.address1,
+					weberp_debtorsmaster.address2,
+					weberp_debtorsmaster.address3,
+					weberp_debtorsmaster.address4,
+					weberp_custbranch.branchcode,
+					weberp_custbranch.brname,
+					weberp_custbranch.contactname,
+					weberp_debtortype.typename,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.faxno,
+					weberp_custbranch.email
+				FROM weberp_debtorsmaster LEFT JOIN weberp_custbranch
+				ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+				INNER JOIN weberp_debtortype
+				ON weberp_debtorsmaster.typeid = weberp_debtortype.typeid";
 	} else {
 		$SearchKeywords = mb_strtoupper(trim(str_replace(' ', '%', $_POST['Keywords'])));
 		$_POST['CustCode'] = mb_strtoupper(trim($_POST['CustCode']));
 		$_POST['CustPhone'] = trim($_POST['CustPhone']);
 		$_POST['CustAdd'] = trim($_POST['CustAdd']);
-		$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3,
-						debtorsmaster.address4,
-						custbranch.branchcode,
-						custbranch.brname,
-						custbranch.contactname,
-						debtortype.typename,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.email
-					FROM debtorsmaster INNER JOIN debtortype
-						ON debtorsmaster.typeid = debtortype.typeid
-					LEFT JOIN custbranch
-						ON debtorsmaster.debtorno = custbranch.debtorno
-					WHERE debtorsmaster.name " . LIKE . " '%" . $SearchKeywords . "%'
-					AND debtorsmaster.debtorno " . LIKE . " '%" . $_POST['CustCode'] . "%'
-					AND (custbranch.phoneno " . LIKE . " '%" . $_POST['CustPhone'] . "%' OR custbranch.phoneno IS NULL)
-					AND (debtorsmaster.address1 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
-						OR debtorsmaster.address2 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
-						OR debtorsmaster.address3 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
-						OR debtorsmaster.address4 " . LIKE . " '%" . $_POST['CustAdd'] . "%')";// If there is no custbranch set, the phoneno in custbranch will be null, so we add IS NULL condition otherwise those debtors without custbranches setting will be no searchable and it will make a inconsistence with customer receipt interface.
+		$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3,
+						weberp_debtorsmaster.address4,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.brname,
+						weberp_custbranch.contactname,
+						weberp_debtortype.typename,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.email
+					FROM weberp_debtorsmaster INNER JOIN weberp_debtortype
+						ON weberp_debtorsmaster.typeid = weberp_debtortype.typeid
+					LEFT JOIN weberp_custbranch
+						ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+					WHERE weberp_debtorsmaster.name " . LIKE . " '%" . $SearchKeywords . "%'
+					AND weberp_debtorsmaster.debtorno " . LIKE . " '%" . $_POST['CustCode'] . "%'
+					AND (weberp_custbranch.phoneno " . LIKE . " '%" . $_POST['CustPhone'] . "%' OR weberp_custbranch.phoneno IS NULL)
+					AND (weberp_debtorsmaster.address1 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
+						OR weberp_debtorsmaster.address2 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
+						OR weberp_debtorsmaster.address3 " . LIKE . " '%" . $_POST['CustAdd'] . "%'
+						OR weberp_debtorsmaster.address4 " . LIKE . " '%" . $_POST['CustAdd'] . "%')";// If there is no custbranch set, the phoneno in custbranch will be null, so we add IS NULL condition otherwise those debtors without custbranches setting will be no searchable and it will make a inconsistence with customer receipt interface.
 
 		if(mb_strlen($_POST['CustType']) > 0 AND $_POST['CustType'] != 'ALL') {
-			$SQL .= " AND debtortype.typename = '" . $_POST['CustType'] . "'";
+			$SQL .= " AND weberp_debtortype.typename = '" . $_POST['CustType'] . "'";
 		}
 
 		if(mb_strlen($_POST['Area']) > 0 AND $_POST['Area'] != 'ALL') {
-			$SQL .= " AND custbranch.area = '" . $_POST['Area'] . "'";
+			$SQL .= " AND weberp_custbranch.area = '" . $_POST['Area'] . "'";
 		}
 
 	}// one of keywords OR custcode OR custphone was more than a zero length string
 
 	if($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
-	$SQL .= " ORDER BY debtorsmaster.name";
+	$SQL .= " ORDER BY weberp_debtorsmaster.name";
 	$ErrMsg = _('The searched customer records requested cannot be retrieved because');
 
 	$result = DB_query($SQL, $ErrMsg);
@@ -150,22 +150,22 @@ if(isset($_POST['Search']) OR isset($_POST['CSV']) OR isset($_POST['Go']) OR iss
 if($_SESSION['CustomerID'] != '' AND !isset($_POST['Search']) AND !isset($_POST['CSV'])) {
 	if(!isset($_SESSION['BranchCode'])) {
 		// !isset($_SESSION['BranchCode'])
-		$SQL = "SELECT debtorsmaster.name,
-					custbranch.phoneno,
-					custbranch.brname
-			FROM debtorsmaster INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno
-			WHERE custbranch.debtorno='" . $_SESSION['CustomerID'] . "'";
+		$SQL = "SELECT weberp_debtorsmaster.name,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.brname
+			FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+			WHERE weberp_custbranch.debtorno='" . $_SESSION['CustomerID'] . "'";
 
 	} else {
 		// isset($_SESSION['BranchCode'])
-		$SQL = "SELECT debtorsmaster.name,
-					custbranch.phoneno,
-					custbranch.brname
-			FROM debtorsmaster INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno
-			WHERE custbranch.debtorno='" . $_SESSION['CustomerID'] . "'
-			AND custbranch.branchcode='" . $_SESSION['BranchCode'] . "'";
+		$SQL = "SELECT weberp_debtorsmaster.name,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.brname
+			FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+			WHERE weberp_custbranch.debtorno='" . $_SESSION['CustomerID'] . "'
+			AND weberp_custbranch.branchcode='" . $_SESSION['BranchCode'] . "'";
 	}
 	$ErrMsg = _('The customer name requested cannot be retrieved because');
 	$result = DB_query($SQL, $ErrMsg);
@@ -284,7 +284,7 @@ echo '<tr>
 		<td>';
 if(isset($_POST['CustType'])) {
 	// Show Customer Type drop down list
-	$result2 = DB_query("SELECT typeid, typename FROM debtortype ORDER BY typename");
+	$result2 = DB_query("SELECT typeid, typename FROM weberp_debtortype ORDER BY typename");
 	// Error if no customer types setup
 	if(DB_num_rows($result2) == 0) {
 		$DataError = 1;
@@ -307,7 +307,7 @@ if(isset($_POST['CustType'])) {
 	}
 } else {// CustType is not set
 	// No option selected="selected" yet, so show Customer Type drop down list
-	$result2 = DB_query("SELECT typeid, typename FROM debtortype ORDER BY typename");
+	$result2 = DB_query("SELECT typeid, typename FROM weberp_debtortype ORDER BY typename");
 	// Error if no customer types setup
 	if(DB_num_rows($result2) == 0) {
 		$DataError = 1;
@@ -328,8 +328,8 @@ if(isset($_POST['CustType'])) {
 /* Option to select a sales area */
 echo '<td><b>', _('OR'), '</b></td>
 		<td>' . _('Choose an Area') . ':</td><td>';
-$result2 = DB_query("SELECT areacode, areadescription FROM areas");
-// Error if no sales areas setup
+$result2 = DB_query("SELECT areacode, areadescription FROM weberp_areas");
+// Error if no sales weberp_areas setup
 if(DB_num_rows($result2) == 0) {
 	$DataError = 1;
 	echo '<a href="Areas.php" target="_parent">' . _('Setup Areas') . '</a>';
@@ -481,7 +481,7 @@ if(isset($_SESSION['CustomerID']) AND $_SESSION['CustomerID'] != '') {
 
 	if($_SESSION['geocode_integration'] == 1) {
 
-		$SQL = "SELECT * FROM geocode_param WHERE 1";
+		$SQL = "SELECT * FROM weberp_geocode_param WHERE 1";
 		$ErrMsg = _('An error occurred in retrieving the information');
 		$result = DB_query($SQL, $ErrMsg);
 		if(DB_num_rows($result) == 0) {
@@ -499,22 +499,22 @@ if(isset($_SESSION['CustomerID']) AND $_SESSION['CustomerID'] != '') {
 		if($map_host == '') {$map_host = 'maps.googleapis.com';}// If $map_host is empty, use a default map host.
 
 		$SQL = "SELECT
-					debtorsmaster.debtorno,
-					debtorsmaster.name,
-					custbranch.branchcode,
-					custbranch.brname,
-					custbranch.lat,
-					custbranch.lng,
-					custbranch.braddress1,
-					custbranch.braddress2,
-					custbranch.braddress3,
-					custbranch.braddress4
-				FROM debtorsmaster
-				LEFT JOIN custbranch
-					ON debtorsmaster.debtorno = custbranch.debtorno
-				WHERE debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'
-					AND custbranch.branchcode = '" . $_SESSION['BranchCode'] . "'
-				ORDER BY debtorsmaster.debtorno";
+					weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_custbranch.branchcode,
+					weberp_custbranch.brname,
+					weberp_custbranch.lat,
+					weberp_custbranch.lng,
+					weberp_custbranch.braddress1,
+					weberp_custbranch.braddress2,
+					weberp_custbranch.braddress3,
+					weberp_custbranch.braddress4
+				FROM weberp_debtorsmaster
+				LEFT JOIN weberp_custbranch
+					ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+				WHERE weberp_debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'
+					AND weberp_custbranch.branchcode = '" . $_SESSION['BranchCode'] . "'
+				ORDER BY weberp_debtorsmaster.debtorno";
 		$ErrMsg = _('An error occurred in retrieving the information');
 		$result2 = DB_query($SQL, $ErrMsg);
 		$myrow2 = DB_fetch_array($result2);
@@ -543,7 +543,7 @@ if(isset($_SESSION['CustomerID']) AND $_SESSION['CustomerID'] != '') {
 					$Lat = $xml->result->geometry->location->lat;
 					$Lng = $xml->result->geometry->location->lng;
 
-					$query = sprintf("UPDATE custbranch " .
+					$query = sprintf("UPDATE weberp_custbranch " .
 							" SET lat = '%s', lng = '%s' " .
 							" WHERE branchcode = '%s' " .
 						" AND debtorno = '%s' LIMIT 1;",
@@ -632,11 +632,11 @@ function initMap() {
 	// Extended Customer Info only if selected in Configuration
 	if($_SESSION['Extended_CustomerInfo'] == 1) {
 		if($_SESSION['CustomerID'] != '') {
-			$SQL = "SELECT debtortype.typeid,
-							debtortype.typename
-						FROM debtorsmaster INNER JOIN debtortype
-					ON debtorsmaster.typeid = debtortype.typeid
-					WHERE debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'";
+			$SQL = "SELECT weberp_debtortype.typeid,
+							weberp_debtortype.typename
+						FROM weberp_debtorsmaster INNER JOIN weberp_debtortype
+					ON weberp_debtorsmaster.typeid = weberp_debtortype.typeid
+					WHERE weberp_debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'";
 			$ErrMsg = _('An error occurred in retrieving the information');
 			$result = DB_query($SQL, $ErrMsg);
 			$myrow = DB_fetch_array($result);
@@ -645,21 +645,21 @@ function initMap() {
 			// Customer Data
 			echo '<br />';
 			// Select some basic data about the Customer
-			$SQL = "SELECT debtorsmaster.clientsince,
-						(TO_DAYS(date(now())) - TO_DAYS(date(debtorsmaster.clientsince))) as customersincedays,
-						(TO_DAYS(date(now())) - TO_DAYS(date(debtorsmaster.lastpaiddate))) as lastpaiddays,
-						debtorsmaster.paymentterms,
-						debtorsmaster.lastpaid,
-						debtorsmaster.lastpaiddate,
-						currencies.decimalplaces AS currdecimalplaces
-					FROM debtorsmaster INNER JOIN currencies
-					ON debtorsmaster.currcode=currencies.currabrev
-					WHERE debtorsmaster.debtorno ='" . $_SESSION['CustomerID'] . "'";
+			$SQL = "SELECT weberp_debtorsmaster.clientsince,
+						(TO_DAYS(date(now())) - TO_DAYS(date(weberp_debtorsmaster.clientsince))) as customersincedays,
+						(TO_DAYS(date(now())) - TO_DAYS(date(weberp_debtorsmaster.lastpaiddate))) as lastpaiddays,
+						weberp_debtorsmaster.paymentterms,
+						weberp_debtorsmaster.lastpaid,
+						weberp_debtorsmaster.lastpaiddate,
+						weberp_currencies.decimalplaces AS currdecimalplaces
+					FROM weberp_debtorsmaster INNER JOIN weberp_currencies
+					ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+					WHERE weberp_debtorsmaster.debtorno ='" . $_SESSION['CustomerID'] . "'";
 			$DataResult = DB_query($SQL);
 			$myrow = DB_fetch_array($DataResult);
 			// Select some more data about the customer
 			$SQL = "SELECT sum(ovamount+ovgst) as total
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE debtorno = '" . $_SESSION['CustomerID'] . "'
 					AND type !=12";
 			$Total1Result = DB_query($SQL);
@@ -714,7 +714,7 @@ function initMap() {
 		}// end if $_SESSION['CustomerID'] != ''
 
 		// Customer Contacts
-		$SQL = "SELECT * FROM custcontacts
+		$SQL = "SELECT * FROM weberp_custcontacts
 				WHERE debtorno='" . $_SESSION['CustomerID'] . "'
 				ORDER BY contid";
 		$result = DB_query($SQL);
@@ -769,7 +769,7 @@ function initMap() {
 							contactname,
 							phoneno,
 							email
-						FROM custbranch
+						FROM weberp_custbranch
 						WHERE debtorno='" . $_SESSION['CustomerID'] . "'
 							AND branchcode='" . $_SESSION['BranchCode'] . "'";
 				$result2 = DB_query($SQL);
@@ -799,7 +799,7 @@ function initMap() {
 					note,
 					date,
 					priority
-				FROM custnotes
+				FROM weberp_custnotes
 				WHERE debtorno='" . $_SESSION['CustomerID'] . "'
 				ORDER BY date DESC";
 		$result = DB_query($SQL);
@@ -841,7 +841,7 @@ function initMap() {
 			}
 		}
 		// Custome Type Notes
-		$SQL = "SELECT * FROM debtortypenotes
+		$SQL = "SELECT * FROM weberp_debtortypenotes
 				WHERE typeid='" . $CustomerType . "'
 				ORDER BY date DESC";
 		$result = DB_query($SQL);

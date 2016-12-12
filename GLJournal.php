@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLJournal.php 7385 2015-11-11 08:03:20Z tehonu $*/
 
 include('includes/DefineJournalClass.php');
 
@@ -29,7 +29,7 @@ if (!isset($_SESSION['JournalDetail'])){
 	Journals cannot be entered against bank accounts GL postings involving bank accounts must be done using
 	a receipt or a payment transaction to ensure a bank trans is available for matching off vs statements */
 
-	$SQL = "SELECT accountcode FROM bankaccounts";
+	$SQL = "SELECT accountcode FROM weberp_bankaccounts";
 	$result = DB_query($SQL);
 	$i=0;
 	while ($Act = DB_fetch_row($result)){
@@ -66,7 +66,7 @@ if (isset($_POST['CommitBatch']) AND $_POST['CommitBatch']==_('Accept and Proces
 	$TransNo = GetNextTransNo( 0, $db);
 
 	foreach ($_SESSION['JournalDetail']->GLEntries as $JournalItem) {
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -88,7 +88,7 @@ if (isset($_POST['CommitBatch']) AND $_POST['CommitBatch']==_('Accept and Proces
 		$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 		if ($_POST['JournalType']=='Reversing'){
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -166,7 +166,7 @@ if (isset($_POST['CommitBatch']) AND $_POST['CommitBatch']==_('Accept and Proces
 
 		if ($AllowThisPosting) {
 			$SQL = "SELECT accountname
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='" . $_POST['GLManualCode'] . "'";
 			$Result=DB_query($SQL);
 
@@ -212,7 +212,7 @@ if (isset($_POST['CommitBatch']) AND $_POST['CommitBatch']==_('Accept and Proces
 			if (!isset($_POST['GLAmount'])) {
 				$_POST['GLAmount']=0;
 			}
-			$SQL = "SELECT accountname FROM chartmaster WHERE accountcode='" . $_POST['GLCode'] . "'";
+			$SQL = "SELECT accountname FROM weberp_chartmaster WHERE accountcode='" . $_POST['GLCode'] . "'";
 			$Result=DB_query($SQL);
 			$myrow=DB_fetch_array($Result);
 			$_SESSION['JournalDetail']->add_to_glanalysis($_POST['GLAmount'],
@@ -304,7 +304,7 @@ echo '<tr>
 
 $SQL = "SELECT tagref,
 				tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result=DB_query($SQL);
@@ -324,11 +324,11 @@ if (!isset($_POST['GLManualCode'])) {
 }
 echo '<td><input type="text" autofocus="autofocus" name="GLManualCode" maxlength="12" size="12" onchange="inArray(this, GLCode.options,'.	"'".'The account code '."'".'+ this.value+ '."'".' doesnt exist'."'".')" value="'. $_POST['GLManualCode'] .'"  /></td>';
 
-$sql="SELECT chartmaster.accountcode,
-			chartmaster.accountname
-		FROM chartmaster
-			INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canupd=1
-		ORDER BY chartmaster.accountcode";
+$sql="SELECT weberp_chartmaster.accountcode,
+			weberp_chartmaster.accountname
+		FROM weberp_chartmaster
+			INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canupd=1
+		ORDER BY weberp_chartmaster.accountcode";
 
 $result=DB_query($sql);
 echo '<td>
@@ -405,7 +405,7 @@ foreach ($_SESSION['JournalDetail']->GLEntries as $JournalItem) {
 			$j++;
 		}
 	$sql="SELECT tagdescription
-			FROM tags
+			FROM weberp_tags
 			WHERE tagref='".$JournalItem->tag . "'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);

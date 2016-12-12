@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GoodsReceived.php 7494 2016-04-25 09:53:53Z daintree $*/
 
 /* Session started in header.inc for password checking and authorisation level check */
 include('includes/DefinePOClass.php');
@@ -277,9 +277,9 @@ if (count($_SESSION['PO'.$identifier]->LineItems)>0){
 		}
 		if ($OrderLine->ReceiveQty < 0 AND $_SESSION['ProhibitNegativeStock']==1){
 
-			$SQL = "SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $OrderLine->StockID . "'
+			$SQL = "SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $OrderLine->StockID . "'
 						AND loccode= '" . $_SESSION['PO'.$identifier]->Location . "'";
 
 			$CheckNegResult = DB_query($SQL);
@@ -334,7 +334,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 					qtyinvoiced,
 					shiptref,
 					jobref
-			FROM purchorderdetails
+			FROM weberp_purchorderdetails
 			WHERE orderno='" . (int) $_SESSION['PO'.$identifier]->OrderNo . "'
 			AND completed=0
 			ORDER BY podetailitem";
@@ -445,7 +445,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 			if ($OrderLine->StockID!='') { //Its a stock item line
 				/*Need to get the current standard cost as it is now so we can process GL jorunals later*/
 				$SQL = "SELECT materialcost + labourcost + overheadcost as stdcost,mbflag
-							FROM stockmaster
+							FROM weberp_stockmaster
 							WHERE stockid='" . $OrderLine->StockID . "'";
 				$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The standard cost of the item being received cannot be retrieved because');
 				$DbgMsg = _('The following SQL to retrieve the standard cost was used');
@@ -481,12 +481,12 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 /*Now the SQL to do the update to the PurchOrderDetails */
 
 			if ($OrderLine->ReceiveQty >= ($OrderLine->Quantity - $OrderLine->QtyReceived)){
-				$SQL = "UPDATE purchorderdetails SET quantityrecd = quantityrecd + '" . $OrderLine->ReceiveQty . "',
+				$SQL = "UPDATE weberp_purchorderdetails SET quantityrecd = quantityrecd + '" . $OrderLine->ReceiveQty . "',
 													stdcostunit='" . $_SESSION['PO'.$identifier]->LineItems[$OrderLine->LineNo]->StandardCost . "',
 													completed=1
 						WHERE podetailitem = '" . $OrderLine->PODetailRec . "'";
 			} else {
-				$SQL = "UPDATE purchorderdetails SET
+				$SQL = "UPDATE weberp_purchorderdetails SET
 												quantityrecd = quantityrecd + '" . $OrderLine->ReceiveQty . "',
 												stdcostunit='" . $_SESSION['PO'.$identifier]->LineItems[$OrderLine->LineNo]->StandardCost . "',
 												completed='" . $_SESSION['PO'.$identifier]->LineItems[$OrderLine->LineNo]->Completed . "'
@@ -506,7 +506,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 
 /*Need to insert a GRN item */
 
-			$SQL = "INSERT INTO grns (grnbatch,
+			$SQL = "INSERT INTO weberp_grns (grnbatch,
 									podetailitem,
 									itemcode,
 									itemdescription,
@@ -534,9 +534,9 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 /* Update location stock records - NB  a PO cannot be entered for a dummy/assembly/kit parts */
 
 /* Need to get the current location quantity will need it later for the stock movement */
-				$SQL="SELECT locstock.quantity
-								FROM locstock
-								WHERE locstock.stockid='" . $OrderLine->StockID . "'
+				$SQL="SELECT weberp_locstock.quantity
+								FROM weberp_locstock
+								WHERE weberp_locstock.stockid='" . $OrderLine->StockID . "'
 								AND loccode= '" . $_SESSION['PO'.$identifier]->Location . "'";
 
 				$Result = DB_query($SQL);
@@ -548,9 +548,9 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity + '" . $OrderLine->ReceiveQty . "'
-						WHERE locstock.stockid = '" . $OrderLine->StockID . "'
+				$SQL = "UPDATE weberp_locstock
+							SET quantity = weberp_locstock.quantity + '" . $OrderLine->ReceiveQty . "'
+						WHERE weberp_locstock.stockid = '" . $OrderLine->StockID . "'
 						AND loccode = '" . $_SESSION['PO'.$identifier]->Location . "'";
 
 				$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
@@ -559,7 +559,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 
 	/* Insert stock movements - with unit cost */
 
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -591,7 +591,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 				$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
 				/*Get the ID of the StockMove... */
-				$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+				$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 				/* Do the Controlled Item INSERTS HERE */
 
 				if ($OrderLine->Controlled ==1){
@@ -600,7 +600,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 						 We need to add the StockSerialItem record and
 						 The StockSerialMoves as well */
 						//need to test if the controlled item exists first already
-							$SQL = "SELECT COUNT(*) FROM stockserialitems
+							$SQL = "SELECT COUNT(*) FROM weberp_stockserialitems
 									WHERE stockid='" . $OrderLine->StockID . "'
 									AND loccode = '" . $_SESSION['PO'.$identifier]->Location . "'
 									AND serialno = '" . $Item->BundleRef . "'";
@@ -611,15 +611,15 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 							if (trim($Item->BundleRef) != ''){
 								if ($AlreadyExistsRow[0]>0){
 									if ($OrderLine->Serialised == 1) {
-										$SQL = "UPDATE stockserialitems SET quantity = '" . $Item->BundleQty . "'";
+										$SQL = "UPDATE weberp_stockserialitems SET quantity = '" . $Item->BundleQty . "'";
 									} else {
-										$SQL = "UPDATE stockserialitems SET quantity = quantity + '" . $Item->BundleQty . "'";
+										$SQL = "UPDATE weberp_stockserialitems SET quantity = quantity + '" . $Item->BundleQty . "'";
 									}
 									$SQL .= "WHERE stockid='" . $OrderLine->StockID . "'
 											 AND loccode = '" . $_SESSION['PO'.$identifier]->Location . "'
 											 AND serialno = '" . $Item->BundleRef . "'";
 								} else {
-									$SQL = "INSERT INTO stockserialitems (stockid,
+									$SQL = "INSERT INTO weberp_stockserialitems (stockid,
 																			loccode,
 																			serialno,
 																			qualitytext,
@@ -637,10 +637,10 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 								$DbgMsg =  _('The following SQL to insert the serial stock item records was used');
 								$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-								/* end of handle stockserialitems records */
+								/* end of handle weberp_stockserialitems records */
 
 							/** now insert the serial stock movement **/
-							$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+							$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 																	stockid,
 																	serialno,
 																	moveqty)
@@ -668,14 +668,14 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 				$CheckAssetExistsResult = DB_query("SELECT assetid,
 															datepurchased,
 															costact
-													FROM fixedassets
-													INNER JOIN fixedassetcategories
-													ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
+													FROM weberp_fixedassets
+													INNER JOIN weberp_fixedassetcategories
+													ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
 													WHERE assetid='" . $OrderLine->AssetID . "'");
 				if (DB_num_rows($CheckAssetExistsResult)==1){ //then work with the assetid provided
 
-					/*Need to add a fixedassettrans for the cost of the asset being received */
-					$SQL = "INSERT INTO fixedassettrans (assetid,
+					/*Need to add a weberp_fixedassettrans for the cost of the asset being received */
+					$SQL = "INSERT INTO weberp_fixedassettrans (assetid,
 														transtype,
 														transno,
 														transdate,
@@ -704,12 +704,12 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 						/* it is a new addition as the date is set to 0000-00-00 when the asset record is created
 						 * before any cost is added to the asset
 						 */
-						$SQL = "UPDATE fixedassets
+						$SQL = "UPDATE weberp_fixedassets
 									SET datepurchased='" . $_POST['DefaultReceivedDate'] . "',
 										cost = cost + " . ($CurrentStandardCost * $OrderLine->ReceiveQty)  . "
 									WHERE assetid = '" . $OrderLine->AssetID . "'";
 					} else {
-							$SQL = "UPDATE fixedassets SET cost = cost + " . ($CurrentStandardCost * $OrderLine->ReceiveQty)  . "
+							$SQL = "UPDATE weberp_fixedassets SET cost = cost + " . ($CurrentStandardCost * $OrderLine->ReceiveQty)  . "
 									WHERE assetid = '" . $OrderLine->AssetID . "'";
 					}
 					$ErrMsg = _('CRITICAL ERROR! NOTE DOWN THIS ERROR AND SEEK ASSISTANCE. The fixed asset cost and date purchased was not able to be updated because:');
@@ -724,7 +724,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 				/*GLCode is set to 0 when the GLLink is not activated this covers a situation where the GLLink is now active but it wasn't when this PO was entered */
 
 				/*first the debit using the GLCode in the PO detail record entry*/
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -747,7 +747,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 				/* If the CurrentStandardCost != UnitCost (the standard at the time the first delivery was booked in,  and its a stock item, then the difference needs to be booked in against the purchase price variance account */
 
 				/*now the GRN suspense entry*/
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -772,7 +772,7 @@ if ($_SESSION['PO'.$identifier]->SomethingReceived()==0 AND isset($_POST['Proces
 
 	if ($_SESSION['PO'.$identifier]->AllLinesReceived()==1 OR $OrderCompleted) { //all lines on the purchase order are now completed
 		$StatusComment=date($_SESSION['DefaultDateFormat']) .' - ' . _('Order Completed on entry of GRN')  . '<br />' . $_SESSION['PO'.$identifier]->StatusComments;
-		$sql="UPDATE purchorders
+		$sql="UPDATE weberp_purchorders
 				SET status='Completed',
 				stat_comment='" . $StatusComment . "'
 				WHERE orderno='" . $_SESSION['PO'.$identifier]->OrderNo . "'";

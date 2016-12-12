@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: EmailConfirmation.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -42,39 +42,39 @@ $headers  .=  'MIME-Version: 1.0\n' . 'Content-Type: text/html; charset="utf-8"\
 /*retrieve the order details from the database to print */
 $ErrMsg = _('There was a problem retrieving the order header details for Order Number') . ' ' . $_GET['TransNo'] . ' ' . _('from the database');
 
-$sql = "SELECT salesorders.debtorno,
-				salesorders.customerref,
-				salesorders.comments,
-				salesorders.orddate,
-				salesorders.deliverto,
-				salesorders.deladd1,
-				salesorders.deladd2,
-				salesorders.deladd3,
-				salesorders.deladd4,
-				salesorders.deladd5,
-				salesorders.deladd6,
-				salesorders.deliverblind,
-				debtorsmaster.name,
-				debtorsmaster.address1,
-				debtorsmaster.address2,
-				debtorsmaster.address3,
-				debtorsmaster.address4,
-				debtorsmaster.address5,
-				debtorsmaster.address6,
-				shippers.shippername,
-				salesorders.printedpackingslip,
-				salesorders.datepackingslipprinted,
-				locations.locationname,
-				salesorders.deliverydate
-			FROM salesorders
-			INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1,
-				debtorsmaster,
-				shippers,
-				locations
-			WHERE salesorders.debtorno=debtorsmaster.debtorno
-			AND salesorders.shipvia=shippers.shipper_id
-			AND salesorders.fromstkloc=locations.loccode
-			AND salesorders.orderno='" . $_GET['TransNo'] . "'";
+$sql = "SELECT weberp_salesorders.debtorno,
+				weberp_salesorders.customerref,
+				weberp_salesorders.comments,
+				weberp_salesorders.orddate,
+				weberp_salesorders.deliverto,
+				weberp_salesorders.deladd1,
+				weberp_salesorders.deladd2,
+				weberp_salesorders.deladd3,
+				weberp_salesorders.deladd4,
+				weberp_salesorders.deladd5,
+				weberp_salesorders.deladd6,
+				weberp_salesorders.deliverblind,
+				weberp_debtorsmaster.name,
+				weberp_debtorsmaster.address1,
+				weberp_debtorsmaster.address2,
+				weberp_debtorsmaster.address3,
+				weberp_debtorsmaster.address4,
+				weberp_debtorsmaster.address5,
+				weberp_debtorsmaster.address6,
+				weberp_shippers.shippername,
+				weberp_salesorders.printedpackingslip,
+				weberp_salesorders.datepackingslipprinted,
+				weberp_locations.locationname,
+				weberp_salesorders.deliverydate
+			FROM weberp_salesorders
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1,
+				weberp_debtorsmaster,
+				weberp_shippers,
+				weberp_locations
+			WHERE weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+			AND weberp_salesorders.shipvia=weberp_shippers.shipper_id
+			AND weberp_salesorders.fromstkloc=weberp_locations.loccode
+			AND weberp_salesorders.orderno='" . $_GET['TransNo'] . "'";
 
 $result=DB_query($sql, $ErrMsg);
 
@@ -112,7 +112,7 @@ if (DB_num_rows($result)==0){
 	/* Place the deliver blind variable into a hold variable to used when
 	producing the packlist */
 	$DeliverBlind = $myrow['deliverblind'];
-	$DeliveryDate = $myrow['salesorders.deliverydate'];
+	$DeliveryDate = $myrow['weberp_salesorders.deliverydate'];
 	if ($myrow['printedpackingslip']==1 AND ($_GET['Reprint']!='OK' OR !isset($_GET['Reprint']))){
 		$Title = _('Print Packing Slip Error');
 		include('includes/header.inc');
@@ -222,17 +222,17 @@ if($_GET['POLine'] == 1){
 					</tr>';
 
 
-	$sql = "SELECT salesorderdetails.stkcode,
-			stockmaster.description,
-			salesorderdetails.quantity,
-			salesorderdetails.qtyinvoiced,
-			salesorderdetails.unitprice,
-			salesorderdetails.narrative,
-			salesorderdetails.poline,
-			salesorderdetails.itemdue
-		FROM salesorderdetails INNER JOIN stockmaster
-			ON salesorderdetails.stkcode=stockmaster.stockid
-		WHERE salesorderdetails.orderno=" . $_GET['TransNo'] . "
+	$sql = "SELECT weberp_salesorderdetails.stkcode,
+			weberp_stockmaster.description,
+			weberp_salesorderdetails.quantity,
+			weberp_salesorderdetails.qtyinvoiced,
+			weberp_salesorderdetails.unitprice,
+			weberp_salesorderdetails.narrative,
+			weberp_salesorderdetails.poline,
+			weberp_salesorderdetails.itemdue
+		FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+			ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+		WHERE weberp_salesorderdetails.orderno=" . $_GET['TransNo'] . "
 		ORDER BY poline";
 	$result=DB_query($sql, $ErrMsg);
 	$i=0;

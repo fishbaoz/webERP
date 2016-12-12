@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_RePostGLFromPeriod.php 7506 2016-05-06 03:25:37Z exsonqu $*/
 
 include ('includes/session.inc');
 $Title = _('Recalculation of GL Balances in Chart Details Table');
@@ -20,7 +20,7 @@ if (!isset($_POST['FromPeriod'])){
 
 	$sql = "SELECT periodno,
                        lastdate_in_period
-                FROM periods ORDER BY periodno";
+                FROM weberp_periods ORDER BY periodno";
 	$Periods = DB_query($sql);
 
 	while ($myrow=DB_fetch_array($Periods,$db)){
@@ -38,16 +38,16 @@ if (!isset($_POST['FromPeriod'])){
 } else {  /*OK do the updates */
 
 	/* Make the posted flag on all GL entries including and after the period selected = 0 */
-	$sql = "UPDATE gltrans SET posted=0 WHERE periodno >='" . $_POST['FromPeriod'] . "'";
+	$sql = "UPDATE weberp_gltrans SET posted=0 WHERE periodno >='" . $_POST['FromPeriod'] . "'";
 	$UpdGLTransPostedFlag = DB_query($sql);
 
 	/* Now make all the actuals 0 for all periods including and after the period from */
-	$sql = "UPDATE chartdetails SET actual =0 WHERE period >= '" . $_POST['FromPeriod'] . "'";
+	$sql = "UPDATE weberp_chartdetails SET actual =0 WHERE period >= '" . $_POST['FromPeriod'] . "'";
 	$UpdActualChartDetails = DB_query($sql);
 
-	$ChartDetailBFwdResult = DB_query("SELECT accountcode, bfwd FROM chartdetails WHERE period='" . $_POST['FromPeriod'] . "'");
+	$ChartDetailBFwdResult = DB_query("SELECT accountcode, bfwd FROM weberp_chartdetails WHERE period='" . $_POST['FromPeriod'] . "'");
 	while ($ChartRow=DB_fetch_array($ChartDetailBFwdResult)){
-		$sql = "UPDATE chartdetails SET bfwd ='" . $ChartRow['bfwd'] . "' WHERE period > '" . $_POST['FromPeriod'] . "' AND accountcode='" . $ChartRow['accountcode'] . "'";
+		$sql = "UPDATE weberp_chartdetails SET bfwd ='" . $ChartRow['bfwd'] . "' WHERE period > '" . $_POST['FromPeriod'] . "' AND accountcode='" . $ChartRow['accountcode'] . "'";
 		$UpdActualChartDetails = DB_query($sql);
 	}
 

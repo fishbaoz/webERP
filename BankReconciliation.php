@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: BankReconciliation.php 7258 2015-04-03 15:41:23Z vvs2012 $*/
 /* This script displays the bank reconciliation for a selected bank account. */
 
 include('includes/session.inc');
@@ -36,9 +36,9 @@ if (isset($_POST['PostExchangeDifference']) AND is_numeric(filter_number_format(
 		$SQL = "SELECT rate,
 						bankaccountname,
 						decimalplaces AS currdecimalplaces
-				FROM bankaccounts INNER JOIN currencies
-				ON bankaccounts.currcode=currencies.currabrev
-				WHERE bankaccounts.accountcode = '" . $_POST['BankAccount']."'";
+				FROM weberp_bankaccounts INNER JOIN weberp_currencies
+				ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
+				WHERE weberp_bankaccounts.accountcode = '" . $_POST['BankAccount']."'";
 
 		$ErrMsg = _('Could not retrieve the exchange rate for the selected bank account');
 		$CurrencyResult = DB_query($SQL);
@@ -57,7 +57,7 @@ if (isset($_POST['PostExchangeDifference']) AND is_numeric(filter_number_format(
 
 //yet to code the journal
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -75,7 +75,7 @@ if (isset($_POST['PostExchangeDifference']) AND is_numeric(filter_number_format(
 		$ErrMsg = _('Cannot insert a GL entry for the exchange difference because');
 		$DbgMsg = _('The SQL that failed to insert the exchange difference GL entry was');
 		$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -99,12 +99,12 @@ if (isset($_POST['PostExchangeDifference']) AND is_numeric(filter_number_format(
 
 echo '<table class="selection">';
 
-$SQL = "SELECT bankaccounts.accountcode,
-				bankaccounts.bankaccountname
-		FROM bankaccounts, bankaccountusers
-		WHERE bankaccounts.accountcode=bankaccountusers.accountcode
-			AND bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
-		ORDER BY bankaccounts.bankaccountname";
+$SQL = "SELECT weberp_bankaccounts.accountcode,
+				weberp_bankaccounts.bankaccountname
+		FROM weberp_bankaccounts, weberp_bankaccountusers
+		WHERE weberp_bankaccounts.accountcode=weberp_bankaccountusers.accountcode
+			AND weberp_bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
+		ORDER BY weberp_bankaccounts.bankaccountname";
 
 $ErrMsg = _('The bank accounts could not be retrieved by the SQL because');
 $DbgMsg = _('The SQL used to retrieve the bank accounts was');
@@ -152,7 +152,7 @@ if (isset($_POST['ShowRec']) OR isset($_POST['DoExchangeDifference'])){
 	$PeriodNo = GetPeriod(date($_SESSION['DefaultDateFormat']), $db);
 
 	$SQL = "SELECT bfwd+actual AS balance
-			FROM chartdetails
+			FROM weberp_chartdetails
 			WHERE period='" . $PeriodNo . "'
 			AND accountcode='" . $_POST['BankAccount']."'";
 
@@ -164,12 +164,12 @@ if (isset($_POST['ShowRec']) OR isset($_POST['DoExchangeDifference'])){
 
 	/* Now need to get the currency of the account and the current table ex rate */
 	$SQL = "SELECT rate,
-					bankaccounts.currcode,
-					bankaccounts.bankaccountname,
-					currencies.decimalplaces AS currdecimalplaces
-			FROM bankaccounts INNER JOIN currencies
-			ON bankaccounts.currcode=currencies.currabrev
-			WHERE bankaccounts.accountcode = '" . $_POST['BankAccount']."'";
+					weberp_bankaccounts.currcode,
+					weberp_bankaccounts.bankaccountname,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_bankaccounts INNER JOIN weberp_currencies
+			ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
+			WHERE weberp_bankaccounts.accountcode = '" . $_POST['BankAccount']."'";
 	$ErrMsg = _('Could not retrieve the currency and exchange rate for the selected bank account');
 	$CurrencyResult = DB_query($SQL);
 	$CurrencyRow =  DB_fetch_array($CurrencyResult);
@@ -190,12 +190,12 @@ if (isset($_POST['ShowRec']) OR isset($_POST['DoExchangeDifference'])){
 					(amount/exrate)-amountcleared as outstanding,
 					ref,
 					transdate,
-					systypes.typename,
+					weberp_systypes.typename,
 					transno
-				FROM banktrans,
-					systypes
-				WHERE banktrans.type = systypes.typeid
-				AND banktrans.bankact='" . $_POST['BankAccount'] . "'
+				FROM weberp_banktrans,
+					weberp_systypes
+				WHERE weberp_banktrans.type = weberp_systypes.typeid
+				AND weberp_banktrans.bankact='" . $_POST['BankAccount'] . "'
 				AND amount < 0
 				AND ABS((amount/exrate)-amountcleared)>0.009 ORDER BY transdate";
 
@@ -269,11 +269,11 @@ if (isset($_POST['ShowRec']) OR isset($_POST['DoExchangeDifference'])){
 				(amount/exrate)-amountcleared AS outstanding,
 				ref,
 				transdate,
-				systypes.typename,
+				weberp_systypes.typename,
 				transno
-			FROM banktrans INNER JOIN systypes
-			ON banktrans.type = systypes.typeid
-			WHERE banktrans.bankact='" . $_POST['BankAccount'] . "'
+			FROM weberp_banktrans INNER JOIN weberp_systypes
+			ON weberp_banktrans.type = weberp_systypes.typeid
+			WHERE weberp_banktrans.bankact='" . $_POST['BankAccount'] . "'
 			AND amount > 0
 			AND ABS((amount/exrate)-amountcleared)>0.009 ORDER BY transdate";
 

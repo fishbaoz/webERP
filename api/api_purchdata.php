@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_purchdata.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 	function VerifyPurchDataLineExists($SupplierID, $StockID, $i, $Errors, $db) {
 		if (VerifyStockCodeExists($StockID, $i, $Errors, $db)!=0 and
@@ -83,7 +83,7 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$sql = "INSERT INTO purchdata (".mb_substr($FieldNames,0,-2).")
+			$sql = "INSERT INTO weberp_purchdata (".mb_substr($FieldNames,0,-2).")
 					VALUES ('" . mb_substr($FieldValues,0,-2). "') ";
 			DB_Txn_Begin();
 			$result = DB_Query($sql, $db);
@@ -128,7 +128,7 @@
 		if (isset($StockItemDetails['preferred'])){
 			$Errors=VerifyPreferredFlag($PurchDataDetails['preferred'], sizeof($Errors), $Errors);
 		}
-		$sql="UPDATE purchdata SET ";
+		$sql="UPDATE weberp_purchdata SET ";
 		foreach ($PurchDataDetails as $key => $value) {
 			$sql .= $key."='" . $value."', ";
 		}

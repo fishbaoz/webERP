@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFStockLocTransfer.php 6941 2014-10-26 23:18:08Z daintree $*/
 include('includes/session.inc');
 $Title = _('Stock Location Transfer Docket Error');
 
@@ -60,24 +60,24 @@ $line_height=30;
 
 $ErrMsg = _('An error occurred retrieving the items on the transfer'). '.' . '<p>' .  _('This page must be called with a location transfer reference number').'.';
 $DbgMsg = _('The SQL that failed while retrieving the items on the transfer was');
-$sql = "SELECT loctransfers.reference,
-			   loctransfers.stockid,
-			   stockmaster.description,
-			   loctransfers.shipqty,
-			   loctransfers.recqty,
-			   loctransfers.shipdate,
-			   loctransfers.shiploc,
-			   locations.locationname as shiplocname,
-			   loctransfers.recloc,
+$sql = "SELECT weberp_loctransfers.reference,
+			   weberp_loctransfers.stockid,
+			   weberp_stockmaster.description,
+			   weberp_loctransfers.shipqty,
+			   weberp_loctransfers.recqty,
+			   weberp_loctransfers.shipdate,
+			   weberp_loctransfers.shiploc,
+			   weberp_locations.locationname as shiplocname,
+			   weberp_loctransfers.recloc,
 			   locationsrec.locationname as reclocname,
-			   stockmaster.decimalplaces
-		FROM loctransfers
-		INNER JOIN stockmaster ON loctransfers.stockid=stockmaster.stockid
-		INNER JOIN locations ON loctransfers.shiploc=locations.loccode
-		INNER JOIN locations AS locationsrec ON loctransfers.recloc = locationsrec.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		INNER JOIN locationusers as locationusersrec ON locationusersrec.loccode=locationsrec.loccode AND locationusersrec.userid='" .  $_SESSION['UserID'] . "' AND locationusersrec.canview=1
-		WHERE loctransfers.reference='" . $_GET['TransferNo'] . "'";
+			   weberp_stockmaster.decimalplaces
+		FROM weberp_loctransfers
+		INNER JOIN weberp_stockmaster ON weberp_loctransfers.stockid=weberp_stockmaster.stockid
+		INNER JOIN weberp_locations ON weberp_loctransfers.shiploc=weberp_locations.loccode
+		INNER JOIN weberp_locations AS locationsrec ON weberp_loctransfers.recloc = locationsrec.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		INNER JOIN weberp_locationusers as weberp_locationusersrec ON weberp_locationusersrec.loccode=locationsrec.loccode AND weberp_locationusersrec.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusersrec.canview=1
+		WHERE weberp_loctransfers.reference='" . $_GET['TransferNo'] . "'";
 
 $result = DB_query($sql, $ErrMsg, $DbgMsg);
 

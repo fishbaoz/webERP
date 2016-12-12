@@ -18,7 +18,7 @@
 //you must tell the script where you main installation is located
 //Rememeber this is different for each location
 //$weberp_home=/srv/www/htdocs/weberp
-/* $Id$*/
+/* $Id: report_runner.php 5912 2013-05-10 14:37:31Z exsonqu $*/
 
 $usage="USAGE\n".$argv[0].":\n".
        "     -r reportnumber (the number of the weberp report)\n".

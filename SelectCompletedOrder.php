@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SelectCompletedOrder.php 7637 2016-09-25 10:38:47Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -102,122 +102,122 @@ if (isset($_POST['SearchParts']) AND $_POST['SearchParts']!=''){
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 		if (isset($_POST['completed'])) {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							stockmaster.units,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE salesorderdetails.completed =1
-						AND stockmaster.description " . LIKE . " '" . $SearchString. "'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							weberp_stockmaster.units,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_salesorderdetails.completed =1
+						AND weberp_stockmaster.description " . LIKE . " '" . $SearchString. "'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							stockmaster.units,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE stockmaster.description " . LIKE . " '" . $SearchString. "'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							weberp_stockmaster.units,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_stockmaster.description " . LIKE . " '" . $SearchString. "'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif ($_POST['StockCode']!=''){
 
 		if (isset($_POST['completed'])) {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem,
-							stockmaster.units
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE salesorderdetails.completed =1
-						AND stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem,
+							weberp_stockmaster.units
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_salesorderdetails.completed =1
+						AND weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem,
-							stockmaster.units
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem,
+							weberp_stockmaster.units
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif ($_POST['StockCode']=='' AND $_POST['Keywords']=='' AND $_POST['StockCat']!='') {
 
 		if (isset($_POST['completed'])) {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem,
-							stockmaster.units
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE salesorderdetails.completed=1
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem,
+							weberp_stockmaster.units
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_salesorderdetails.completed=1
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							SUM(locstock.quantity) AS qoh,
-							SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qoo,
-							SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qdem,
-							stockmaster.units
-						FROM (((stockmaster LEFT JOIN salesorderdetails on stockmaster.stockid = salesorderdetails.stkcode)
-							 LEFT JOIN locstock ON stockmaster.stockid=locstock.stockid)
-							 LEFT JOIN purchorderdetails on stockmaster.stockid = purchorderdetails.itemcode)
-						WHERE stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.decimalplaces,
-							stockmaster.units
-						ORDER BY stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							SUM(weberp_locstock.quantity) AS qoh,
+							SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qoo,
+							SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qdem,
+							weberp_stockmaster.units
+						FROM (((weberp_stockmaster LEFT JOIN weberp_salesorderdetails on weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode)
+							 LEFT JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid)
+							 LEFT JOIN weberp_purchorderdetails on weberp_stockmaster.stockid = weberp_purchorderdetails.itemcode)
+						WHERE weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.units
+						ORDER BY weberp_stockmaster.stockid";
 		}
 	}
 
@@ -241,70 +241,70 @@ if (isset($_POST['SearchParts']) AND $_POST['SearchParts']!=''){
 
 	//figure out the SQL required from the inputs available
 	if (isset($OrderNumber)) {
-		$SQL = "SELECT salesorders.orderno,
-						debtorsmaster.name,
-						custbranch.brname,
-						salesorders.customerref,
-						salesorders.orddate,
-						salesorders.deliverydate,
-						salesorders.deliverto,
-						currencies.decimalplaces AS currdecimalplaces, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-					FROM salesorders INNER JOIN salesorderdetails
-						ON salesorders.orderno = salesorderdetails.orderno
-						INNER JOIN debtorsmaster
-						ON salesorders.debtorno = debtorsmaster.debtorno
-						INNER JOIN custbranch
-						ON salesorders.branchcode = custbranch.branchcode
-						AND salesorders.debtorno = custbranch.debtorno
-						INNER JOIN currencies
-						ON debtorsmaster.currcode = currencies.currabrev
-					WHERE salesorders.orderno='". $OrderNumber ."'
-					AND salesorders.quotation=0
-					AND salesorderdetails.completed " . $Completed;
+		$SQL = "SELECT weberp_salesorders.orderno,
+						weberp_debtorsmaster.name,
+						weberp_custbranch.brname,
+						weberp_salesorders.customerref,
+						weberp_salesorders.orddate,
+						weberp_salesorders.deliverydate,
+						weberp_salesorders.deliverto,
+						weberp_currencies.decimalplaces AS currdecimalplaces, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+					FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+						ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						INNER JOIN weberp_debtorsmaster
+						ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_custbranch
+						ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+					WHERE weberp_salesorders.orderno='". $OrderNumber ."'
+					AND weberp_salesorders.quotation=0
+					AND weberp_salesorderdetails.completed " . $Completed;
 	} elseif (isset($CustomerRef)) {
 		if (isset($SelectedCustomer)) {
-			$SQL = "SELECT salesorders.orderno,
-							debtorsmaster.name,
-							currencies.decimalplaces AS currdecimalplaces,
-							custbranch.brname,
-							salesorders.customerref,
-							salesorders.orddate,
-							salesorders.deliverydate,
-							salesorders.deliverto, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-						FROM salesorders INNER JOIN salesorderdetails
-							ON salesorders.orderno = salesorderdetails.orderno
-							INNER JOIN debtorsmaster
-							ON salesorders.debtorno = debtorsmaster.debtorno
-							INNER JOIN custbranch
-							ON salesorders.branchcode = custbranch.branchcode
-							AND salesorders.debtorno = custbranch.debtorno
-							INNER JOIN currencies
-							ON debtorsmaster.currcode = currencies.currabrev
-						WHERE salesorders.debtorno='" . $SelectedCustomer ."'
-						AND salesorders.customerref like '%". $CustomerRef."%'
-						AND salesorders.quotation=0
-						AND salesorderdetails.completed".$Completed;
+			$SQL = "SELECT weberp_salesorders.orderno,
+							weberp_debtorsmaster.name,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							weberp_custbranch.brname,
+							weberp_salesorders.customerref,
+							weberp_salesorders.orddate,
+							weberp_salesorders.deliverydate,
+							weberp_salesorders.deliverto, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+						FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+							ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+							INNER JOIN weberp_debtorsmaster
+							ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							INNER JOIN weberp_custbranch
+							ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+						WHERE weberp_salesorders.debtorno='" . $SelectedCustomer ."'
+						AND weberp_salesorders.customerref like '%". $CustomerRef."%'
+						AND weberp_salesorders.quotation=0
+						AND weberp_salesorderdetails.completed".$Completed;
 		} else { //customer not selected
-			$SQL = "SELECT salesorders.orderno,
-							debtorsmaster.name,
-							currencies.decimalplaces AS currdecimalplaces,
-							custbranch.brname,
-							salesorders.customerref,
-							salesorders.orddate,
-							salesorders.deliverydate,
-							salesorders.deliverto, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-						FROM salesorders INNER JOIN salesorderdetails
-							ON salesorders.orderno = salesorderdetails.orderno
-							INNER JOIN debtorsmaster
-							ON salesorders.debtorno = debtorsmaster.debtorno
-							INNER JOIN custbranch
-							ON salesorders.branchcode = custbranch.branchcode
-							AND salesorders.debtorno = custbranch.debtorno
-							INNER JOIN currencies
-							ON debtorsmaster.currcode = currencies.currabrev
-						WHERE salesorders.customerref " . LIKE . " '%". $CustomerRef . "%'
-						AND salesorders.quotation=0
-						AND salesorderdetails.completed" . $Completed;
+			$SQL = "SELECT weberp_salesorders.orderno,
+							weberp_debtorsmaster.name,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							weberp_custbranch.brname,
+							weberp_salesorders.customerref,
+							weberp_salesorders.orddate,
+							weberp_salesorders.deliverydate,
+							weberp_salesorders.deliverto, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+						FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+							ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+							INNER JOIN weberp_debtorsmaster
+							ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							INNER JOIN weberp_custbranch
+							ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+						WHERE weberp_salesorders.customerref " . LIKE . " '%". $CustomerRef . "%'
+						AND weberp_salesorders.quotation=0
+						AND weberp_salesorderdetails.completed" . $Completed;
 		}
 
 	} else {
@@ -313,111 +313,111 @@ if (isset($_POST['SearchParts']) AND $_POST['SearchParts']!=''){
 		if (isset($SelectedCustomer) AND !isset($OrderNumber) AND !isset($CustomerRef)) {
 
 			if (isset($SelectedStockItem)) {
-				$SQL = "SELECT salesorders.orderno,
-								debtorsmaster.name,
-								currencies.decimalplaces AS currdecimalplaces,
-								custbranch.brname,
-								salesorders.customerref,
-								salesorders.orddate,
-								salesorders.deliverydate,
-								salesorders.deliverto, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-							FROM salesorders INNER JOIN salesorderdetails
-								ON salesorders.orderno = salesorderdetails.orderno
-								INNER JOIN debtorsmaster
-								ON salesorders.debtorno = debtorsmaster.debtorno
-								INNER JOIN custbranch
-								ON salesorders.branchcode = custbranch.branchcode
-								AND salesorders.debtorno = custbranch.debtorno
-								INNER JOIN currencies
-								ON debtorsmaster.currcode = currencies.currabrev
-							WHERE salesorderdetails.stkcode='". $SelectedStockItem ."'
-							AND salesorders.debtorno='" . $SelectedCustomer ."'
-							AND salesorders.orddate >= '" . $DateAfterCriteria ."'
-							AND salesorders.quotation=0
-							AND salesorderdetails.completed".$Completed;
+				$SQL = "SELECT weberp_salesorders.orderno,
+								weberp_debtorsmaster.name,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								weberp_custbranch.brname,
+								weberp_salesorders.customerref,
+								weberp_salesorders.orddate,
+								weberp_salesorders.deliverydate,
+								weberp_salesorders.deliverto, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+							FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+								ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+								INNER JOIN weberp_debtorsmaster
+								ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+								INNER JOIN weberp_custbranch
+								ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+								AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+								INNER JOIN weberp_currencies
+								ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+							WHERE weberp_salesorderdetails.stkcode='". $SelectedStockItem ."'
+							AND weberp_salesorders.debtorno='" . $SelectedCustomer ."'
+							AND weberp_salesorders.orddate >= '" . $DateAfterCriteria ."'
+							AND weberp_salesorders.quotation=0
+							AND weberp_salesorderdetails.completed".$Completed;
 			} else {
-				$SQL = "SELECT salesorders.orderno,
-								debtorsmaster.name,
-								currencies.decimalplaces AS currdecimalplaces,
-								custbranch.brname,
-								salesorders.customerref,
-								salesorders.orddate,
-								salesorders.deliverto,
-								salesorders.deliverydate, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-							FROM salesorders INNER JOIN salesorderdetails
-								ON salesorders.orderno = salesorderdetails.orderno
-								INNER JOIN debtorsmaster
-								ON salesorders.debtorno = debtorsmaster.debtorno
-								INNER JOIN custbranch
-								ON salesorders.branchcode = custbranch.branchcode
-								AND salesorders.debtorno = custbranch.debtorno
-								INNER JOIN currencies
-								ON debtorsmaster.currcode = currencies.currabrev
-							WHERE salesorders.debtorno='" . $SelectedCustomer . "'
-							AND salesorders.orddate >= '" . $DateAfterCriteria . "'
-							AND salesorders.quotation=0
-							AND salesorderdetails.completed".$Completed;
+				$SQL = "SELECT weberp_salesorders.orderno,
+								weberp_debtorsmaster.name,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								weberp_custbranch.brname,
+								weberp_salesorders.customerref,
+								weberp_salesorders.orddate,
+								weberp_salesorders.deliverto,
+								weberp_salesorders.deliverydate, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+							FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+								ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+								INNER JOIN weberp_debtorsmaster
+								ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+								INNER JOIN weberp_custbranch
+								ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+								AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+								INNER JOIN weberp_currencies
+								ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+							WHERE weberp_salesorders.debtorno='" . $SelectedCustomer . "'
+							AND weberp_salesorders.orddate >= '" . $DateAfterCriteria . "'
+							AND weberp_salesorders.quotation=0
+							AND weberp_salesorderdetails.completed".$Completed;
 			}
 		} else { //no customer selected
 			if (isset($SelectedStockItem)) {
-				$SQL = "SELECT salesorders.orderno,
-								debtorsmaster.name,
-								currencies.decimalplaces AS currdecimalplaces,
-								custbranch.brname,
-								salesorders.customerref,
-								salesorders.orddate,
-								salesorders.deliverto,
-								salesorders.deliverydate, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-							FROM salesorders INNER JOIN salesorderdetails
-								ON salesorders.orderno = salesorderdetails.orderno
-								INNER JOIN debtorsmaster
-								ON salesorders.debtorno = debtorsmaster.debtorno
-								INNER JOIN custbranch
-								ON salesorders.branchcode = custbranch.branchcode
-								AND salesorders.debtorno = custbranch.debtorno
-								INNER JOIN currencies
-								ON debtorsmaster.currcode = currencies.currabrev
-							WHERE salesorderdetails.stkcode='". $SelectedStockItem ."'
-							AND salesorders.orddate >= '" . $DateAfterCriteria . "'
-							AND salesorders.quotation=0
-							AND salesorderdetails.completed".$Completed;
+				$SQL = "SELECT weberp_salesorders.orderno,
+								weberp_debtorsmaster.name,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								weberp_custbranch.brname,
+								weberp_salesorders.customerref,
+								weberp_salesorders.orddate,
+								weberp_salesorders.deliverto,
+								weberp_salesorders.deliverydate, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+							FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+								ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+								INNER JOIN weberp_debtorsmaster
+								ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+								INNER JOIN weberp_custbranch
+								ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+								AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+								INNER JOIN weberp_currencies
+								ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+							WHERE weberp_salesorderdetails.stkcode='". $SelectedStockItem ."'
+							AND weberp_salesorders.orddate >= '" . $DateAfterCriteria . "'
+							AND weberp_salesorders.quotation=0
+							AND weberp_salesorderdetails.completed".$Completed;
 			} else {
-				$SQL = "SELECT salesorders.orderno,
-								debtorsmaster.name,
-								currencies.decimalplaces AS currdecimalplaces,
-								custbranch.brname,
-								salesorders.customerref,
-								salesorders.orddate,
-								salesorders.deliverto,
-								salesorders.deliverydate, SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) AS ordervalue
-							FROM salesorders INNER JOIN salesorderdetails
-								ON salesorders.orderno = salesorderdetails.orderno
-								INNER JOIN debtorsmaster
-								ON salesorders.debtorno = debtorsmaster.debtorno
-								INNER JOIN custbranch
-								ON salesorders.branchcode = custbranch.branchcode
-								AND salesorders.debtorno = custbranch.debtorno
-								INNER JOIN currencies
-								ON debtorsmaster.currcode = currencies.currabrev
-							WHERE salesorders.orddate >= '".$DateAfterCriteria . "'
-							AND salesorders.quotation=0
-							AND salesorderdetails.completed".$Completed;
+				$SQL = "SELECT weberp_salesorders.orderno,
+								weberp_debtorsmaster.name,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								weberp_custbranch.brname,
+								weberp_salesorders.customerref,
+								weberp_salesorders.orddate,
+								weberp_salesorders.deliverto,
+								weberp_salesorders.deliverydate, SUM(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) AS ordervalue
+							FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+								ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+								INNER JOIN weberp_debtorsmaster
+								ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+								INNER JOIN weberp_custbranch
+								ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+								AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+								INNER JOIN weberp_currencies
+								ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+							WHERE weberp_salesorders.orddate >= '".$DateAfterCriteria . "'
+							AND weberp_salesorders.quotation=0
+							AND weberp_salesorderdetails.completed".$Completed;
 			}
 		} //end selected customer
 	} //end not order number selected
 
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
-	$SQL .= " GROUP BY salesorders.orderno,
-					debtorsmaster.name,
-					currencies.decimalplaces,
-					custbranch.brname,
-					salesorders.customerref,
-					salesorders.orddate,
-					salesorders.deliverydate,
-					salesorders.deliverto
-				ORDER BY salesorders.orderno";
+	$SQL .= " GROUP BY weberp_salesorders.orderno,
+					weberp_debtorsmaster.name,
+					weberp_currencies.decimalplaces,
+					weberp_custbranch.brname,
+					weberp_salesorders.customerref,
+					weberp_salesorders.orddate,
+					weberp_salesorders.deliverydate,
+					weberp_salesorders.deliverto
+				ORDER BY weberp_salesorders.orderno";
 
 	$SalesOrdersResult = DB_query($SQL);
 
@@ -458,7 +458,7 @@ echo '</table>';
 if (!isset($SelectedStockItem)) {
 	$result1 = DB_query("SELECT categoryid,
 							categorydescription
-						FROM stockcategory
+						FROM weberp_stockcategory
 						ORDER BY categorydescription");
 
    echo '<br />';

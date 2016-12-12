@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SuppShiptChgs.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*The supplier transaction uses the SuppTrans class to hold the information about the invoice
 the SuppTrans class contains an array of Shipts objects - containing details of all shipment charges for invoicing
@@ -43,7 +43,7 @@ if (isset($_POST['AddShiptChgToInvoice'])){
 			$_POST['ShiptRef'] = $_POST['ShiptSelection'];
 		}
 	} else {
-		$result = DB_query("SELECT shiptref FROM shipments WHERE shiptref='". $_POST['ShiptRef'] . "'");
+		$result = DB_query("SELECT shiptref FROM weberp_shipments WHERE shiptref='". $_POST['ShiptRef'] . "'");
 		if (DB_num_rows($result)==0) {
 			prnMsg(_('The shipment entered manually is not a valid shipment reference. If you do not know the shipment reference, select it from the list'),'error');
 			$InputError = True;
@@ -122,8 +122,8 @@ $sql = "SELECT shiptref,
 				vessel,
 				eta,
 				suppname
-			FROM shipments INNER JOIN suppliers
-				ON shipments.supplierid=suppliers.supplierid
+			FROM weberp_shipments INNER JOIN weberp_suppliers
+				ON weberp_shipments.supplierid=weberp_suppliers.supplierid
 			WHERE closed='0'";
 
 $result = DB_query($sql);

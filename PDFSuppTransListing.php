@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFSuppTransListing.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 include('includes/SQL_CommonFunctions.inc');
 include ('includes/session.inc');
@@ -67,10 +67,10 @@ $sql= "SELECT type,
 			currcode,
 			decimalplaces AS currdecimalplaces,
 			suppname
-		FROM supptrans INNER JOIN suppliers
-		ON supptrans.supplierno = suppliers.supplierid
-		INNER JOIN currencies
-		ON suppliers.currcode=currencies.currabrev
+		FROM weberp_supptrans INNER JOIN weberp_suppliers
+		ON weberp_supptrans.supplierno = weberp_suppliers.supplierid
+		INNER JOIN weberp_currencies
+		ON weberp_suppliers.currcode=weberp_currencies.currabrev
 		WHERE type='" . $_POST['TransType'] . "'
 		AND trandate='" . FormatDateForSQL($_POST['Date']) . "'";
 

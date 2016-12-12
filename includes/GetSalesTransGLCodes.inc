@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GetSalesTransGLCodes.inc 6942 2014-10-27 02:48:29Z daintree $*/
 
 /*Functions to get the GL codes for customer transactions based on
 $Area, $StockID to determine the stock category and the SalesType (Price List)
@@ -14,14 +14,14 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 
 	/*Get the StockCategory for this item */
 
-	$SQL = "SELECT categoryid FROM stockmaster WHERE stockid='" . $StockID . "'";
+	$SQL = "SELECT categoryid FROM weberp_stockmaster WHERE stockid='" . $StockID . "'";
 	$Result=DB_query($SQL);
 	$myrow = DB_fetch_row($Result);
 	$StockCategory = $myrow[0];
 
 	/*Gets the GL Code for the COGS for a specific area and stock category. */
 
-	$SQL = "SELECT glcode FROM cogsglpostings
+	$SQL = "SELECT glcode FROM weberp_cogsglpostings
 			WHERE area = '" . $Area . "'
 			AND stkcat = '" . $StockCategory . "'
 			AND salestype='" . $SalesType . "'";
@@ -35,7 +35,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 	- see if matching Area, saletype and ANY StockCategory
 	- see if matching saletype , StockCategory	and AN Area
 	- see if mathcing Area, ANY stock category and AN salestype
-	- see if matching stockcategory, AN area and AN salestype
+	- see if matching weberp_stockcategory, AN area and AN salestype
 	- if still no record is found then the GL Code for the default area, sales type and default stock category is used
 
 	*/
@@ -46,7 +46,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 	if (DB_num_rows($Result)==0){
 
 		DB_free_result($Result);
-		$SQL = "SELECT glcode FROM cogsglpostings
+		$SQL = "SELECT glcode FROM weberp_cogsglpostings
 			WHERE area = '" . $Area . "'
 			AND stkcat = '" . $StockCategory . "'
 			AND salestype = 'AN'";
@@ -58,7 +58,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 	if (DB_num_rows($Result)==0){
 
 		DB_free_result($Result);
-		$SQL = "SELECT glcode FROM cogsglpostings
+		$SQL = "SELECT glcode FROM weberp_cogsglpostings
 			WHERE area = '" . $Area . "'
 			AND stkcat = 'ANY' AND salestype = '" . $SalesType . "'";
 
@@ -67,7 +67,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 	if (DB_num_rows($Result)==0){
 
 		DB_free_result($Result);
-		$SQL = "SELECT glcode FROM cogsglpostings
+		$SQL = "SELECT glcode FROM weberp_cogsglpostings
 			WHERE area = 'AN'
 			AND stkcat = '" . $StockCategory . "'
 			AND salestype = '" . $SalesType . "'";
@@ -79,7 +79,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 
 		DB_free_result($Result);
 		$SQL = "SELECT glcode
-			FROM cogsglpostings
+			FROM weberp_cogsglpostings
 			WHERE area = 'AN'
 			AND salestype='AN'
 			AND stkcat = '" . $StockCategory . "'";
@@ -91,7 +91,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 
 		DB_free_result($Result);
 		$SQL = "SELECT glcode
-			FROM cogsglpostings
+			FROM weberp_cogsglpostings
 			WHERE area = '" . $Area . "'
 			AND stkcat = 'ANY'
 			AND salestype='AN'";
@@ -101,7 +101,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 	if (DB_num_rows($Result)==0) {
 		DB_free_result($Result);
 		$SQL = "SELECT glcode
-				FROM cogsglpostings
+				FROM weberp_cogsglpostings
                 		WHERE area = 'AN'
                 		AND stkcat = 'ANY'
                 		AND salestype = '" . $SalesType . "'";
@@ -112,7 +112,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 
             DB_free_result($Result);
             $SQL = "SELECT glcode
-                  FROM cogsglpostings
+                  FROM weberp_cogsglpostings
                   WHERE area = 'AN'
                   AND stkcat = 'ANY'
                   AND salestype='AN'";
@@ -123,12 +123,12 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 		/*The default if all else fails */
 		/*Check GL account 1 exists */
 		prnMsg(_('Could not determine the correct general ledger account to use for posting the cost of this sale. Go to the setup menu and define appropriate COGS (Cost Of Goods Sold) accounts. To enable this invoice to be posted it has been posted to default sales and COGS - account number 1'),'warn');
-		$SQL = "SELECT accountcode FROM chartmaster WHERE accountcode=1";
+		$SQL = "SELECT accountcode FROM weberp_chartmaster WHERE accountcode=1";
 		$Result = DB_query($SQL);
 		if (DB_num_rows($Result)==0){ /*It doesn't exist so  create it */
-			$Result = DB_query("SELECT groupname FROM accountgroups WHERE groupname='Sales'");
+			$Result = DB_query("SELECT groupname FROM weberp_accountgroups WHERE groupname='Sales'");
 			if (DB_num_rows($Result)==0) {
-				$Result = DB_query("INSERT INTO accountgroups (groupname,
+				$Result = DB_query("INSERT INTO weberp_accountgroups (groupname,
 									sectioninaccounts,
 									pandl,
 									sequenceintb)
@@ -137,7 +137,7 @@ Function GetCOGSGLAccount ($Area, $StockID, $SalesType, &$db) {
 								1,
 								5)");
 			}
-			$SQL = "INSERT INTO chartmaster VALUES (1, 'Default Sales and COGS', 'Sales')";
+			$SQL = "INSERT INTO weberp_chartmaster VALUES (1, 'Default Sales and COGS', 'Sales')";
 			$Result = DB_query($SQL);
 		}
 		return 1;
@@ -156,7 +156,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 
 
 		/*Get the StockCategory for this item */
-	$SQL = "SELECT categoryid FROM stockmaster WHERE stockid='" . $StockID . "'";
+	$SQL = "SELECT categoryid FROM weberp_stockmaster WHERE stockid='" . $StockID . "'";
 	$Result=DB_query($SQL);
 	$myrow = DB_fetch_row($Result);
 	$StockCategory = $myrow[0];
@@ -171,14 +171,14 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 	- see if matching Area, stock category - AN sales type
 	- see if matching Area, saletype and ANY StockCategory
 	- see if mathcing Area, ANY stock category and AN salestype
-	- see if matching stockcategory, AN area and AN salestype
+	- see if matching weberp_stockcategory, AN area and AN salestype
 	- if still no record is found then the GL Code for the default area, sales type and default stock category is used
 
 	*/
 
 	$SQL = "SELECT salesglcode,
 					discountglcode
-			FROM salesglpostings
+			FROM weberp_salesglpostings
 			WHERE area = '" . $Area . "'
 			AND stkcat = '" . $StockCategory . "'
 			AND salestype = '". $SalesType . "'";
@@ -189,7 +189,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = '" . $Area . "'
 				AND stkcat = '" . $StockCategory . "'
 				AND salestype = 'AN'";
@@ -201,7 +201,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = '" . $Area . "'
 				AND stkcat = 'ANY'
 				AND salestype = '" . $SalesType . "'";
@@ -213,7 +213,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = 'AN'
 				AND salestype='" . $SalesType . "'
 				AND stkcat = '" . $StockCategory . "'";
@@ -225,7 +225,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = 'AN'
 				AND salestype='AN'
 				AND stkcat = '" . $StockCategory . "'";
@@ -237,7 +237,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = '" . $Area . "'
 				AND stkcat = 'ANY'
 				AND salestype='AN'";
@@ -249,7 +249,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
     		DB_free_result($Result);
         	$SQL = "SELECT salesglcode,
 							discountglcode
-                	FROM salesglpostings
+                	FROM weberp_salesglpostings
                 	WHERE area = 'AN'
                 	AND stkcat = 'ANY'
                 	AND salestype = '" . $SalesType . "'";
@@ -261,7 +261,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		DB_free_result($Result);
 		$SQL = "SELECT salesglcode,
 						discountglcode
-				FROM salesglpostings
+				FROM weberp_salesglpostings
 				WHERE area = 'AN'
 				AND stkcat = 'ANY'
 				AND salestype='AN'";
@@ -272,13 +272,13 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 		/*The default if all else fails */
 		prnMsg(_('Could not determine the correct general ledger account to use for posting this sale to. Go to the setup menu and define appropriate Sale GL Posting accounts. To enable this invoice to be posted it has been posted to default sales and COGS - account number 1'),'warn');
 		/*Check GL account 1 exists */
-		$SQL = "SELECT accountcode FROM chartmaster WHERE accountcode=1";
+		$SQL = "SELECT accountcode FROM weberp_chartmaster WHERE accountcode=1";
 		$Result = DB_query($SQL);
 		if (DB_num_rows($Result)==0){ /*It doesn't exist so  create it */
 			/*First check the account group sales exists */
-			$Result = DB_query("SELECT groupname FROM accountgroups WHERE groupname='Sales'");
+			$Result = DB_query("SELECT groupname FROM weberp_accountgroups WHERE groupname='Sales'");
 			if (DB_num_rows($Result)==0) {
-				$Result = DB_query("INSERT INTO accountgroups (groupname,
+				$Result = DB_query("INSERT INTO weberp_accountgroups (groupname,
 																sectioninaccounts,
 																pandl,
 																sequenceintb)
@@ -287,7 +287,7 @@ Function GetSalesGLAccount ($Area, $StockID, $SalesType, &$db) {
 																1,
 																5)");
 			}
-			$SQL = "INSERT INTO chartmaster VALUES (1, 'Default Sales and COGS', 'Sales')";
+			$SQL = "INSERT INTO weberp_chartmaster VALUES (1, 'Default Sales and COGS', 'Sales')";
 			$Result = DB_query($SQL);
 		}
 		return array('salesglcode'=>1,

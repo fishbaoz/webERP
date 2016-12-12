@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SupplierBalsAtPeriodEnd.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 
@@ -21,29 +21,29 @@ If (isset($_POST['PrintPDF'])
 
       /*Now figure out the aged analysis for the Supplier range under review */
 
-	$SQL = "SELECT suppliers.supplierid,
-					suppliers.suppname,
-		  			currencies.currency,
-		  			currencies.decimalplaces AS currdecimalplaces,
-					SUM((supptrans.ovamount + supptrans.ovgst - supptrans.alloc)/supptrans.rate) AS balance,
-					SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) AS fxbalance,
-					SUM(CASE WHEN supptrans.trandate > '" . $_POST['PeriodEnd'] . "' THEN
-			(supptrans.ovamount + supptrans.ovgst)/supptrans.rate ELSE 0 END) AS afterdatetrans,
-					SUM(CASE WHEN supptrans.trandate > '" . $_POST['PeriodEnd'] . "'
-						AND (supptrans.type=22 OR supptrans.type=21) THEN
-						supptrans.diffonexch ELSE 0 END) AS afterdatediffonexch,
-					SUM(CASE WHEN supptrans.trandate > '" . $_POST['PeriodEnd'] . "' THEN
-						supptrans.ovamount + supptrans.ovgst ELSE 0 END) AS fxafterdatetrans
-			FROM suppliers INNER JOIN currencies
-			ON suppliers.currcode = currencies.currabrev
-			INNER JOIN supptrans
-			ON suppliers.supplierid = supptrans.supplierno
-			WHERE suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
-			AND suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
-			GROUP BY suppliers.supplierid,
-				suppliers.suppname,
-				currencies.currency,
-				currencies.decimalplaces";
+	$SQL = "SELECT weberp_suppliers.supplierid,
+					weberp_suppliers.suppname,
+		  			weberp_currencies.currency,
+		  			weberp_currencies.decimalplaces AS currdecimalplaces,
+					SUM((weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc)/weberp_supptrans.rate) AS balance,
+					SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) AS fxbalance,
+					SUM(CASE WHEN weberp_supptrans.trandate > '" . $_POST['PeriodEnd'] . "' THEN
+			(weberp_supptrans.ovamount + weberp_supptrans.ovgst)/weberp_supptrans.rate ELSE 0 END) AS afterdatetrans,
+					SUM(CASE WHEN weberp_supptrans.trandate > '" . $_POST['PeriodEnd'] . "'
+						AND (weberp_supptrans.type=22 OR weberp_supptrans.type=21) THEN
+						weberp_supptrans.diffonexch ELSE 0 END) AS afterdatediffonexch,
+					SUM(CASE WHEN weberp_supptrans.trandate > '" . $_POST['PeriodEnd'] . "' THEN
+						weberp_supptrans.ovamount + weberp_supptrans.ovgst ELSE 0 END) AS fxafterdatetrans
+			FROM weberp_suppliers INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode = weberp_currencies.currabrev
+			INNER JOIN weberp_supptrans
+			ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+			WHERE weberp_suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
+			AND weberp_suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
+			GROUP BY weberp_suppliers.supplierid,
+				weberp_suppliers.suppname,
+				weberp_currencies.currency,
+				weberp_currencies.decimalplaces";
 
 	$SupplierResult = DB_query($SQL);
 
@@ -141,7 +141,7 @@ If (isset($_POST['PrintPDF'])
 
 	$sql = "SELECT periodno,
 					lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			ORDER BY periodno DESC";
 
 	$ErrMsg = _('Could not retrieve period data because');

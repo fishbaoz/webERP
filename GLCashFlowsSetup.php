@@ -25,8 +25,8 @@ switch($_POST['Action']) {
 		// Updates config accounts:
 		if($_SESSION['PeriodProfitAccount'] != $_POST['PeriodProfitAccount'] ) {
 			if(DB_query(
-				"UPDATE config SET confvalue = '" . $_POST['PeriodProfitAccount'] . "' WHERE confname = 'PeriodProfitAccount'",
-				_('Can not update chartmaster.cashflowsactivity because')
+				"UPDATE weberp_config SET confvalue = '" . $_POST['PeriodProfitAccount'] . "' WHERE confname = 'PeriodProfitAccount'",
+				_('Can not update weberp_chartmaster.cashflowsactivity because')
 				)) {
 				$_SESSION['PeriodProfitAccount'] = $_POST['PeriodProfitAccount'];
 				prnMsg(_('The net profit of the period GL account was updated'), 'success');
@@ -34,8 +34,8 @@ switch($_POST['Action']) {
 		}
 		if($_SESSION['RetainedEarningsAccount'] != $_POST['RetainedEarningsAccount'] ) {
 			if(DB_query(
-				"UPDATE companies SET retainedearnings = '" . $_POST['RetainedEarningsAccount'] . "' WHERE coycode = 1",
-				_('Can not update chartmaster.cashflowsactivity because')
+				"UPDATE weberp_companies SET retainedearnings = '" . $_POST['RetainedEarningsAccount'] . "' WHERE coycode = 1",
+				_('Can not update weberp_chartmaster.cashflowsactivity because')
 				)) {
 				$_SESSION['RetainedEarningsAccount'] = $_POST['RetainedEarningsAccount'];
 				prnMsg(_('The retained earnings GL account was updated'), 'success');
@@ -43,7 +43,7 @@ switch($_POST['Action']) {
 		}
 		break;// END Update.
 	case 'Reset':
-		$Sql = "UPDATE `chartmaster` SET `cashflowsactivity`='-1';";
+		$Sql = "UPDATE `weberp_chartmaster` SET `cashflowsactivity`='-1';";
 		$ErrMsg = _('Can not update chartmaster.cashflowsactivity because');
 		$Result = DB_query($Sql, $ErrMsg);
 		if($Result) {
@@ -122,7 +122,7 @@ switch($_POST['Action']) {
 		$Criterion[$i++]['CashFlowsActivity'] = 0;
 
 		foreach($Criterion as $Criteria) {
-			$Sql = "UPDATE `chartmaster`
+			$Sql = "UPDATE `weberp_chartmaster`
 				SET `cashflowsactivity`=". $Criteria['CashFlowsActivity'] . "
 				WHERE `accountname` LIKE '%". addslashes(_($Criteria['AccountLike'])) . "%'
 				AND `cashflowsactivity`=-1";// Uses cashflowsactivity=-1 to NOT overwrite.
@@ -183,9 +183,9 @@ echo '<br />',
 			</tr>
 		</tfoot><tbody>';
 $Sql = "SELECT accountcode, accountname
-		FROM chartmaster
-			LEFT JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl=0
+		FROM weberp_chartmaster
+			LEFT JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl=0
 		ORDER BY accountcode";
 $GLAccounts = DB_query($Sql);
 // Setups the net profit for the period GL account:
@@ -193,11 +193,11 @@ echo		'<tr>
 				<td><label for="PeriodProfitAccount">', _('Net profit for the period GL account'), ':</label></td>
 	 			<td><select id="PeriodProfitAccount" name="PeriodProfitAccount" required="required">';
 if(!isset($_SESSION['PeriodProfitAccount']) OR $_SESSION['PeriodProfitAccount']=='') {
-	$Result = DB_fetch_array(DB_query("SELECT confvalue FROM `config` WHERE confname ='PeriodProfitAccount'"));
+	$Result = DB_fetch_array(DB_query("SELECT confvalue FROM `weberp_config` WHERE confname ='PeriodProfitAccount'"));
 	if($Result == NULL) {// If $Result is NULL (false, 0, or the empty; because we use "==", instead of "==="), the parameter NOT exists so creates it.
 		echo		'<option value="">', _('Select...'), '</option>';
 		// Creates a configuration parameter for the net profit for the period GL account:
-		$Sql = "INSERT INTO `config` (confname, confvalue) VALUES ('PeriodProfitAccount', '" . $Result['accountcode'] . "')";
+		$Sql = "INSERT INTO `weberp_config` (confname, confvalue) VALUES ('PeriodProfitAccount', '" . $Result['accountcode'] . "')";
 		$ErrMsg = _('Could not add the new account code');
 		$Result = DB_query($Sql, $ErrMsg);
 		$_SESSION['PeriodProfitAccount'] = '';
@@ -217,7 +217,7 @@ echo		'<tr>
 				<td><label for="RetainedEarningsAccount">', _('Retained earnings GL account'), ':</label></td>
 	 			<td><select id="RetainedEarningsAccount" name="RetainedEarningsAccount" required="required">';
 if(!isset($_SESSION['RetainedEarningsAccount']) OR $_SESSION['RetainedEarningsAccount']=='') {
-	$Result = DB_fetch_array(DB_query("SELECT retainedearnings FROM `companies` WHERE `coycode`=1"));
+	$Result = DB_fetch_array(DB_query("SELECT retainedearnings FROM `weberp_companies` WHERE `coycode`=1"));
 	if($Result == NULL) {// If $Result is NULL (false, 0, or the empty; because we use "==", instead of "==="), the parameter NOT exists.
 		echo		'<option value="">', _('Select...'), '</option>';
 		$_SESSION['RetainedEarningsAccount'] = '';

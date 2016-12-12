@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: CreditStatus.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Credit Status Code Maintenance');
@@ -33,7 +33,7 @@ if (isset($_POST['submit'])) {
 	//first off validate inputs are sensible
 
 	$sql="SELECT count(reasoncode)
-			FROM holdreasons WHERE reasoncode='".$_POST['ReasonCode']."'";
+			FROM weberp_holdreasons WHERE reasoncode='".$_POST['ReasonCode']."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 
@@ -67,12 +67,12 @@ if (isset($_POST['submit'])) {
 		/*SelectedReason could also exist if submit had not been clicked this code would not run in this case cos submit is false of course	see the delete code below*/
 
 		if (isset($_POST['DisallowInvoices']) and $_POST['DisallowInvoices']=='on'){
-			$sql = "UPDATE holdreasons SET
+			$sql = "UPDATE weberp_holdreasons SET
 							reasondescription='" . $_POST['ReasonDescription'] . "',
 							dissallowinvoices=1
 							WHERE reasoncode = '".$SelectedReason."'";
 		} else {
-			$sql = "UPDATE holdreasons SET
+			$sql = "UPDATE weberp_holdreasons SET
 							reasondescription='" . $_POST['ReasonDescription'] . "',
 							dissallowinvoices=0
 							WHERE reasoncode = '".$SelectedReason."'";
@@ -85,14 +85,14 @@ if (isset($_POST['submit'])) {
 
 		if (isset($_POST['DisallowInvoices']) AND $_POST['DisallowInvoices']=='on'){
 
-			$sql = "INSERT INTO holdreasons (reasoncode,
+			$sql = "INSERT INTO weberp_holdreasons (reasoncode,
 											reasondescription,
 											dissallowinvoices)
 									VALUES ('" .$_POST['ReasonCode'] . "',
 											'".$_POST['ReasonDescription'] . "',
 											1)";
 		} else {
-			$sql = "INSERT INTO holdreasons (reasoncode,
+			$sql = "INSERT INTO weberp_holdreasons (reasoncode,
 											reasondescription,
 											dissallowinvoices)
 									VALUES ('" . $_POST['ReasonCode'] . "',
@@ -115,8 +115,8 @@ if (isset($_POST['submit'])) {
 // PREVENT DELETES IF DEPENDENT RECORDS IN DebtorsMaster
 
 	$sql= "SELECT COUNT(*)
-			FROM debtorsmaster
-			WHERE debtorsmaster.holdreason='".$SelectedReason."'";
+			FROM weberp_debtorsmaster
+			WHERE weberp_debtorsmaster.holdreason='".$SelectedReason."'";
 
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
@@ -126,7 +126,7 @@ if (isset($_POST['submit'])) {
 	}  else {
 		//only delete if used in neither customer or supplier accounts
 
-		$sql="DELETE FROM holdreasons WHERE reasoncode='" . $SelectedReason . "'";
+		$sql="DELETE FROM weberp_holdreasons WHERE reasoncode='" . $SelectedReason . "'";
 		$result = DB_query($sql);
 		prnMsg(_('This credit status code has been deleted'),'success');
 	}
@@ -143,7 +143,7 @@ then none of the above are true and the list of status codes will be displayed w
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = "SELECT reasoncode, reasondescription, dissallowinvoices FROM holdreasons";
+	$sql = "SELECT reasoncode, reasondescription, dissallowinvoices FROM weberp_holdreasons";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">
@@ -206,7 +206,7 @@ if (!isset($_GET['delete'])) {
 		$sql = "SELECT reasoncode,
 					reasondescription,
 					dissallowinvoices
-				FROM holdreasons
+				FROM weberp_holdreasons
 				WHERE reasoncode='".$SelectedReason."'";
 
 		$result = DB_query($sql);

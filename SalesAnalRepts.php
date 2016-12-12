@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SalesAnalRepts.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -140,7 +140,7 @@ if (isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE reportheaders SET
+		$sql = "UPDATE weberp_reportheaders SET
 						reportheading='" . $_POST['ReportHeading'] . "',
 						groupbydata1='" . $_POST['GroupByData1'] . "',
 						groupbydata2='" . $_POST['GroupByData2'] . "',
@@ -186,7 +186,7 @@ if (isset($_POST['submit'])) {
 
 	/*SelectedReport is null cos no item selected on first time round so must be adding a new report */
 
-		$sql = "INSERT INTO reportheaders (
+		$sql = "INSERT INTO weberp_reportheaders (
 						reportheading,
 						groupbydata1,
 						groupbydata2,
@@ -252,13 +252,13 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	$sql="DELETE FROM reportcolumns WHERE reportid='".$SelectedReport."'";
+	$sql="DELETE FROM weberp_reportcolumns WHERE reportid='".$SelectedReport."'";
 	$ErrMsg = _('The deletion of the report column failed because');
 	$DbgMsg = _('The SQL used to delete the report column was');
 
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
 
-	$sql="DELETE FROM reportheaders WHERE reportid='".$SelectedReport."'";
+	$sql="DELETE FROM weberp_reportheaders WHERE reportid='".$SelectedReport."'";
 	$ErrMsg = _('The deletion of the report heading failed because');
 	$DbgMsg = _('The SQL used to delete the report headers was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -278,7 +278,7 @@ links to delete or edit each. These will call the same page again and allow upda
 or deletion of the records*/
 
 
-	$result = DB_query("SELECT reportid, reportheading FROM reportheaders ORDER BY reportid");
+	$result = DB_query("SELECT reportid, reportheading FROM weberp_reportheaders ORDER BY reportid");
 
 	echo '<table class="selection">';
 	echo '<tr>
@@ -360,7 +360,7 @@ if (!isset($_GET['delete'])) {
 						groupbydata4,
 						upper4,
 						lower4
-				FROM reportheaders
+				FROM weberp_reportheaders
 				WHERE reportid='".$SelectedReport."'";
 
 		$ErrMsg = _('The reports for display could not be retrieved because');

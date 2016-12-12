@@ -17,12 +17,12 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/g
 
 
 if (isset($_GET['Complete'])) {
-	$result = DB_query("UPDATE fixedassettasks SET lastcompleted='" . Date('Y-m-d') . "' WHERE taskid='" . $_GET['TaskID'] . "'");
+	$result = DB_query("UPDATE weberp_fixedassettasks SET lastcompleted='" . Date('Y-m-d') . "' WHERE taskid='" . $_GET['TaskID'] . "'");
 }
 
 
 $sql="SELECT taskid,
-				fixedassettasks.assetid,
+				weberp_fixedassettasks.assetid,
 				description,
 				taskdescription,
 				frequencydays,
@@ -31,11 +31,11 @@ $sql="SELECT taskid,
 				userresponsible,
 				realname,
 				manager
-		FROM fixedassettasks
-		INNER JOIN fixedassets
-		ON fixedassettasks.assetid=fixedassets.assetid
-		INNER JOIN www_users
-		ON fixedassettasks.userresponsible=www_users.userid
+		FROM weberp_fixedassettasks
+		INNER JOIN weberp_fixedassets
+		ON weberp_fixedassettasks.assetid=weberp_fixedassets.assetid
+		INNER JOIN weberp_www_users
+		ON weberp_fixedassettasks.userresponsible=weberp_www_users.userid
 		WHERE userresponsible='" . $_SESSION['UserID'] . "'
 		OR manager = '" . $_SESSION['UserID'] . "'
 		ORDER BY ADDDATE(lastcompleted,frequencydays) DESC";
@@ -58,7 +58,7 @@ echo '<table class="selection">
 while ($myrow=DB_fetch_array($Result)) {
 
 	if ($myrow['manager']!=''){
-		$ManagerResult = DB_query("SELECT realname FROM www_users WHERE userid='" . $myrow['manager'] . "'");
+		$ManagerResult = DB_query("SELECT realname FROM weberp_www_users WHERE userid='" . $myrow['manager'] . "'");
 		$ManagerRow = DB_fetch_array($ManagerResult);
 		$ManagerName = $ManagerRow['realname'];
 	} else {

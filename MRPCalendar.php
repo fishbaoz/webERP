@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: MRPCalendar.php 6941 2014-10-26 23:18:08Z daintree $ */
 
 // MRPCalendar.php
 // Maintains the calendar of valid manufacturing dates for MRP
@@ -74,10 +74,10 @@ function submit(&$db,&$ChangeDate)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUB
 		return;
 	 }
 
-	$sql = "DROP TABLE IF EXISTS mrpcalendar";
+	$sql = "DROP TABLE IF EXISTS weberp_mrpcalendar";
 	$result = DB_query($sql);
 
-	$sql = "CREATE TABLE mrpcalendar (
+	$sql = "CREATE TABLE weberp_mrpcalendar (
 				calendardate date NOT NULL,
 				daynumber int(6) NOT NULL,
 				manufacturingflag smallint(6) NOT NULL default '1',
@@ -108,7 +108,7 @@ function submit(&$db,&$ChangeDate)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUB
 			 }
 		 }
 
-		 $sql = "INSERT INTO mrpcalendar (
+		 $sql = "INSERT INTO weberp_mrpcalendar (
 					calendardate,
 					daynumber,
 					manufacturingflag)
@@ -122,7 +122,7 @@ function submit(&$db,&$ChangeDate)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUB
 	// manufacturing day that precedes it. That way can read the table by the non-manufacturing day,
 	// subtract the leadtime from the daynumber, and find the valid manufacturing day with that daynumber.
 	$DayNumber = 1;
-	$sql = "SELECT * FROM mrpcalendar
+	$sql = "SELECT * FROM weberp_mrpcalendar
 			ORDER BY calendardate";
 	$result = DB_query($sql,$ErrMsg);
 	while ($myrow = DB_fetch_array($result)) {
@@ -130,7 +130,7 @@ function submit(&$db,&$ChangeDate)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUB
 			   $DayNumber++;
 		   }
 		   $CalDate = $myrow['calendardate'];
-		   $sql = "UPDATE mrpcalendar SET daynumber = '" . $DayNumber . "'
+		   $sql = "UPDATE weberp_mrpcalendar SET daynumber = '" . $DayNumber . "'
 					WHERE calendardate = '" . $CalDate . "'";
 		   $resultupdate = DB_query($sql,$ErrMsg);
 	}
@@ -147,7 +147,7 @@ function update(&$db,&$ChangeDate)  //####UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_UPD
 
 	$InputError = 0;
 	$CalDate = FormatDateForSQL($ChangeDate);
-	$sql="SELECT COUNT(*) FROM mrpcalendar
+	$sql="SELECT COUNT(*) FROM weberp_mrpcalendar
 		  WHERE calendardate='$CalDate'
 		  GROUP BY calendardate";
 	$result = DB_query($sql);
@@ -162,14 +162,14 @@ function update(&$db,&$ChangeDate)  //####UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_UPD
 		return;
 	 }
 
-	$sql="SELECT mrpcalendar.* FROM mrpcalendar WHERE calendardate='$CalDate'";
+	$sql="SELECT weberp_mrpcalendar.* FROM weberp_mrpcalendar WHERE calendardate='$CalDate'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	$newmanufacturingflag = 0;
 	if ($myrow[2] == 0) {
 		$newmanufacturingflag = 1;
 	}
-	$sql = "UPDATE mrpcalendar SET manufacturingflag = '".$newmanufacturingflag."'
+	$sql = "UPDATE weberp_mrpcalendar SET manufacturingflag = '".$newmanufacturingflag."'
 			WHERE calendardate = '".$CalDate."'";
 	$ErrMsg = _('Cannot update the MRP Calendar');
 	$resultupdate = DB_query($sql,$ErrMsg);
@@ -182,14 +182,14 @@ function update(&$db,&$ChangeDate)  //####UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_UPD
 	// manufacturing day that precedes it. That way can read the table by the non-manufacturing day,
 	// subtract the leadtime from the daynumber, and find the valid manufacturing day with that daynumber.
 	$DayNumber = 1;
-	$sql = "SELECT * FROM mrpcalendar ORDER BY calendardate";
+	$sql = "SELECT * FROM weberp_mrpcalendar ORDER BY calendardate";
 	$result = DB_query($sql,$ErrMsg);
 	while ($myrow = DB_fetch_array($result)) {
 		   if ($myrow['manufacturingflag'] == '1') {
 			   $DayNumber++;
 		   }
 		   $CalDate = $myrow['calendardate'];
-		   $sql = "UPDATE mrpcalendar SET daynumber = '" . $DayNumber . "'
+		   $sql = "UPDATE weberp_mrpcalendar SET daynumber = '" . $DayNumber . "'
 					WHERE calendardate = '" . $CalDate . "'";
 		   $resultupdate = DB_query($sql,$ErrMsg);
 	} // End of while
@@ -206,7 +206,7 @@ function ShowDays(&$db)  {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_
 				   daynumber,
 				   manufacturingflag,
 				   DAYNAME(calendardate) as dayname
-			FROM mrpcalendar
+			FROM weberp_mrpcalendar
 			WHERE calendardate >='" . $FromDate . "'
 			AND calendardate <='" . $ToDate . "'";
 

@@ -313,7 +313,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 
 
 		if($InputError !=1) {
-			$sql="SELECT 1 FROM debtorsmaster WHERE debtorno='".$_POST['DebtorNo']."' LIMIT 1";
+			$sql="SELECT 1 FROM weberp_debtorsmaster WHERE debtorno='".$_POST['DebtorNo']."' LIMIT 1";
 			$result=DB_query($sql);
 			$DebtorExists=(DB_num_rows($result)>0);
 			if($DebtorExists AND $_POST['UpdateIfExists']!=1) {
@@ -325,7 +325,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 				if($DebtorExists) {//update
 					$UpdatedNum++;
 					$sql = "SELECT 1
-							  FROM debtortrans
+							  FROM weberp_debtortrans
 							where debtorno = '" . $_POST['DebtorNo'] . "' LIMIT 1";
 					$result = DB_query($sql);
 
@@ -334,7 +334,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 						$curr=true;
 					} else {
 						$CurrSQL = "SELECT currcode
-							FROM debtorsmaster
+							FROM weberp_debtorsmaster
 							where debtorno = '" . $_POST['DebtorNo'] . "'";
 						$CurrResult = DB_query($CurrSQL);
 						$CurrRow = DB_fetch_array($CurrResult);
@@ -344,7 +344,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 						}
 					}
 
-					$sql = "UPDATE debtorsmaster SET
+					$sql = "UPDATE weberp_debtorsmaster SET
 							name='" . $_POST['CustName'] . "',
 							address1='" . $_POST['Address1'] . "',
 							address2='" . $_POST['Address2'] . "',
@@ -376,7 +376,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 
 				} else { //insert
 					$InsertNum++;
-					$sql = "INSERT INTO debtorsmaster (
+					$sql = "INSERT INTO weberp_debtorsmaster (
 							debtorno,
 							name,
 							address1,
@@ -475,7 +475,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 			if(DB_error_no() ==0) {
 
 				$sql = "SELECT 1
-				     FROM custbranch
+				     FROM weberp_custbranch
            			 WHERE debtorno='".$_POST['DebtorNo']."' AND
 				           branchcode='".$_POST['BranchCode']."' LIMIT 1";
 				$result=DB_query($sql);
@@ -492,7 +492,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 						$Longitude=0.0;
 					}
 					if($BranchExists) {
-						$sql = "UPDATE custbranch SET brname = '" . $_POST['BrName'] . "',
+						$sql = "UPDATE weberp_custbranch SET brname = '" . $_POST['BrName'] . "',
 									braddress1 = '" . $_POST['BrAddress1'] . "',
 									braddress2 = '" . $_POST['BrAddress2'] . "',
 									braddress3 = '" . $_POST['BrAddress3'] . "',
@@ -525,7 +525,7 @@ if(isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file pr
 
 					} else {
 
-						$sql = "INSERT INTO custbranch (branchcode,
+						$sql = "INSERT INTO weberp_custbranch (branchcode,
 										debtorno,
 										brname,
 										braddress1,

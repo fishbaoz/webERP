@@ -89,7 +89,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 		if ($_SESSION['AutoAuthorisePO']==1) {
 			//if the user has authority to authorise the PO then it will automatically be authorised
 			$AuthSQL ="SELECT authlevel
-						FROM purchorderauth
+						FROM weberp_purchorderauth
 						WHERE userid='".$_SESSION['UserID']."'
 						AND currabrev='".$_SESSION['PO'.$identifier]->CurrCode."'";
 
@@ -129,7 +129,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			$_SESSION['PO'.$identifier]->OrderNo =  GetNextTransNo(18, $db);
 
 			/*Insert to purchase order header record */
-			$sql = "INSERT INTO purchorders ( orderno,
+			$sql = "INSERT INTO weberp_purchorders ( orderno,
 											supplierno,
 											comments,
 											orddate,
@@ -201,7 +201,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 		     /*Insert the purchase order detail records */
 			foreach ($_SESSION['PO'.$identifier]->LineItems as $POLine) {
 				if ($POLine->Deleted==False) {
-					$sql = "INSERT INTO purchorderdetails (orderno,
+					$sql = "INSERT INTO weberp_purchorderdetails (orderno,
 														itemcode,
 														deliverydate,
 														itemdescription,
@@ -259,7 +259,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			}
 		     /*Update the purchase order header with any changes */
 
-			$sql = "UPDATE purchorders SET supplierno = '" . $_SESSION['PO'.$identifier]->SupplierID . "' ,
+			$sql = "UPDATE weberp_purchorders SET supplierno = '" . $_SESSION['PO'.$identifier]->SupplierID . "' ,
 										comments='" . $_SESSION['PO'.$identifier]->Comments . "',
 										rate='" . $_SESSION['PO'.$identifier]->ExRate . "',
 										initiator='" . $_SESSION['PO'.$identifier]->Initiator . "',
@@ -300,7 +300,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 				if ($POLine->Deleted==true) {
 					if ($POLine->PODetailRec!='') {
-						$sql="DELETE FROM purchorderdetails WHERE podetailitem='" . $POLine->PODetailRec . "'";
+						$sql="DELETE FROM weberp_purchorderdetails WHERE podetailitem='" . $POLine->PODetailRec . "'";
 						$ErrMsg =  _('The purchase order detail line could not be deleted because');
 						$DbgMsg = _('The SQL statement used to delete the purchase order detail record, that failed was');
 						$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
@@ -310,7 +310,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 						 * field PODetailRec is given to the session for that POLine
 						 * So it will only be a new POLine if PODetailRec is empty
 						*/
-					$sql = "INSERT INTO purchorderdetails ( orderno,
+					$sql = "INSERT INTO weberp_purchorderdetails ( orderno,
 														itemcode,
 														deliverydate,
 														itemdescription,
@@ -340,7 +340,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 				} else {
 					if ($POLine->Quantity==$POLine->QtyReceived){
-						$sql = "UPDATE purchorderdetails SET itemcode='" . $POLine->StockID . "',
+						$sql = "UPDATE weberp_purchorderdetails SET itemcode='" . $POLine->StockID . "',
 															deliverydate ='" . FormatDateForSQL($POLine->ReqDelDate) . "',
 															itemdescription='" . DB_escape_string($POLine->ItemDescription) . "',
 															glcode='" . $POLine->GLCode . "',
@@ -355,7 +355,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 															conversionfactor = '" . $POLine->ConversionFactor . "'
 								WHERE podetailitem='" . $POLine->PODetailRec . "'";
 					} else {
-						$sql = "UPDATE purchorderdetails SET itemcode='" . $POLine->StockID . "',
+						$sql = "UPDATE weberp_purchorderdetails SET itemcode='" . $POLine->StockID . "',
 															deliverydate ='" . FormatDateForSQL($POLine->ReqDelDate) . "',
 															itemdescription='" . DB_escape_string($POLine->ItemDescription) . "',
 															glcode='" . $POLine->GLCode . "',
@@ -446,7 +446,7 @@ if (isset($_POST['EnterLine'])){ /*Inputs from the form directly without selecti
 	if ($_SESSION['PO'.$identifier]->GLLink==1 OR $_SESSION['CompanyRecord']['gllink_creditors']==1){
 
 		$sql = "SELECT accountname
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode ='" . $_POST['GLCode'] . "'";
 		$ErrMsg =  _('The account details for') . ' ' . $_POST['GLCode'] . ' ' . _('could not be retrieved because');
 		$DbgMsg =  _('The SQL used to retrieve the details of the account, but failed was');
@@ -475,9 +475,9 @@ if (isset($_POST['EnterLine'])){ /*Inputs from the form directly without selecti
 		$ValidAssetResult = DB_query("SELECT assetid,
 											description,
 											costact
-										FROM fixedassets
-										INNER JOIN fixedassetcategories
-										ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
+										FROM weberp_fixedassets
+										INNER JOIN weberp_fixedassetcategories
+										ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
 										WHERE assetid='" . $_POST['AssetID'] . "'");
 		if (DB_num_rows($ValidAssetResult)==0){ // then the asset id entered doesn't exist
 			$AllowUpdate = false;
@@ -571,11 +571,11 @@ if (isset($_POST['NewItem'])
 							decimalplaces,
 							stockact,
 							accountname
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockcategory.categoryid = stockmaster.categoryid
-						INNER JOIN chartmaster
-						ON chartmaster.accountcode = stockcategory.stockact
-						WHERE  stockmaster.stockid = '". $ItemCode . "'";
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+						INNER JOIN weberp_chartmaster
+						ON weberp_chartmaster.accountcode = weberp_stockcategory.stockact
+						WHERE  weberp_stockmaster.stockid = '". $ItemCode . "'";
 
 				$ErrMsg = _('The item details for') . ' ' . $ItemCode . ' ' . _('could not be retrieved because');
 				$DbgMsg = _('The SQL used to retrieve the item details but failed was');
@@ -589,17 +589,17 @@ if (isset($_POST['NewItem'])
 								suppliersuom,
 								suppliers_partno,
 								leadtime,
-								MAX(purchdata.effectivefrom) AS latesteffectivefrom
-							FROM purchdata
-							WHERE purchdata.supplierno = '" . $_SESSION['PO'.$identifier]->SupplierID . "'
-							AND purchdata.effectivefrom <='" . Date('Y-m-d') . "'
-							AND purchdata.stockid = '". $ItemCode . "'
-							GROUP BY purchdata.price,
-									purchdata.conversionfactor,
-									purchdata.supplierdescription,
-									purchdata.suppliersuom,
-									purchdata.suppliers_partno,
-									purchdata.leadtime
+								MAX(weberp_purchdata.effectivefrom) AS latesteffectivefrom
+							FROM weberp_purchdata
+							WHERE weberp_purchdata.supplierno = '" . $_SESSION['PO'.$identifier]->SupplierID . "'
+							AND weberp_purchdata.effectivefrom <='" . Date('Y-m-d') . "'
+							AND weberp_purchdata.stockid = '". $ItemCode . "'
+							GROUP BY weberp_purchdata.price,
+									weberp_purchdata.conversionfactor,
+									weberp_purchdata.supplierdescription,
+									weberp_purchdata.suppliersuom,
+									weberp_purchdata.suppliers_partno,
+									weberp_purchdata.leadtime
 							ORDER BY latesteffectivefrom DESC";
 
 					$ErrMsg = _('The purchasing data for') . ' ' . $ItemCode . ' ' . _('could not be retrieved because');
@@ -611,7 +611,7 @@ if (isset($_POST['NewItem'])
 						/* Now to get the applicable discounts */
 						$sql = "SELECT discountpercent,
 										discountamount
-								FROM supplierdiscounts
+								FROM weberp_supplierdiscounts
 								WHERE supplierno= '" . $_SESSION['PO'.$identifier]->SupplierID . "'
 								AND effectivefrom <='" . Date('Y-m-d') . "'
 								AND effectiveto >='" . Date('Y-m-d') . "'
@@ -796,7 +796,7 @@ if (isset($_POST['NonStockOrder'])) {
 			<td><select name="GLCode">';
 	$sql="SELECT accountcode,
 				  accountname
-				FROM chartmaster
+				FROM weberp_chartmaster
 				ORDER BY accountcode ASC";
 
 	$result=DB_query($sql);
@@ -810,7 +810,7 @@ if (isset($_POST['NonStockOrder'])) {
 	$AssetsResult = DB_query("SELECT assetid,
 									description,
 									datepurchased
-								FROM fixedassets
+								FROM weberp_fixedassets
 								ORDER BY assetid DESC");
 	echo '<option selected="selected" value="Not an Asset">' . _('Not an Asset') . '</option>';
 	while ($AssetRow = DB_fetch_array($AssetsResult)){
@@ -857,69 +857,69 @@ if (isset($_POST['Search']) OR isset($_POST['Prev']) OR isset($_POST['Next'])){ 
 
 		if ($_POST['StockCat']=='All'){
 			if ($_POST['SupplierItemsOnly']=='on'){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'G'
-						AND stockmaster.discontinued<>1
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						AND stockmaster.description " . LIKE . " '" . $SearchString ."'
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid";
-			} else { // not just supplier purchdata items
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-					AND stockmaster.mbflag<>'K'
-					AND stockmaster.mbflag<>'A'
-					AND stockmaster.mbflag<>'G'
-					AND stockmaster.discontinued<>1
-					AND stockmaster.description " . LIKE . " '" . $SearchString ."'
-					ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_stockmaster.discontinued<>1
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						AND weberp_stockmaster.description " . LIKE . " '" . $SearchString ."'
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid";
+			} else { // not just supplier weberp_purchdata items
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+					AND weberp_stockmaster.mbflag<>'K'
+					AND weberp_stockmaster.mbflag<>'A'
+					AND weberp_stockmaster.mbflag<>'G'
+					AND weberp_stockmaster.discontinued<>1
+					AND weberp_stockmaster.description " . LIKE . " '" . $SearchString ."'
+					ORDER BY weberp_stockmaster.stockid ";
 			}
 		} else { //for a specific stock category
 			if ($_POST['SupplierItemsOnly']=='on'){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'G'
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						AND stockmaster.discontinued<>1
-						AND stockmaster.description " . LIKE . " '". $SearchString ."'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						AND weberp_stockmaster.discontinued<>1
+						AND weberp_stockmaster.description " . LIKE . " '". $SearchString ."'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid ";
 			} else {
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'G'
-						AND stockmaster.discontinued<>1
-						AND stockmaster.description " . LIKE . " '". $SearchString ."'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_stockmaster.discontinued<>1
+						AND weberp_stockmaster.description " . LIKE . " '". $SearchString ."'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						ORDER BY weberp_stockmaster.stockid ";
 			}
 		}
 
@@ -929,134 +929,134 @@ if (isset($_POST['Search']) OR isset($_POST['Prev']) OR isset($_POST['Next'])){ 
 
 		if ($_POST['StockCat']=='All'){
 			if ($_POST['SupplierItemsOnly']=='on'){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'G'
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						AND stockmaster.discontinued<>1
-						AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						AND weberp_stockmaster.discontinued<>1
+						AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid ";
 			} else {
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-					AND stockmaster.mbflag<>'A'
-					AND stockmaster.mbflag<>'K'
-					AND stockmaster.mbflag<>'G'
-					AND stockmaster.discontinued<>1
-					AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-					ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+					AND weberp_stockmaster.mbflag<>'A'
+					AND weberp_stockmaster.mbflag<>'K'
+					AND weberp_stockmaster.mbflag<>'G'
+					AND weberp_stockmaster.discontinued<>1
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+					ORDER BY weberp_stockmaster.stockid ";
 			}
 		} else { //for a specific stock category and LIKE stock code
 			if ($_POST['SupplierItemsOnly']=='on'){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'G'
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						and stockmaster.discontinued<>1
-						AND stockmaster.stockid " . LIKE  . " '" . $_POST['StockCode'] . "'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						and weberp_stockmaster.discontinued<>1
+						AND weberp_stockmaster.stockid " . LIKE  . " '" . $_POST['StockCode'] . "'
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid ";
 			} else {
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-					AND stockmaster.mbflag<>'A'
-					AND stockmaster.mbflag<>'K'
-					AND stockmaster.mbflag<>'G'
-					and stockmaster.discontinued<>1
-					AND stockmaster.stockid " . LIKE  . " '" . $_POST['StockCode'] . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+					AND weberp_stockmaster.mbflag<>'A'
+					AND weberp_stockmaster.mbflag<>'K'
+					AND weberp_stockmaster.mbflag<>'G'
+					and weberp_stockmaster.discontinued<>1
+					AND weberp_stockmaster.stockid " . LIKE  . " '" . $_POST['StockCode'] . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid ";
 			}
 		}
 
 	} else {
 		if ($_POST['StockCat']=='All'){
 			if (isset($_POST['SupplierItemsOnly'])){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'G'
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						AND stockmaster.discontinued<>1
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						AND weberp_stockmaster.discontinued<>1
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid ";
 			} else {
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-					AND stockmaster.mbflag<>'A'
-					AND stockmaster.mbflag<>'K'
-					AND stockmaster.mbflag<>'G'
-					AND stockmaster.discontinued<>1
-					ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+					AND weberp_stockmaster.mbflag<>'A'
+					AND weberp_stockmaster.mbflag<>'K'
+					AND weberp_stockmaster.mbflag<>'G'
+					AND weberp_stockmaster.discontinued<>1
+					ORDER BY weberp_stockmaster.stockid ";
 			}
 		} else { // for a specific stock category
 			if (isset($_POST['SupplierItemsOnly']) AND $_POST['SupplierItemsOnly']=='on'){
-				$sql = "SELECT stockmaster.stockid,
-								stockmaster.description,
-								stockmaster.units
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN purchdata
-						ON stockmaster.stockid=purchdata.stockid
-						WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-						AND stockmaster.mbflag<>'A'
-						AND stockmaster.mbflag<>'K'
-						AND stockmaster.mbflag<>'G'
-						AND purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-						AND stockmaster.discontinued<>1
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid
-						ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.units
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_purchdata
+						ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+						WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+						AND weberp_stockmaster.mbflag<>'A'
+						AND weberp_stockmaster.mbflag<>'K'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+						AND weberp_stockmaster.discontinued<>1
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+						GROUP BY weberp_stockmaster.stockid
+						ORDER BY weberp_stockmaster.stockid ";
 			} else {
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE (stockmaster.mbflag<>'D' OR stockcategory.stocktype='L')
-					AND stockmaster.mbflag<>'A'
-					AND stockmaster.mbflag<>'K'
-					AND stockmaster.mbflag<>'G'
-					AND stockmaster.discontinued<>1
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid ";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE (weberp_stockmaster.mbflag<>'D' OR weberp_stockcategory.stocktype='L')
+					AND weberp_stockmaster.mbflag<>'A'
+					AND weberp_stockmaster.mbflag<>'K'
+					AND weberp_stockmaster.mbflag<>'G'
+					AND weberp_stockmaster.discontinued<>1
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid ";
 			}
 		}
 	}
@@ -1114,7 +1114,7 @@ if (isset($_POST['Search']) OR isset($_POST['Prev']) OR isset($_POST['Next'])){ 
 if (!isset($_GET['Edit'])) {
 	$sql="SELECT categoryid,
 				categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE stocktype<>'D'
 			ORDER BY categorydescription";
 	$ErrMsg = _('The supplier category details could not be retrieved because');
@@ -1228,11 +1228,11 @@ if (isset($SearchResult)) {
 		}
 
 		/*Get conversion factor and supplier units if any */
-		$sql =  "SELECT purchdata.conversionfactor,
-						purchdata.suppliersuom
-					FROM purchdata
-					WHERE purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
-					AND purchdata.stockid='" . $myrow['stockid'] . "'";
+		$sql =  "SELECT weberp_purchdata.conversionfactor,
+						weberp_purchdata.suppliersuom
+					FROM weberp_purchdata
+					WHERE weberp_purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "'
+					AND weberp_purchdata.stockid='" . $myrow['stockid'] . "'";
 		$ErrMsg = _('Could not retrieve the purchasing data for the item');
 		$PurchDataResult = DB_query($sql,$ErrMsg);
 

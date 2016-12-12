@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PcAuthorizeExpenses.php 7675 2016-11-21 14:55:36Z rchacon $*/
 /*  */
 
 include('includes/session.inc');
@@ -66,27 +66,27 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 	echo '<input type="submit" name="Go" value="' . _('Go') . '" /></th>
 		</tr>';
 
-	$sql = "SELECT pcashdetails.counterindex,
-				pcashdetails.tabcode,
-				pcashdetails.date,
-				pcashdetails.codeexpense,
-				pcashdetails.amount,
-				pcashdetails.authorized,
-				pcashdetails.posted,
-				pcashdetails.notes,
-				pcashdetails.receipt,
-				pctabs.glaccountassignment,
-				pctabs.glaccountpcash,
-				pctabs.usercode,
-				pctabs.currency,
-				currencies.rate,
-				currencies.decimalplaces
-			FROM pcashdetails, pctabs, currencies
-			WHERE pcashdetails.tabcode = pctabs.tabcode
-				AND pctabs.currency = currencies.currabrev
-				AND pcashdetails.tabcode = '" . $SelectedTabs . "'
-				AND pcashdetails.date >= DATE_SUB(CURDATE(), INTERVAL '".$Days."' DAY)
-			ORDER BY pcashdetails.date, pcashdetails.counterindex ASC";
+	$sql = "SELECT weberp_pcashdetails.counterindex,
+				weberp_pcashdetails.tabcode,
+				weberp_pcashdetails.date,
+				weberp_pcashdetails.codeexpense,
+				weberp_pcashdetails.amount,
+				weberp_pcashdetails.authorized,
+				weberp_pcashdetails.posted,
+				weberp_pcashdetails.notes,
+				weberp_pcashdetails.receipt,
+				weberp_pctabs.glaccountassignment,
+				weberp_pctabs.glaccountpcash,
+				weberp_pctabs.usercode,
+				weberp_pctabs.currency,
+				weberp_currencies.rate,
+				weberp_currencies.decimalplaces
+			FROM weberp_pcashdetails, weberp_pctabs, weberp_currencies
+			WHERE weberp_pcashdetails.tabcode = weberp_pctabs.tabcode
+				AND weberp_pctabs.currency = weberp_currencies.currabrev
+				AND weberp_pcashdetails.tabcode = '" . $SelectedTabs . "'
+				AND weberp_pcashdetails.date >= DATE_SUB(CURDATE(), INTERVAL '".$Days."' DAY)
+			ORDER BY weberp_pcashdetails.date, weberp_pcashdetails.counterindex ASC";
 
 	$result = DB_query($sql);
 
@@ -128,7 +128,7 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 				$AccountFrom = $myrow['glaccountpcash'];
 				$SQLAccExp = "SELECT glaccount,
 									tag
-								FROM pcexpenses
+								FROM weberp_pcexpenses
 								WHERE codeexpense = '".$myrow['codeexpense']."'";
 				$ResultAccExp = DB_query($SQLAccExp);
 				$myrowAccExp = DB_fetch_array($ResultAccExp);
@@ -141,10 +141,10 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 
 			//build narrative
 			$Narrative = _('Petty Cash') . ' - '. $myrow['tabcode'] . ' - ' . $myrow['codeexpense'] . ' - ' . DB_escape_string($myrow['notes']) . ' - ' . $myrow['receipt'];
-			//insert to gltrans
+			//insert to weberp_gltrans
 			DB_Txn_Begin();
 
-			$sqlFrom="INSERT INTO `gltrans` (`counterindex`,
+			$sqlFrom="INSERT INTO `weberp_gltrans` (`counterindex`,
 											`type`,
 											`typeno`,
 											`chequeno`,
@@ -171,7 +171,7 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 
 			$ResultFrom = DB_Query($sqlFrom,'', '', true);
 
-			$sqlTo="INSERT INTO `gltrans` (`counterindex`,
+			$sqlTo="INSERT INTO `weberp_gltrans` (`counterindex`,
 										`type`,
 										`typeno`,
 										`chequeno`,
@@ -199,9 +199,9 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 			$ResultTo = DB_query($sqlTo,'', '', true);
 
 			if($myrow['codeexpense'] == 'ASSIGNCASH') {
-			// if it's a cash assignation we need to updated banktrans table as well.
+			// if it's a cash assignation we need to updated weberp_banktrans table as well.
 				$ReceiptTransNo = GetNextTransNo( 2, $db);
-				$SQLBank= "INSERT INTO banktrans (transno,
+				$SQLBank= "INSERT INTO weberp_banktrans (transno,
 												type,
 												bankact,
 												ref,
@@ -228,7 +228,7 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 
 			}
 
-			$sql = "UPDATE pcashdetails
+			$sql = "UPDATE weberp_pcashdetails
 					SET authorized = '".Date('Y-m-d')."',
 					posted = 1
 					WHERE counterindex = '".$myrow['counterindex']."'";
@@ -273,7 +273,7 @@ if(isset($_POST['Submit']) or isset($_POST['update']) OR isset($SelectedTabs) OR
 	} //end of looping
 
 	$sqlamount="SELECT sum(amount)
-			FROM pcashdetails
+			FROM weberp_pcashdetails
 			WHERE tabcode='".$SelectedTabs."'";
 
 	$ResultAmount = DB_query($sqlamount);
@@ -306,7 +306,7 @@ echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_
 		<table class="selection">'; //Main table
 
 	$SQL = "SELECT tabcode,authorizer
-		FROM pctabs
+		FROM weberp_pctabs
 		WHERE authorizer LIKE '%" . $_SESSION['UserID'] . "%'
 		ORDER BY tabcode";
 

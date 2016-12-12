@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: RecurringSalesOrders.php 6945 2014-10-27 07:20:48Z daintree $*/
 /* This is where the details specific to the recurring order are entered and the template committed to the database once the Process button is hit */
 
 include('includes/DefineCartClass.php');
@@ -41,37 +41,37 @@ if (isset($_GET['NewRecurringOrder'])){
 
 		/*read in all the guff from the selected order into the Items cart  */
 
-		$OrderHeaderSQL = "SELECT recurringsalesorders.debtorno,
-									debtorsmaster.name,
-									recurringsalesorders.branchcode,
-									recurringsalesorders.customerref,
-									recurringsalesorders.comments,
-									recurringsalesorders.orddate,
-									recurringsalesorders.ordertype,
-									salestypes.sales_type,
-									recurringsalesorders.shipvia,
-									recurringsalesorders.deliverto,
-									recurringsalesorders.deladd1,
-									recurringsalesorders.deladd2,
-									recurringsalesorders.deladd3,
-									recurringsalesorders.deladd4,
-									recurringsalesorders.deladd5,
-									recurringsalesorders.deladd6,
-									recurringsalesorders.contactphone,
-									recurringsalesorders.contactemail,
-									recurringsalesorders.freightcost,
-									debtorsmaster.currcode,
-									recurringsalesorders.fromstkloc,
-									recurringsalesorders.frequency,
-									recurringsalesorders.stopdate,
-									recurringsalesorders.lastrecurrence,
-									recurringsalesorders.autoinvoice
-								FROM recurringsalesorders
-								INNER JOIN debtorsmaster
-								ON recurringsalesorders.debtorno = debtorsmaster.debtorno
-								INNER JOIN salestypes
-								ON recurringsalesorders.ordertype=salestypes.typeabbrev
-								WHERE recurringsalesorders.recurrorderno = '" . $_GET['ModifyRecurringSalesOrder'] . "'";
+		$OrderHeaderSQL = "SELECT weberp_recurringsalesorders.debtorno,
+									weberp_debtorsmaster.name,
+									weberp_recurringsalesorders.branchcode,
+									weberp_recurringsalesorders.customerref,
+									weberp_recurringsalesorders.comments,
+									weberp_recurringsalesorders.orddate,
+									weberp_recurringsalesorders.ordertype,
+									weberp_salestypes.sales_type,
+									weberp_recurringsalesorders.shipvia,
+									weberp_recurringsalesorders.deliverto,
+									weberp_recurringsalesorders.deladd1,
+									weberp_recurringsalesorders.deladd2,
+									weberp_recurringsalesorders.deladd3,
+									weberp_recurringsalesorders.deladd4,
+									weberp_recurringsalesorders.deladd5,
+									weberp_recurringsalesorders.deladd6,
+									weberp_recurringsalesorders.contactphone,
+									weberp_recurringsalesorders.contactemail,
+									weberp_recurringsalesorders.freightcost,
+									weberp_debtorsmaster.currcode,
+									weberp_recurringsalesorders.fromstkloc,
+									weberp_recurringsalesorders.frequency,
+									weberp_recurringsalesorders.stopdate,
+									weberp_recurringsalesorders.lastrecurrence,
+									weberp_recurringsalesorders.autoinvoice
+								FROM weberp_recurringsalesorders
+								INNER JOIN weberp_debtorsmaster
+								ON weberp_recurringsalesorders.debtorno = weberp_debtorsmaster.debtorno
+								INNER JOIN weberp_salestypes
+								ON weberp_recurringsalesorders.ordertype=weberp_salestypes.typeabbrev
+								WHERE weberp_recurringsalesorders.recurrorderno = '" . $_GET['ModifyRecurringSalesOrder'] . "'";
 
 		$ErrMsg =  _('The order cannot be retrieved because');
 		$GetOrdHdrResult = DB_query($OrderHeaderSQL,$ErrMsg);
@@ -112,25 +112,25 @@ if (isset($_GET['NewRecurringOrder'])){
 			$_POST['AutoInvoice'] = $myrow['autoinvoice'];
 
 	/*need to look up customer name from debtors master then populate the line items array with the sales order details records */
-			$LineItemsSQL = "SELECT recurrsalesorderdetails.stkcode,
-									stockmaster.description,
-									stockmaster.longdescription,
-									stockmaster.volume,
-									stockmaster.grossweight,
-									stockmaster.units,
-									recurrsalesorderdetails.unitprice,
-									recurrsalesorderdetails.quantity,
-									recurrsalesorderdetails.discountpercent,
-									recurrsalesorderdetails.narrative,
-									locstock.quantity as qohatloc,
-									stockmaster.mbflag,
-									stockmaster.discountcategory,
-									stockmaster.decimalplaces
-									FROM recurrsalesorderdetails INNER JOIN stockmaster
-									ON recurrsalesorderdetails.stkcode = stockmaster.stockid
-									INNER JOIN locstock ON locstock.stockid = stockmaster.stockid
-									WHERE  locstock.loccode = '" . $myrow['fromstkloc'] . "'
-									AND recurrsalesorderdetails.recurrorderno ='" . $_GET['ModifyRecurringSalesOrder'] . "'";
+			$LineItemsSQL = "SELECT weberp_recurrsalesorderdetails.stkcode,
+									weberp_stockmaster.description,
+									weberp_stockmaster.longdescription,
+									weberp_stockmaster.volume,
+									weberp_stockmaster.grossweight,
+									weberp_stockmaster.units,
+									weberp_recurrsalesorderdetails.unitprice,
+									weberp_recurrsalesorderdetails.quantity,
+									weberp_recurrsalesorderdetails.discountpercent,
+									weberp_recurrsalesorderdetails.narrative,
+									weberp_locstock.quantity as qohatloc,
+									weberp_stockmaster.mbflag,
+									weberp_stockmaster.discountcategory,
+									weberp_stockmaster.decimalplaces
+									FROM weberp_recurrsalesorderdetails INNER JOIN weberp_stockmaster
+									ON weberp_recurrsalesorderdetails.stkcode = weberp_stockmaster.stockid
+									INNER JOIN weberp_locstock ON weberp_locstock.stockid = weberp_stockmaster.stockid
+									WHERE  weberp_locstock.loccode = '" . $myrow['fromstkloc'] . "'
+									AND weberp_recurrsalesorderdetails.recurrorderno ='" . $_GET['ModifyRecurringSalesOrder'] . "'";
 
 			$ErrMsg = _('The line items of the order cannot be retrieved because');
 			$LineItemsResult = DB_query($LineItemsSQL,$ErrMsg);
@@ -171,11 +171,11 @@ if ((!isset($_SESSION['Items'.$identifier]) OR $_SESSION['Items'.$identifier]->I
 
 
 if (isset($_POST['DeleteRecurringOrder'])){
-	$sql = "DELETE FROM recurrsalesorderdetails WHERE recurrorderno='" . $_POST['ExistingRecurrOrderNo'] . "'";
+	$sql = "DELETE FROM weberp_recurrsalesorderdetails WHERE recurrorderno='" . $_POST['ExistingRecurrOrderNo'] . "'";
 	$ErrMsg = _('Could not delete recurring sales order lines for the recurring order template') . ' ' . $_POST['ExistingRecurrOrderNo'];
 	$result = DB_query($sql,$ErrMsg);
 
-	$sql = "DELETE FROM recurringsalesorders WHERE recurrorderno='" . $_POST['ExistingRecurrOrderNo'] . "'";
+	$sql = "DELETE FROM weberp_recurringsalesorders WHERE recurrorderno='" . $_POST['ExistingRecurrOrderNo'] . "'";
 	$ErrMsg = _('Could not delete the recurring sales order template number') . ' ' . $_POST['ExistingRecurrOrderNo'];
 	$result = DB_query($sql,$ErrMsg);
 
@@ -216,7 +216,7 @@ If (isset($_POST['Process'])) {
 			/* finally write the recurring order header to the database and then the line details*/
 			$DelDate = FormatDateforSQL($_SESSION['Items'.$identifier]->DeliveryDate);
 
-			$HeaderSQL = "INSERT INTO recurringsalesorders (
+			$HeaderSQL = "INSERT INTO weberp_recurringsalesorders (
 										debtorno,
 										branchcode,
 										customerref,
@@ -267,9 +267,9 @@ If (isset($_POST['Process'])) {
 			$DbgMsg = _('The SQL that failed was');
 			$InsertQryResult = DB_query($HeaderSQL,$ErrMsg,$DbgMsg,true);
 
-			$RecurrOrderNo = DB_Last_Insert_ID($db,'recurringsalesorders','recurrorderno');
+			$RecurrOrderNo = DB_Last_Insert_ID($db,'weberp_recurringsalesorders','recurrorderno');
 			echo 'xxx'.$RecurrOrderNo;
-			$StartOf_LineItemsSQL = "INSERT INTO recurrsalesorderdetails (recurrorderno,
+			$StartOf_LineItemsSQL = "INSERT INTO weberp_recurrsalesorderdetails (recurrorderno,
 																			stkcode,
 																			unitprice,
 																			quantity,
@@ -294,7 +294,7 @@ If (isset($_POST['Process'])) {
 			prnmsg(_('The new recurring order template has been added'),'success');
 
 		} else { /* must be updating an existing recurring order */
-			$HeaderSQL = "UPDATE recurringsalesorders SET
+			$HeaderSQL = "UPDATE weberp_recurringsalesorders SET
 						stopdate =  '" . FormatDateforSQL($_POST['StopDate']) . "',
 						frequency = '" . $_POST['Frequency'] . "',
 						autoinvoice = '" . $_POST['AutoInvoice'] . "'

@@ -24,8 +24,8 @@ require ($PathPrefix . 'includes/session.inc');
 
 // Initialize some constants
 $ReportLanguage = 'en_US';				// default language file
-define('DBReports','reports');		// name of the databse holding the main report information (ReportID)
-define('DBRptFields','reportfields');	// name of the database holding the report fields
+define('DBReports','weberp_reports');		// name of the databse holding the main report information (ReportID)
+define('DBRptFields','weberp_reportfields');	// name of the database holding the report fields
 define ('DefRptPath',$PathPrefix . 'companies/' . $_SESSION['DatabaseName'] . '/reportwriter/');	// path to default reports
 define ('MyDocPath',$PathPrefix . 'companies/' . $_SESSION['DatabaseName'] . '/reportwriter/');	// path to user saved documents
 

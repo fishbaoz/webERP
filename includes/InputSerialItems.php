@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: InputSerialItems.php 6941 2014-10-26 23:18:08Z daintree $*/
 /*Input Serial Items - used for inputing serial numbers or batch/roll/bundle references
 for controlled items - used in:
 - ConfirmDispatchControlledInvoice.php
@@ -11,7 +11,7 @@ for controlled items - used in:
 //bring up perishable variable here otherwise we cannot get it in Add_SerialItems.php
 $sql = "SELECT perishable,
 		decimalplaces
-		FROM stockmaster
+		FROM weberp_stockmaster
 		WHERE stockid='".$StockID."'";
 $result = DB_query($sql);
 $myrow = DB_fetch_array($result);

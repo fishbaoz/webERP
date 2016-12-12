@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PricesBasedOnMarkUp.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 $Title=_('Update Pricing');
@@ -13,7 +13,7 @@ echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-$SQL = 'SELECT sales_type, typeabbrev FROM salestypes';
+$SQL = 'SELECT sales_type, typeabbrev FROM weberp_salestypes';
 
 $PricesResult = DB_query($SQL);
 
@@ -36,7 +36,7 @@ while ($PriceLists=DB_fetch_array($PricesResult)){
 
 echo '</select></td></tr>';
 
-$SQL = "SELECT currency, currabrev FROM currencies";
+$SQL = "SELECT currency, currabrev FROM weberp_currencies";
 
 $result = DB_query($SQL);
 
@@ -103,7 +103,7 @@ if (isset($_POST['CostType']) and $_POST['CostType']=='OtherPriceList'){
 echo '<tr><td>' . _('Stock Category From') . ':</td>
                 <td><select name="StkCatFrom">';
 
-$sql = "SELECT categoryid, categorydescription FROM stockcategory ORDER BY categoryid";
+$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory ORDER BY categoryid";
 
 $ErrMsg = _('The stock categories could not be retrieved because');
 $DbgMsg = _('The SQL used to retrieve stock categories and failed was');
@@ -245,14 +245,14 @@ if (isset($_POST['UpdatePrices'])){
 		}
 		$sql = "SELECT stockid,
 						materialcost+labourcost+overheadcost AS cost
-				FROM stockmaster
+				FROM weberp_stockmaster
 				WHERE categoryid>='" . $_POST['StkCatFrom'] . "'
 				AND categoryid <='" . $_POST['StkCatTo'] . "'";
 		$PartsResult = DB_query($sql);
 
 		$IncrementPercentage = filter_number_format($_POST['IncreasePercent']/100);
 
-		$CurrenciesResult = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_POST['CurrCode'] . "'");
+		$CurrenciesResult = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_POST['CurrCode'] . "'");
 		$CurrencyRow = DB_fetch_row($CurrenciesResult);
 		$CurrencyRate = $CurrencyRow[0];
 
@@ -260,12 +260,12 @@ if (isset($_POST['UpdatePrices'])){
 
 	//Figure out the cost to use
 			if ($_POST['CostType']=='PreferredSupplier'){
-				$sql = "SELECT purchdata.price/purchdata.conversionfactor/currencies.rate AS cost
-							FROM purchdata INNER JOIN suppliers
-								ON purchdata.supplierno=suppliers.supplierid
-								INNER JOIN currencies
-								ON suppliers.currcode=currencies.currabrev
-							WHERE purchdata.preferred=1 AND purchdata.stockid='" . $myrow['stockid'] ."'";
+				$sql = "SELECT weberp_purchdata.price/weberp_purchdata.conversionfactor/weberp_currencies.rate AS cost
+							FROM weberp_purchdata INNER JOIN weberp_suppliers
+								ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+								INNER JOIN weberp_currencies
+								ON weberp_suppliers.currcode=weberp_currencies.currabrev
+							WHERE weberp_purchdata.preferred=1 AND weberp_purchdata.stockid='" . $myrow['stockid'] ."'";
 				$ErrMsg = _('Could not get the supplier purchasing information for a preferred supplier for the item') . ' ' . $myrow['stockid'];
 				$PrefSuppResult = DB_query($sql,$ErrMsg);
 				if (DB_num_rows($PrefSuppResult)==0){
@@ -320,7 +320,7 @@ if (isset($_POST['UpdatePrices'])){
 				$CurrentPriceResult = DB_query("SELECT price,
 											 		   startdate,
 													   enddate
-													FROM prices
+													FROM weberp_prices
 													WHERE typeabbrev= '" . $_POST['PriceList'] . "'
 													AND debtorno =''
 													AND currabrev='" . $_POST['CurrCode'] . "'
@@ -330,7 +330,7 @@ if (isset($_POST['UpdatePrices'])){
 				if (DB_num_rows($CurrentPriceResult)==1){
 					$DayPriorToNewPrice = DateAdd($_POST['PriceStartDate'],'d',-1);
 					$CurrentPriceRow = DB_fetch_array($CurrentPriceResult);
-					$UpdateSQL = "UPDATE prices SET enddate='" . FormatDateForSQL($DayPriorToNewPrice) . "'
+					$UpdateSQL = "UPDATE weberp_prices SET enddate='" . FormatDateForSQL($DayPriorToNewPrice) . "'
 												WHERE typeabbrev='" . $_POST['PriceList'] . "'
 												AND currabrev='" . $_POST['CurrCode'] . "'
 												AND debtorno=''
@@ -341,7 +341,7 @@ if (isset($_POST['UpdatePrices'])){
 					$result = DB_query($UpdateSQL,$ErrMsg);
 
 				}
-				$sql = "INSERT INTO prices (stockid,
+				$sql = "INSERT INTO weberp_prices (stockid,
 												typeabbrev,
 												currabrev,
 												startdate,

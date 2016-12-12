@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Shippers.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Shipping Company Maintenance');
@@ -46,14 +46,14 @@ if ( isset($_POST['submit']) ) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE shippers SET shippername='" . $_POST['ShipperName'] . "'
+		$sql = "UPDATE weberp_shippers SET shippername='" . $_POST['ShipperName'] . "'
 				WHERE shipper_id = '".$SelectedShipper."'";
 		$msg = _('The shipper record has been updated');
 	} elseif ($InputError !=1) {
 
 	/*SelectedShipper is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new Shipper form */
 
-		$sql = "INSERT INTO shippers (shippername) VALUES ('" . $_POST['ShipperName'] . "')";
+		$sql = "INSERT INTO weberp_shippers (shippername) VALUES ('" . $_POST['ShipperName'] . "')";
 		$msg = _('The shipper record has been added');
 	}
 
@@ -72,7 +72,7 @@ if ( isset($_POST['submit']) ) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'SalesOrders'
 
-	$sql= "SELECT COUNT(*) FROM salesorders WHERE salesorders.shipvia='".$SelectedShipper."'";
+	$sql= "SELECT COUNT(*) FROM weberp_salesorders WHERE weberp_salesorders.shipvia='".$SelectedShipper."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -84,7 +84,7 @@ if ( isset($_POST['submit']) ) {
 	} else {
 		// PREVENT DELETES IF DEPENDENT RECORDS IN 'DebtorTrans'
 
-		$sql= "SELECT COUNT(*) FROM debtortrans WHERE debtortrans.shipvia='".$SelectedShipper."'";
+		$sql= "SELECT COUNT(*) FROM weberp_debtortrans WHERE weberp_debtortrans.shipvia='".$SelectedShipper."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
@@ -102,7 +102,7 @@ if ( isset($_POST['submit']) ) {
 
 			} else {
 
-				$sql="DELETE FROM shippers WHERE shipper_id='".$SelectedShipper."'";
+				$sql="DELETE FROM weberp_shippers WHERE shipper_id='".$SelectedShipper."'";
 				$result = DB_query($sql);
 				echo '<br />';
 				prnMsg( _('The shipper record has been deleted'), 'success');;
@@ -123,7 +123,7 @@ or deletion of the records*/
 			<img src="'.$RootPath.'/css/'.$Theme.'/images/supplier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title .
 		'</p>';
 
-	$sql = "SELECT * FROM shippers ORDER BY shipper_id";
+	$sql = "SELECT * FROM weberp_shippers ORDER BY shipper_id";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">
@@ -171,7 +171,7 @@ if (!isset($_GET['delete'])) {
 	if (isset($SelectedShipper)) {
 		//editing an existing Shipper
 
-		$sql = "SELECT shipper_id, shippername FROM shippers WHERE shipper_id='".$SelectedShipper."'";
+		$sql = "SELECT shipper_id, shippername FROM weberp_shippers WHERE shipper_id='".$SelectedShipper."'";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);

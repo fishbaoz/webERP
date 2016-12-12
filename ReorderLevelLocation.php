@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: ReorderLevelLocation.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 // ReorderLevelLocation.php - Report of reorder level by category
 
@@ -16,7 +16,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/i
 if (isset($_POST['submit'])){
 	for ($i=1;$i<count($_POST);$i++){ //loop through the returned customers
 		if (isset($_POST['StockID' . $i]) AND is_numeric(filter_number_format($_POST['ReorderLevel'.$i]))){
-			$SQLUpdate="UPDATE locstock SET reorderlevel = '" . filter_number_format($_POST['ReorderLevel'.$i]) . "',
+			$SQLUpdate="UPDATE weberp_locstock SET reorderlevel = '" . filter_number_format($_POST['ReorderLevel'.$i]) . "',
 											bin = '" . strtoupper($_POST['BinLocation'.$i]) . "' 
 						WHERE loccode = '" . $_POST['StockLocation'] . "'
 						AND stockid = '" . $_POST['StockID' . $i] . "'";
@@ -32,30 +32,30 @@ if (isset($_POST['submit']) OR isset($_POST['Update'])) {
 	}
 
 	if($_POST['Sequence']==1){
-		$Sequence="qtyinvoice DESC, locstock.stockid";
+		$Sequence="qtyinvoice DESC, weberp_locstock.stockid";
 	}else{
-		$Sequence="locstock.stockid";
+		$Sequence="weberp_locstock.stockid";
 	}
 
-	$sql="SELECT locstock.stockid,
+	$sql="SELECT weberp_locstock.stockid,
 				description,
 				reorderlevel,
 				bin,
 				quantity,
 				decimalplaces,
 				canupd
-			FROM locstock INNER JOIN stockmaster
-			ON locstock.stockid = stockmaster.stockid
-			INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE stockmaster.categoryid = '" . $_POST['StockCat'] . "'
-			AND locstock.loccode = '" . $_POST['StockLocation'] . "'
-			AND stockmaster.discontinued = 0
+			FROM weberp_locstock INNER JOIN weberp_stockmaster
+			ON weberp_locstock.stockid = weberp_stockmaster.stockid
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_stockmaster.categoryid = '" . $_POST['StockCat'] . "'
+			AND weberp_locstock.loccode = '" . $_POST['StockLocation'] . "'
+			AND weberp_stockmaster.discontinued = 0
 			ORDER BY '" . $Sequence . "' ASC";
 
 	$result = DB_query($sql);
 
 	$SqlLoc="SELECT locationname
-		   FROM locations
+		   FROM weberp_locations
 		   WHERE loccode='".$_POST['StockLocation']."'";
 
 	$ResultLocation = DB_query($SqlLoc);
@@ -98,7 +98,7 @@ if (isset($_POST['submit']) OR isset($_POST['Update'])) {
 
 
 		$SqlInv="SELECT SUM(-qty) AS qtyinvoiced
-				FROM stockmoves
+				FROM weberp_stockmoves
 				WHERE stockid='".$myrow['stockid']."'
 				AND (type=10 OR type=11)
 				AND loccode='" . $_POST['StockLocation'] ."'
@@ -111,8 +111,8 @@ if (isset($_POST['submit']) OR isset($_POST['Update'])) {
 		//get On Hand all
 		//find the quantity onhand item
 		$SqlOH="SELECT SUM(quantity) AS qty
-				FROM locstock
-				INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+				FROM weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 				WHERE stockid='" . $myrow['stockid'] . "'";
 		$TotQtyResult = DB_query($SqlOH);
 		$TotQtyRow = DB_fetch_array($TotQtyResult);
@@ -155,9 +155,9 @@ if (isset($_POST['submit']) OR isset($_POST['Update'])) {
 		<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
 		<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 				   locationname
-		    FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+		    FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$resultStkLocs = DB_query($sql);
 	echo '<table class="selection">
 			<tr>
@@ -171,7 +171,7 @@ if (isset($_POST['submit']) OR isset($_POST['Update'])) {
 
 	$SQL="SELECT categoryid,
 				categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 
 	$result1 = DB_query($SQL);

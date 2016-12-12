@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectRecurringSalesOrder.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Search Recurring Sales Orders');
@@ -20,7 +20,7 @@ echo '<table class="selection">
 			<td>' . _('Select recurring order templates for delivery from:') . ' </td>
 			<td>' . '<select name="StockLocation">';
 
-$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 
 $resultStkLocs = DB_query($sql);
 
@@ -46,37 +46,37 @@ echo '<br /><div class="centre"><input type="submit" name="SearchRecurringOrders
 
 if (isset($_POST['SearchRecurringOrders'])){
 
-	$SQL = "SELECT recurringsalesorders.recurrorderno,
-				debtorsmaster.name,
-				currencies.decimalplaces AS currdecimalplaces,
-				custbranch.brname,
-				recurringsalesorders.customerref,
-				recurringsalesorders.orddate,
-				recurringsalesorders.deliverto,
-				recurringsalesorders.lastrecurrence,
-				recurringsalesorders.stopdate,
-				recurringsalesorders.frequency,
-SUM(recurrsalesorderdetails.unitprice*recurrsalesorderdetails.quantity*(1-recurrsalesorderdetails.discountpercent)) AS ordervalue
-			FROM recurringsalesorders INNER JOIN recurrsalesorderdetails
-			ON recurringsalesorders.recurrorderno = recurrsalesorderdetails.recurrorderno
-			INNER JOIN debtorsmaster
-			ON recurringsalesorders.debtorno = debtorsmaster.debtorno
-			INNER JOIN custbranch
-			ON debtorsmaster.debtorno = custbranch.debtorno
-			AND recurringsalesorders.branchcode = custbranch.branchcode
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE recurringsalesorders.fromstkloc = '". $_POST['StockLocation'] . "'
-			GROUP BY recurringsalesorders.recurrorderno,
-				debtorsmaster.name,
-				currencies.decimalplaces,
-				custbranch.brname,
-				recurringsalesorders.customerref,
-				recurringsalesorders.orddate,
-				recurringsalesorders.deliverto,
-				recurringsalesorders.lastrecurrence,
-				recurringsalesorders.stopdate,
-				recurringsalesorders.frequency";
+	$SQL = "SELECT weberp_recurringsalesorders.recurrorderno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_custbranch.brname,
+				weberp_recurringsalesorders.customerref,
+				weberp_recurringsalesorders.orddate,
+				weberp_recurringsalesorders.deliverto,
+				weberp_recurringsalesorders.lastrecurrence,
+				weberp_recurringsalesorders.stopdate,
+				weberp_recurringsalesorders.frequency,
+SUM(weberp_recurrsalesorderdetails.unitprice*weberp_recurrsalesorderdetails.quantity*(1-weberp_recurrsalesorderdetails.discountpercent)) AS ordervalue
+			FROM weberp_recurringsalesorders INNER JOIN weberp_recurrsalesorderdetails
+			ON weberp_recurringsalesorders.recurrorderno = weberp_recurrsalesorderdetails.recurrorderno
+			INNER JOIN weberp_debtorsmaster
+			ON weberp_recurringsalesorders.debtorno = weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+			AND weberp_recurringsalesorders.branchcode = weberp_custbranch.branchcode
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_recurringsalesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+			GROUP BY weberp_recurringsalesorders.recurrorderno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.decimalplaces,
+				weberp_custbranch.brname,
+				weberp_recurringsalesorders.customerref,
+				weberp_recurringsalesorders.orddate,
+				weberp_recurringsalesorders.deliverto,
+				weberp_recurringsalesorders.lastrecurrence,
+				weberp_recurringsalesorders.stopdate,
+				weberp_recurringsalesorders.frequency";
 
 	$ErrMsg = _('No recurring orders were returned by the SQL because');
 	$SalesOrdersResult = DB_query($SQL,$ErrMsg);

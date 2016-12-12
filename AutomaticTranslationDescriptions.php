@@ -12,18 +12,18 @@ include ('includes/GoogleTranslator.php');
 $SourceLanguage=mb_substr($_SESSION['Language'],0,2);
 
 // Select items and classify them
-$SQL = "SELECT stockmaster.stockid,
+$SQL = "SELECT weberp_stockmaster.stockid,
 				description,
 				longdescription,
 				language_id,
 				descriptiontranslation,
 				longdescriptiontranslation
-		FROM stockmaster, stockdescriptiontranslations
-		WHERE stockmaster.stockid = stockdescriptiontranslations.stockid
-			AND stockmaster.discontinued = 0
+		FROM weberp_stockmaster, weberp_stockdescriptiontranslations
+		WHERE weberp_stockmaster.stockid = weberp_stockdescriptiontranslations.stockid
+			AND weberp_stockmaster.discontinued = 0
 			AND (descriptiontranslation = ''
 				OR longdescriptiontranslation = '')
-		ORDER BY stockmaster.stockid,
+		ORDER BY weberp_stockmaster.stockid,
 				language_id";
 $result = DB_query($SQL);
 
@@ -47,7 +47,7 @@ if(DB_num_rows($result) != 0) {
 			$TargetLanguage=mb_substr($myrow['language_id'],0,2);
 			$TranslatedText = translate_via_google_translator($myrow['description'],$TargetLanguage,$SourceLanguage);
 
-			$sql = "UPDATE stockdescriptiontranslations " .
+			$sql = "UPDATE weberp_stockdescriptiontranslations " .
 					"SET descriptiontranslation='" . $TranslatedText . "', " .
 						"needsrevision= '1' " .
 					"WHERE stockid='" . $myrow['stockid'] . "' AND (language_id='" . $myrow['language_id'] . "')";
@@ -78,7 +78,7 @@ if(DB_num_rows($result) != 0) {
 			$TargetLanguage=mb_substr($myrow['language_id'],0,2);
 			$TranslatedText = translate_via_google_translator($myrow['longdescription'],$TargetLanguage,$SourceLanguage);
 
-			$sql = "UPDATE stockdescriptiontranslations " .
+			$sql = "UPDATE weberp_stockdescriptiontranslations " .
 					"SET longdescriptiontranslation='" . $TranslatedText . "', " .
 						"needsrevision= '1' " .
 					"WHERE stockid='" . $myrow['stockid'] . "' AND (language_id='" . $myrow['language_id'] . "')";

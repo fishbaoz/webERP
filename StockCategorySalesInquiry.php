@@ -20,7 +20,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 // stock category selection
 	$SQL="SELECT categoryid,
 					categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 
@@ -89,26 +89,26 @@ if (isset($_POST['ShowSales'])){
 	$FromDate = FormatDateForSQL($_POST['FromDate']);
 	$ToDate = FormatDateForSQL($_POST['ToDate']);
 
-	$sql = "SELECT stockmaster.categoryid,
-					stockcategory.categorydescription,
-					stockmaster.stockid,
-					stockmaster.description,
+	$sql = "SELECT weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
 					SUM(price*(1-discountpercent)* -qty) as salesvalue,
 					SUM(-qty) as quantitysold,
 					SUM(standardcost * -qty) as cogs
-			FROM stockmoves INNER JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			INNER JOIN stockcategory
-			ON stockmaster.categoryid=stockcategory.categoryid
-			WHERE (stockmoves.type=10 OR stockmoves.type=11)
+			FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_stockcategory
+			ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			WHERE (weberp_stockmoves.type=10 OR weberp_stockmoves.type=11)
 			AND show_on_inv_crds =1
 			AND trandate>='" . $FromDate . "'
 			AND trandate<='" . $ToDate . "'
-			GROUP BY stockmaster.categoryid,
-					stockcategory.categorydescription,
-					stockmaster.stockid,
-					stockmaster.description
-			ORDER BY stockmaster.categoryid,
+			GROUP BY weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.description
+			ORDER BY weberp_stockmaster.categoryid,
 					salesvalue DESC";
 
 	$ErrMsg = _('The sales data could not be retrieved because') . ' - ' . DB_error_msg();

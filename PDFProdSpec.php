@@ -39,8 +39,8 @@ If (!isset($SelectedProdSpec) OR $SelectedProdSpec==''){
 			<td>' . _('Or Select Existing Specification') .':</td>';
 	$SQLSpecSelect="SELECT DISTINCT(keyval),
 							description
-						FROM prodspecs LEFT OUTER JOIN stockmaster
-						ON stockmaster.stockid=prodspecs.keyval";
+						FROM weberp_prodspecs LEFT OUTER JOIN weberp_stockmaster
+						ON weberp_stockmaster.stockid=weberp_prodspecs.keyval";
 
 
 	$ResultSelection=DB_query($SQLSpecSelect);
@@ -67,22 +67,22 @@ $ErrMsg = _('There was a problem retrieving the Product Specification') . ' ' . 
 $sql = "SELECT keyval,
 				description,
 				longdescription,
-				prodspecs.testid,
+				weberp_prodspecs.testid,
 				name,
 				method,
-				qatests.units,
+				weberp_qatests.units,
 				type,
 				numericvalue,
-				prodspecs.targetvalue,
-				prodspecs.rangemin,
-				prodspecs.rangemax,
+				weberp_prodspecs.targetvalue,
+				weberp_prodspecs.rangemin,
+				weberp_prodspecs.rangemax,
 				groupby
-			FROM prodspecs INNER JOIN qatests
-			ON qatests.testid=prodspecs.testid
-			LEFT OUTER JOIN stockmaster on stockmaster.stockid=prodspecs.keyval
-			WHERE prodspecs.keyval='" .$SelectedProdSpec."'
-			AND prodspecs.showonspec='1'
-			ORDER by groupby, prodspecs.testid";
+			FROM weberp_prodspecs INNER JOIN weberp_qatests
+			ON weberp_qatests.testid=weberp_prodspecs.testid
+			LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_prodspecs.keyval
+			WHERE weberp_prodspecs.keyval='" .$SelectedProdSpec."'
+			AND weberp_prodspecs.showonspec='1'
+			ORDER by groupby, weberp_prodspecs.testid";
 
 $result=DB_query($sql,$ErrMsg);
 
@@ -271,7 +271,7 @@ $LeftOvers = $pdf->addTextWrap($XPos+5,$YPos,500,$FontSize,$Disclaimer);
 $YPos -= $line_height;
 $YPos -= $line_height;
 $sql = "SELECT confvalue
-			FROM config
+			FROM weberp_config
 			WHERE confname='QualityProdSpecText'";
 
 $result=DB_query($sql,$ErrMsg);

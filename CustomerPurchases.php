@@ -19,12 +19,12 @@ if(isset($_GET['DebtorNo'])) {
 	exit;
 }
 
-$SQL = "SELECT debtorsmaster.name,
-				custbranch.brname
-		FROM debtorsmaster
-		INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno
-		WHERE debtorsmaster.debtorno = '" . $DebtorNo . "'";
+$SQL = "SELECT weberp_debtorsmaster.name,
+				weberp_custbranch.brname
+		FROM weberp_debtorsmaster
+		INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+		WHERE weberp_debtorsmaster.debtorno = '" . $DebtorNo . "'";
 
 $ErrMsg = _('The customer details could not be retrieved by the SQL because');
 $CustomerResult = DB_query($SQL, $ErrMsg);
@@ -35,32 +35,32 @@ echo '<p class="page_title_text"><img alt="" src="'.$RootPath.'/css/'.$Theme.
 	_('Customer') . '" /> ' .// Icon title.
 	_('Items Purchased by Customer') . '<br />' . $DebtorNo . " - " . $CustomerRecord['name'] . '</p>';// Page title.
 
-$SQL = "SELECT stockmoves.stockid,
-			stockmaster.description,
-			systypes.typename,
+$SQL = "SELECT weberp_stockmoves.stockid,
+			weberp_stockmaster.description,
+			weberp_systypes.typename,
 			transno,
-			locations.locationname,
+			weberp_locations.locationname,
 			trandate,
-			stockmoves.branchcode,
+			weberp_stockmoves.branchcode,
 			price,
 			reference,
 			qty,
 			narrative
-		FROM stockmoves
-		INNER JOIN stockmaster
-			ON stockmaster.stockid=stockmoves.stockid
-		INNER JOIN systypes
-			ON stockmoves.type=systypes.typeid
-		INNER JOIN locations
-			ON stockmoves.loccode=locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+		FROM weberp_stockmoves
+		INNER JOIN weberp_stockmaster
+			ON weberp_stockmaster.stockid=weberp_stockmoves.stockid
+		INNER JOIN weberp_systypes
+			ON weberp_stockmoves.type=weberp_systypes.typeid
+		INNER JOIN weberp_locations
+			ON weberp_stockmoves.loccode=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 
-$SQLWhere=" WHERE stockmoves.debtorno='" . $DebtorNo . "'";
+$SQLWhere=" WHERE weberp_stockmoves.debtorno='" . $DebtorNo . "'";
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$SQL .= " INNER JOIN custbranch
-				ON stockmoves.branchcode=custbranch.branchcode";
-	$SQLWhere .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+	$SQL .= " INNER JOIN weberp_custbranch
+				ON weberp_stockmoves.branchcode=weberp_custbranch.branchcode";
+	$SQLWhere .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
 $SQL .= $SQLWhere . " ORDER BY trandate DESC";

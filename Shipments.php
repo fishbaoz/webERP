@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Shipments.php 7194 2015-03-07 10:13:21Z exsonqu $*/
 
 include('includes/DefineShiptClass.php');
 include('includes/session.inc');
@@ -38,16 +38,16 @@ if (isset($_GET['SelectedShipment'])){
 
 /*read in all the guff from the selected shipment into the Shipment Class variable - the class code is included in the main script before this script is included  */
 
-       $ShipmentHeaderSQL = "SELECT shipments.supplierid,
-				       				suppliers.suppname,
-								shipments.eta,
-								suppliers.currcode,
-								shipments.vessel,
-								shipments.voyageref,
-								shipments.closed
-							FROM shipments INNER JOIN suppliers
-								ON shipments.supplierid = suppliers.supplierid
-							WHERE shipments.shiptref = '" . $_GET['SelectedShipment'] . "'";
+       $ShipmentHeaderSQL = "SELECT weberp_shipments.supplierid,
+				       				weberp_suppliers.suppname,
+								weberp_shipments.eta,
+								weberp_suppliers.currcode,
+								weberp_shipments.vessel,
+								weberp_shipments.voyageref,
+								weberp_shipments.closed
+							FROM weberp_shipments INNER JOIN weberp_suppliers
+								ON weberp_shipments.supplierid = weberp_suppliers.supplierid
+							WHERE weberp_shipments.shiptref = '" . $_GET['SelectedShipment'] . "'";
 
        $ErrMsg = _('Shipment').' '. $_GET['SelectedShipment'] . ' ' . _('cannot be retrieved because a database error occurred');
        $GetShiptHdrResult = DB_query($ShipmentHeaderSQL, $ErrMsg);
@@ -78,25 +78,25 @@ if (isset($_GET['SelectedShipment'])){
 
 /*now populate the shipment details records */
 
-              $LineItemsSQL = "SELECT purchorderdetails.podetailitem,
-				      				purchorders.orderno,
-									purchorderdetails.itemcode,
-									purchorderdetails.itemdescription,
-									purchorderdetails.deliverydate,
-									purchorderdetails.glcode,
-									purchorderdetails.qtyinvoiced,
-									purchorderdetails.unitprice,
-									stockmaster.units,
-									purchorderdetails.quantityord,
-									purchorderdetails.quantityrecd,
-									purchorderdetails.stdcostunit,
-									stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost as stdcost,
-									purchorders.intostocklocation
-							FROM purchorderdetails INNER JOIN stockmaster
-								ON purchorderdetails.itemcode=stockmaster.stockid
-							INNER JOIN purchorders
-								ON purchorderdetails.orderno=purchorders.orderno
-							WHERE purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'";
+              $LineItemsSQL = "SELECT weberp_purchorderdetails.podetailitem,
+				      				weberp_purchorders.orderno,
+									weberp_purchorderdetails.itemcode,
+									weberp_purchorderdetails.itemdescription,
+									weberp_purchorderdetails.deliverydate,
+									weberp_purchorderdetails.glcode,
+									weberp_purchorderdetails.qtyinvoiced,
+									weberp_purchorderdetails.unitprice,
+									weberp_stockmaster.units,
+									weberp_purchorderdetails.quantityord,
+									weberp_purchorderdetails.quantityrecd,
+									weberp_purchorderdetails.stdcostunit,
+									weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost as stdcost,
+									weberp_purchorders.intostocklocation
+							FROM weberp_purchorderdetails INNER JOIN weberp_stockmaster
+								ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
+							INNER JOIN weberp_purchorders
+								ON weberp_purchorderdetails.orderno=weberp_purchorders.orderno
+							WHERE weberp_purchorderdetails.shiptref='" . $_GET['SelectedShipment'] . "'";
 	      $ErrMsg = _('The lines on the shipment cannot be retrieved because'). ' - ' . DB_error_msg();
               $LineItemsResult = DB_query($LineItemsSQL, $ErrMsg);
 
@@ -146,8 +146,8 @@ if (!isset($_SESSION['Shipment'])){
 	$sql = "SELECT suppname,
 					currcode,
 					decimalplaces AS currdecimalplaces
-		FROM suppliers INNER JOIN currencies
-		ON suppliers.currcode=currencies.currabrev
+		FROM weberp_suppliers INNER JOIN weberp_currencies
+		ON weberp_suppliers.currcode=weberp_currencies.currabrev
 		WHERE supplierid='" . $_SESSION['SupplierID'] . "'";
 
 	$ErrMsg = _('The supplier details for the shipment could not be retrieved because');
@@ -198,17 +198,17 @@ if (isset($_POST['Update'])
 /*The user hit the update the shipment button and there are some lines on the shipment*/
 	if ($InputError == 0 AND (count($_SESSION['Shipment']->LineItems) > 0 OR isset($_GET['Add']))){
 
-		$sql = "SELECT shiptref FROM shipments WHERE shiptref =" . $_SESSION['Shipment']->ShiptRef;
+		$sql = "SELECT shiptref FROM weberp_shipments WHERE shiptref =" . $_SESSION['Shipment']->ShiptRef;
 		$result = DB_query($sql);
 		if (DB_num_rows($result)==1){
-			$sql = "UPDATE shipments SET vessel='" . $_SESSION['Shipment']->Vessel . "',
+			$sql = "UPDATE weberp_shipments SET vessel='" . $_SESSION['Shipment']->Vessel . "',
 										voyageref='".  $_SESSION['Shipment']->VoyageRef . "',
 										eta='" .  $_SESSION['Shipment']->ETA . "'
 					WHERE shiptref ='" .  $_SESSION['Shipment']->ShiptRef . "'";
 
 		} else {
 
-			$sql = "INSERT INTO shipments (shiptref,
+			$sql = "INSERT INTO weberp_shipments (shiptref,
 							vessel,
 							voyageref,
 							eta,
@@ -228,7 +228,7 @@ if (isset($_POST['Update'])
 
 			if (DateDiff(ConvertSQLDate($LnItm->DelDate),ConvertSQLDate($_SESSION['Shipment']->ETA),'d')!=0){
 
-				$sql = "UPDATE purchorderdetails
+				$sql = "UPDATE weberp_purchorderdetails
 						SET deliverydate ='" . $_SESSION['Shipment']->ETA . "'
 						WHERE podetailitem='" . $LnItm->PODetailItem . "'";
 
@@ -247,21 +247,21 @@ if (isset($_GET['Add'])
 	AND $_SESSION['Shipment']->Closed==0
 	AND $InputError==0){
 
-	$sql = "SELECT purchorderdetails.orderno,
-					purchorderdetails.itemcode,
-					purchorderdetails.itemdescription,
-					purchorderdetails.unitprice,
-					purchorderdetails.stdcostunit,
-					stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost as stdcost,
-					purchorderdetails.quantityord,
-					purchorderdetails.quantityrecd,
-					purchorderdetails.deliverydate,
-					stockmaster.units,
-					stockmaster.decimalplaces,
-					purchorderdetails.qtyinvoiced
-			FROM purchorderdetails INNER JOIN stockmaster
-			ON purchorderdetails.itemcode=stockmaster.stockid
-			WHERE purchorderdetails.podetailitem='" . $_GET['Add'] . "'";
+	$sql = "SELECT weberp_purchorderdetails.orderno,
+					weberp_purchorderdetails.itemcode,
+					weberp_purchorderdetails.itemdescription,
+					weberp_purchorderdetails.unitprice,
+					weberp_purchorderdetails.stdcostunit,
+					weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost as stdcost,
+					weberp_purchorderdetails.quantityord,
+					weberp_purchorderdetails.quantityrecd,
+					weberp_purchorderdetails.deliverydate,
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces,
+					weberp_purchorderdetails.qtyinvoiced
+			FROM weberp_purchorderdetails INNER JOIN weberp_stockmaster
+			ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
+			WHERE weberp_purchorderdetails.podetailitem='" . $_GET['Add'] . "'";
 
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
@@ -331,9 +331,9 @@ if (count($_SESSION['Shipment']->LineItems)>0){
 
 	if (!isset($_SESSION['Shipment']->StockLocation)){
 
-		$sql = "SELECT purchorders.intostocklocation
-				FROM purchorders INNER JOIN purchorderdetails
-				ON purchorders.orderno=purchorderdetails.orderno AND podetailitem = '" . key($_SESSION['Shipment']->LineItems) . "'";
+		$sql = "SELECT weberp_purchorders.intostocklocation
+				FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+				ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno AND podetailitem = '" . key($_SESSION['Shipment']->LineItems) . "'";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -352,7 +352,7 @@ if (!isset($_SESSION['Shipment']->StockLocation)){
 
 	echo _('Stock Location').': <select name="StockLocation">';
 
-	$sql = "SELECT loccode, locationname FROM locations";
+	$sql = "SELECT loccode, locationname FROM weberp_locations";
 
 	$resultStkLocs = DB_query($sql);
 
@@ -378,7 +378,7 @@ if (!isset($_SESSION['Shipment']->StockLocation)){
 	echo '</select>';
 
 } else {
-	$sql = "SELECT locationname FROM locations WHERE loccode='" . $_SESSION['Shipment']->StockLocation . "'";
+	$sql = "SELECT locationname FROM weberp_locations WHERE loccode='" . $_SESSION['Shipment']->StockLocation . "'";
 	$resultStkLocs = DB_query($sql);
 	$myrow=DB_fetch_array($resultStkLocs);
 	echo '<input type="hidden" name="StockLocation" value="'.$_SESSION['Shipment']->StockLocation.'" />';
@@ -450,26 +450,26 @@ if (!isset($_POST['StockLocation'])) {
 	$_POST['StockLocation'] =$_SESSION['Shipment']->StockLocation;
 }
 
-$sql = "SELECT purchorderdetails.podetailitem,
-				purchorders.orderno,
-				purchorderdetails.itemcode,
-				purchorderdetails.itemdescription,
-				purchorderdetails.unitprice,
-				purchorderdetails.quantityord,
-				purchorderdetails.quantityrecd,
-				purchorderdetails.deliverydate,
-				stockmaster.units,
-				stockmaster.decimalplaces
-			FROM purchorderdetails INNER JOIN purchorders
-				ON purchorderdetails.orderno=purchorders.orderno
-				INNER JOIN stockmaster
-			ON purchorderdetails.itemcode=stockmaster.stockid
+$sql = "SELECT weberp_purchorderdetails.podetailitem,
+				weberp_purchorders.orderno,
+				weberp_purchorderdetails.itemcode,
+				weberp_purchorderdetails.itemdescription,
+				weberp_purchorderdetails.unitprice,
+				weberp_purchorderdetails.quantityord,
+				weberp_purchorderdetails.quantityrecd,
+				weberp_purchorderdetails.deliverydate,
+				weberp_stockmaster.units,
+				weberp_stockmaster.decimalplaces
+			FROM weberp_purchorderdetails INNER JOIN weberp_purchorders
+				ON weberp_purchorderdetails.orderno=weberp_purchorders.orderno
+				INNER JOIN weberp_stockmaster
+			ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
 			WHERE qtyinvoiced=0
-			AND purchorders.status <> 'Cancelled'
-			AND purchorders.status <> 'Rejected'
-			AND purchorders.supplierno ='" . $_SESSION['Shipment']->SupplierID . "'
-			AND purchorderdetails.shiptref=0
-			AND purchorders.intostocklocation='" . $_POST['StockLocation'] . "'";
+			AND weberp_purchorders.status <> 'Cancelled'
+			AND weberp_purchorders.status <> 'Rejected'
+			AND weberp_purchorders.supplierno ='" . $_SESSION['Shipment']->SupplierID . "'
+			AND weberp_purchorderdetails.shiptref=0
+			AND weberp_purchorders.intostocklocation='" . $_POST['StockLocation'] . "'";
 
 $result = DB_query($sql);
 

@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: SpecialOrder.php 7053 2014-12-28 23:21:24Z rchacon $ */
 
 include('includes/DefineSpecialOrderClass.php');
 /* Session started in header.inc for password checking and authorisation level check */
@@ -57,12 +57,12 @@ if (!isset($_SESSION['SPL'.$identifier])){
 
 /*if not already done populate the SPL object with supplier data */
 if (!isset($_SESSION['SPL'.$identifier]->SupplierID)){
-	$sql = "SELECT suppliers.suppname,
-					suppliers.currcode,
-					currencies.rate,
-					currencies.decimalplaces
-				FROM suppliers INNER JOIN currencies
-					ON suppliers.currcode=currencies.currabrev
+	$sql = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.rate,
+					weberp_currencies.decimalplaces
+				FROM weberp_suppliers INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode=weberp_currencies.currabrev
 				WHERE supplierid='" . $_SESSION['SupplierID'] . "'";
 	$ErrMsg = _('The supplier record of the supplier selected') . ": " . $_SESSION['SupplierID']  . ' ' . _('cannot be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the supplier details and failed was');
@@ -77,16 +77,16 @@ if (!isset($_SESSION['SPL'.$identifier]->SupplierID)){
 }
 if (!isset($_SESSION['SPL'.$identifier]->CustomerID)){
 	// Now check to ensure this account is not on hold */
-	$sql = "SELECT debtorsmaster.name,
-					holdreasons.dissallowinvoices,
-					debtorsmaster.currcode,
-					currencies.rate,
-					currencies.decimalplaces
-			FROM debtorsmaster INNER JOIN holdreasons
-			ON debtorsmaster.holdreason=holdreasons.reasoncode
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'";
+	$sql = "SELECT weberp_debtorsmaster.name,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_debtorsmaster.currcode,
+					weberp_currencies.rate,
+					weberp_currencies.decimalplaces
+			FROM weberp_debtorsmaster INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason=weberp_holdreasons.reasoncode
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtorsmaster.debtorno = '" . $_SESSION['CustomerID'] . "'";
 
 	$ErrMsg = _('The customer record for') . ' : ' . $_SESSION['CustomerID']  . ' ' . _('cannot be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the customer details and failed was');
@@ -108,7 +108,7 @@ if (!isset($_SESSION['SPL'.$identifier]->CustomerID)){
 if (isset($_POST['SelectBranch'])){
 
 	$sql = "SELECT brname
-			FROM custbranch
+			FROM weberp_custbranch
 			WHERE debtorno='" . $_SESSION['SPL'.$identifier]->CustomerID . "'
 			AND branchcode='" . $_POST['SelectBranch'] . "'";
 	$BranchResult = DB_query($sql);
@@ -130,7 +130,7 @@ if (!isset($_SESSION['SPL'.$identifier]->BranchCode)){
 
 	$sql = "SELECT branchcode,
 					brname
-			FROM custbranch
+			FROM weberp_custbranch
 			WHERE debtorno='" . $_SESSION['CustomerID'] . "'";
 	$BranchResult = DB_query($sql);
 
@@ -302,7 +302,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 		if ($_SESSION['AutoAuthorisePO']==1) {
 			//if the user has authority to authorise the PO then it will automatically be authorised
 			$AuthSQL ="SELECT authlevel
-						FROM purchorderauth
+						FROM weberp_purchorderauth
 						WHERE userid='".$_SESSION['UserID']."'
 						AND currabrev='".$_SESSION['SPL'.$identifier]->SuppCurrCode."'";
 
@@ -338,7 +338,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 						deladd4,
 						deladd5,
 						deladd6
-				FROM locations
+				FROM weberp_locations
 				WHERE loccode='" . $_SESSION['SPL'.$identifier]->StkLocation . "'";
 
 		$StkLocAddResult = DB_query($sql);
@@ -347,7 +347,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 		 $result = DB_Txn_Begin();
 
 		 /*Insert to purchase order header record */
-		 $sql = "INSERT INTO purchorders (supplierno,
+		 $sql = "INSERT INTO weberp_purchorders (supplierno,
 					 					comments,
 										orddate,
 										rate,
@@ -403,7 +403,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			$PartAlreadyExists =True; /*assume the worst */
 			$Counter = 0;
 			While ($PartAlreadyExists==True) {
-				$sql = "SELECT COUNT(*) FROM stockmaster WHERE stockid = '" . $PartCode . "'";
+				$sql = "SELECT COUNT(*) FROM weberp_stockmaster WHERE stockid = '" . $PartCode . "'";
 				$PartCountResult = DB_query($sql);
 				$PartCount = DB_fetch_row($PartCountResult);
 				if ($PartCount[0]!=0){
@@ -420,7 +420,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 			$_SESSION['SPL'.$identifier]->LineItems[$SPLLine->LineNo]->PartCode = $PartCode;
 
-			$sql = "INSERT INTO stockmaster (stockid,
+			$sql = "INSERT INTO weberp_stockmaster (stockid,
 							categoryid,
 							description,
 							longdescription,
@@ -437,14 +437,14 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 			$result =DB_query($sql,$ErrMsg,$DbgMsg,true);
 
-			$sql = "INSERT INTO locstock (loccode, stockid)
-					SELECT loccode,'" . $PartCode . "' FROM locations";
+			$sql = "INSERT INTO weberp_locstock (loccode, stockid)
+					SELECT loccode,'" . $PartCode . "' FROM weberp_locations";
 			$ErrMsg = _('The item stock locations for the special order line') . ' ' . $SPLLine->LineNo . ' ' ._('could not be created because');
 			$DbgMsg = _('The SQL statement used to insert the location stock records and failed was');
 			$result =DB_query($sql,$ErrMsg,$DbgMsg,true);
 
 			/*need to get the stock category GL information */
-			$sql = "SELECT stockact FROM stockcategory WHERE categoryid = '" . $SPLLine->StkCat . "'";
+			$sql = "SELECT stockact FROM weberp_stockcategory WHERE categoryid = '" . $SPLLine->StkCat . "'";
 			$ErrMsg = _('The item stock category information for the special order line') . ' ' . $SPLLine->LineNo . ' ' . _('could not be retrieved because');
 			$DbgMsg = _('The SQL statement used to get the category information and that failed was');
 			$result =DB_query($sql,$ErrMsg,$DbgMsg,true);
@@ -454,7 +454,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 			$OrderDate = FormatDateForSQL($SPLLine->ReqDelDate);
 
-			$sql = "INSERT INTO purchorderdetails (orderno,
+			$sql = "INSERT INTO weberp_purchorderdetails (orderno,
 								itemcode,
 								deliverydate,
 								itemdescription,
@@ -493,10 +493,10 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 					defaultshipvia,
 					email,
 					phoneno
-				FROM custbranch INNER JOIN debtorsmaster
-					ON custbranch.debtorno=debtorsmaster.debtorno
-				WHERE custbranch.debtorno='" . $_SESSION['SPL'.$identifier]->CustomerID . "'
-				AND custbranch.branchcode = '" . $_SESSION['SPL'.$identifier]->BranchCode . "'";
+				FROM weberp_custbranch INNER JOIN weberp_debtorsmaster
+					ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+				WHERE weberp_custbranch.debtorno='" . $_SESSION['SPL'.$identifier]->CustomerID . "'
+				AND weberp_custbranch.branchcode = '" . $_SESSION['SPL'.$identifier]->BranchCode . "'";
 
 		$ErrMsg = _('The delivery and sales type for the customer could not be retrieved for this special order') . ' ' . $SPLLine->LineNo . ' ' . _('because');
 		$DbgMsg = _('The SQL statement used to get the delivery details and that failed was');
@@ -504,7 +504,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 		$BranchDetails=DB_fetch_array($result);
 		$SalesOrderNo=GetNextTransNo (30, $db);
-		$HeaderSQL = "INSERT INTO salesorders (orderno,
+		$HeaderSQL = "INSERT INTO weberp_salesorders (orderno,
 											debtorno,
 											branchcode,
 											customerref,
@@ -544,7 +544,7 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 		$ErrMsg = _('The sales order cannot be added because');
 		$InsertQryResult = DB_query($HeaderSQL,$ErrMsg, $DbgMsg);
 
-		$StartOf_LineItemsSQL = "INSERT INTO salesorderdetails (orderno,
+		$StartOf_LineItemsSQL = "INSERT INTO weberp_salesorderdetails (orderno,
 																stkcode,
 																unitprice,
 																quantity,
@@ -589,8 +589,8 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 
 echo '<table><tr><td>' . _('Receive Purchase Into and Sell From') . ': <select name="StkLocation">';
 
-$sql = "SELECT locations.loccode, locationname FROM locations
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 $LocnResult = DB_query($sql);
 if (!isset($_SESSION['SPL'.$identifier]->StkLocation) or $_SESSION['SPL'.$identifier]->StkLocation==''){ /*If this is the first time the form loaded set up defaults */
 	$_SESSION['SPL'.$identifier]->StkLocation = $_SESSION['UserStockLocation'];
@@ -697,7 +697,7 @@ echo '<tr>
 		<td>' . _('Category') . ':</td>
 		<td><select name="StkCat">';
 
-$sql = "SELECT categoryid, categorydescription FROM stockcategory";
+$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
 $ErrMsg = _('The stock categories could not be retrieved because');
 $DbgMsg = _('The SQL used to retrieve stock categories and failed was');
 $result = DB_query($sql, $ErrMsg, $DbgMsg);

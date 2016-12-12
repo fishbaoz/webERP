@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: OrderDetails.php 7635 2016-09-25 03:59:01Z exsonqu $*/
 
 /* Session started in header.inc for password checking and authorisation level check */
 include('includes/session.inc');
@@ -19,33 +19,33 @@ if (isset($_GET['OrderNumber'])) {
 
 include('includes/header.inc');
 
-$OrderHeaderSQL = "SELECT salesorders.debtorno,
-							debtorsmaster.name,
-							salesorders.branchcode,
-							salesorders.customerref,
-							salesorders.comments,
-							salesorders.orddate,
-							salesorders.ordertype,
-							salesorders.shipvia,
-							salesorders.deliverto,
-							salesorders.deladd1,
-							salesorders.deladd2,
-							salesorders.deladd3,
-							salesorders.deladd4,
-							salesorders.deladd5,
-							salesorders.deladd6,
-							salesorders.contactphone,
-							salesorders.contactemail,
-							salesorders.freightcost,
-							salesorders.deliverydate,
-							debtorsmaster.currcode,
-							salesorders.fromstkloc,
-							currencies.decimalplaces
-					FROM salesorders INNER JOIN 	debtorsmaster
-					ON salesorders.debtorno = debtorsmaster.debtorno
-					INNER JOIN currencies
-					ON debtorsmaster.currcode=currencies.currabrev
-					WHERE salesorders.orderno = '" . $_GET['OrderNumber'] . "'";
+$OrderHeaderSQL = "SELECT weberp_salesorders.debtorno,
+							weberp_debtorsmaster.name,
+							weberp_salesorders.branchcode,
+							weberp_salesorders.customerref,
+							weberp_salesorders.comments,
+							weberp_salesorders.orddate,
+							weberp_salesorders.ordertype,
+							weberp_salesorders.shipvia,
+							weberp_salesorders.deliverto,
+							weberp_salesorders.deladd1,
+							weberp_salesorders.deladd2,
+							weberp_salesorders.deladd3,
+							weberp_salesorders.deladd4,
+							weberp_salesorders.deladd5,
+							weberp_salesorders.deladd6,
+							weberp_salesorders.contactphone,
+							weberp_salesorders.contactemail,
+							weberp_salesorders.freightcost,
+							weberp_salesorders.deliverydate,
+							weberp_debtorsmaster.currcode,
+							weberp_salesorders.fromstkloc,
+							weberp_currencies.decimalplaces
+					FROM weberp_salesorders INNER JOIN 	weberp_debtorsmaster
+					ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+					INNER JOIN weberp_currencies
+					ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+					WHERE weberp_salesorders.orderno = '" . $_GET['OrderNumber'] . "'";
 
 $ErrMsg =  _('The order cannot be retrieved because');
 $DbgMsg = _('The SQL that failed to get the order header was');
@@ -146,15 +146,15 @@ if (DB_num_rows($GetOrdHdrResult)==1) {
 /*Now get the line items */
 
 	$LineItemsSQL = "SELECT stkcode,
-							stockmaster.description,
-							stockmaster.volume,
-							stockmaster.grossweight,
-							stockmaster.decimalplaces,
-							stockmaster.mbflag,
-							stockmaster.units,
-							stockmaster.discountcategory,
-							stockmaster.controlled,
-							stockmaster.serialised,
+							weberp_stockmaster.description,
+							weberp_stockmaster.volume,
+							weberp_stockmaster.grossweight,
+							weberp_stockmaster.decimalplaces,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.units,
+							weberp_stockmaster.discountcategory,
+							weberp_stockmaster.controlled,
+							weberp_stockmaster.serialised,
 							unitprice,
 							quantity,
 							discountpercent,
@@ -163,8 +163,8 @@ if (DB_num_rows($GetOrdHdrResult)==1) {
 							itemdue,
 							poline,
 							narrative
-						FROM salesorderdetails INNER JOIN stockmaster
-						ON salesorderdetails.stkcode = stockmaster.stockid
+						FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+						ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
 						WHERE orderno ='" . $_GET['OrderNumber'] . "'";
 
 	$ErrMsg =  _('The line items of the order cannot be retrieved because');

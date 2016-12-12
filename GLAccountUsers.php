@@ -56,7 +56,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 		SELECT
 			accountcode,
 			accountname
-		FROM chartmaster
+		FROM weberp_chartmaster
 		ORDER BY accountcode");
 	while ($MyRow = DB_fetch_array($Result)) {
 		echo '<option ';
@@ -76,7 +76,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 } else {// If is set a GL account for users ($SelectedGLAccount).
 	$Result = DB_query("
 		SELECT accountname
-		FROM chartmaster
+		FROM weberp_chartmaster
 		WHERE accountcode='" . $SelectedGLAccount . "'");
 	$MyRow = DB_fetch_array($Result);
 	$SelectedGLAccountName = $MyRow['accountname'];
@@ -93,7 +93,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 			// First check the user is not being duplicated
 			$CheckResult = DB_query("
 				SELECT count(*)
-				FROM glaccountusers
+				FROM weberp_glaccountusers
 				WHERE accountcode= '" . $SelectedGLAccount . "'
 				AND userid = '" . $SelectedUser . "'");
 			$CheckRow = DB_fetch_row($CheckResult);
@@ -102,7 +102,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 				prnMsg(_('The user') . ' ' . $SelectedUser . ' ' . _('is already authorised to use this GL Account'), 'error');
 			} else {
 				// Add new record on submit
-				$SQL = "INSERT INTO glaccountusers (
+				$SQL = "INSERT INTO weberp_glaccountusers (
 						accountcode,
 						userid,
 						canview,
@@ -121,7 +121,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 			}
 		}
 	} elseif(isset($_GET['delete'])) {
-		$SQL = "DELETE FROM glaccountusers
+		$SQL = "DELETE FROM weberp_glaccountusers
 			WHERE accountcode='" . $SelectedGLAccount . "'
 			AND userid='" . $SelectedUser . "'";
 		$ErrMsg = _('An access permission for a user could not be removed');
@@ -131,7 +131,7 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 			unset($_POST['delete']);
 		}
 	} elseif(isset($_GET['ToggleUpdate'])) {
-		$SQL = "UPDATE glaccountusers
+		$SQL = "UPDATE weberp_glaccountusers
 				SET canupd='" . $_GET['ToggleUpdate'] . "'
 				WHERE accountcode='" . $SelectedGLAccount . "'
 				AND userid='" . $SelectedUser . "'";
@@ -156,14 +156,14 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 		</thead><tbody>';
 	$Result = DB_query("
 		SELECT
-			glaccountusers.userid,
+			weberp_glaccountusers.userid,
 			canview,
 			canupd,
-			www_users.realname
-		FROM glaccountusers INNER JOIN www_users
-		ON glaccountusers.userid=www_users.userid
-		WHERE glaccountusers.accountcode='" . $SelectedGLAccount . "'
-		ORDER BY glaccountusers.userid ASC");
+			weberp_www_users.realname
+		FROM weberp_glaccountusers INNER JOIN weberp_www_users
+		ON weberp_glaccountusers.userid=weberp_www_users.userid
+		WHERE weberp_glaccountusers.accountcode='" . $SelectedGLAccount . "'
+		ORDER BY weberp_glaccountusers.userid ASC");
 	if(DB_num_rows($Result)>0) {// If the GL account has access permissions for one or more users:
 		$k = 0; //row colour counter
 		while($MyRow = DB_fetch_array($Result)) {
@@ -213,11 +213,11 @@ if(!isset($SelectedGLAccount)) {// If is NOT set a GL account for users.
 		SELECT
 			userid,
 			realname
-		FROM www_users
-		WHERE NOT EXISTS (SELECT glaccountusers.userid
-		FROM glaccountusers
-		WHERE glaccountusers.accountcode='" . $SelectedGLAccount . "'
-			AND glaccountusers.userid=www_users.userid)
+		FROM weberp_www_users
+		WHERE NOT EXISTS (SELECT weberp_glaccountusers.userid
+		FROM weberp_glaccountusers
+		WHERE weberp_glaccountusers.accountcode='" . $SelectedGLAccount . "'
+			AND weberp_glaccountusers.userid=weberp_www_users.userid)
 		ORDER BY userid");
 	if(DB_num_rows($Result)>0) {// If the GL account does not have access permissions for one or more users:
 		echo	_('Add access permissions to a user'), ':</td>

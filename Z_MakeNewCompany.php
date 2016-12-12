@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_MakeNewCompany.php 7682 2016-11-24 14:10:25Z rchacon $*/
 
 
 include ('includes/session.inc');
@@ -191,18 +191,18 @@ if (isset($_POST['submit']) AND isset($_POST['NewDatabase'])) {
 		unset ($_SESSION['Items']);
 		unset ($_SESSION['CreditItems']);
 
-		$SQL ="UPDATE config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI__Sent' WHERE confname='EDI_MsgSent'";
+		$SQL ="UPDATE weberp_config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI__Sent' WHERE confname='EDI_MsgSent'";
 		$result = DB_query($SQL);
-		$SQL ="UPDATE config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI_Incoming_Orders' WHERE confname='EDI_Incoming_Orders'";
+		$SQL ="UPDATE weberp_config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI_Incoming_Orders' WHERE confname='EDI_Incoming_Orders'";
 		$result = DB_query($SQL);
-		$SQL ="UPDATE config SET confvalue='companies/" . $_POST['NewDatabase'] . "/part_pics' WHERE confname='part_pics_dir'";
+		$SQL ="UPDATE weberp_config SET confvalue='companies/" . $_POST['NewDatabase'] . "/part_pics' WHERE confname='part_pics_dir'";
 		$result = DB_query($SQL);
-		$SQL ="UPDATE config SET confvalue='companies/" . $_POST['NewDatabase'] . "/reports' WHERE confname='reports_dir'";
+		$SQL ="UPDATE weberp_config SET confvalue='companies/" . $_POST['NewDatabase'] . "/reports' WHERE confname='reports_dir'";
 		$result = DB_query($SQL);
-		$SQL ="UPDATE config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI_Pending' WHERE confname='EDI_MsgPending'";
+		$SQL ="UPDATE weberp_config SET confvalue='companies/" . $_POST['NewDatabase'] . "/EDI_Pending' WHERE confname='EDI_MsgPending'";
 		$result = DB_query($SQL);
 		//add new company
-        $SQL = "UPDATE companies SET coyname='".$_POST['NewCompany']."' where coycode = 1";
+        $SQL = "UPDATE weberp_companies SET coyname='".$_POST['NewCompany']."' where coycode = 1";
         $result = DB_query($SQL);
 
 		$ForceConfigReload=true;

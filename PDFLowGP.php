@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFLowGP.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 
@@ -27,28 +27,28 @@ if (isset($_POST['PrintPDF'])) {
 	}
 
 	  /*Now figure out the data to report for the category range under review */
-	$SQL = "SELECT stockmaster.categoryid,
-					stockmaster.stockid,
-					stockmoves.transno,
-					stockmoves.trandate,
-					systypes.typename,
-					stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost as unitcost,
-					stockmoves.qty,
-					stockmoves.debtorno,
-					stockmoves.branchcode,
-					stockmoves.price*(1-stockmoves.discountpercent) as sellingprice,
-					(stockmoves.price*(1-stockmoves.discountpercent)) - (stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS gp,
-					debtorsmaster.name
-				FROM stockmaster INNER JOIN stockmoves
-					ON stockmaster.stockid=stockmoves.stockid
-				INNER JOIN systypes
-					ON stockmoves.type=systypes.typeid
-				INNER JOIN debtorsmaster
-					ON stockmoves.debtorno=debtorsmaster.debtorno
-				WHERE stockmoves.trandate >= '" . FormatDateForSQL($_POST['FromDate']) . "'
-				AND stockmoves.trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'
-				AND ((stockmoves.price*(1-stockmoves.discountpercent)) - (stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost))/(stockmoves.price*(1-stockmoves.discountpercent)) <=" . $_POST['GPMin']/100 . "
-				ORDER BY stockmaster.stockid";
+	$SQL = "SELECT weberp_stockmaster.categoryid,
+					weberp_stockmaster.stockid,
+					weberp_stockmoves.transno,
+					weberp_stockmoves.trandate,
+					weberp_systypes.typename,
+					weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost as unitcost,
+					weberp_stockmoves.qty,
+					weberp_stockmoves.debtorno,
+					weberp_stockmoves.branchcode,
+					weberp_stockmoves.price*(1-weberp_stockmoves.discountpercent) as sellingprice,
+					(weberp_stockmoves.price*(1-weberp_stockmoves.discountpercent)) - (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS gp,
+					weberp_debtorsmaster.name
+				FROM weberp_stockmaster INNER JOIN weberp_stockmoves
+					ON weberp_stockmaster.stockid=weberp_stockmoves.stockid
+				INNER JOIN weberp_systypes
+					ON weberp_stockmoves.type=weberp_systypes.typeid
+				INNER JOIN weberp_debtorsmaster
+					ON weberp_stockmoves.debtorno=weberp_debtorsmaster.debtorno
+				WHERE weberp_stockmoves.trandate >= '" . FormatDateForSQL($_POST['FromDate']) . "'
+				AND weberp_stockmoves.trandate <= '" . FormatDateForSQL($_POST['ToDate']) . "'
+				AND ((weberp_stockmoves.price*(1-weberp_stockmoves.discountpercent)) - (weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost))/(weberp_stockmoves.price*(1-weberp_stockmoves.discountpercent)) <=" . $_POST['GPMin']/100 . "
+				ORDER BY weberp_stockmaster.stockid";
 
 	$LowGPSalesResult = DB_query($SQL,'','',false,false);
 

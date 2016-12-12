@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: CustEDISetup.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Customer EDI Set Up');
@@ -52,7 +52,7 @@ if (isset($_POST['submit'])) {
 		if (!isset($_POST['EDIServerPwd'])){
 			$_POST['EDIServerPwd']='';
 		}
-		$sql = "UPDATE debtorsmaster SET ediinvoices ='" . $_POST['EDIInvoices'] . "',
+		$sql = "UPDATE weberp_debtorsmaster SET ediinvoices ='" . $_POST['EDIInvoices'] . "',
 					ediorders ='" . $_POST['EDIOrders'] . "',
 					edireference='" . $_POST['EDIReference'] . "',
 					editransport='" . $_POST['EDITransport'] . "',
@@ -83,7 +83,7 @@ $sql = "SELECT debtorno,
 		ediaddress,
 		ediserveruser,
 		ediserverpwd
-	FROM debtorsmaster
+	FROM weberp_debtorsmaster
 	WHERE debtorno = '" . $_SESSION['CustomerID'] . "'";
 
 $ErrMsg = _('The customer EDI configuration details could not be retrieved because');

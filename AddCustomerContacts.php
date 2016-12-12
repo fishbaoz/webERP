@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: AddCustomerContacts.php 7542 2016-05-28 03:45:56Z daintree $*/
 /* Adds customer contacts */
 
 include('includes/session.inc');
@@ -21,7 +21,7 @@ if (isset($_POST['DebtorNo'])){
 	$DebtorNo = $_GET['DebtorNo'];
 }
 echo '<a class="noprint" href="' . $RootPath . '/Customers.php?DebtorNo=' . $DebtorNo . '">' . _('Back to Customers') . '</a><br />';
-$SQLname="SELECT name FROM debtorsmaster WHERE debtorno='" . $DebtorNo . "'";
+$SQLname="SELECT name FROM weberp_debtorsmaster WHERE debtorno='" . $DebtorNo . "'";
 $Result = DB_query($SQLname);
 $row = DB_fetch_array($Result);
 if (!isset($_GET['Id'])) {
@@ -52,7 +52,7 @@ if ( isset($_POST['submit']) ) {
 	}
 
 	if (isset($Id) AND ($Id AND $InputError !=1)) {
-		$sql = "UPDATE custcontacts SET contactname='" . $_POST['ContactName'] . "',
+		$sql = "UPDATE weberp_custcontacts SET contactname='" . $_POST['ContactName'] . "',
 										role='" . $_POST['ContactRole'] . "',
 										phoneno='" . $_POST['ContactPhone'] . "',
 										notes='" . $_POST['ContactNotes'] . "',
@@ -63,7 +63,7 @@ if ( isset($_POST['submit']) ) {
 		$msg = _('Customer Contacts') . ' ' . $DebtorNo . ' ' . _('has been updated');
 	} elseif ($InputError !=1) {
 
-		$sql = "INSERT INTO custcontacts (debtorno,
+		$sql = "INSERT INTO weberp_custcontacts (debtorno,
 										contactname,
 										role,
 										phoneno,
@@ -100,7 +100,7 @@ if ( isset($_POST['submit']) ) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'SalesOrders'
 
-	$sql="DELETE FROM custcontacts
+	$sql="DELETE FROM weberp_custcontacts
 			WHERE contid='" . $Id . "'
 			AND debtorno='" . $DebtorNo . "'";
 	$result = DB_query($sql);
@@ -122,7 +122,7 @@ if (!isset($Id)) {
 					statement,
 					notes,
 					email
-			FROM custcontacts
+			FROM weberp_custcontacts
 			WHERE debtorno='".$DebtorNo."'
 			ORDER BY contid";
 	$result = DB_query($sql);
@@ -193,7 +193,7 @@ if (!isset($_GET['delete'])) {
 						phoneno,
 						notes,
 						email
-					FROM custcontacts
+					FROM weberp_custcontacts
 					WHERE contid='".$Id."'
 						AND debtorno='".$DebtorNo."'";
 

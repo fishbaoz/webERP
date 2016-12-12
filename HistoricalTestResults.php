@@ -51,8 +51,8 @@ echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'
 		<td>' . _('Show Test Results For') .':</td>';
 $SQLSpecSelect="SELECT DISTINCT(prodspeckey),
 						description
-					FROM qasamples LEFT OUTER JOIN stockmaster
-					ON stockmaster.stockid=qasamples.prodspeckey";
+					FROM weberp_qasamples LEFT OUTER JOIN weberp_stockmaster
+					ON weberp_stockmaster.stockid=weberp_qasamples.prodspeckey";
 
 
 $ResultSelection=DB_query($SQLSpecSelect);
@@ -86,26 +86,26 @@ echo '</tr>
 
 //show header
 $SQLSpecSelect="SELECT description
-					FROM stockmaster
-					WHERE stockmaster.stockid='" . $KeyValue . "'";
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='" . $KeyValue . "'";
 
 $ResultSelection=DB_query($SQLSpecSelect);
 $MyRowSelection=DB_fetch_array($ResultSelection);
-$SQLTests="SELECT sampleresults.testid,
+$SQLTests="SELECT weberp_sampleresults.testid,
 					sampledate,
-					sampleresults.sampleid,
+					weberp_sampleresults.sampleid,
 					lotkey,
 					identifier,
 					cert,
 					isinspec,
 					testvalue,
 					name
-				FROM qasamples
-				INNER JOIN sampleresults on sampleresults.sampleid=qasamples.sampleid
-				INNER JOIN qatests
-				ON qatests.testid=sampleresults.testid
-				WHERE qasamples.prodspeckey='" . $KeyValue . "'
-				AND sampleresults.showontestplan='1'
+				FROM weberp_qasamples
+				INNER JOIN weberp_sampleresults on weberp_sampleresults.sampleid=weberp_qasamples.sampleid
+				INNER JOIN weberp_qatests
+				ON weberp_qatests.testid=weberp_sampleresults.testid
+				WHERE weberp_qasamples.prodspeckey='" . $KeyValue . "'
+				AND weberp_sampleresults.showontestplan='1'
 				AND sampledate>='" . $FromDate . "'
 				AND sampledate <='" . $ToDate . "'";
 

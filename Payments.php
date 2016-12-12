@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Payments.php 7702 2016-12-08 14:24:19Z exsonqu $*/
 /* Entry of bank account payments either against an AP account or a general ledger payment - if the AP-GL link in company preferences is set */
 
 include('includes/DefinePaymentClass.php');
@@ -73,7 +73,7 @@ if(isset($_GET['SupplierID'])) {
 				address6,
 				currcode,
 				factorcompanyid
-			FROM suppliers
+			FROM weberp_suppliers
 			WHERE supplierid='" . $_GET['SupplierID'] . "'";
 
 	$Result = DB_query($SQL);
@@ -103,7 +103,7 @@ if(isset($_GET['SupplierID'])) {
 			 					address4,
 			 					address5,
 			 					address6
-							FROM factorcompanies
+							FROM weberp_factorcompanies
 							WHERE id='" . $myrow['factorcompanyid'] . "'";
 
 			$FactorResult = DB_query($factorsql);
@@ -132,8 +132,8 @@ if(isset($_POST['BankAccount']) AND $_POST['BankAccount']!='') {
 	$ErrMsg = _('Could not get the currency of the bank account');
 	$result = DB_query("SELECT currcode,
 								decimalplaces
-						FROM bankaccounts INNER JOIN currencies
-						ON bankaccounts.currcode = currencies.currabrev
+						FROM weberp_bankaccounts INNER JOIN weberp_currencies
+						ON weberp_bankaccounts.currcode = weberp_currencies.currabrev
 						WHERE accountcode ='" . $_POST['BankAccount'] . "'",
 						$ErrMsg);
 
@@ -185,7 +185,7 @@ if(isset($_POST['Currency']) AND $_POST['Currency']!='') {
 		*/
 
 		/*Get suggested FunctionalExRate - between bank account and home functional currency */
-		$result = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->AccountCurrency . "'");
+		$result = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->AccountCurrency . "'");
 		$myrow = DB_fetch_row($result);
 		$SuggestedFunctionalExRate = $myrow[0];
 		if($DefaultFunctionalRate) {
@@ -200,7 +200,7 @@ if(isset($_POST['Currency']) AND $_POST['Currency']!='') {
 		$SuggestedExRate=1;
 	} elseif(isset($_POST['Currency'])) {
 		/*Get the exchange rate between the bank account currency and the payment currency*/
-		$result = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->Currency . "'");
+		$result = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->Currency . "'");
 		$myrow = DB_fetch_row($result);
 		$TableExRate = $myrow[0]; //this is the rate of exchange between the functional currency and the payment currency
 		/*Calculate cross rate to suggest appropriate exchange rate between payment currency and account currency */
@@ -261,7 +261,7 @@ if(isset($_POST['Discount']) AND $_POST['Discount']!='') {
 if(isset($_POST['CommitBatch'])) {
 
 	/* once the GL analysis of the payment is entered (if the Creditors_GLLink is active),
-	process all the data in the session cookie into the DB creating a banktrans record for
+	process all the data in the session cookie into the DB creating a weberp_banktrans record for
 	the payment in the batch and SuppTrans record for the supplier payment if a supplier was selected
 	A GL entry is created for each GL entry (only one for a supplier entry) and one for the bank
 	account credit.
@@ -293,10 +293,10 @@ if(isset($_POST['CommitBatch'])) {
 	}
 
 	/*Make an array of the defined bank accounts */
-	$SQL = "SELECT bankaccounts.accountcode
-			FROM bankaccounts,
-				chartmaster
-			WHERE bankaccounts.accountcode=chartmaster.accountcode";
+	$SQL = "SELECT weberp_bankaccounts.accountcode
+			FROM weberp_bankaccounts,
+				weberp_chartmaster
+			WHERE weberp_bankaccounts.accountcode=weberp_chartmaster.accountcode";
 	$result = DB_query($SQL);
 	$BankAccounts = array();
 	$i=0;
@@ -309,7 +309,7 @@ if(isset($_POST['CommitBatch'])) {
 	$PeriodNo = GetPeriod($_SESSION['PaymentDetail'.$identifier]->DatePaid,$db);
 
 	$sql = "SELECT usepreprintedstationery
-			FROM paymentmethods
+			FROM weberp_paymentmethods
 			WHERE paymentname='" . $_SESSION['PaymentDetail'.$identifier]->Paymenttype ."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
@@ -364,7 +364,7 @@ if(isset($_POST['CommitBatch'])) {
 					if($PaymentItem->Cheque=='') {
 						$PaymentItem->Cheque=0;
 					}
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 								type,
 								typeno,
 								trandate,
@@ -404,8 +404,8 @@ if(isset($_POST['CommitBatch'])) {
 
 					/*Get the currency and rate of the bank account transferring to*/
 					$SQL = "SELECT currcode, rate
-							FROM bankaccounts INNER JOIN currencies
-							ON bankaccounts.currcode = currencies.currabrev
+							FROM weberp_bankaccounts INNER JOIN weberp_currencies
+							ON weberp_bankaccounts.currcode = weberp_currencies.currabrev
 							WHERE accountcode='" . $PaymentItem->GLCode . "'";
 					$TrfToAccountResult = DB_query($SQL);
 					$TrfToBankRow = DB_fetch_array($TrfToAccountResult) ;
@@ -445,7 +445,7 @@ if(isset($_POST['CommitBatch'])) {
 				*/
 
 					$ReceiptTransNo = GetNextTransNo( 2, $db);
-					$SQL = "INSERT INTO banktrans (
+					$SQL = "INSERT INTO weberp_banktrans (
 								transno,
 								type,
 								bankact,
@@ -481,7 +481,7 @@ if(isset($_POST['CommitBatch'])) {
 			$TransType = 22;
 
 			/* Create a SuppTrans entry for the supplier payment */
-			$SQL = "INSERT INTO supptrans (
+			$SQL = "INSERT INTO weberp_supptrans (
 							transno,
 							type,
 							supplierno,
@@ -507,10 +507,10 @@ if(isset($_POST['CommitBatch'])) {
 			$result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
 			/*Update the supplier master with the date and amount of the last payment made */
-			$SQL = "UPDATE suppliers
+			$SQL = "UPDATE weberp_suppliers
 					SET	lastpaiddate = '" . FormatDateForSQL($_SESSION['PaymentDetail'.$identifier]->DatePaid) . "',
 						lastpaid='" . $_SESSION['PaymentDetail'.$identifier]->Amount ."'
-					WHERE suppliers.supplierid='" . $_SESSION['PaymentDetail'.$identifier]->SupplierID . "'";
+					WHERE weberp_suppliers.supplierid='" . $_SESSION['PaymentDetail'.$identifier]->SupplierID . "'";
 			$ErrMsg = _('Cannot update the supplier record for the date of the last payment made because');
 			$DbgMsg = _('Cannot update the supplier record for the date of the last payment made using the SQL');
 			$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
@@ -520,7 +520,7 @@ if(isset($_POST['CommitBatch'])) {
 			if($_SESSION['CompanyRecord']['gllink_creditors']==1) { /* then do the supplier control GLTrans */
 			/* Now debit creditors account with payment + discount */
 
-				$SQL = "INSERT INTO gltrans (
+				$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,
@@ -543,7 +543,7 @@ if(isset($_POST['CommitBatch'])) {
 
 				if($_SESSION['PaymentDetail'.$identifier]->Discount != 0) {
 					/* Now credit Discount received account with discounts */
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 								type,
 								typeno,
 								trandate,
@@ -572,7 +572,7 @@ if(isset($_POST['CommitBatch'])) {
 
 			if($_SESSION['PaymentDetail'.$identifier]->Amount != 0) {
 				/* Bank account entry first */
-				$SQL = "INSERT INTO gltrans (
+				$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,
@@ -597,7 +597,7 @@ if(isset($_POST['CommitBatch'])) {
 		}
 
 		/*now enter the BankTrans entry */
-		$SQL = "INSERT INTO banktrans (
+		$SQL = "INSERT INTO weberp_banktrans (
 					transno,
 					type,
 					bankact,
@@ -646,11 +646,11 @@ if(isset($_POST['CommitBatch'])) {
 
 		/*Set up a newy in case user wishes to enter another */
 		if(isset($LastSupplier) and $LastSupplier!='') {
-			$SupplierSQL="SELECT suppname FROM suppliers
+			$SupplierSQL="SELECT suppname FROM weberp_suppliers
 					WHERE supplierid='".$LastSupplier."'";
 			$SupplierResult = DB_query($SupplierSQL);
 			$SupplierRow = DB_fetch_array($SupplierResult);
-			$TransSQL = "SELECT id FROM supptrans WHERE type=22 AND transno='" . $TransNo . "'";
+			$TransSQL = "SELECT id FROM weberp_supptrans WHERE type=22 AND transno='" . $TransNo . "'";
 			$TransResult = DB_query($TransSQL);
 			$TransRow = DB_fetch_array($TransResult);
 			echo '<br /><a href="' . $RootPath . '/SupplierAllocations.php?AllocTrans=' . $TransRow['id'] . '">' . _('Allocate this payment') . '</a>';
@@ -678,13 +678,13 @@ if(isset($_POST['CommitBatch'])) {
 
 } elseif(isset($_POST['Process']) AND !$BankAccountEmpty) { //user hit submit a new GL Analysis line into the payment
 
-	$ChequeNoSQL="SELECT account FROM gltrans WHERE chequeno='" . $_POST['Cheque'] ."'";
+	$ChequeNoSQL="SELECT account FROM weberp_gltrans WHERE chequeno='" . $_POST['Cheque'] ."'";
 	$ChequeNoResult=DB_query($ChequeNoSQL);
 
 	if(is_numeric($_POST['GLManualCode'])) {
 
 		$SQL = "SELECT accountname
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='" . $_POST['GLManualCode'] . "'";
 
 		$Result=DB_query($SQL);
@@ -727,7 +727,7 @@ if(isset($_POST['CommitBatch'])) {
 	} elseif($_POST['GLCode'] == '') {
 			prnMsg( _('No General Ledger code has been chosen') . ' - ' . _('so this GL analysis item could not be added'),'warn');
 	} else {
-		$SQL = "SELECT accountname FROM chartmaster WHERE accountcode='" . $_POST['GLCode'] . "'";
+		$SQL = "SELECT accountname FROM weberp_chartmaster WHERE accountcode='" . $_POST['GLCode'] . "'";
 		$Result=DB_query($SQL);
 		$myrow=DB_fetch_array($Result);
 		$_SESSION['PaymentDetail'.$identifier]->add_to_glanalysis(filter_number_format($_POST['GLAmount']),
@@ -769,10 +769,10 @@ if($_SESSION['PaymentDetail'.$identifier]->Currency=='' AND $_SESSION['PaymentDe
 
 if(isset($_POST['BankAccount']) AND $_POST['BankAccount']!='') {
 	$SQL = "SELECT bankaccountname
-			FROM bankaccounts,
-				chartmaster
-			WHERE bankaccounts.accountcode= chartmaster.accountcode
-			AND chartmaster.accountcode='" . $_POST['BankAccount'] . "'";
+			FROM weberp_bankaccounts,
+				weberp_chartmaster
+			WHERE weberp_bankaccounts.accountcode= weberp_chartmaster.accountcode
+			AND weberp_chartmaster.accountcode='" . $_POST['BankAccount'] . "'";
 
 	$ErrMsg = _('The bank account name cannot be retrieved because');
 	$DbgMsg = _('SQL used to retrieve the bank account name was');
@@ -807,14 +807,14 @@ if($_SESSION['PaymentDetail'.$identifier]->BankAccountName!='') {
 echo ' ' . _('on') . ' ' . $_SESSION['PaymentDetail'.$identifier]->DatePaid . '</h3></th></tr>';
 
 $SQL = "SELECT bankaccountname,
-				bankaccounts.accountcode,
-				bankaccounts.currcode
-		FROM bankaccounts
-		INNER JOIN chartmaster
-			ON bankaccounts.accountcode=chartmaster.accountcode
-		INNER JOIN bankaccountusers
-			ON bankaccounts.accountcode=bankaccountusers.accountcode
-		WHERE bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
+				weberp_bankaccounts.accountcode,
+				weberp_bankaccounts.currcode
+		FROM weberp_bankaccounts
+		INNER JOIN weberp_chartmaster
+			ON weberp_bankaccounts.accountcode=weberp_chartmaster.accountcode
+		INNER JOIN weberp_bankaccountusers
+			ON weberp_bankaccounts.accountcode=weberp_bankaccountusers.accountcode
+		WHERE weberp_bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
 		ORDER BY bankaccountname";
 
 $ErrMsg = _('The bank accounts could not be retrieved because');
@@ -857,7 +857,7 @@ if($_SESSION['PaymentDetail'.$identifier]->SupplierID=='') {
 	echo '<tr>
 			<td>' . _('Currency of Payment') . ':</td>
 			<td><select name="Currency" required="required" onchange="ReloadForm(UpdateHeader)">';
-	$SQL = "SELECT currency, currabrev, rate FROM currencies";
+	$SQL = "SELECT currency, currabrev, rate FROM weberp_currencies";
 	$result=DB_query($SQL);
 
 	if(DB_num_rows($result)==0) {
@@ -884,7 +884,7 @@ if($_SESSION['PaymentDetail'.$identifier]->SupplierID=='') {
 		</tr>';
 	/*get the default rate from the currency table if it has not been set */
 	if(!isset($_POST['ExRate']) OR $_POST['ExRate']=='') {
-		$SQL = "SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->Currency ."'";
+		$SQL = "SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['PaymentDetail'.$identifier]->Currency ."'";
 		$Result=DB_query($SQL);
 		$myrow=DB_fetch_row($Result);
 		$_POST['ExRate']=locale_number_format($myrow[0],'Variable');
@@ -956,7 +956,7 @@ echo '<tr>
 		<td><input maxlength="8" name="ChequeNum" size="10" type="text" value="' . $_POST['ChequeNum'] . '" /> ' . _('(if using pre-printed stationery)') . '</td>
 	</tr>';
 
-// Info to be inserted on `banktrans`.`ref` varchar(50):
+// Info to be inserted on `weberp_banktrans`.`ref` varchar(50):
 if(!isset($_POST['BankTransRef'])) {
 	$_POST['BankTransRef'] = '';
 }
@@ -965,7 +965,7 @@ echo '<tr>
 		<td><input maxlength="50" name="BankTransRef" size="52" type="text" value="', stripslashes($_POST['BankTransRef']), '" /> ', _('Reference in banking transactions'), '</td>
 	</tr>';
 
-// Info to be inserted on `gltrans`.`narrative` varchar(200):
+// Info to be inserted on `weberp_gltrans`.`narrative` varchar(200):
 if(!isset($_POST['Narrative'])) {
 	$_POST['Narrative'] = '';
 }
@@ -997,7 +997,7 @@ if($_SESSION['CompanyRecord']['gllink_creditors']==1 AND $_SESSION['PaymentDetai
 
 	$SQL = "SELECT tagref,
 				tagdescription
-			FROM tags
+			FROM weberp_tags
 			ORDER BY tagref";
 
 	$result=DB_query($SQL);
@@ -1031,7 +1031,7 @@ if($_SESSION['CompanyRecord']['gllink_creditors']==1 AND $_SESSION['PaymentDetai
 			<td><select name="GLGroup" onchange="return ReloadForm(UpdateCodes)">';
 
 	$SQL = "SELECT groupname
-			FROM accountgroups
+			FROM weberp_accountgroups
 			ORDER BY sequenceintb";
 
 	$result=DB_query($SQL);
@@ -1054,18 +1054,18 @@ if($_SESSION['CompanyRecord']['gllink_creditors']==1 AND $_SESSION['PaymentDetai
 	}
 
 	if(isset($_POST['GLGroup']) AND $_POST['GLGroup']!='') {
-		$SQL = "SELECT chartmaster.accountcode,
-						chartmaster.accountname
-				FROM chartmaster
-					INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" . $_SESSION['UserID'] . "' AND glaccountusers.canupd=1
-				WHERE chartmaster.group_='".$_POST['GLGroup']."'
-				ORDER BY chartmaster.accountcode";
+		$SQL = "SELECT weberp_chartmaster.accountcode,
+						weberp_chartmaster.accountname
+				FROM weberp_chartmaster
+					INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" . $_SESSION['UserID'] . "' AND weberp_glaccountusers.canupd=1
+				WHERE weberp_chartmaster.group_='".$_POST['GLGroup']."'
+				ORDER BY weberp_chartmaster.accountcode";
 	} else {
-		$SQL = "SELECT chartmaster.accountcode,
-						chartmaster.accountname
-				FROM chartmaster
-					INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" . $_SESSION['UserID'] . "' AND glaccountusers.canupd=1
-				ORDER BY chartmaster.accountcode";
+		$SQL = "SELECT weberp_chartmaster.accountcode,
+						weberp_chartmaster.accountname
+				FROM weberp_chartmaster
+					INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" . $_SESSION['UserID'] . "' AND weberp_glaccountusers.canupd=1
+				ORDER BY weberp_chartmaster.accountcode";
 	}
 
 
@@ -1094,7 +1094,7 @@ if($_SESSION['CompanyRecord']['gllink_creditors']==1 AND $_SESSION['PaymentDetai
 			<td><input type="text" name="Cheque" maxlength="12" size="12" /></td>
 		</tr>';
 
-	if(isset($_POST['GLNarrative'])) {// General Ledger Payment (Different than Bank Account) info to be inserted on gltrans.narrative, varchar(200).
+	if(isset($_POST['GLNarrative'])) {// General Ledger Payment (Different than Bank Account) info to be inserted on weberp_gltrans.narrative, varchar(200).
 		echo '<tr>
 				<td>' . _('GL Narrative') . ':</td>
 				<td><input maxlength="200" name="GLNarrative" size="52" type="text" value="' . stripslashes($_POST['GLNarrative']) . '" /></td>
@@ -1177,8 +1177,8 @@ the fields for entry of receipt amt and disc */
 				<th colspan="2"><h3>', _('Supplier Transactions Payment Entry'), '</h3></th>
 			</tr>';
 
-	// If the script was called with a SupplierID, it allows to input a customised gltrans.narrative, supptrans.suppreference and supptrans.transtext:
-	// Info to be inserted on `gltrans`.`narrative` varchar(200):
+	// If the script was called with a SupplierID, it allows to input a customised weberp_gltrans.narrative, weberp_supptrans.suppreference and weberp_supptrans.transtext:
+	// Info to be inserted on `weberp_gltrans`.`narrative` varchar(200):
 	if(!isset($_POST['gltrans_narrative'])) {
 		$_POST['gltrans_narrative'] = '';
 	}

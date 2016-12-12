@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFCustomerList.php 7682 2016-11-24 14:10:25Z rchacon $*/
 /* Creates a report of the customer and branch information held. This report has options to print only customer branches in a specified sales area and sales person. Additional option allows to list only those customers with activity either under or over a specified amount, since a specified date. */
 
 include('includes/session.inc');
@@ -30,74 +30,74 @@ if(isset($_POST['PrintPDF'])) {
 
 	if(in_array('All', $_POST['Areas'])) {
 		if(in_array('All', $_POST['SalesPeople'])) {
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3,
-						debtorsmaster.address4,
-						debtorsmaster.address5,
-						debtorsmaster.address6,
-						debtorsmaster.salestype,
-						custbranch.branchcode,
-						custbranch.brname,
-						custbranch.braddress1,
-						custbranch.braddress2,
-						custbranch.braddress3,
-						custbranch.braddress4,
-						custbranch.braddress5,
-						custbranch.braddress6,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.email,
-						custbranch.area,
-						custbranch.salesman,
-						areas.areadescription,
-						salesman.salesmanname
-					FROM debtorsmaster INNER JOIN custbranch
-					ON debtorsmaster.debtorno=custbranch.debtorno
-					INNER JOIN areas
-					ON custbranch.area = areas.areacode
-					INNER JOIN salesman
-					ON custbranch.salesman=salesman.salesmancode
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3,
+						weberp_debtorsmaster.address4,
+						weberp_debtorsmaster.address5,
+						weberp_debtorsmaster.address6,
+						weberp_debtorsmaster.salestype,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.brname,
+						weberp_custbranch.braddress1,
+						weberp_custbranch.braddress2,
+						weberp_custbranch.braddress3,
+						weberp_custbranch.braddress4,
+						weberp_custbranch.braddress5,
+						weberp_custbranch.braddress6,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.email,
+						weberp_custbranch.area,
+						weberp_custbranch.salesman,
+						weberp_areas.areadescription,
+						weberp_salesman.salesmanname
+					FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+					ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+					INNER JOIN weberp_areas
+					ON weberp_custbranch.area = weberp_areas.areacode
+					INNER JOIN weberp_salesman
+					ON weberp_custbranch.salesman=weberp_salesman.salesmancode
 					ORDER BY area,
 						salesman,
-						debtorsmaster.debtorno,
-						custbranch.branchcode";
+						weberp_debtorsmaster.debtorno,
+						weberp_custbranch.branchcode";
 		} else {
 		/* there are a range of salesfolk selected need to build the where clause */
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3,
-						debtorsmaster.address4,
-						debtorsmaster.address5,
-						debtorsmaster.address6,
-						debtorsmaster.salestype,
-						custbranch.branchcode,
-						custbranch.brname,
-						custbranch.braddress1,
-						custbranch.braddress2,
-						custbranch.braddress3,
-						custbranch.braddress4,
-						custbranch.braddress5,
-						custbranch.braddress6,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.email,
-						custbranch.area,
-						custbranch.salesman,
-						areas.areadescription,
-						salesman.salesmanname
-					FROM debtorsmaster INNER JOIN custbranch
-					ON debtorsmaster.debtorno=custbranch.debtorno
-					INNER JOIN areas
-					ON custbranch.area = areas.areacode
-					INNER JOIN salesman
-					ON custbranch.salesman=salesman.salesmancode
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3,
+						weberp_debtorsmaster.address4,
+						weberp_debtorsmaster.address5,
+						weberp_debtorsmaster.address6,
+						weberp_debtorsmaster.salestype,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.brname,
+						weberp_custbranch.braddress1,
+						weberp_custbranch.braddress2,
+						weberp_custbranch.braddress3,
+						weberp_custbranch.braddress4,
+						weberp_custbranch.braddress5,
+						weberp_custbranch.braddress6,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.email,
+						weberp_custbranch.area,
+						weberp_custbranch.salesman,
+						weberp_areas.areadescription,
+						weberp_salesman.salesmanname
+					FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+					ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+					INNER JOIN weberp_areas
+					ON weberp_custbranch.area = weberp_areas.areacode
+					INNER JOIN weberp_salesman
+					ON weberp_custbranch.salesman=weberp_salesman.salesmancode
 					WHERE (";
 
 				$i=0;
@@ -106,47 +106,47 @@ if(isset($_POST['PrintPDF'])) {
 						$SQL .= " OR ";
 					}
 					$i++;
-					$SQL .= "custbranch.salesman='" . $Salesperson ."'";
+					$SQL .= "weberp_custbranch.salesman='" . $Salesperson ."'";
 				}
 
 				$SQL .=") ORDER BY area,
 						salesman,
-						debtorsmaster.debtorno,
-						custbranch.branchcode";
+						weberp_debtorsmaster.debtorno,
+						weberp_custbranch.branchcode";
 		} /*end if SalesPeople =='All' */
 	} else { /* not all sales areas has been selected so need to build the where clause */
 		if(in_array('All', $_POST['SalesPeople'])) {
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3,
-						debtorsmaster.address4,
-						debtorsmaster.address5,
-						debtorsmaster.address6,
-						debtorsmaster.salestype,
-						custbranch.branchcode,
-						custbranch.brname,
-						custbranch.braddress1,
-						custbranch.braddress2,
-						custbranch.braddress3,
-						custbranch.braddress4,
-						custbranch.braddress5,
-						custbranch.braddress6,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.email,
-						custbranch.area,
-						custbranch.salesman,
-						areas.areadescription,
-						salesman.salesmanname
-					FROM debtorsmaster INNER JOIN custbranch
-					ON debtorsmaster.debtorno=custbranch.debtorno
-					INNER JOIN areas
-					ON custbranch.area = areas.areacode
-					INNER JOIN salesman
-					ON custbranch.salesman=salesman.salesmancode
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3,
+						weberp_debtorsmaster.address4,
+						weberp_debtorsmaster.address5,
+						weberp_debtorsmaster.address6,
+						weberp_debtorsmaster.salestype,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.brname,
+						weberp_custbranch.braddress1,
+						weberp_custbranch.braddress2,
+						weberp_custbranch.braddress3,
+						weberp_custbranch.braddress4,
+						weberp_custbranch.braddress5,
+						weberp_custbranch.braddress6,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.email,
+						weberp_custbranch.area,
+						weberp_custbranch.salesman,
+						weberp_areas.areadescription,
+						weberp_salesman.salesmanname
+					FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+					ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+					INNER JOIN weberp_areas
+					ON weberp_custbranch.area = weberp_areas.areacode
+					INNER JOIN weberp_salesman
+					ON weberp_custbranch.salesman=weberp_salesman.salesmancode
 					WHERE (";
 
 			$i=0;
@@ -155,46 +155,46 @@ if(isset($_POST['PrintPDF'])) {
 					$SQL .= " OR ";
 				}
 				$i++;
-				$SQL .= "custbranch.area='" . $Area ."'";
+				$SQL .= "weberp_custbranch.area='" . $Area ."'";
 			}
 
-			$SQL .= ") ORDER BY custbranch.area,
-					custbranch.salesman,
-					debtorsmaster.debtorno,
-					custbranch.branchcode";
+			$SQL .= ") ORDER BY weberp_custbranch.area,
+					weberp_custbranch.salesman,
+					weberp_debtorsmaster.debtorno,
+					weberp_custbranch.branchcode";
 		} else {
 		/* there are a range of salesfolk selected need to build the where clause */
-			$SQL = "SELECT debtorsmaster.debtorno,
-					debtorsmaster.name,
-					debtorsmaster.address1,
-					debtorsmaster.address2,
-					debtorsmaster.address3,
-					debtorsmaster.address4,
-					debtorsmaster.address5,
-					debtorsmaster.address6,
-					debtorsmaster.salestype,
-					custbranch.branchcode,
-					custbranch.brname,
-					custbranch.braddress1,
-					custbranch.braddress2,
-					custbranch.braddress3,
-					custbranch.braddress4,
-					custbranch.braddress5,
-					custbranch.braddress6,
-					custbranch.contactname,
-					custbranch.phoneno,
-					custbranch.faxno,
-					custbranch.email,
-					custbranch.area,
-					custbranch.salesman,
-					areas.areadescription,
-					salesman.salesmanname
-				FROM debtorsmaster INNER JOIN custbranch
-				ON debtorsmaster.debtorno=custbranch.debtorno
-				INNER JOIN areas
-				ON custbranch.area = areas.areacode
-				INNER JOIN salesman
-				ON custbranch.salesman=salesman.salesmancode
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_debtorsmaster.address1,
+					weberp_debtorsmaster.address2,
+					weberp_debtorsmaster.address3,
+					weberp_debtorsmaster.address4,
+					weberp_debtorsmaster.address5,
+					weberp_debtorsmaster.address6,
+					weberp_debtorsmaster.salestype,
+					weberp_custbranch.branchcode,
+					weberp_custbranch.brname,
+					weberp_custbranch.braddress1,
+					weberp_custbranch.braddress2,
+					weberp_custbranch.braddress3,
+					weberp_custbranch.braddress4,
+					weberp_custbranch.braddress5,
+					weberp_custbranch.braddress6,
+					weberp_custbranch.contactname,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.faxno,
+					weberp_custbranch.email,
+					weberp_custbranch.area,
+					weberp_custbranch.salesman,
+					weberp_areas.areadescription,
+					weberp_salesman.salesmanname
+				FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+				ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+				INNER JOIN weberp_areas
+				ON weberp_custbranch.area = weberp_areas.areacode
+				INNER JOIN weberp_salesman
+				ON weberp_custbranch.salesman=weberp_salesman.salesmancode
 				WHERE (";
 
 			$i=0;
@@ -203,7 +203,7 @@ if(isset($_POST['PrintPDF'])) {
 					$SQL .= " OR ";
 				}
 				$i++;
-				$SQL .= "custbranch.area='" . $Area ."'";
+				$SQL .= "weberp_custbranch.area='" . $Area ."'";
 			}
 
 			$SQL .= ") AND (";
@@ -214,13 +214,13 @@ if(isset($_POST['PrintPDF'])) {
 					$SQL .= " OR ";
 				}
 				$i++;
-				$SQL .= "custbranch.salesman='" . $Salesperson ."'";
+				$SQL .= "weberp_custbranch.salesman='" . $Salesperson ."'";
 			}
 
-			$SQL .=") ORDER BY custbranch.area,
-					custbranch.salesman,
-					debtorsmaster.debtorno,
-					custbranch.branchcode";
+			$SQL .=") ORDER BY weberp_custbranch.area,
+					weberp_custbranch.salesman,
+					weberp_debtorsmaster.debtorno,
+					weberp_custbranch.branchcode";
 		} /*end if Salesfolk =='All' */
 
 	} /* end if not all sales areas was selected */
@@ -263,7 +263,7 @@ if(isset($_POST['PrintPDF'])) {
 			since the date entered */
 
 			$SQL = "SELECT SUM((ovamount+ovfreight+ovdiscount)/rate) AS turnover
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE debtorno='" . $Customers['debtorno'] . "'
 					AND branchcode='" . $Customers['branchcode'] . "'
 					AND (type=10 or type=11)
@@ -376,7 +376,7 @@ if(isset($_POST['PrintPDF'])) {
     echo '<table class="selection">';
 	echo '<tr><td>' . _('For Sales Areas') . ':</td><td><select name="Areas[]" multiple="multiple">';
 
-	$sql="SELECT areacode, areadescription FROM areas";
+	$sql="SELECT areacode, areadescription FROM weberp_areas";
 	$AreasResult= DB_query($sql);
 
 	echo '<option selected="selected" value="All">' . _('All Areas') . '</option>';
@@ -390,7 +390,7 @@ if(isset($_POST['PrintPDF'])) {
 			<td><select name="SalesPeople[]" multiple="multiple">
 				<option selected="selected" value="All">' .  _('All Salespeople') . '</option>';
 
-	$sql = "SELECT salesmancode, salesmanname FROM salesman";
+	$sql = "SELECT salesmancode, salesmanname FROM weberp_salesman";
 	$SalesFolkResult = DB_query($sql);
 
 	while($myrow = DB_fetch_array($SalesFolkResult)) {

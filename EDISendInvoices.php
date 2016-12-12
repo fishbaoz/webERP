@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: EDISendInvoices.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include ('includes/session.inc');
 include ('includes/header.inc');
@@ -16,7 +16,7 @@ $sql = "SELECT debtorno,
 			ediserverpwd,
 			daysbeforedue,
 			dayinfollowingmonth
-		FROM debtorsmaster INNER JOIN paymentterms ON debtorsmaster.paymentterms=paymentterms.termsindicator
+		FROM weberp_debtorsmaster INNER JOIN weberp_paymentterms ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
 		WHERE ediinvoices=1";
 
 $EDIInvCusts = DB_query($sql);
@@ -29,7 +29,7 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 
 	/*Figure out if there are any unset invoices or credits for the customer */
 
-	$sql = "SELECT debtortrans.id,
+	$sql = "SELECT weberp_debtortrans.id,
 					transno,
 					type,
 					order_,
@@ -38,7 +38,7 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 					ovamount,
 					ovfreight,
 					ovdiscount,
-					debtortrans.branchcode,
+					weberp_debtortrans.branchcode,
 					custbranchcode,
 					invtext,
 					shipvia,
@@ -48,11 +48,11 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 					braddress2,
 					braddress3,
 					braddress4
-				FROM debtortrans INNER JOIN custbranch ON custbranch.debtorno = debtortrans.debtorno
-				AND custbranch.branchcode = debtortrans.branchcode
+				FROM weberp_debtortrans INNER JOIN weberp_custbranch ON weberp_custbranch.debtorno = weberp_debtortrans.debtorno
+				AND weberp_custbranch.branchcode = weberp_debtortrans.branchcode
 				WHERE (type=10 or type=11)
 				AND edisent=0
-				AND debtortrans.debtorno='" . $CustDetails['debtorno'] . "'";
+				AND weberp_debtortrans.debtorno='" . $CustDetails['debtorno'] . "'";
 
 	$ErrMsg = _('There was a problem retrieving the customer transactions because');
 	$TransHeaders = DB_query($sql,$ErrMsg);
@@ -99,7 +99,7 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 
 		$sql = "SELECT section,
                        linetext
-                FROM edimessageformat
+                FROM weberp_edimessageformat
                 WHERE partnercode='" . $CustDetails['debtorno'] . "'
                 AND messagetype='INVOIC' ORDER BY sequenceno";
 		$ErrMsg =  _('An error occurred in getting the EDI format template for') . ' ' . $CustDetails['debtorno'] . ' ' . _('because');
@@ -134,35 +134,35 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 					for creating the detail lines */
 
 					if ($TransDetail['type']==10){ /*its an invoice */
-						 $sql = "SELECT stockmoves.stockid,
-							 		stockmaster.description,
-									-stockmoves.qty as quantity,
-									stockmoves.discountpercent,
-									((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
-									(stockmoves.price * " . $ExchRate . ") AS fxprice,
-									stockmoves.taxrate,
-									stockmaster.units
-								FROM stockmoves,
-									stockmaster
-								WHERE stockmoves.stockid = stockmaster.stockid
-								AND stockmoves.type=10
-								AND stockmoves.transno='" . $TransNo . "'
-								AND stockmoves.show_on_inv_crds=1";
+						 $sql = "SELECT weberp_stockmoves.stockid,
+							 		weberp_stockmaster.description,
+									-weberp_stockmoves.qty as quantity,
+									weberp_stockmoves.discountpercent,
+									((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . "* -weberp_stockmoves.qty) AS fxnet,
+									(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+									weberp_stockmoves.taxrate,
+									weberp_stockmaster.units
+								FROM weberp_stockmoves,
+									weberp_stockmaster
+								WHERE weberp_stockmoves.stockid = weberp_stockmaster.stockid
+								AND weberp_stockmoves.type=10
+								AND weberp_stockmoves.transno='" . $TransNo . "'
+								AND weberp_stockmoves.show_on_inv_crds=1";
 					} else {
 					/* credit note */
-						$sql = "SELECT stockmoves.stockid,
-									stockmaster.description,
-									stockmoves.qty as quantity,
-									stockmoves.discountpercent,
-									((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) as fxnet,
-									(stockmoves.price * " . $ExchRate . ") AS fxprice,
-									stockmoves.taxrate,
-									stockmaster.units
-								FROM stockmoves,
-									stockmaster
-								WHERE stockmoves.stockid = stockmaster.stockid
-								AND stockmoves.type=11 and stockmoves.transno='" . $TransNo . "'
-								AND stockmoves.show_on_inv_crds=1";
+						$sql = "SELECT weberp_stockmoves.stockid,
+									weberp_stockmaster.description,
+									weberp_stockmoves.qty as quantity,
+									weberp_stockmoves.discountpercent,
+									((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . " * weberp_stockmoves.qty) as fxnet,
+									(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+									weberp_stockmoves.taxrate,
+									weberp_stockmaster.units
+								FROM weberp_stockmoves,
+									weberp_stockmaster
+								WHERE weberp_stockmoves.stockid = weberp_stockmaster.stockid
+								AND weberp_stockmoves.type=11 and weberp_stockmoves.transno='" . $TransNo . "'
+								AND weberp_stockmoves.show_on_inv_crds=1";
 					}
 					$TransLinesResult = DB_query($sql);
 
@@ -173,7 +173,7 @@ while ($CustDetails = DB_fetch_array($EDIInvCusts)){
 						$LineNumber++;
 						$StockID = $TransLines['StockID'];
 						$sql = "SELECT partnerstockid
-								FROM ediitemmapping
+								FROM weberp_ediitemmapping
 								WHERE supporcust='CUST'
 								AND partnercode ='" . $CustDetails['debtorno'] . "'
 								AND stockid='" . $TransLines['stockid'] . "'";

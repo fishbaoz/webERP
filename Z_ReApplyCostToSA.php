@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_ReApplyCostToSA.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title=_('Apply Current Cost to Sales Analysis');
@@ -15,7 +15,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 $SQL = "SELECT MonthName(lastdate_in_period) AS mnth,
 		YEAR(lastdate_in_period) AS yr,
 		periodno
-		FROM periods";
+		FROM weberp_periods";
 echo '<br /><div class="centre">' . _('Select the Period to update the costs for') . ':<select name="PeriodNo">';
 $result = DB_query($SQL);
 
@@ -33,18 +33,18 @@ echo '<br /><input type="submit" name="UpdateSalesAnalysis" value="' . _('Update
 echo '</div></form>';
 
 if (isset($_POST['UpdateSalesAnalysis']) AND $_POST['PeriodNo']!=0){
-	$sql = "SELECT stockmaster.stockid,
+	$sql = "SELECT weberp_stockmaster.stockid,
 			materialcost+overheadcost+labourcost AS standardcost,
-			stockmaster.mbflag
-		FROM salesanalysis INNER JOIN stockmaster
-			ON salesanalysis.stockid=stockmaster.stockid
+			weberp_stockmaster.mbflag
+		FROM weberp_salesanalysis INNER JOIN weberp_stockmaster
+			ON weberp_salesanalysis.stockid=weberp_stockmaster.stockid
 		WHERE periodno='" . $_POST['PeriodNo']  . "'
-		AND stockmaster.mbflag<>'D'
-		GROUP BY stockmaster.stockid,
-			stockmaster.materialcost,
-			stockmaster.overheadcost,
-			stockmaster.labourcost,
-			stockmaster.mbflag";
+		AND weberp_stockmaster.mbflag<>'D'
+		GROUP BY weberp_stockmaster.stockid,
+			weberp_stockmaster.materialcost,
+			weberp_stockmaster.overheadcost,
+			weberp_stockmaster.labourcost,
+			weberp_stockmaster.mbflag";
 
 
 	$ErrMsg = _('Could not retrieve the sales analysis records to be updated because');
@@ -54,11 +54,11 @@ if (isset($_POST['UpdateSalesAnalysis']) AND $_POST['PeriodNo']!=0){
 
 		if ($ItemsToUpdate['mbflag']=='A'){
 			$SQL = "SELECT SUM(materialcost + labourcost + overheadcost) AS standardcost
-					FROM stockmaster INNER JOIN BOM
-						ON stockmaster.stockid = bom.component
-					WHERE bom.parent = '" . $ItemsToUpdate['stockid'] . "'
-					AND bom.effectiveto > '" . Date('Y-m-d') . "'
-					AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+					FROM weberp_stockmaster INNER JOIN weberp_BOM
+						ON weberp_stockmaster.stockid = weberp_bom.component
+					WHERE weberp_bom.parent = '" . $ItemsToUpdate['stockid'] . "'
+					AND weberp_bom.effectiveto > '" . Date('Y-m-d') . "'
+					AND weberp_bom.effectiveafter < '" . Date('Y-m-d') . "'";
 
 			$ErrMsg = _('Could not recalculate the current cost of the assembly item') . $ItemsToUpdate['stockid'] . ' ' . _('because');
 			$AssemblyCostResult = DB_query($SQL,$ErrMsg);
@@ -68,7 +68,7 @@ if (isset($_POST['UpdateSalesAnalysis']) AND $_POST['PeriodNo']!=0){
 			$Cost = $ItemsToUpdate['standardcost'];
 		}
 
-		$SQL = "UPDATE salesanalysis SET cost = (qty * " . $Cost . ")
+		$SQL = "UPDATE weberp_salesanalysis SET cost = (qty * " . $Cost . ")
 				WHERE stockid='" . $ItemsToUpdate['stockid'] . "'
 				AND periodno ='" . $_POST['PeriodNo'] . "'";
 

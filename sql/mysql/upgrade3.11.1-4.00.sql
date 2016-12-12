@@ -1,146 +1,146 @@
 SET FOREIGN_KEY_CHECKS=0;
-ALTER TABLE accountgroups CONVERT TO CHARACTER SET utf8;
-ALTER TABLE accountsection CONVERT TO CHARACTER SET utf8;
-ALTER TABLE areas  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE audittrail CONVERT TO CHARACTER SET utf8;
-ALTER TABLE bankaccounts CONVERT TO CHARACTER SET utf8;
-ALTER TABLE banktrans CONVERT TO CHARACTER SET utf8;
-ALTER TABLE bom CONVERT TO CHARACTER SET utf8;
-ALTER TABLE buckets CONVERT TO CHARACTER SET utf8;
-ALTER TABLE chartdetails CONVERT TO CHARACTER SET utf8;
-ALTER TABLE chartmaster CONVERT TO CHARACTER SET utf8;
-ALTER TABLE cogsglpostings CONVERT TO CHARACTER SET utf8;
-ALTER TABLE companies CONVERT TO CHARACTER SET utf8;
-ALTER TABLE config CONVERT TO CHARACTER SET utf8;
-ALTER TABLE currencies CONVERT TO CHARACTER SET utf8;
-ALTER TABLE custallocns CONVERT TO CHARACTER SET utf8;
-ALTER TABLE custbranch CONVERT TO CHARACTER SET utf8;
-ALTER TABLE custcontacts CONVERT TO CHARACTER SET utf8;
-ALTER TABLE custnotes  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE debtorsmaster CONVERT TO CHARACTER SET utf8;
-ALTER TABLE debtortrans CONVERT TO CHARACTER SET utf8;
-ALTER TABLE debtortranstaxes  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE debtortype CONVERT TO CHARACTER SET utf8;
-ALTER TABLE debtortypenotes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE deliverynotes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE discountmatrix CONVERT TO CHARACTER SET utf8;
-ALTER TABLE edi_orders_seg_groups  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE edi_orders_segs CONVERT TO CHARACTER SET utf8;
-ALTER TABLE ediitemmapping CONVERT TO CHARACTER SET utf8;
-ALTER TABLE edimessageformat CONVERT TO CHARACTER SET utf8;
-ALTER TABLE factorcompanies CONVERT TO CHARACTER SET utf8;
-ALTER TABLE freightcosts  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE geocode_param CONVERT TO CHARACTER SET utf8;
-ALTER TABLE gltrans CONVERT TO CHARACTER SET utf8;
-ALTER TABLE grns  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE holdreasons CONVERT TO CHARACTER SET utf8;
-ALTER TABLE lastcostrollup CONVERT TO CHARACTER SET utf8;
-ALTER TABLE locations CONVERT TO CHARACTER SET utf8;
-ALTER TABLE locstock  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE loctransfers  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE mrpcalendar  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE mrpdemands CONVERT TO CHARACTER SET utf8;
-ALTER TABLE mrpdemandtypes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE orderdeliverydifferenceslog CONVERT TO CHARACTER SET utf8;
-ALTER TABLE paymentmethods CONVERT TO CHARACTER SET utf8;
-ALTER TABLE paymentterms CONVERT TO CHARACTER SET utf8;
-ALTER TABLE periods CONVERT TO CHARACTER SET utf8;
-ALTER TABLE prices CONVERT TO CHARACTER SET utf8;
-ALTER TABLE purchdata CONVERT TO CHARACTER SET utf8;
-ALTER TABLE purchorderauth CONVERT TO CHARACTER SET utf8;
-ALTER TABLE purchorderdetails CONVERT TO CHARACTER SET utf8;
-ALTER TABLE purchorders   CONVERT TO CHARACTER SET utf8;
-ALTER TABLE recurringsalesorders CONVERT TO CHARACTER SET utf8;
-ALTER TABLE recurrsalesorderdetails CONVERT TO CHARACTER SET utf8;
-ALTER TABLE reportcolumns CONVERT TO CHARACTER SET utf8;
-ALTER TABLE reportfields  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE reportheaders CONVERT TO CHARACTER SET utf8;
-ALTER TABLE reportlinks   CONVERT TO CHARACTER SET utf8;
-ALTER TABLE reports  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salesanalysis CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salescat CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salescatprod  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salesglpostings  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salesman      CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salesorderdetails  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salesorders CONVERT TO CHARACTER SET utf8;
-ALTER TABLE salestypes  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE scripts  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE securitygroups CONVERT TO CHARACTER SET utf8;
-ALTER TABLE securityroles CONVERT TO CHARACTER SET utf8;
-ALTER TABLE securitytokens CONVERT TO CHARACTER SET utf8;
-ALTER TABLE shipmentcharges CONVERT TO CHARACTER SET utf8;
-ALTER TABLE shipments  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE shippers CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockcategory CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockcatproperties CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockcheckfreeze CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockcounts   CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockitemproperties CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockmaster CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockmoves CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockmovestaxes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockserialitems CONVERT TO CHARACTER SET utf8;
-ALTER TABLE stockserialmoves CONVERT TO CHARACTER SET utf8;
-ALTER TABLE suppallocs CONVERT TO CHARACTER SET utf8;
-ALTER TABLE suppliercontacts CONVERT TO CHARACTER SET utf8;
-ALTER TABLE suppliers CONVERT TO CHARACTER SET utf8;
-ALTER TABLE supptrans CONVERT TO CHARACTER SET utf8;
-ALTER TABLE supptranstaxes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE systypes  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE tags CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxauthorities CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxauthrates CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxcategories CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxgroups CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxgrouptaxes CONVERT TO CHARACTER SET utf8;
-ALTER TABLE taxprovinces  CONVERT TO CHARACTER SET utf8;
-ALTER TABLE unitsofmeasure CONVERT TO CHARACTER SET utf8;
-ALTER TABLE woitems CONVERT TO CHARACTER SET utf8;
-ALTER TABLE worequirements CONVERT TO CHARACTER SET utf8;
-ALTER TABLE workcentres CONVERT TO CHARACTER SET utf8;
-ALTER TABLE workorders CONVERT TO CHARACTER SET utf8;
-ALTER TABLE woserialnos CONVERT TO CHARACTER SET utf8;
-ALTER TABLE www_users CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_accountgroups CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_accountsection CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_areas  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_audittrail CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_bankaccounts CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_banktrans CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_bom CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_buckets CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_chartdetails CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_chartmaster CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_cogsglpostings CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_companies CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_config CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_currencies CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_custallocns CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_custbranch CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_custcontacts CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_custnotes  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_debtorsmaster CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_debtortrans CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_debtortranstaxes  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_debtortype CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_debtortypenotes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_deliverynotes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_discountmatrix CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_edi_orders_seg_groups  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_edi_orders_segs CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_ediitemmapping CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_edimessageformat CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_factorcompanies CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_freightcosts  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_geocode_param CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_gltrans CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_grns  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_holdreasons CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_lastcostrollup CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_locations CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_locstock  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_loctransfers  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_mrpcalendar  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_mrpdemands CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_mrpdemandtypes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_orderdeliverydifferenceslog CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_paymentmethods CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_paymentterms CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_periods CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_prices CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_purchdata CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_purchorderauth CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_purchorderdetails CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_purchorders   CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_recurringsalesorders CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_recurrsalesorderdetails CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_reportcolumns CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_reportfields  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_reportheaders CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_reportlinks   CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_reports  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salesanalysis CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salescat CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salescatprod  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salesglpostings  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salesman      CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salesorderdetails  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salesorders CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_salestypes  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_scripts  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_securitygroups CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_securityroles CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_securitytokens CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_shipmentcharges CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_shipments  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_shippers CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockcategory CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockcatproperties CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockcheckfreeze CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockcounts   CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockitemproperties CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockmaster CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockmoves CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockmovestaxes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockserialitems CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_stockserialmoves CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_suppallocs CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_suppliercontacts CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_suppliers CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_supptrans CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_supptranstaxes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_systypes  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_tags CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxauthorities CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxauthrates CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxcategories CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxgroups CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxgrouptaxes CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_taxprovinces  CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_unitsofmeasure CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_woitems CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_worequirements CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_workcentres CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_workorders CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_woserialnos CONVERT TO CHARACTER SET utf8;
+ALTER TABLE weberp_www_users CONVERT TO CHARACTER SET utf8;
 
-INSERT INTO `config` (`confname`, `confvalue`) VALUES ('FrequentlyOrderedItems',0);
-ALTER TABLE `www_users` CHANGE COLUMN `language` `language` varchar(10) NOT NULL DEFAULT 'en_GB.utf8';
+INSERT INTO `weberp_config` (`confname`, `confvalue`) VALUES ('FrequentlyOrderedItems',0);
+ALTER TABLE `weberp_www_users` CHANGE COLUMN `language` `language` varchar(10) NOT NULL DEFAULT 'en_GB.utf8';
 
-ALTER TABLE `currencies` ADD COLUMN `decimalplaces` tinyint(3) NOT NULL DEFAULT 2 AFTER `hundredsname`;
+ALTER TABLE `weberp_currencies` ADD COLUMN `decimalplaces` tinyint(3) NOT NULL DEFAULT 2 AFTER `hundredsname`;
 
-INSERT INTO `config` (`confname`, `confvalue`) VALUES ('NumberOfMonthMustBeShown', '6');
+INSERT INTO `weberp_config` (`confname`, `confvalue`) VALUES ('NumberOfMonthMustBeShown', '6');
 
-ALTER TABLE `holdreasons` DROP INDEX `ReasonCode`;
-ALTER TABLE `chartmaster` DROP INDEX `AccountCode`;
+ALTER TABLE `weberp_holdreasons` DROP INDEX `ReasonCode`;
+ALTER TABLE `weberp_chartmaster` DROP INDEX `AccountCode`;
 
-ALTER TABLE `purchorders` ADD COLUMN `paymentterms` char(2) NOT NULL DEFAULT '';
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress1` varchar(40) NOT NULL DEFAULT '' AFTER deladd6;
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress2` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress1;
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress3` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress2;
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress4` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress3;
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress5` varchar(20) NOT NULL DEFAULT '' AFTER suppdeladdress4;
-ALTER TABLE `purchorders` ADD COLUMN `suppdeladdress6` varchar(15) NOT NULL DEFAULT '' AFTER suppdeladdress5;
-ALTER TABLE `purchorders` ADD COLUMN `suppliercontact` varchar(30) NOT NULL DEFAULT '' AFTER suppdeladdress6;
-ALTER TABLE `purchorders` ADD COLUMN `supptel` varchar(30) NOT NULL DEFAULT '' AFTER suppliercontact;
-ALTER TABLE `purchorders` ADD COLUMN `tel` varchar(15) NOT NULL DEFAULT '' AFTER deladd6;
-ALTER TABLE `purchorders` ADD COLUMN `port` varchar(40) NOT NULL DEFAULT '' ;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `paymentterms` char(2) NOT NULL DEFAULT '';
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress1` varchar(40) NOT NULL DEFAULT '' AFTER deladd6;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress2` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress1;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress3` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress2;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress4` varchar(40) NOT NULL DEFAULT '' AFTER suppdeladdress3;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress5` varchar(20) NOT NULL DEFAULT '' AFTER suppdeladdress4;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppdeladdress6` varchar(15) NOT NULL DEFAULT '' AFTER suppdeladdress5;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `suppliercontact` varchar(30) NOT NULL DEFAULT '' AFTER suppdeladdress6;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `supptel` varchar(30) NOT NULL DEFAULT '' AFTER suppliercontact;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `tel` varchar(15) NOT NULL DEFAULT '' AFTER deladd6;
+ALTER TABLE `weberp_purchorders` ADD COLUMN `port` varchar(40) NOT NULL DEFAULT '' ;
 
-ALTER TABLE `suppliers` DROP FOREIGN KEY `suppliers_ibfk_4`;
+ALTER TABLE `weberp_suppliers` DROP FOREIGN KEY `suppliers_ibfk_4`;
 UPDATE `suppliers` SET `factorcompanyid`=0 WHERE `factorcompanyid`=1;
 DELETE FROM `factorcompanies` WHERE `coyname`='None';
 
-INSERT INTO  `config` (`confname`, `confvalue`) VALUES ('LogPath', '');
-INSERT INTO  `config` (`confname`, `confvalue`) VALUES ('LogSeverity', '0');
+INSERT INTO weberp_ `config` (`confname`, `confvalue`) VALUES ('LogPath', '');
+INSERT INTO weberp_ `config` (`confname`, `confvalue`) VALUES ('LogSeverity', '0');
 
-ALTER TABLE `www_users` ADD COLUMN `pdflanguage` tinyint(1) NOT NULL DEFAULT '0';
+ALTER TABLE `weberp_www_users` ADD COLUMN `pdflanguage` tinyint(1) NOT NULL DEFAULT '0';
 
-ALTER TABLE `purchorderauth` ADD COLUMN `offhold` tinyint(1) NOT NULL DEFAULT 0;
+ALTER TABLE `weberp_purchorderauth` ADD COLUMN `offhold` tinyint(1) NOT NULL DEFAULT 0;
 
 UPDATE `www_users` SET `modulesallowed` = '1,1,1,1,1,1,1,1,1,1';
 
 UPDATE securitytokens SET tokenname = 'Petty Cash' WHERE tokenid = 6;
 
-CREATE TABLE IF NOT EXISTS `pcashdetails` (
+CREATE TABLE weberp_IF NOT EXISTS `pcashdetails` (
   `counterindex` int(20) NOT NULL AUTO_INCREMENT,
   `tabcode` varchar(20) NOT NULL,
   `date` date NOT NULL,
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS `pcashdetails` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
-CREATE TABLE IF NOT EXISTS `pcexpenses` (
+CREATE TABLE weberp_IF NOT EXISTS `pcexpenses` (
   `codeexpense` varchar(20) NOT NULL COMMENT 'code for the group',
   `description` varchar(50) NOT NULL COMMENT 'text description, e.g. meals, train tickets, fuel, etc',
   `glaccount` int(11) NOT NULL COMMENT 'GL related account',
@@ -163,14 +163,14 @@ CREATE TABLE IF NOT EXISTS `pcexpenses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE IF NOT EXISTS `pctabexpenses` (
+CREATE TABLE weberp_IF NOT EXISTS `pctabexpenses` (
   `typetabcode` varchar(20) NOT NULL,
   `codeexpense` varchar(20) NOT NULL,
   KEY (`typetabcode`),
   KEY (`codeexpense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `pctabs` (
+CREATE TABLE weberp_IF NOT EXISTS `pctabs` (
   `tabcode` varchar(20) NOT NULL,
   `usercode` varchar(20) NOT NULL COMMENT 'code of user employee from www_users',
   `typetabcode` varchar(20) NOT NULL,
@@ -187,34 +187,34 @@ CREATE TABLE IF NOT EXISTS `pctabs` (
   KEY (`glaccountassignment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `pctypetabs` (
+CREATE TABLE weberp_IF NOT EXISTS `pctypetabs` (
   `typetabcode` varchar(20) NOT NULL COMMENT 'code for the type of petty cash tab',
   `typetabdescription` varchar(50) NOT NULL COMMENT 'text description, e.g. tab for CEO',
   PRIMARY KEY (`typetabcode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `pcexpenses`   ADD CONSTRAINT `pcexpenses_ibfk_1` FOREIGN KEY (`glaccount`) REFERENCES `chartmaster` (`accountcode`);
+ALTER TABLE `weberp_pcexpenses`   ADD CONSTRAINT `pcexpenses_ibfk_1` FOREIGN KEY (`glaccount`) REFERENCES `chartmaster` (`accountcode`);
 
-ALTER TABLE `pctabexpenses`
+ALTER TABLE `weberp_pctabexpenses`
   ADD CONSTRAINT `pctabexpenses_ibfk_1` FOREIGN KEY (`typetabcode`) REFERENCES `pctypetabs` (`typetabcode`),
   ADD CONSTRAINT `pctabexpenses_ibfk_2` FOREIGN KEY (`codeexpense`) REFERENCES `pcexpenses` (`codeexpense`);
 
-ALTER TABLE `pctabs`
+ALTER TABLE `weberp_pctabs`
   ADD CONSTRAINT `pctabs_ibfk_1` FOREIGN KEY (`usercode`) REFERENCES `www_users` (`userid`),
   ADD CONSTRAINT `pctabs_ibfk_2` FOREIGN KEY (`typetabcode`) REFERENCES `pctypetabs` (`typetabcode`),
   ADD CONSTRAINT `pctabs_ibfk_3` FOREIGN KEY (`currency`) REFERENCES `currencies` (`currabrev`),
   ADD CONSTRAINT `pctabs_ibfk_4` FOREIGN KEY (`authorizer`) REFERENCES `www_users` (`userid`),
   ADD CONSTRAINT `pctabs_ibfk_5` FOREIGN KEY (`glaccountassignment`) REFERENCES `chartmaster` (`accountcode`);
 
-ALTER TABLE `supptrans`  ADD COLUMN `inputdate` datetime NOT NULL AFTER `duedate` ;
+ALTER TABLE `weberp_supptrans`  ADD COLUMN `inputdate` datetime NOT NULL AFTER `duedate` ;
 
-ALTER TABLE `debtortrans`  ADD COLUMN `inputdate` datetime NOT NULL AFTER `trandate` ;
+ALTER TABLE `weberp_debtortrans`  ADD COLUMN `inputdate` datetime NOT NULL AFTER `trandate` ;
 
-ALTER TABLE `reportfields` CHANGE COLUMN `fieldname` `fieldname` VARCHAR(60) NOT NULL DEFAULT '';
+ALTER TABLE `weberp_reportfields` CHANGE COLUMN `fieldname` `fieldname` VARCHAR(60) NOT NULL DEFAULT '';
 
-INSERT INTO `config` (`confname`, `confvalue`) VALUES ('RequirePickingNote',0);
+INSERT INTO `weberp_config` (`confname`, `confvalue`) VALUES ('RequirePickingNote',0);
 
-CREATE TABLE IF NOT EXISTS `pickinglists` (
+CREATE TABLE weberp_IF NOT EXISTS `pickinglists` (
   `pickinglistno` int(11) NOT NULL DEFAULT 0,
   `orderno` int(11) NOT NULL DEFAULT 0,
   `pickinglistdate` date NOT NULL default '0000-00-00',
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `pickinglists` (
   PRIMARY KEY (`pickinglistno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `pickinglistdetails` (
+CREATE TABLE weberp_IF NOT EXISTS `pickinglistdetails` (
   `pickinglistno` int(11) NOT NULL DEFAULT 0,
   `pickinglistlineno` int(11) NOT NULL DEFAULT 0,
   `orderlineno` int(11) NOT NULL DEFAULT 0,
@@ -234,29 +234,29 @@ CREATE TABLE IF NOT EXISTS `pickinglistdetails` (
   PRIMARY KEY (`pickinglistno`, `pickinglistlineno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `systypes` VALUES(19, 'Picking List', 0);
-ALTER TABLE `prices` ADD `startdate` DATE NOT NULL DEFAULT '0000-00-00' , ADD `enddate` DATE NOT NULL DEFAULT '0000-00-00';
-ALTER TABLE prices DROP PRIMARY KEY ,
+INSERT INTO `weberp_systypes` VALUES(19, 'Picking List', 0);
+ALTER TABLE `weberp_prices` ADD `startdate` DATE NOT NULL DEFAULT '0000-00-00' , ADD `enddate` DATE NOT NULL DEFAULT '0000-00-00';
+ALTER TABLE weberp_prices DROP PRIMARY KEY ,
 ADD PRIMARY KEY ( `stockid` , `typeabbrev` , `currabrev` , `debtorno` , `branchcode`, `startdate` , `enddate` ) ;
-ALTER TABLE purchdata ADD column minorderqty int(11) NOT NULL default 1;
+ALTER TABLE weberp_purchdata ADD column minorderqty int(11) NOT NULL default 1;
 UPDATE prices SET startdate='1999-01-01', enddate='0000-00-00';
 
-ALTER TABLE stockcheckfreeze ADD COLUMN stockcheckdate date NOT NULL;
+ALTER TABLE weberp_stockcheckfreeze ADD COLUMN stockcheckdate date NOT NULL;
 
-ALTER TABLE suppliers add (email varchar(55),fax varchar(25), telephone varchar(25));
+ALTER TABLE weberp_suppliers add (email varchar(55),fax varchar(25), telephone varchar(25));
 
-ALTER TABLE `www_users` add `supplierid` varchar(10) NOT NULL DEFAULT '' AFTER `customerid`;
-INSERT INTO `securityroles` VALUES (9,'Supplier Log On Only');
+ALTER TABLE `weberp_www_users` add `supplierid` varchar(10) NOT NULL DEFAULT '' AFTER `customerid`;
+INSERT INTO `weberp_securityroles` VALUES (9,'Supplier Log On Only');
 UPDATE `securitytokens` SET `tokenname`='Supplier centre - Supplier access only' WHERE tokenid=9;
-INSERT INTO `securitygroups` VALUES(9,9);
+INSERT INTO `weberp_securitygroups` VALUES(9,9);
 
-ALTER TABLE locations add cashsalecustomer VARCHAR(21) NOT NULL DEFAULT '';
+ALTER TABLE weberp_locations add cashsalecustomer VARCHAR(21) NOT NULL DEFAULT '';
 
-DROP TABLE contracts;
-DROP TABLE contractreqts;
-DROP TABLE contractbom;
+DROP TABLE weberp_contracts;
+DROP TABLE weberp_contractreqts;
+DROP TABLE weberp_contractbom;
 
-CREATE TABLE IF NOT EXISTS `contractbom` (
+CREATE TABLE weberp_IF NOT EXISTS `contractbom` (
    contractref varchar(20) NOT NULL DEFAULT '0',
    `stockid` varchar(20) NOT NULL DEFAULT '',
   `workcentreadded` char(5) NOT NULL DEFAULT '',
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS `contractbom` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE IF NOT EXISTS `contractreqts` (
+CREATE TABLE weberp_IF NOT EXISTS `contractreqts` (
   `contractreqid` int(11) NOT NULL AUTO_INCREMENT,
   `contractref` varchar(20) NOT NULL DEFAULT '0',
   `requirement` varchar(40) NOT NULL DEFAULT '',
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS `contractreqts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE IF NOT EXISTS `contracts` (
+CREATE TABLE weberp_IF NOT EXISTS `contracts` (
   `contractref` varchar(20) NOT NULL DEFAULT '',
   `contractdescription` text NOT NULL DEFAULT '',
   `debtorno` varchar(10) NOT NULL DEFAULT '',
@@ -310,10 +310,10 @@ CREATE TABLE IF NOT EXISTS `contracts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-ALTER TABLE `salestypes` CHANGE COLUMN `sales_type` `sales_type` VARCHAR(40) NOT NULL DEFAULT '';
-INSERT INTO `config` VALUES ('ShowValueOnGRN', 1);
+ALTER TABLE `weberp_salestypes` CHANGE COLUMN `sales_type` `sales_type` VARCHAR(40) NOT NULL DEFAULT '';
+INSERT INTO `weberp_config` VALUES ('ShowValueOnGRN', 1);
 
-CREATE TABLE IF NOT EXISTS `offers` (
+CREATE TABLE weberp_IF NOT EXISTS `offers` (
   offerid int(11) NOT NULL AUTO_INCREMENT,
   tenderid int(11) NOT NULL DEFAULT 0,
   supplierid varchar(10) NOT NULL DEFAULT '',
@@ -328,9 +328,9 @@ CREATE TABLE IF NOT EXISTS `offers` (
   CONSTRAINT `offers_ibfk_2` FOREIGN KEY (`stockid`) REFERENCES `stockmaster` (`stockid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `config` VALUES('PurchasingManagerEmail', '');
+INSERT INTO `weberp_config` VALUES('PurchasingManagerEmail', '');
 
-CREATE TABLE IF NOT EXISTS `emailsettings` (
+CREATE TABLE weberp_IF NOT EXISTS `emailsettings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `host` varchar(30) NOT NULL,
   `port` char(5) NOT NULL,
@@ -343,31 +343,31 @@ CREATE TABLE IF NOT EXISTS `emailsettings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO emailsettings VALUES(Null, 'localhost', 25, 'helo', '', '', 5, '', 0);
+INSERT INTO weberp_emailsettings VALUES(Null, 'localhost', 25, 'helo', '', '', 5, '', 0);
 
-ALTER TABLE `salesorderdetails` ADD COLUMN `commissionrate` double NOT NULL DEFAULT 0.0;
-ALTER TABLE `salesorderdetails` ADD COLUMN `commissionearned` double NOT NULL DEFAULT 0.0;
+ALTER TABLE `weberp_salesorderdetails` ADD COLUMN `commissionrate` double NOT NULL DEFAULT 0.0;
+ALTER TABLE `weberp_salesorderdetails` ADD COLUMN `commissionearned` double NOT NULL DEFAULT 0.0;
 
-CREATE TABLE `suppliertype` (
+CREATE TABLE `weberp_suppliertype` (
   `typeid` tinyint(4) NOT NULL AUTO_INCREMENT,
   `typename` varchar(100) NOT NULL,
   PRIMARY KEY (`typeid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-INSERT INTO `config` VALUES ('DefaultSupplierType', 1);
-INSERT INTO `suppliertype` VALUES(1, 'Default');
-ALTER TABLE `suppliers` ADD COLUMN `supptype` tinyint(4) NOT NULL DEFAULT 1 AFTER `address6`;
+INSERT INTO `weberp_config` VALUES ('DefaultSupplierType', 1);
+INSERT INTO `weberp_suppliertype` VALUES(1, 'Default');
+ALTER TABLE `weberp_suppliers` ADD COLUMN `supptype` tinyint(4) NOT NULL DEFAULT 1 AFTER `address6`;
 
-ALTER TABLE `loctransfers` CHANGE COLUMN `shipqty` `shipqty` double NOT NULL DEFAULT 0.0;
+ALTER TABLE `weberp_loctransfers` CHANGE COLUMN `shipqty` `shipqty` double NOT NULL DEFAULT 0.0;
 
 UPDATE `securitytokens` SET `tokenname`='Prices Security' WHERE tokenid=12;
 
-ALTER TABLE `www_users` CHANGE `supplierid` `supplierid` VARCHAR( 10 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
-ALTER TABLE `orderdeliverydifferenceslog` DROP PRIMARY KEY;
+ALTER TABLE `weberp_www_users` CHANGE `supplierid` `supplierid` VARCHAR( 10 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `weberp_orderdeliverydifferenceslog` DROP PRIMARY KEY;
 
-ALTER TABLE `loctransfers` CHANGE COLUMN `recqty` `recqty` double NOT NULL DEFAULT 0.0;
+ALTER TABLE `weberp_loctransfers` CHANGE COLUMN `recqty` `recqty` double NOT NULL DEFAULT 0.0;
 
-CREATE TABLE IF NOT EXISTS `contractcharges` (
+CREATE TABLE weberp_IF NOT EXISTS `contractcharges` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `contractref` varchar(20) NOT NULL,
   `transtype` SMALLINT NOT NULL DEFAULT 20,
@@ -380,39 +380,39 @@ CREATE TABLE IF NOT EXISTS `contractcharges` (
   CONSTRAINT `contractcharges_ibfk_2` FOREIGN KEY (`transtype`) REFERENCES `systypes` (`typeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `systypes` (`typeid`, `typename`, `typeno`) VALUES ('32', 'Contract Close', '1');
+INSERT INTO `weberp_systypes` (`typeid`, `typename`, `typeno`) VALUES ('32', 'Contract Close', '1');
 
-ALTER TABLE `reports` ADD `col9width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col8width` ;
+ALTER TABLE `weberp_reports` ADD `col9width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col8width` ;
 
-ALTER TABLE `reports` ADD `col10width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col9width` ;
+ALTER TABLE `weberp_reports` ADD `col10width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col9width` ;
 
-ALTER TABLE `reports` ADD `col11width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col10width` ;
+ALTER TABLE `weberp_reports` ADD `col11width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col10width` ;
 
-ALTER TABLE `reports` ADD `col12width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col11width` ;
+ALTER TABLE `weberp_reports` ADD `col12width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col11width` ;
 
-ALTER TABLE `reports` ADD `col13width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col12width` ;
+ALTER TABLE `weberp_reports` ADD `col13width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col12width` ;
 
-ALTER TABLE `reports` ADD `col14width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col13width` ;
+ALTER TABLE `weberp_reports` ADD `col14width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col13width` ;
 
-ALTER TABLE `reports` ADD `col15width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col14width` ;
+ALTER TABLE `weberp_reports` ADD `col15width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col14width` ;
 
-ALTER TABLE `reports` ADD `col16width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col15width` ;
+ALTER TABLE `weberp_reports` ADD `col16width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col15width` ;
 
-ALTER TABLE `reports` ADD `col17width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col16width` ;
+ALTER TABLE `weberp_reports` ADD `col17width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col16width` ;
 
-ALTER TABLE `reports` ADD `col18width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col17width` ;
+ALTER TABLE `weberp_reports` ADD `col18width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col17width` ;
 
-ALTER TABLE `reports` ADD `col19width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col18width` ;
+ALTER TABLE `weberp_reports` ADD `col19width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col18width` ;
 
-ALTER TABLE `reports` ADD `col20width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col19width` ;
+ALTER TABLE `weberp_reports` ADD `col20width` INT( 3 ) NOT NULL DEFAULT '25' AFTER `col19width` ;
 
-ALTER TABLE `reportfields` CHANGE `fieldname` `fieldname` VARCHAR( 80) NOT NULL DEFAULT '';
+ALTER TABLE `weberp_reportfields` CHANGE `fieldname` `fieldname` VARCHAR( 80) NOT NULL DEFAULT '';
 
-ALTER TABLE `stockcatproperties` ADD `maximumvalue` DOUBLE NOT NULL DEFAULT 999999999 AFTER `defaultvalue` ,
+ALTER TABLE `weberp_stockcatproperties` ADD `maximumvalue` DOUBLE NOT NULL DEFAULT 999999999 AFTER `defaultvalue` ,
 	ADD `minimumvalue` DOUBLE NOT NULL DEFAULT -999999999,
 	ADD `numericvalue` TINYINT NOT NULL DEFAULT 0 ;
 
-CREATE TABLE IF NOT EXISTS `fixedassetcategories` (
+CREATE TABLE weberp_IF NOT EXISTS `fixedassetcategories` (
   `categoryid` char(6) NOT NULL DEFAULT '',
   `categorydescription` char(20) NOT NULL DEFAULT '',
   `costact` int(11) NOT NULL DEFAULT '0',
@@ -424,7 +424,7 @@ CREATE TABLE IF NOT EXISTS `fixedassetcategories` (
   PRIMARY KEY (`categoryid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `fixedassets` (
+CREATE TABLE weberp_IF NOT EXISTS `fixedassets` (
   `assetid` int(11) NOT NULL AUTO_INCREMENT,
   `serialno` varchar(30) NOT NULL DEFAULT '',
   `barcode` varchar(20) NOT NULL,
@@ -444,12 +444,12 @@ CREATE TABLE IF NOT EXISTS `fixedassets` (
 
 
 
-INSERT INTO `systypes` (`typeid`, `typename`, `typeno`) VALUES ('41', 'Asset Addition', '1');
-INSERT INTO `systypes` (`typeid`, `typename`, `typeno`) VALUES ('42', 'Asset Category Change', '1');
-INSERT INTO `systypes` (`typeid`, `typename`, `typeno`) VALUES ('43', 'Delete w/down asset', '1');
-INSERT INTO `systypes` (`typeid`, `typename`, `typeno`) VALUES ('44', 'Depreciation', '1');
+INSERT INTO `weberp_systypes` (`typeid`, `typename`, `typeno`) VALUES ('41', 'Asset Addition', '1');
+INSERT INTO `weberp_systypes` (`typeid`, `typename`, `typeno`) VALUES ('42', 'Asset Category Change', '1');
+INSERT INTO `weberp_systypes` (`typeid`, `typename`, `typeno`) VALUES ('43', 'Delete w/down asset', '1');
+INSERT INTO `weberp_systypes` (`typeid`, `typename`, `typeno`) VALUES ('44', 'Depreciation', '1');
 
-CREATE TABLE fixedassettrans(
+CREATE TABLE weberp_fixedassettrans(
 	id INT( 11 ) NOT NULL AUTO_INCREMENT ,
 	assetid INT( 11 ) NOT NULL ,
 	transtype TINYINT( 4 ) NOT NULL ,
@@ -465,22 +465,22 @@ CREATE TABLE fixedassettrans(
 	INDEX (transdate)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
-ALTER TABLE stockcheckfreeze CHANGE stockcheckdate stockcheckdate date NOT NULL DEFAULT '0000-00-00';
+ALTER TABLE weberp_stockcheckfreeze CHANGE stockcheckdate stockcheckdate date NOT NULL DEFAULT '0000-00-00';
 
-ALTER TABLE purchorderdetails ADD COLUMN assetid int NOT NULL DEFAULT 0;
+ALTER TABLE weberp_purchorderdetails ADD COLUMN assetid int NOT NULL DEFAULT 0;
 
-INSERT INTO `systypes` (`typeid` ,`typename` ,`typeno`) VALUES ('49', 'Import Fixed Assets', '1');
+INSERT INTO `weberp_systypes` (`typeid` ,`typename` ,`typeno`) VALUES ('49', 'Import Fixed Assets', '1');
 
-DROP TABLE scripts;
+DROP TABLE weberp_scripts;
 
-CREATE TABLE IF NOT EXISTS `scripts` (
+CREATE TABLE weberp_IF NOT EXISTS `scripts` (
   `script` varchar(78) NOT NULL DEFAULT '',
   `pagesecurity` tinyint(11) NOT NULL DEFAULT '1',
   `description` text NOT NULL,
   PRIMARY KEY (`script`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `scripts` (`script`, `pagesecurity`, `description`) VALUES
+INSERT INTO `weberp_scripts` (`script`, `pagesecurity`, `description`) VALUES
 ('AccountGroups.php', 10, 'Defines the groupings of general ledger accounts'),
 ('AccountSections.php', 10, 'Defines the sections in the general ledger reports'),
 ('AddCustomerContacts.php', 3, 'Adds customer contacts'),
@@ -801,27 +801,27 @@ INSERT INTO `scripts` (`script`, `pagesecurity`, `description`) VALUES
 ('Z_UploadForm.php', 15, 'Utility to upload a file to a remote server'),
 ('Z_UploadResult.php', 15, 'Utility to upload a file to a remote server');
 
-INSERT INTO config (confname, confvalue) VALUES ('VersionNumber', '3.12.0');
+INSERT INTO weberp_config (confname, confvalue) VALUES ('VersionNumber', '3.12.0');
 UPDATE config SET confvalue='3.12.1' WHERE confname='VersionNumber';
 
-INSERT INTO `scripts` (`script`, `pagesecurity`, `description`) VALUES
+INSERT INTO `weberp_scripts` (`script`, `pagesecurity`, `description`) VALUES
 ('FormMaker.php', 1, 'Allows running user defined Forms'),
 ('ReportMaker.php', 1, 'Produces reports from the report writer templates created'),
 ('ReportCreator.php', 13, 'Report Writer and Form Creator script that creates templates for user defined reports and forms');
 UPDATE config SET confvalue='3.12.2' WHERE confname='VersionNumber';
-ALTER TABLE `purchorderdetails` CHANGE `nw` `netweight` VARCHAR( 50 )  DEFAULT '';
-ALTER TABLE `purchorderdetails` CHANGE `gw` `kgs` VARCHAR( 50 )  DEFAULT '';
-ALTER TABLE `purchorderdetails` ADD `conversionfactor` DOUBLE NOT NULL DEFAULT '1';
+ALTER TABLE `weberp_purchorderdetails` CHANGE `nw` `netweight` VARCHAR( 50 )  DEFAULT '';
+ALTER TABLE `weberp_purchorderdetails` CHANGE `gw` `kgs` VARCHAR( 50 )  DEFAULT '';
+ALTER TABLE `weberp_purchorderdetails` ADD `conversionfactor` DOUBLE NOT NULL DEFAULT '1';
 UPDATE config SET confvalue='3.12.3' WHERE confname='VersionNumber';
-ALTER TABLE `purchorderdetails` CHANGE `uom` `suppliersunit` VARCHAR( 50 );
+ALTER TABLE `weberp_purchorderdetails` CHANGE `uom` `suppliersunit` VARCHAR( 50 );
 UPDATE config SET confvalue='3.12.31' WHERE confname='VersionNumber';
-INSERT INTO config (`confname`, `confvalue`) VALUES ('AutoAuthorisePO', '1');
+INSERT INTO weberp_config (`confname`, `confvalue`) VALUES ('AutoAuthorisePO', '1');
 UPDATE config SET confvalue='4.03' WHERE confname='VersionNumber';
-ALTER TABLE `salesorders` ADD `poplaced` TINYINT NOT NULL DEFAULT '0',
+ALTER TABLE `weberp_salesorders` ADD `poplaced` TINYINT NOT NULL DEFAULT '0',
 ADD INDEX ( `poplaced` );
 UPDATE config SET confvalue='4.03.1' WHERE confname='VersionNumber';
 
-CREATE TABLE IF NOT EXISTS `fixedassetlocations` (
+CREATE TABLE weberp_IF NOT EXISTS `fixedassetlocations` (
   `locationid` char(6) NOT NULL DEFAULT '',
   `locationdescription` char(20) NOT NULL DEFAULT '',
   `parentlocationid` char(6) DEFAULT '',
@@ -829,21 +829,21 @@ CREATE TABLE IF NOT EXISTS `fixedassetlocations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-INSERT INTO `fixedassetlocations` (`locationid`, `locationdescription`, `parentlocationid`) VALUES
+INSERT INTO `weberp_fixedassetlocations` (`locationid`, `locationdescription`, `parentlocationid`) VALUES
 ('HEADOF', 'Head Office', '');
 UPDATE config SET confvalue='4.03.2' WHERE confname='VersionNumber';
-ALTER TABLE locations ADD cashsalebranch varchar(10) DEFAULT '';
-ALTER TABLE `locations` CHANGE `cashsalecustomer` `cashsalecustomer` VARCHAR( 10 ) DEFAULT '';
+ALTER TABLE weberp_locations ADD cashsalebranch varchar(10) DEFAULT '';
+ALTER TABLE `weberp_locations` CHANGE `cashsalecustomer` `cashsalecustomer` VARCHAR( 10 ) DEFAULT '';
 UPDATE config SET confvalue='4.03.3' WHERE confname='VersionNumber';
-INSERT INTO `scripts` (`script`, `pagesecurity`, `description`) VALUES ('Z_ChangeSupplierCode.php', '15', 'Script to change a supplier code accross all tables necessary');
+INSERT INTO `weberp_scripts` (`script`, `pagesecurity`, `description`) VALUES ('Z_ChangeSupplierCode.php', '15', 'Script to change a supplier code accross all tables necessary');
 UPDATE config SET confvalue='4.03.5' WHERE confname='VersionNumber';
-INSERT INTO `scripts` (`script` ,`pagesecurity` ,`description`) VALUES ( 'ReprintGRN.php', '11', 'Allows selection of a goods received batch for reprinting the goods received note given a purchase order number');
+INSERT INTO `weberp_scripts` (`script` ,`pagesecurity` ,`description`) VALUES ( 'ReprintGRN.php', '11', 'Allows selection of a goods received batch for reprinting the goods received note given a purchase order number');
 UPDATE config SET confvalue='4.03.6' WHERE confname='VersionNumber';
-ALTER TABLE `paymentmethods` ADD `usepreprintedstationery` TINYINT NOT NULL DEFAULT '0';
+ALTER TABLE `weberp_paymentmethods` ADD `usepreprintedstationery` TINYINT NOT NULL DEFAULT '0';
 DELETE FROM scripts WHERE script='PDFStockTransListing.php';
-INSERT INTO scripts (`script` ,`pagesecurity` ,`description`) VALUES('PDFPeriodStockTransListing.php','3','Allows stock transactions of a specific transaction type to be listed over a single day or period range');
+INSERT INTO weberp_scripts (`script` ,`pagesecurity` ,`description`) VALUES('PDFPeriodStockTransListing.php','3','Allows stock transactions of a specific transaction type to be listed over a single day or period range');
 UPDATE config SET confvalue='4.03.7' WHERE confname='VersionNumber';
-ALTER TABLE `purchorderdetails`
+ALTER TABLE `weberp_purchorderdetails`
   DROP `itemno`,
   DROP `subtotal_amount`,
   DROP `package`,

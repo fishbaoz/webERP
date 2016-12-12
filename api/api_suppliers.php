@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_suppliers.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Verify that the supplier number is valid, and doesn't already
    exist.*/
@@ -8,7 +8,7 @@
 			$Errors[$i] = IncorrectDebtorNumberLength;
 		}
 		$Searchsql = "SELECT count(supplierid)
-  				      FROM suppliers
+  				      FROM weberp_suppliers
 				      WHERE supplierid='".$SupplierNumber."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -25,7 +25,7 @@
 			$Errors[$i] = IncorrectDebtorNumberLength;
 		}
 		$Searchsql = "SELECT count(supplierid)
-				      FROM suppliers
+				      FROM weberp_suppliers
 				      WHERE supplierid='".$SupplierNumber."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -47,7 +47,7 @@
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifySupplierSinceDate($suppliersincedate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config where confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config where confname='DefaultDateFormat'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -110,7 +110,7 @@
 /* Check that the factor company is set up in the weberp database */
 	function VerifyFactorCompany($factorco , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(id)
-					 FROM factorcompanies
+					 FROM weberp_factorcompanies
 					  WHERE id='".$factorco."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -203,7 +203,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = 'INSERT INTO suppliers ('.mb_substr($FieldNames,0,-2).') '.
+		$sql = 'INSERT INTO weberp_suppliers ('.mb_substr($FieldNames,0,-2).') '.
 		  'VALUES ('.mb_substr($FieldValues,0,-2).') ';
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -288,7 +288,7 @@
 		if (isset($CustomerDetails['taxref'])){
 			$Errors=VerifyTaxRef($CustomerDetails['taxref'], sizeof($Errors), $Errors);
 		}
-		$sql='UPDATE suppliers SET ';
+		$sql='UPDATE weberp_suppliers SET ';
 		foreach ($SupplierDetails as $key => $value) {
 			$sql .= $key.'="'.$value.'", ';
 		}
@@ -320,7 +320,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM suppliers WHERE supplierid='".$SupplierID."'";
+		$sql="SELECT * FROM weberp_suppliers WHERE supplierid='".$SupplierID."'";
 		$result = DB_Query($sql, $db);
 		if (sizeof($Errors)==0) {
 			return DB_fetch_array($result);
@@ -340,7 +340,7 @@
 			return $Errors;
 		}
 		$sql='SELECT supplierid
-			FROM suppliers
+			FROM weberp_suppliers
 			WHERE '.$Field." LIKE '%".$Criteria."%' ORDER BY supplierid";
 		$result = DB_Query($sql, $db);
 		$i=0;

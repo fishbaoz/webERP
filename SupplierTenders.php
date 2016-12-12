@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SupplierTenders.php 7494 2016-04-25 09:53:53Z daintree $*/
 
 include('includes/DefineOfferClass.php');
 include('includes/session.inc');
@@ -20,7 +20,7 @@ if (empty($_GET['identifier'])) {
 }
 
 if (!isset($_POST['SupplierID'])) {
-	$sql="SELECT supplierid FROM www_users WHERE userid='" . $_SESSION['UserID'] . "'";
+	$sql="SELECT supplierid FROM weberp_www_users WHERE userid='" . $_SESSION['UserID'] . "'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_array($result);
 	if ($myrow['supplierid']=='') {
@@ -40,7 +40,7 @@ if (isset($_GET['Delete'])) {
 
 $sql="SELECT suppname,
 			currcode
-		FROM suppliers
+		FROM weberp_suppliers
 		WHERE supplierid='" . $_POST['SupplierID'] . "'";
 $result=DB_query($sql);
 $myrow=DB_fetch_array($result);
@@ -50,7 +50,7 @@ $Currency=$myrow['currcode'];
 if (isset($_POST['Confirm'])) {
 	$_SESSION['offer'.$identifier]->Save($db);
 	$_SESSION['offer'.$identifier]->EmailOffer();
-	$sql="UPDATE tendersuppliers
+	$sql="UPDATE weberp_tendersuppliers
 			SET responded=1
 			WHERE supplierid='" . $_SESSION['offer'.$identifier]->SupplierID . "'
 			AND tenderid='" . $_SESSION['offer'.$identifier]->TenderID . "'";
@@ -89,7 +89,7 @@ if (isset($_POST['Process'])) {
 	echo '<table class="selection">';
 	echo '<input type="hidden" name="TenderType" value="3" />';
 	$LocationSQL="SELECT tenderid,
-						locations.locationname,
+						weberp_locations.locationname,
 						address1,
 						address2,
 						address3,
@@ -97,14 +97,14 @@ if (isset($_POST['Process'])) {
 						address5,
 						address6,
 						telephone
-					FROM tenders
-					INNER JOIN locations
-					ON tenders.location=locations.loccode
+					FROM weberp_tenders
+					INNER JOIN weberp_locations
+					ON weberp_tenders.location=weberp_locations.loccode
 					WHERE closed=0
 					AND tenderid='".$_SESSION['offer'.$identifier]->TenderID."'";
 	$LocationResult=DB_query($LocationSQL);
 	$MyLocationRow=DB_fetch_row($LocationResult);
-	$CurrencySQL="SELECT decimalplaces from currencies WHERE currabrev='".$_SESSION['offer'.$identifier]->CurrCode."'";
+	$CurrencySQL="SELECT decimalplaces from weberp_currencies WHERE currabrev='".$_SESSION['offer'.$identifier]->CurrCode."'";
 	$CurrencyResult=DB_query($CurrencySQL);
 	$CurrencyRow=DB_fetch_array($CurrencyResult);
 	echo '<tr>
@@ -192,7 +192,7 @@ if (isset($_POST['NewItem']) AND !isset($_POST['Refresh'])) {
 			$Price=filter_number_format($_POST['Price'.$Index]);
 			$UOM=$_POST['uom'.$Index];
 			if (isset($UOM) AND $Quantity>0) {
-				$sql="SELECT description, decimalplaces FROM stockmaster WHERE stockid='".$StockID."'";
+				$sql="SELECT description, decimalplaces FROM weberp_stockmaster WHERE stockid='".$StockID."'";
 				$result=DB_query($sql);
 				$myrow=DB_fetch_array($result);
 				$_SESSION['offer'.$identifier]->add_to_offer($_SESSION['offer'.$identifier]->LinesOnOffer,
@@ -288,19 +288,19 @@ if (isset($_POST['Save'])) {
 /*The supplier has chosen option 1
  */
 if (isset($_POST['TenderType']) AND $_POST['TenderType']==1 AND !isset($_POST['Refresh']) AND !isset($_GET['Delete'])) {
-	$sql="SELECT offers.offerid,
-				offers.stockid,
-				stockmaster.description,
-				offers.quantity,
-				offers.uom,
-				offers.price,
-				offers.expirydate,
-				stockmaster.decimalplaces
-			FROM offers
-			INNER JOIN stockmaster
-				ON offers.stockid=stockmaster.stockid
-			WHERE offers.supplierid='" . $_POST['SupplierID'] . "'
-			AND offers.expirydate>='" . date('Y-m-d') . "'";
+	$sql="SELECT weberp_offers.offerid,
+				weberp_offers.stockid,
+				weberp_stockmaster.description,
+				weberp_offers.quantity,
+				weberp_offers.uom,
+				weberp_offers.price,
+				weberp_offers.expirydate,
+				weberp_stockmaster.decimalplaces
+			FROM weberp_offers
+			INNER JOIN weberp_stockmaster
+				ON weberp_offers.stockid=weberp_stockmaster.stockid
+			WHERE weberp_offers.supplierid='" . $_POST['SupplierID'] . "'
+			AND weberp_offers.expirydate>='" . date('Y-m-d') . "'";
 	$result=DB_query($sql);
 	$_SESSION['offer'.$identifier]=new Offer($_POST['SupplierID']);
 	$_SESSION['offer'.$identifier]->CurrCode=$Currency;
@@ -389,7 +389,7 @@ if (isset($_POST['TenderType'])
 
 	$sql = "SELECT categoryid,
 				categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 	$result = DB_query($sql);
 
@@ -456,17 +456,17 @@ if (isset($_POST['TenderType'])
 	OR isset($_GET['Delete'])) {
 
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/supplier.png" title="' . _('Tenders') . '" alt="" />' . ' ' . _('Tenders Waiting For Offers') . '</p>';
-	$sql="SELECT DISTINCT tendersuppliers.tenderid,
-				suppliers.currcode
-			FROM tendersuppliers
-			LEFT JOIN suppliers
-			ON suppliers.supplierid=tendersuppliers.supplierid
-			LEFT JOIN tenders
-			ON tenders.tenderid=tendersuppliers.tenderid
-			WHERE tendersuppliers.supplierid='" . $_POST['SupplierID'] . "'
-			AND tenders.closed=0
-			AND tendersuppliers.responded=0
-			ORDER BY tendersuppliers.tenderid";
+	$sql="SELECT DISTINCT weberp_tendersuppliers.tenderid,
+				weberp_suppliers.currcode
+			FROM weberp_tendersuppliers
+			LEFT JOIN weberp_suppliers
+			ON weberp_suppliers.supplierid=weberp_tendersuppliers.supplierid
+			LEFT JOIN weberp_tenders
+			ON weberp_tenders.tenderid=weberp_tendersuppliers.tenderid
+			WHERE weberp_tendersuppliers.supplierid='" . $_POST['SupplierID'] . "'
+			AND weberp_tenders.closed=0
+			AND weberp_tendersuppliers.responded=0
+			ORDER BY weberp_tendersuppliers.tenderid";
 	$result=DB_query($sql);
 	echo '<table class="selection">';
 	echo '<tr>
@@ -477,7 +477,7 @@ if (isset($_POST['TenderType'])
 		echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 		echo '<input type="hidden" name="TenderType" value="3" />';
 		$LocationSQL="SELECT tenderid,
-							locations.locationname,
+							weberp_locations.locationname,
 							address1,
 							address2,
 							address3,
@@ -485,9 +485,9 @@ if (isset($_POST['TenderType'])
 							address5,
 							address6,
 							telephone
-						FROM tenders
-						INNER JOIN locations
-						ON tenders.location=locations.loccode
+						FROM weberp_tenders
+						INNER JOIN weberp_locations
+						ON weberp_tenders.location=weberp_locations.loccode
 						WHERE closed=0
 						AND tenderid='".$myrow[0]."'";
 		$LocationResult=DB_query($LocationSQL);
@@ -505,24 +505,24 @@ if (isset($_POST['TenderType'])
 		echo '<input type="hidden" value="' . $myrow[0] . '" name="Tender" />';
 		echo '<th><input type="submit" value="' . _('Process') . "\n" . _('Tender') . '" name="Process" /></th>
 			</tr>';
-		$ItemSQL="SELECT tenderitems.tenderid,
-						tenderitems.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						purchdata.suppliers_partno,
-						tenderitems.quantity,
-						tenderitems.units,
-						tenders.requiredbydate,
-						purchdata.suppliersuom
-					FROM tenderitems
-					LEFT JOIN stockmaster
-					ON tenderitems.stockid=stockmaster.stockid
-					LEFT JOIN purchdata
-					ON tenderitems.stockid=purchdata.stockid
-					AND purchdata.supplierno='".$_POST['SupplierID']."'
-					LEFT JOIN tenders
-					ON tenders.tenderid=tenderitems.tenderid
-					WHERE tenderitems.tenderid='" . $myrow[0] . "'";
+		$ItemSQL="SELECT weberp_tenderitems.tenderid,
+						weberp_tenderitems.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_purchdata.suppliers_partno,
+						weberp_tenderitems.quantity,
+						weberp_tenderitems.units,
+						weberp_tenders.requiredbydate,
+						weberp_purchdata.suppliersuom
+					FROM weberp_tenderitems
+					LEFT JOIN weberp_stockmaster
+					ON weberp_tenderitems.stockid=weberp_stockmaster.stockid
+					LEFT JOIN weberp_purchdata
+					ON weberp_tenderitems.stockid=weberp_purchdata.stockid
+					AND weberp_purchdata.supplierno='".$_POST['SupplierID']."'
+					LEFT JOIN weberp_tenders
+					ON weberp_tenders.tenderid=weberp_tenderitems.tenderid
+					WHERE weberp_tenderitems.tenderid='" . $myrow[0] . "'";
 		$ItemResult=DB_query($ItemSQL);
 		echo '<tr>
 				<th>' . stripslashes($_SESSION['CompanyRecord']['coyname']) . '<br />' . _('Item Code') . '</th>
@@ -580,30 +580,30 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.description " . LIKE . " '$SearchString'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.description " . LIKE . " '$SearchString'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif ($_POST['StockCode']){
@@ -611,56 +611,56 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 		$_POST['StockCode'] = '%' . $_POST['StockCode'] . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} else {
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 	}
 
@@ -722,10 +722,10 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 
 			$UOMsql="SELECT conversionfactor,
 						suppliersuom,
-						unitsofmeasure.unitname
-					FROM purchdata
-					LEFT JOIN unitsofmeasure
-					ON purchdata.suppliersuom=unitsofmeasure.unitid
+						weberp_unitsofmeasure.unitname
+					FROM weberp_purchdata
+					LEFT JOIN weberp_unitsofmeasure
+					ON weberp_purchdata.suppliersuom=weberp_unitsofmeasure.unitid
 					WHERE supplierno='".$_POST['SupplierID']."'
 					AND stockid='" . $myrow['stockid'] . "'";
 

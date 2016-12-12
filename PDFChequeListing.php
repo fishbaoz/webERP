@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFChequeListing.php 7385 2015-11-11 08:03:20Z tehonu $*/
 
 include('includes/SQL_CommonFunctions.inc');
 include ('includes/session.inc');
@@ -45,7 +45,7 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate'])){
 	</tr>';
 	 echo '<tr><td>' . _('Bank Account') . '</td><td>';
 
-	 $sql = "SELECT bankaccountname, accountcode FROM bankaccounts";
+	 $sql = "SELECT bankaccountname, accountcode FROM weberp_bankaccounts";
 	 $result = DB_query($sql);
 
 
@@ -81,8 +81,8 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate'])){
 
 $sql = "SELECT bankaccountname,
 				decimalplaces AS bankcurrdecimalplaces
-		FROM bankaccounts INNER JOIN currencies
-		ON bankaccounts.currcode=currencies.currabrev
+		FROM weberp_bankaccounts INNER JOIN weberp_currencies
+		ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
 		WHERE accountcode = '" .$_POST['BankAccount'] . "'";
 $BankActResult = DB_query($sql);
 $myrow = DB_fetch_array($BankActResult);
@@ -95,9 +95,9 @@ $sql= "SELECT amount,
 			banktranstype,
 			type,
 			transno
-		FROM banktrans
-		WHERE banktrans.bankact='" . $_POST['BankAccount'] . "'
-		AND (banktrans.type=1 or banktrans.type=22)
+		FROM weberp_banktrans
+		WHERE weberp_banktrans.bankact='" . $_POST['BankAccount'] . "'
+		AND (weberp_banktrans.type=1 or weberp_banktrans.type=22)
 		AND transdate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 		AND transdate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 	
@@ -140,10 +140,10 @@ while ($myrow=DB_fetch_array($Result)){
 					accountcode,
 					amount,
 					narrative
-			FROM gltrans INNER JOIN chartmaster
-			ON gltrans.account=chartmaster.accountcode
-			WHERE gltrans.typeno ='" . $myrow['transno'] . "'
-			AND gltrans.type='" . $myrow['type'] . "'";
+			FROM weberp_gltrans INNER JOIN weberp_chartmaster
+			ON weberp_gltrans.account=weberp_chartmaster.accountcode
+			WHERE weberp_gltrans.typeno ='" . $myrow['transno'] . "'
+			AND weberp_gltrans.type='" . $myrow['type'] . "'";
 
 	$GLTransResult = DB_query($sql,'','',false,false);
 	if (DB_error_no()!=0){
@@ -159,7 +159,7 @@ while ($myrow=DB_fetch_array($Result)){
 	while ($GLRow=DB_fetch_array($GLTransResult)){
 		// if user is allowed to see the account we show it, other wise we show "OTHERS ACCOUNTS"
 		$CheckSql = "SELECT count(*)
-					 FROM glaccountusers
+					 FROM weberp_glaccountusers
 					 WHERE accountcode= '" . $GLRow['accountcode'] . "'
 						 AND userid = '" . $_SESSION['UserID'] . "'
 						 AND canview = '1'";

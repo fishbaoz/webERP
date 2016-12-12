@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectProduct.php 7699 2016-12-06 19:42:15Z turbopt $*/
 /* Selection of items. All item maintenance, transactions and inquiries start with this script. */
 
 $PricesSecurity = 12;//don't show pricing info unless security token 12 available to user
@@ -39,7 +39,7 @@ if (isset($_POST['StockCode'])) {
 // Always show the search facilities
 $SQL = "SELECT categoryid,
 				categorydescription
-		FROM stockcategory
+		FROM weberp_stockcategory
 		ORDER BY categorydescription";
 $result1 = DB_query($SQL);
 if (DB_num_rows($result1) == 0) {
@@ -58,23 +58,23 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 	} else {
 		$StockID = $_SESSION['SelectedStockItem'];
 	}
-	$result = DB_query("SELECT stockmaster.description,
-								stockmaster.longdescription,
-								stockmaster.mbflag,
-								stockcategory.stocktype,
-								stockmaster.units,
-								stockmaster.decimalplaces,
-								stockmaster.controlled,
-								stockmaster.serialised,
-								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS cost,
-								stockmaster.discontinued,
-								stockmaster.eoq,
-								stockmaster.volume,
-								stockmaster.grossweight,
-								stockcategory.categorydescription,
-								stockmaster.categoryid
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
+	$result = DB_query("SELECT weberp_stockmaster.description,
+								weberp_stockmaster.longdescription,
+								weberp_stockmaster.mbflag,
+								weberp_stockcategory.stocktype,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces,
+								weberp_stockmaster.controlled,
+								weberp_stockmaster.serialised,
+								weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS cost,
+								weberp_stockmaster.discontinued,
+								weberp_stockmaster.eoq,
+								weberp_stockmaster.volume,
+								weberp_stockmaster.grossweight,
+								weberp_stockcategory.categorydescription,
+								weberp_stockmaster.categoryid
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
 						WHERE stockid='" . $StockID . "'");
 	$myrow = DB_fetch_array($result);
 	$Its_A_Kitset_Assembly_Or_Dummy = false;
@@ -147,7 +147,7 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 		$PriceResult = DB_query("SELECT typeabbrev,
 										price
-								FROM prices
+								FROM weberp_prices
 								WHERE currabrev ='" . $_SESSION['CompanyRecord']['currencydefault'] . "'
 								AND typeabbrev = '" . $_SESSION['DefaultPriceList'] . "'
 								AND debtorno=''
@@ -155,12 +155,12 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 								AND startdate <= '". Date('Y-m-d') ."' AND ( enddate >= '" . Date('Y-m-d') . "' OR enddate = '0000-00-00')
 								AND stockid='" . $StockID . "'");
 		if ($myrow['mbflag'] == 'K' OR $myrow['mbflag'] == 'A' OR $myrow['mbflag'] == 'G') {
-			$CostResult = DB_query("SELECT SUM(bom.quantity * (stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost)) AS cost
-									FROM bom INNER JOIN stockmaster
-									ON bom.component=stockmaster.stockid
-									WHERE bom.parent='" . $StockID . "'
-                                    AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                                    AND bom.effectiveto > '" . date('Y-m-d') . "'");
+			$CostResult = DB_query("SELECT SUM(weberp_bom.quantity * (weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost)) AS cost
+									FROM weberp_bom INNER JOIN weberp_stockmaster
+									ON weberp_bom.component=weberp_stockmaster.stockid
+									WHERE weberp_bom.parent='" . $StockID . "'
+                                    AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                                    AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'");
 			$CostRow = DB_fetch_row($CostResult);
 			$Cost = $CostRow[0];
 		} else {
@@ -198,7 +198,7 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 					label,
 					controltype,
 					defaultvalue
-				FROM stockcatproperties
+				FROM weberp_stockcatproperties
 				WHERE categoryid ='" . $myrow['categoryid'] . "'
 				AND reqatsalesorder =0
 				ORDER BY stkcatpropid";
@@ -207,7 +207,7 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 	$PropertyWidth = array();
 	while ($PropertyRow = DB_fetch_array($PropertiesResult)) {
 		$PropValResult = DB_query("SELECT value
-									FROM stockitemproperties
+									FROM weberp_stockitemproperties
 									WHERE stockid='" . $StockID . "'
 									AND stkcatpropid ='" . $PropertyRow['stkcatpropid']."'");
 		$PropValRow = DB_fetch_row($PropValResult);
@@ -251,7 +251,7 @@ switch ($myrow['mbflag']) {
 	case 'M':
 	case 'B':
 		$QOHResult = DB_query("SELECT sum(quantity)
-						FROM locstock
+						FROM weberp_locstock
 						WHERE stockid = '" . $StockID . "'");
 		$QOHRow = DB_fetch_row($QOHResult);
 		$QOH = locale_number_format($QOHRow[0], $myrow['decimalplaces']);
@@ -265,37 +265,37 @@ switch ($myrow['mbflag']) {
 	break;
 }
 $Demand = 0;
-$DemResult = DB_query("SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-						FROM salesorderdetails INNER JOIN salesorders
-						ON salesorders.orderno = salesorderdetails.orderno
-						INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-						WHERE salesorderdetails.completed=0
-						AND salesorders.quotation=0
-						AND salesorderdetails.stkcode='" . $StockID . "'");
+$DemResult = DB_query("SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+						FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+						ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_salesorderdetails.completed=0
+						AND weberp_salesorders.quotation=0
+						AND weberp_salesorderdetails.stkcode='" . $StockID . "'");
 $DemRow = DB_fetch_row($DemResult);
 $Demand = $DemRow[0];
-$DemAsComponentResult = DB_query("SELECT  SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-									FROM salesorderdetails INNER JOIN salesorders
-									ON salesorders.orderno = salesorderdetails.orderno
-									INNER JOIN bom ON salesorderdetails.stkcode=bom.parent
-									INNER JOIN stockmaster ON stockmaster.stockid=bom.parent
-									INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-									WHERE salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-									AND bom.component='" . $StockID . "'
-									AND stockmaster.mbflag='A'
-									AND salesorders.quotation=0");
+$DemAsComponentResult = DB_query("SELECT  SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+									FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+									ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+									INNER JOIN weberp_bom ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+									INNER JOIN weberp_stockmaster ON weberp_stockmaster.stockid=weberp_bom.parent
+									INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+									WHERE weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+									AND weberp_bom.component='" . $StockID . "'
+									AND weberp_stockmaster.mbflag='A'
+									AND weberp_salesorders.quotation=0");
 $DemAsComponentRow = DB_fetch_row($DemAsComponentResult);
 $Demand+= $DemAsComponentRow[0];
 //Also the demand for the item as a component of works orders
-$sql = "SELECT SUM(qtypu*(woitems.qtyreqd - woitems.qtyrecd)) AS woqtydemo
-		FROM woitems INNER JOIN worequirements
-		ON woitems.stockid=worequirements.parentstockid
-		INNER JOIN workorders
-		ON woitems.wo=workorders.wo
-		AND woitems.wo=worequirements.wo
-		INNER JOIN locationusers ON locationusers.loccode=workorders.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE  worequirements.stockid='" . $StockID . "'
-		AND workorders.closed=0";
+$sql = "SELECT SUM(qtypu*(weberp_woitems.qtyreqd - weberp_woitems.qtyrecd)) AS woqtydemo
+		FROM weberp_woitems INNER JOIN weberp_worequirements
+		ON weberp_woitems.stockid=weberp_worequirements.parentstockid
+		INNER JOIN weberp_workorders
+		ON weberp_woitems.wo=weberp_workorders.wo
+		AND weberp_woitems.wo=weberp_worequirements.wo
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workorders.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE  weberp_worequirements.stockid='" . $StockID . "'
+		AND weberp_workorders.closed=0";
 $ErrMsg = _('The workorder component demand for this product cannot be retrieved because');
 $DemandResult = DB_query($sql, $ErrMsg);
 if (DB_num_rows($DemandResult) == 1) {
@@ -328,33 +328,33 @@ if (($myrow['mbflag'] == 'B' OR ($myrow['mbflag'] == 'M'))
 				<th style="width:10%">' . _('Lead Time') . '</th>
 				<th style="width:10%">' . _('Min Order Qty') . '</th>
 				<th style="width:5%">' . _('Prefer') . '</th></tr>';
-	$SuppResult = DB_query("SELECT suppliers.suppname,
-									suppliers.currcode,
-									suppliers.supplierid,
-									purchdata.price,
-									purchdata.suppliers_partno,
-									purchdata.leadtime,
-									purchdata.conversionfactor,
-									purchdata.minorderqty,
-									purchdata.preferred,
-									currencies.decimalplaces,
-									MAX(purchdata.effectivefrom)
-								FROM purchdata INNER JOIN suppliers
-								ON purchdata.supplierno=suppliers.supplierid
-								INNER JOIN currencies
-								ON suppliers.currcode=currencies.currabrev
-								WHERE purchdata.stockid = '" . $StockID . "'
-								GROUP BY suppliers.suppname,
-									suppliers.currcode,
-									suppliers.supplierid,
-									purchdata.price,
-									purchdata.suppliers_partno,
-									purchdata.leadtime,
-									purchdata.conversionfactor,
-									purchdata.minorderqty,
-									purchdata.preferred,
-									currencies.decimalplaces
-							ORDER BY purchdata.preferred DESC");
+	$SuppResult = DB_query("SELECT weberp_suppliers.suppname,
+									weberp_suppliers.currcode,
+									weberp_suppliers.supplierid,
+									weberp_purchdata.price,
+									weberp_purchdata.suppliers_partno,
+									weberp_purchdata.leadtime,
+									weberp_purchdata.conversionfactor,
+									weberp_purchdata.minorderqty,
+									weberp_purchdata.preferred,
+									weberp_currencies.decimalplaces,
+									MAX(weberp_purchdata.effectivefrom)
+								FROM weberp_purchdata INNER JOIN weberp_suppliers
+								ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+								INNER JOIN weberp_currencies
+								ON weberp_suppliers.currcode=weberp_currencies.currabrev
+								WHERE weberp_purchdata.stockid = '" . $StockID . "'
+								GROUP BY weberp_suppliers.suppname,
+									weberp_suppliers.currcode,
+									weberp_suppliers.supplierid,
+									weberp_purchdata.price,
+									weberp_purchdata.suppliers_partno,
+									weberp_purchdata.leadtime,
+									weberp_purchdata.conversionfactor,
+									weberp_purchdata.minorderqty,
+									weberp_purchdata.preferred,
+									weberp_currencies.decimalplaces
+							ORDER BY weberp_purchdata.preferred DESC");
 
 	while ($SuppRow = DB_fetch_array($SuppResult)) {
 		echo '<tr>
@@ -448,15 +448,15 @@ if ($Its_A_Kitset_Assembly_Or_Dummy == false) {
 		AND (in_array($SuppliersSecurity, $_SESSION['AllowedPageSecurityTokens']))
 		AND $myrow['discontinued']==0){
 		echo '<br />';
-		$SuppResult = DB_query("SELECT suppliers.suppname,
-										suppliers.supplierid,
-										purchdata.preferred,
-										purchdata.minorderqty,
-										purchdata.leadtime
-									FROM purchdata INNER JOIN suppliers
-									ON purchdata.supplierno=suppliers.supplierid
-									WHERE purchdata.stockid='" . $StockID . "'
-									ORDER BY purchdata.effectivefrom DESC");
+		$SuppResult = DB_query("SELECT weberp_suppliers.suppname,
+										weberp_suppliers.supplierid,
+										weberp_purchdata.preferred,
+										weberp_purchdata.minorderqty,
+										weberp_purchdata.leadtime
+									FROM weberp_purchdata INNER JOIN weberp_suppliers
+									ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+									WHERE weberp_purchdata.stockid='" . $StockID . "'
+									ORDER BY weberp_purchdata.effectivefrom DESC");
 		$LastSupplierShown = "";
 		while ($SuppRow = DB_fetch_array($SuppResult)) {
 			if ($LastSupplierShown != $SuppRow['supplierid']){
@@ -587,188 +587,188 @@ if (isset($_POST['Search']) OR isset($_POST['Go']) OR isset($_POST['Next']) OR i
 		$_POST['Keywords'] = mb_strtoupper($_POST['Keywords']);
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 		if ($_POST['StockCat'] == 'All') {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							SUM(locstock.quantity) AS qoh,
-							stockmaster.units,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							stockmaster.decimalplaces
-						FROM stockmaster LEFT JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid,
-							locstock
-						WHERE stockmaster.stockid=locstock.stockid
-						AND stockmaster.description " . LIKE . " '$SearchString'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							stockmaster.units,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							stockmaster.decimalplaces
-						ORDER BY stockmaster.discontinued, stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							SUM(weberp_locstock.quantity) AS qoh,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							weberp_stockmaster.decimalplaces
+						FROM weberp_stockmaster LEFT JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid,
+							weberp_locstock
+						WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+						AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							weberp_stockmaster.decimalplaces
+						ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							SUM(locstock.quantity) AS qoh,
-							stockmaster.units,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							stockmaster.decimalplaces
-						FROM stockmaster INNER JOIN locstock
-						ON stockmaster.stockid=locstock.stockid
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							SUM(weberp_locstock.quantity) AS qoh,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							weberp_stockmaster.decimalplaces
+						FROM weberp_stockmaster INNER JOIN weberp_locstock
+						ON weberp_stockmaster.stockid=weberp_locstock.stockid
 						WHERE description " . LIKE . " '$SearchString'
 						AND categoryid='" . $_POST['StockCat'] . "'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							stockmaster.units,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							stockmaster.decimalplaces
-						ORDER BY stockmaster.discontinued, stockmaster.stockid";
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							weberp_stockmaster.decimalplaces
+						ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		}
 	} elseif (isset($_POST['StockCode']) AND mb_strlen($_POST['StockCode'])>0) {
 		$_POST['StockCode'] = mb_strtoupper($_POST['StockCode']);
 		if ($_POST['StockCat'] == 'All') {
-			$SQL = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							SUM(locstock.quantity) AS qoh,
-							stockmaster.units,
-							stockmaster.decimalplaces
-						FROM stockmaster
-						INNER JOIN stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN locstock ON stockmaster.stockid=locstock.stockid
-						WHERE stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
-						GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.longdescription,
-							stockmaster.units,
-							stockmaster.mbflag,
-							stockmaster.discontinued,
-							stockmaster.decimalplaces
-						ORDER BY stockmaster.discontinued, stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							SUM(weberp_locstock.quantity) AS qoh,
+							weberp_stockmaster.units,
+							weberp_stockmaster.decimalplaces
+						FROM weberp_stockmaster
+						INNER JOIN weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_locstock ON weberp_stockmaster.stockid=weberp_locstock.stockid
+						WHERE weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+						GROUP BY weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.longdescription,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							weberp_stockmaster.discontinued,
+							weberp_stockmaster.decimalplaces
+						ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						sum(locstock.quantity) as qoh,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid=locstock.stockid
-					WHERE stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+			$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						sum(weberp_locstock.quantity) as qoh,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid=weberp_locstock.stockid
+					WHERE weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
 					AND categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						stockmaster.decimalplaces
-					ORDER BY stockmaster.discontinued, stockmaster.stockid";
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						weberp_stockmaster.decimalplaces
+					ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		}
 	} elseif (isset($_POST['SupplierStockCode']) AND mb_strlen($_POST['SupplierStockCode'])>0) {
 		if ($_POST['StockCat'] == 'All') {
-			$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM stockmaster
-					INNER JOIN purchdata
-					ON stockmaster.stockid=purchdata.stockid
-					INNER JOIN locstock
-					ON stockmaster.stockid=locstock.stockid
-					LEFT JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE purchdata.suppliers_partno " . LIKE . " '%" . $_POST['SupplierStockCode'] . "%'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						stockmaster.decimalplaces
-					ORDER BY stockmaster.discontinued, stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster
+					INNER JOIN weberp_purchdata
+					ON weberp_stockmaster.stockid=weberp_purchdata.stockid
+					INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid=weberp_locstock.stockid
+					LEFT JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_purchdata.suppliers_partno " . LIKE . " '%" . $_POST['SupplierStockCode'] . "%'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						weberp_stockmaster.decimalplaces
+					ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid=locstock.stockid
-					INNER JOIN purchdata
-					ON stockmaster.stockid=purchdata.stockid
+			$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid=weberp_locstock.stockid
+					INNER JOIN weberp_purchdata
+					ON weberp_stockmaster.stockid=weberp_purchdata.stockid
 					WHERE categoryid='" . $_POST['StockCat'] . "'
-					AND purchdata.suppliers_partno " . LIKE . " '%" . $_POST['SupplierStockCode'] . "%'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						stockmaster.decimalplaces
-					ORDER BY stockmaster.discontinued, stockmaster.stockid";
+					AND weberp_purchdata.suppliers_partno " . LIKE . " '%" . $_POST['SupplierStockCode'] . "%'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						weberp_stockmaster.decimalplaces
+					ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		}
 	} else {
 		if ($_POST['StockCat'] == 'All') {
-			$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM stockmaster
-					LEFT JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid,
-						locstock
-					WHERE stockmaster.stockid=locstock.stockid
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						stockmaster.decimalplaces
-					ORDER BY stockmaster.discontinued, stockmaster.stockid";
+			$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster
+					LEFT JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid,
+						weberp_locstock
+					WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						weberp_stockmaster.decimalplaces
+					ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						stockmaster.decimalplaces
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid=locstock.stockid
+			$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units,
+						weberp_stockmaster.decimalplaces
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid=weberp_locstock.stockid
 					WHERE categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						stockmaster.mbflag,
-						stockmaster.discontinued,
-						stockmaster.decimalplaces
-					ORDER BY stockmaster.discontinued, stockmaster.stockid";
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag,
+						weberp_stockmaster.discontinued,
+						weberp_stockmaster.decimalplaces
+					ORDER BY weberp_stockmaster.discontinued, weberp_stockmaster.stockid";
 		}
 	}
 	$ErrMsg = _('No stock items were returned by the SQL because');

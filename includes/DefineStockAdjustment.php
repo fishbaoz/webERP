@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineStockAdjustment.php 6033 2013-06-24 07:36:26Z daintree $*/
 class StockAdjustment {
 
 	var $StockID;

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFPickingList.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -21,10 +21,10 @@ if ($_SESSION['RequirePickingNote']==0) {
 if ((!isset($_GET['TransNo']) or $_GET['TransNo']=='') and !isset($_POST['TransDate'])){
 	$Title = _('Select Picking Lists');
 	include('includes/header.inc');
-	$sql="SELECT locations.loccode,
+	$sql="SELECT weberp_locations.loccode,
 				locationname
-			FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+			FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$result=DB_query($sql);
 	echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/sales.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p><br />';
 	echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post" name="form">
@@ -59,80 +59,80 @@ $ErrMsg = _('There was a problem retrieving the order header details from the da
 
 if (!isset($_POST['TransDate']) AND $_GET['TransNo'] != 'Preview') {
 /* If there is no transaction date set, then it must be for a single order */
-	$sql = "SELECT salesorders.debtorno,
-        		salesorders.orderno,
-        		salesorders.customerref,
-        		salesorders.comments,
-        		salesorders.orddate,
-        		salesorders.deliverto,
-        		salesorders.deladd1,
-        		salesorders.deladd2,
-        		salesorders.deladd3,
-        		salesorders.deladd4,
-        		salesorders.deladd5,
-        		salesorders.deladd6,
-        		salesorders.deliverblind,
-        		salesorders.deliverydate,
-        		debtorsmaster.name,
-        		debtorsmaster.address1,
-        		debtorsmaster.address2,
-        		debtorsmaster.address3,
-        		debtorsmaster.address4,
-        		debtorsmaster.address5,
-        		debtorsmaster.address6,
-        		shippers.shippername,
-        		salesorders.printedpackingslip,
-        		salesorders.datepackingslipprinted,
-        		locations.locationname
-        	FROM salesorders,
-        		debtorsmaster,
-        		shippers,
-        		locations
-        	WHERE salesorders.debtorno=debtorsmaster.debtorno
-        	AND salesorders.shipvia=shippers.shipper_id
-        	AND salesorders.fromstkloc=locations.loccode
-        	AND salesorders.orderno='" . $_GET['TransNo']."'";
+	$sql = "SELECT weberp_salesorders.debtorno,
+        		weberp_salesorders.orderno,
+        		weberp_salesorders.customerref,
+        		weberp_salesorders.comments,
+        		weberp_salesorders.orddate,
+        		weberp_salesorders.deliverto,
+        		weberp_salesorders.deladd1,
+        		weberp_salesorders.deladd2,
+        		weberp_salesorders.deladd3,
+        		weberp_salesorders.deladd4,
+        		weberp_salesorders.deladd5,
+        		weberp_salesorders.deladd6,
+        		weberp_salesorders.deliverblind,
+        		weberp_salesorders.deliverydate,
+        		weberp_debtorsmaster.name,
+        		weberp_debtorsmaster.address1,
+        		weberp_debtorsmaster.address2,
+        		weberp_debtorsmaster.address3,
+        		weberp_debtorsmaster.address4,
+        		weberp_debtorsmaster.address5,
+        		weberp_debtorsmaster.address6,
+        		weberp_shippers.shippername,
+        		weberp_salesorders.printedpackingslip,
+        		weberp_salesorders.datepackingslipprinted,
+        		weberp_locations.locationname
+        	FROM weberp_salesorders,
+        		weberp_debtorsmaster,
+        		weberp_shippers,
+        		weberp_locations
+        	WHERE weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+        	AND weberp_salesorders.shipvia=weberp_shippers.shipper_id
+        	AND weberp_salesorders.fromstkloc=weberp_locations.loccode
+        	AND weberp_salesorders.orderno='" . $_GET['TransNo']."'";
 } else if (isset($_POST['TransDate'])
 		OR (isset($_GET['TransNo']) AND $_GET['TransNo'] != 'Preview')) {
 /* We are printing picking lists for all orders on a day */
-	$sql = "SELECT salesorders.debtorno,
-            		salesorders.orderno,
-            		salesorders.customerref,
-            		salesorders.comments,
-            		salesorders.orddate,
-            		salesorders.deliverto,
-            		salesorders.deladd1,
-            		salesorders.deladd2,
-            		salesorders.deladd3,
-            		salesorders.deladd4,
-            		salesorders.deladd5,
-            		salesorders.deladd6,
-            		salesorders.deliverblind,
-            		salesorders.deliverydate,
-            		debtorsmaster.name,
-            		debtorsmaster.address1,
-            		debtorsmaster.address2,
-            		debtorsmaster.address3,
-            		debtorsmaster.address4,
-            		debtorsmaster.address5,
-            		debtorsmaster.address6,
-            		shippers.shippername,
-            		salesorders.printedpackingslip,
-            		salesorders.datepackingslipprinted,
-            		locations.locationname
-            	FROM salesorders,
-            		debtorsmaster,
-            		shippers,
-            		locations
-            	WHERE salesorders.debtorno=debtorsmaster.debtorno
-            	AND salesorders.shipvia=shippers.shipper_id
-            	AND salesorders.fromstkloc=locations.loccode
-            	AND salesorders.fromstkloc='".$_POST['loccode']."'
-            	AND salesorders.deliverydate<='" . FormatDateForSQL($_POST['TransDate'])."'";
+	$sql = "SELECT weberp_salesorders.debtorno,
+            		weberp_salesorders.orderno,
+            		weberp_salesorders.customerref,
+            		weberp_salesorders.comments,
+            		weberp_salesorders.orddate,
+            		weberp_salesorders.deliverto,
+            		weberp_salesorders.deladd1,
+            		weberp_salesorders.deladd2,
+            		weberp_salesorders.deladd3,
+            		weberp_salesorders.deladd4,
+            		weberp_salesorders.deladd5,
+            		weberp_salesorders.deladd6,
+            		weberp_salesorders.deliverblind,
+            		weberp_salesorders.deliverydate,
+            		weberp_debtorsmaster.name,
+            		weberp_debtorsmaster.address1,
+            		weberp_debtorsmaster.address2,
+            		weberp_debtorsmaster.address3,
+            		weberp_debtorsmaster.address4,
+            		weberp_debtorsmaster.address5,
+            		weberp_debtorsmaster.address6,
+            		weberp_shippers.shippername,
+            		weberp_salesorders.printedpackingslip,
+            		weberp_salesorders.datepackingslipprinted,
+            		weberp_locations.locationname
+            	FROM weberp_salesorders,
+            		weberp_debtorsmaster,
+            		weberp_shippers,
+            		weberp_locations
+            	WHERE weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+            	AND weberp_salesorders.shipvia=weberp_shippers.shipper_id
+            	AND weberp_salesorders.fromstkloc=weberp_locations.loccode
+            	AND weberp_salesorders.fromstkloc='".$_POST['loccode']."'
+            	AND weberp_salesorders.deliverydate<='" . FormatDateForSQL($_POST['TransDate'])."'";
 }
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$sql .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$sql .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
 if (isset($_POST['TransDate'])
@@ -225,47 +225,47 @@ for ($i=0;$i<sizeof($OrdersToPick);$i++){
 
 		/* Are there any picking lists for this order already */
 		$sql="SELECT COUNT(orderno)
-				FROM pickinglists
+				FROM weberp_pickinglists
 				WHERE orderno='" . $OrdersToPick[$i]['orderno'] . "'";
 		$CountResult=DB_query($sql);
 		$Count=DB_fetch_row($CountResult);
 		if ($Count[0]==0) {
 		/* There are no previous picking lists for this order */
-			$sql = "SELECT salesorderdetails.stkcode,
-            				stockmaster.description,
-            				salesorderdetails.orderlineno,
-            				salesorderdetails.quantity,
-            				salesorderdetails.qtyinvoiced,
-            				salesorderdetails.unitprice,
-            				salesorderdetails.narrative,
-            				stockmaster.decimalplaces
-            			FROM salesorderdetails
-            			INNER JOIN stockmaster
-            				ON salesorderdetails.stkcode=stockmaster.stockid
-            			WHERE salesorderdetails.orderno='" . $OrdersToPick[$i]['orderno'] ."'";
+			$sql = "SELECT weberp_salesorderdetails.stkcode,
+            				weberp_stockmaster.description,
+            				weberp_salesorderdetails.orderlineno,
+            				weberp_salesorderdetails.quantity,
+            				weberp_salesorderdetails.qtyinvoiced,
+            				weberp_salesorderdetails.unitprice,
+            				weberp_salesorderdetails.narrative,
+            				weberp_stockmaster.decimalplaces
+            			FROM weberp_salesorderdetails
+            			INNER JOIN weberp_stockmaster
+            				ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+            			WHERE weberp_salesorderdetails.orderno='" . $OrdersToPick[$i]['orderno'] ."'";
 		} else {
 		/* There are previous picking lists for this order so
 		 * need to take those quantities into account
 		 */
-			$sql = "SELECT salesorderdetails.stkcode,
-            				stockmaster.description,
-            				salesorderdetails.orderlineno,
-            				salesorderdetails.quantity,
-            				salesorderdetails.qtyinvoiced,
-            				SUM(pickinglistdetails.qtyexpected) as qtyexpected,
-            				SUM(pickinglistdetails.qtypicked) as qtypicked,
-            				salesorderdetails.unitprice,
-            				salesorderdetails.narrative,
-            				stockmaster.decimalplaces
-            			FROM salesorderdetails
-            			INNER JOIN stockmaster
-            				ON salesorderdetails.stkcode=stockmaster.stockid
-            			LEFT JOIN pickinglists
-            				ON salesorderdetails.orderno=pickinglists.orderno
-            			LEFT JOIN pickinglistdetails
-            				ON pickinglists.pickinglistno=pickinglistdetails.pickinglistno
-            			WHERE salesorderdetails.orderno='" . $OrdersToPick[$i]['orderno'] ."'
-            			AND salesorderdetails.orderlineno=pickinglistdetails.orderlineno";
+			$sql = "SELECT weberp_salesorderdetails.stkcode,
+            				weberp_stockmaster.description,
+            				weberp_salesorderdetails.orderlineno,
+            				weberp_salesorderdetails.quantity,
+            				weberp_salesorderdetails.qtyinvoiced,
+            				SUM(weberp_pickinglistdetails.qtyexpected) as qtyexpected,
+            				SUM(weberp_pickinglistdetails.qtypicked) as qtypicked,
+            				weberp_salesorderdetails.unitprice,
+            				weberp_salesorderdetails.narrative,
+            				weberp_stockmaster.decimalplaces
+            			FROM weberp_salesorderdetails
+            			INNER JOIN weberp_stockmaster
+            				ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+            			LEFT JOIN weberp_pickinglists
+            				ON weberp_salesorderdetails.orderno=weberp_pickinglists.orderno
+            			LEFT JOIN weberp_pickinglistdetails
+            				ON weberp_pickinglists.pickinglistno=weberp_pickinglistdetails.pickinglistno
+            			WHERE weberp_salesorderdetails.orderno='" . $OrdersToPick[$i]['orderno'] ."'
+            			AND weberp_salesorderdetails.orderlineno=weberp_pickinglistdetails.orderlineno";
 		}
 		$LineResult=DB_query($sql, $ErrMsg);
 	}
@@ -278,7 +278,7 @@ for ($i=0;$i<sizeof($OrdersToPick);$i++){
 		if (isset($_POST['TransDate']) or (isset($_GET['TransNo']) and $_GET['TransNo'] != 'Preview')) {
 			$LinesToShow=DB_num_rows($LineResult);
 			$PickingListNo = GetNextTransNo(19, $db);
-			$sql="INSERT INTO pickinglists
+			$sql="INSERT INTO weberp_pickinglists
 				VALUES (
 				'" . $PickingListNo ."',
 				'" . $OrdersToPick[$i]['orderno']."',
@@ -312,7 +312,7 @@ for ($i=0;$i<sizeof($OrdersToPick);$i++){
 				$DisplayPrevDel = locale_number_format($myrow2['qtyinvoiced'],$myrow2['decimalplaces']);
 				$DisplayQtySupplied = locale_number_format($myrow2['quantity'] - $myrow2['qtyinvoiced']-$myrow2['qtyexpected']-$myrow2['qtypicked'],$myrow2['decimalplaces']);
 				$itemdesc = $myrow2['description'] . ' - ' . $myrow2['narrative'];
-				$sql="INSERT INTO pickinglistdetails
+				$sql="INSERT INTO weberp_pickinglistdetails
 					VALUES(
 					'" . $PickingListNo ."',
 					'" . $Lines."',

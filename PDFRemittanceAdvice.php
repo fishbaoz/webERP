@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFRemittanceAdvice.php 7016 2014-12-06 02:40:48Z rchacon $*/
 
 include('includes/session.inc');
 
@@ -10,25 +10,25 @@ If ((isset($_POST['PrintPDF']))
 			AND mb_strlen($_POST['ToCriteria'])>=1)	{
 	/*Now figure out the invoice less credits due for the Supplier range under review */
 
-	$sql = "SELECT suppliers.supplierid,
-					suppliers.suppname,
-					suppliers.address1,
-					suppliers.address2,
-					suppliers.address3,
-					suppliers.address4,
-					suppliers.address5,
-					suppliers.address6,
-					suppliers.currcode,
-					supptrans.id,
-					currencies.decimalplaces AS currdecimalplaces
-			FROM supptrans INNER JOIN suppliers ON supptrans.supplierno = suppliers.supplierid
-			INNER JOIN paymentterms ON suppliers.paymentterms = paymentterms.termsindicator
-			INNER JOIN currencies ON suppliers.currcode=currencies.currabrev
-			WHERE supptrans.type=22
+	$sql = "SELECT weberp_suppliers.supplierid,
+					weberp_suppliers.suppname,
+					weberp_suppliers.address1,
+					weberp_suppliers.address2,
+					weberp_suppliers.address3,
+					weberp_suppliers.address4,
+					weberp_suppliers.address5,
+					weberp_suppliers.address6,
+					weberp_suppliers.currcode,
+					weberp_supptrans.id,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_supptrans INNER JOIN weberp_suppliers ON weberp_supptrans.supplierno = weberp_suppliers.supplierid
+			INNER JOIN weberp_paymentterms ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+			INNER JOIN weberp_currencies ON weberp_suppliers.currcode=weberp_currencies.currabrev
+			WHERE weberp_supptrans.type=22
 			AND trandate ='" . FormatDateForSQL($_POST['PaymentDate']) . "'
 			AND supplierno >= '" . $_POST['FromCriteria'] . "'
 			AND supplierno <= '" . $_POST['ToCriteria'] . "'
-			AND suppliers.remittance=1
+			AND weberp_suppliers.remittance=1
 			ORDER BY supplierno";
 
 	$SuppliersResult = DB_query($sql);
@@ -61,18 +61,18 @@ If ((isset($_POST['PrintPDF']))
 		$AccumBalance = 0;
 
 		/* Now get the transactions and amounts that the payment was allocated to */
-		$sql = "SELECT systypes.typename,
-						supptrans.suppreference,
-						supptrans.trandate,
-						supptrans.transno,
-						suppallocs.amt,
-						(supptrans.ovamount + supptrans.ovgst ) AS trantotal
-				FROM supptrans
-				INNER JOIN systypes ON systypes.typeid = supptrans.type
-				INNER JOIN suppallocs ON suppallocs.transid_allocto=supptrans.id
-				WHERE suppallocs.transid_allocfrom='" . $SuppliersPaid['id'] . "'
-				ORDER BY supptrans.type,
-						 supptrans.transno";
+		$sql = "SELECT weberp_systypes.typename,
+						weberp_supptrans.suppreference,
+						weberp_supptrans.trandate,
+						weberp_supptrans.transno,
+						weberp_suppallocs.amt,
+						(weberp_supptrans.ovamount + weberp_supptrans.ovgst ) AS trantotal
+				FROM weberp_supptrans
+				INNER JOIN weberp_systypes ON weberp_systypes.typeid = weberp_supptrans.type
+				INNER JOIN weberp_suppallocs ON weberp_suppallocs.transid_allocto=weberp_supptrans.id
+				WHERE weberp_suppallocs.transid_allocfrom='" . $SuppliersPaid['id'] . "'
+				ORDER BY weberp_supptrans.type,
+						 weberp_supptrans.transno";
 
 
 		$TransResult = DB_query($sql,'','',false,false);

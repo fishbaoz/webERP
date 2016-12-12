@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockCounts.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 
@@ -47,9 +47,9 @@ if ($_GET['Action'] == 'Enter'){
 			$Reference = 'Ref_' . $i;
 
 			if (strlen($_POST[$BarCode])>0){
-				$sql = "SELECT stockmaster.stockid
-								FROM stockmaster
-								WHERE stockmaster.barcode='". $_POST[$BarCode] ."'";
+				$sql = "SELECT weberp_stockmaster.stockid
+								FROM weberp_stockmaster
+								WHERE weberp_stockmaster.barcode='". $_POST[$BarCode] ."'";
 
 				$ErrMsg = _('Could not determine if the part being ordered was a kitset or not because');
 				$DbgMsg = _('The sql that was used to determine if the part being ordered was a kitset or not was ');
@@ -63,7 +63,7 @@ if ($_GET['Action'] == 'Enter'){
 				if (!is_numeric($_POST[$Quantity])){
 					$InputError=True;
 				}
-			$SQL = "SELECT stockid FROM stockcheckfreeze WHERE stockid='" . $_POST[$StockID] . "'";
+			$SQL = "SELECT stockid FROM weberp_stockcheckfreeze WHERE stockid='" . $_POST[$StockID] . "'";
 				$result = DB_query($SQL);
 				if (DB_num_rows($result)==0){
 					prnMsg( _('The stock code entered on line') . ' ' . $i . ' ' . _('is not a part code that has been added to the stock check file') . ' - ' . _('the code entered was') . ' ' . $_POST[$StockID] . '. ' . _('This line will have to be re-entered'),'warn');
@@ -72,7 +72,7 @@ if ($_GET['Action'] == 'Enter'){
 
 				if ($InputError==False){
 					$Added++;
-					$sql = "INSERT INTO stockcounts (stockid,
+					$sql = "INSERT INTO weberp_stockcounts (stockid,
 									loccode,
 									qtycounted,
 									reference)
@@ -90,12 +90,12 @@ if ($_GET['Action'] == 'Enter'){
 		unset($_POST['EnterCounts']);
 	} // end of if enter counts button hit
 
-	$CatsResult = DB_query("SELECT DISTINCT stockcategory.categoryid,
+	$CatsResult = DB_query("SELECT DISTINCT weberp_stockcategory.categoryid,
 								categorydescription
-						FROM stockcategory INNER JOIN stockmaster
-							ON stockcategory.categoryid=stockmaster.categoryid
-							INNER JOIN stockcheckfreeze
-							ON stockmaster.stockid=stockcheckfreeze.stockid");
+						FROM weberp_stockcategory INNER JOIN weberp_stockmaster
+							ON weberp_stockcategory.categoryid=weberp_stockmaster.categoryid
+							INNER JOIN weberp_stockcheckfreeze
+							ON weberp_stockmaster.stockid=weberp_stockcheckfreeze.stockid");
 
 	if (DB_num_rows($CatsResult) ==0) {
 		prnMsg(_('The stock check sheets must be run first to create the stock check. Only once these are created can the stock counts be entered. Currently there is no stock check to enter counts for'),'error');
@@ -104,8 +104,8 @@ if ($_GET['Action'] == 'Enter'){
 		echo '<table cellpadding="2" class="selection">';
 		echo '<tr>
 				<th colspan="3">' ._('Stock Check Counts at Location') . ':<select name="Location">';
-		$sql = "SELECT locations.loccode, locationname FROM locations
-				INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+		$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 		$result = DB_query($sql);
 
 		while ($myrow=DB_fetch_array($result)){
@@ -131,7 +131,7 @@ if ($_GET['Action'] == 'Enter'){
 
 		if (isset($_POST['EnterByCat'])){
 
-			$StkCatResult = DB_query("SELECT categorydescription FROM stockcategory WHERE categoryid='" . $_POST['StkCat'] . "'");
+			$StkCatResult = DB_query("SELECT categorydescription FROM weberp_stockcategory WHERE categoryid='" . $_POST['StkCat'] . "'");
 			$StkCatRow = DB_fetch_row($StkCatResult);
 
 			echo '<tr>
@@ -143,12 +143,12 @@ if ($_GET['Action'] == 'Enter'){
 					<th>' . _('Quantity') . '</th>
 					<th>' . _('Reference') . '</th>
 				</tr>';
-			$StkItemsResult = DB_query("SELECT stockcheckfreeze.stockid,
+			$StkItemsResult = DB_query("SELECT weberp_stockcheckfreeze.stockid,
 												description
-										FROM stockcheckfreeze INNER JOIN stockmaster
-										ON stockcheckfreeze.stockid=stockmaster.stockid
+										FROM weberp_stockcheckfreeze INNER JOIN weberp_stockmaster
+										ON weberp_stockcheckfreeze.stockid=weberp_stockmaster.stockid
 										WHERE categoryid='" . $_POST['StkCat'] . "' AND loccode = '" . $_POST['Location'] . "'
-										ORDER BY stockcheckfreeze.stockid");
+										ORDER BY weberp_stockcheckfreeze.stockid");
 
 			$RowCount=1;
 			while ($StkRow = DB_fetch_array($StkItemsResult)) {
@@ -194,7 +194,7 @@ if ($_GET['Action'] == 'Enter'){
 	if (isset($_POST['DEL']) AND is_array($_POST['DEL']) ){
 		foreach ($_POST['DEL'] as $id=>$val){
 			if ($val == 'on'){
-				$sql = "DELETE FROM stockcounts WHERE id='".$id."'";
+				$sql = "DELETE FROM weberp_stockcounts WHERE id='".$id."'";
 				$ErrMsg = _('Failed to delete StockCount ID #').' '.$i;
 				$EnterResult = DB_query($sql,$ErrMsg);
 				prnMsg( _('Deleted Id #') . ' ' . $id, 'success');
@@ -203,9 +203,9 @@ if ($_GET['Action'] == 'Enter'){
 	}
 
 	//START OF action=VIEW
-	$SQL = "select stockcounts.*,
-					canupd from stockcounts
-					INNER JOIN locationusers ON locationusers.loccode=stockcounts.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+	$SQL = "select weberp_stockcounts.*,
+					canupd from weberp_stockcounts
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockcounts.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$result = DB_query($SQL);
 	echo '<input type="hidden" name="Action" value="View" />';
 	echo '<table cellpadding="2" class="selection">';

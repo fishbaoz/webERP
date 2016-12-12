@@ -1,6 +1,6 @@
 WEB-ERP Installation
 
-/* $Id$*/
+/* $Id: INSTALL.txt 6906 2014-10-04 03:40:57Z daintree $*/
 
 Upgrading
 

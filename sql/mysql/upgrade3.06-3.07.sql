@@ -1,4 +1,4 @@
-CREATE TABLE `stockitemproperties` (
+CREATE TABLE `weberp_stockitemproperties` (
   `stockid` varchar(20) NOT NULL,
   `stkcatpropid` int(11) NOT NULL,
   `value` varchar(50) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE `stockitemproperties` (
   KEY `value` (`value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `stockcatproperties` (
+CREATE TABLE `weberp_stockcatproperties` (
   `stkcatpropid` int(11) NOT NULL auto_increment,
   `categoryid` char(6) NOT NULL,
   `label` text NOT NULL,

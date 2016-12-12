@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SelectOrderItems_IntoCart.inc 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*SelectOrderItems_IntoCart.inc
 
@@ -31,26 +31,26 @@ if (count($_SESSION['Items'.$identifier]->LineItems)>0
 
 if ($AlreadyOnThisOrder!=1){
 
-    $sql = "SELECT stockmaster.description,
-					stockmaster.longdescription,
-					stockmaster.stockid,
-					stockmaster.units,
-					stockmaster.volume,
-					stockmaster.grossweight,
+    $sql = "SELECT weberp_stockmaster.description,
+					weberp_stockmaster.longdescription,
+					weberp_stockmaster.stockid,
+					weberp_stockmaster.units,
+					weberp_stockmaster.volume,
+					weberp_stockmaster.grossweight,
 					(materialcost+labourcost+overheadcost) AS standardcost,
-					locstock.quantity,
-					stockmaster.mbflag,
-					stockmaster.discountcategory,
-					stockmaster.decimalplaces,
-					stockmaster.discontinued,
-					stockmaster.serialised,
-					stockmaster.eoq,
-					stockmaster.nextserialno,
-					stockmaster.taxcatid
-			FROM stockmaster INNER JOIN locstock
-			ON stockmaster.stockid=locstock.stockid
-			WHERE locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'
-			AND stockmaster.stockid = '". $NewItem . "'";
+					weberp_locstock.quantity,
+					weberp_stockmaster.mbflag,
+					weberp_stockmaster.discountcategory,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.discontinued,
+					weberp_stockmaster.serialised,
+					weberp_stockmaster.eoq,
+					weberp_stockmaster.nextserialno,
+					weberp_stockmaster.taxcatid
+			FROM weberp_stockmaster INNER JOIN weberp_locstock
+			ON weberp_stockmaster.stockid=weberp_locstock.stockid
+			WHERE weberp_locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'
+			AND weberp_stockmaster.stockid = '". $NewItem . "'";
 
     $ErrMsg = _('The details for') . ' ' . $NewItem . ' ' . _('could not be retrieved because');
     $DbgMsg = _('The SQL used to retrieve the pricing details but failed was');
@@ -79,7 +79,7 @@ if ($AlreadyOnThisOrder!=1){
 
 		   	if ($_SESSION['ExistingOrder' . $identifier]!=0){
 				$UpdateDB = 'Yes';
-				$result = DB_query("SELECT MAX(orderlineno) AS newlineno FROM salesorderdetails WHERE orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'");
+				$result = DB_query("SELECT MAX(orderlineno) AS newlineno FROM weberp_salesorderdetails WHERE orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'");
 				$MaxNumRow = DB_fetch_row($result);
 				if ($MaxNumRow[0] != '' AND $MaxNumRow[0] >= 0) {
 					$NewLineNo = $MaxNumRow[0]+1;
@@ -95,7 +95,7 @@ if ($AlreadyOnThisOrder!=1){
 				$DiscCatsDone[$Counter]=$StockItem->DiscCat;
 				$QuantityOfDiscCat =0;
 				$result = DB_query("SELECT MAX(discountrate) AS discount
-										FROM discountmatrix
+										FROM weberp_discountmatrix
 										WHERE salestype='" .  $_SESSION['Items'.$identifier]->DefaultSalesType . "'
 										AND discountcategory ='" . $myrow['discountcategory'] . "'
 										AND quantitybreak <" . $NewItemQty,$db);
@@ -115,10 +115,10 @@ if ($AlreadyOnThisOrder!=1){
 			
 			$sql = "SELECT rebateamount/rate AS rebateinfunctionalcurrency,
 							rebatepercent
-					FROM sellthroughsupport INNER JOIN suppliers
-						ON suppliers.supplierid=sellthroughsupport.supplierno
-					INNER JOIN currencies
-						ON currencies.currabrev=suppliers.currcode
+					FROM weberp_sellthroughsupport INNER JOIN weberp_suppliers
+						ON weberp_suppliers.supplierid=weberp_sellthroughsupport.supplierno
+					INNER JOIN weberp_currencies
+						ON weberp_currencies.currabrev=weberp_suppliers.currcode
 					WHERE stockid='" . $NewItem . "'
 					AND (debtorno='" . $_SESSION['Items'.$identifier]->DebtorNo . "'
 						OR debtorno='')
@@ -143,13 +143,13 @@ if ($AlreadyOnThisOrder!=1){
 
 			$sql = "SELECT rebateamount/rate AS rebateinfunctionalcurrency,
 							rebatepercent
-					FROM sellthroughsupport INNER JOIN stockmaster
-					ON sellthroughsupport.categoryid=stockmaster.categoryid
-					INNER JOIN suppliers
-					ON suppliers.supplierid=sellthroughsupport.supplierno
-					INNER JOIN currencies
-					ON currencies.currabrev=suppliers.currcode
-					WHERE stockmaster.stockid='" . $NewItem . "'
+					FROM weberp_sellthroughsupport INNER JOIN weberp_stockmaster
+					ON weberp_sellthroughsupport.categoryid=weberp_stockmaster.categoryid
+					INNER JOIN weberp_suppliers
+					ON weberp_suppliers.supplierid=weberp_sellthroughsupport.supplierno
+					INNER JOIN weberp_currencies
+					ON weberp_currencies.currabrev=weberp_suppliers.currcode
+					WHERE weberp_stockmaster.stockid='" . $NewItem . "'
 					AND (debtorno='" . $_SESSION['Items'.$identifier]->DebtorNo . "'
 						OR debtorno='')
 					AND effectivefrom <='" . Date('Y-m-d') . "'
@@ -169,7 +169,7 @@ if ($AlreadyOnThisOrder!=1){
 			if ($_SESSION['Items'.$identifier]->DefaultCurrency != $_SESSION['CompanyRecord']['currencydefault'] AND $SellSupportDiscount != 0) {
 				/* Customer currency is not the same as the functional/home currency so need to convert the rebate amount */
 				/* Would be better to have the currency rate held in the cart object so only have to run this query once - this is a hack for this purpose! */
-				$CurrResult = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
+				$CurrResult = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
 				$CurrRow = DB_fetch_array($CurrResult);
 				$SellSupportDiscount *= $CurrRow['rate'];
 			}

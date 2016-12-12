@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SalesGLPostings.php 7035 2014-12-20 06:55:12Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Sales GL Postings Set Up');
@@ -27,19 +27,19 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedSalesPostingID could also exist if submit had not been clicked this		code would not run in this case cos submit is false of course	see the delete code below*/
 
-		$sql = "UPDATE salesglpostings SET salesglcode = '" . $_POST['SalesGLCode'] . "',
+		$sql = "UPDATE weberp_salesglpostings SET salesglcode = '" . $_POST['SalesGLCode'] . "',
 										discountglcode = '" . $_POST['DiscountGLCode'] . "',
 										area = '" . $_POST['Area'] . "',
 										stkcat = '" . $_POST['StkCat'] . "',
 										salestype = '" . $_POST['SalesType'] . "'
-				WHERE salesglpostings.id = '".$SelectedSalesPostingID."'";
+				WHERE weberp_salesglpostings.id = '".$SelectedSalesPostingID."'";
 		$msg = _('The sales GL posting record has been updated');
 	} else {
 
 	/*Selected Sales GL Posting is null cos no item selected on first time round so must be	adding a record must be submitting new entries in the new SalesGLPosting form */
 
 		/* Verify if item doesn't exists to insert it, otherwise just refreshes the page. */
-		$sql = "SELECT count(*) FROM salesglpostings
+		$sql = "SELECT count(*) FROM weberp_salesglpostings
 				WHERE area='" . $_POST['Area'] . "'
 				AND stkcat='" . $_POST['StkCat'] . "'
 				AND salestype='" . $_POST['SalesType'] . "'";
@@ -47,7 +47,7 @@ if (isset($_POST['submit'])) {
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0] == 0) {
-			$sql = "INSERT INTO salesglpostings (
+			$sql = "INSERT INTO weberp_salesglpostings (
 						salesglcode,
 						discountglcode,
 						area,
@@ -83,7 +83,7 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	$sql="DELETE FROM salesglpostings WHERE id='".$SelectedSalesPostingID."'";
+	$sql="DELETE FROM weberp_salesglpostings WHERE id='".$SelectedSalesPostingID."'";
 
 	$result = DB_query($sql);
 
@@ -94,18 +94,18 @@ if (!isset($SelectedSalesPostingID)) {
 
 	$ShowLivePostingRecords = true;
 
-	$SQL = "SELECT salesglpostings.id,
-				salesglpostings.area,
-				salesglpostings.stkcat,
-				salesglpostings.salestype,
-				salesglpostings.salesglcode,
-				salesglpostings.discountglcode
-				FROM salesglpostings LEFT JOIN chartmaster
-					ON salesglpostings.salesglcode = chartmaster.accountcode
-				WHERE chartmaster.accountcode IS NULL
-				ORDER BY salesglpostings.area,
-					salesglpostings.stkcat,
-					salesglpostings.salestype";
+	$SQL = "SELECT weberp_salesglpostings.id,
+				weberp_salesglpostings.area,
+				weberp_salesglpostings.stkcat,
+				weberp_salesglpostings.salestype,
+				weberp_salesglpostings.salesglcode,
+				weberp_salesglpostings.discountglcode
+				FROM weberp_salesglpostings LEFT JOIN weberp_chartmaster
+					ON weberp_salesglpostings.salesglcode = weberp_chartmaster.accountcode
+				WHERE weberp_chartmaster.accountcode IS NULL
+				ORDER BY weberp_salesglpostings.area,
+					weberp_salesglpostings.stkcat,
+					weberp_salesglpostings.salestype";
 
 	$result = DB_query($SQL);
 	if (DB_num_rows($result)>0){
@@ -148,22 +148,22 @@ if (!isset($SelectedSalesPostingID)) {
 		}
 	}
 
-	$SQL = "SELECT salesglpostings.id,
-			salesglpostings.area,
-			salesglpostings.stkcat,
-			salesglpostings.salestype
-			FROM salesglpostings";
+	$SQL = "SELECT weberp_salesglpostings.id,
+			weberp_salesglpostings.area,
+			weberp_salesglpostings.stkcat,
+			weberp_salesglpostings.salestype
+			FROM weberp_salesglpostings";
 
 	$result = DB_query($SQL);
 
 	if (DB_num_rows($result)==0){
 		/* there is no default set up so need to check that account 1 is not already used */
 		/* First Check if we have at least a group_ caled Sales */
-		$SQL = "SELECT groupname FROM accountgroups WHERE groupname = 'Sales'";
+		$SQL = "SELECT groupname FROM weberp_accountgroups WHERE groupname = 'Sales'";
 		$result = DB_query($SQL);
 		if (DB_num_rows($result)==0){
 			/* The required group does not seem to exist so we create it */
-			$SQL = "INSERT INTO accountgroups (
+			$SQL = "INSERT INTO weberp_accountgroups (
 					groupname,
 					sectioninaccounts,
 					pandl,
@@ -178,11 +178,11 @@ if (!isset($SelectedSalesPostingID)) {
 
 			$result = DB_query($SQL);
 		}
-		$SQL = "SELECT accountcode FROM chartmaster WHERE accountcode ='1'";
+		$SQL = "SELECT accountcode FROM weberp_chartmaster WHERE accountcode ='1'";
 		$result = DB_query($SQL);
 		if (DB_num_rows($result)==0){
 		/* account number 1 is not used, so insert a new account */
-			$SQL = "INSERT INTO chartmaster (
+			$SQL = "INSERT INTO weberp_chartmaster (
 						accountcode,
 						accountname,
 						group_)
@@ -194,7 +194,7 @@ if (!isset($SelectedSalesPostingID)) {
 			$result = DB_query($SQL);
 		}
 
-		$SQL = "INSERT INTO salesglpostings (
+		$SQL = "INSERT INTO weberp_salesglpostings (
 						area,
 						stkcat,
 						salestype,
@@ -210,20 +210,20 @@ if (!isset($SelectedSalesPostingID)) {
 	}
 	if ($ShowLivePostingRecords){
 
-		$SQL = "SELECT salesglpostings.id,
-				salesglpostings.area,
-				salesglpostings.stkcat,
-				salesglpostings.salestype,
+		$SQL = "SELECT weberp_salesglpostings.id,
+				weberp_salesglpostings.area,
+				weberp_salesglpostings.stkcat,
+				weberp_salesglpostings.salestype,
 				chart1.accountname,
 				chart2.accountname
-			FROM salesglpostings,
-				chartmaster as chart1,
-				chartmaster as chart2
-			WHERE salesglpostings.salesglcode = chart1.accountcode
-			AND salesglpostings.discountglcode = chart2.accountcode
-			ORDER BY salesglpostings.area,
-					salesglpostings.stkcat,
-					salesglpostings.salestype";
+			FROM weberp_salesglpostings,
+				weberp_chartmaster as chart1,
+				weberp_chartmaster as chart2
+			WHERE weberp_salesglpostings.salesglcode = chart1.accountcode
+			AND weberp_salesglpostings.discountglcode = chart2.accountcode
+			ORDER BY weberp_salesglpostings.area,
+					weberp_salesglpostings.stkcat,
+					weberp_salesglpostings.salestype";
 
 		$result = DB_query($SQL);
 
@@ -285,13 +285,13 @@ if (!isset($_GET['delete'])) {
 	if (isset($SelectedSalesPostingID)) {
 		//editing an existing sales posting record
 
-		$sql = "SELECT salesglpostings.stkcat,
-				salesglpostings.salesglcode,
-				salesglpostings.discountglcode,
-				salesglpostings.area,
-				salesglpostings.salestype
-			FROM salesglpostings
-			WHERE salesglpostings.id='".$SelectedSalesPostingID."'";
+		$sql = "SELECT weberp_salesglpostings.stkcat,
+				weberp_salesglpostings.salesglcode,
+				weberp_salesglpostings.discountglcode,
+				weberp_salesglpostings.area,
+				weberp_salesglpostings.salestype
+			FROM weberp_salesglpostings
+			WHERE weberp_salesglpostings.id='".$SelectedSalesPostingID."'";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);
@@ -309,7 +309,7 @@ if (!isset($_GET['delete'])) {
 /*end of if $SelectedSalesPostingID only do the else when a new record is being entered */
 
 	$SQL = "SELECT areacode,
-			areadescription FROM areas";
+			areadescription FROM weberp_areas";
 	$result = DB_query($SQL);
 
 	echo '<br /><table class="selection">
@@ -330,7 +330,7 @@ if (!isset($_GET['delete'])) {
 
 	DB_free_result($result);
 
-	$SQL = "SELECT categoryid, categorydescription FROM stockcategory";
+	$SQL = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
 	$result = DB_query($SQL);
 
 	echo '</select></td></tr>';
@@ -358,7 +358,7 @@ if (!isset($_GET['delete'])) {
 
 	$SQL = "SELECT typeabbrev,
 					sales_type
-			FROM salestypes";
+			FROM weberp_salestypes";
 	$result = DB_query($SQL);
 
 
@@ -383,14 +383,14 @@ if (!isset($_GET['delete'])) {
 			<td><select name="SalesGLCode">';
 
 	DB_free_result($result);
-	$SQL = "SELECT chartmaster.accountcode,
-			chartmaster.accountname
-		FROM chartmaster,
-			accountgroups
-		WHERE chartmaster.group_=accountgroups.groupname
-		AND accountgroups.pandl='1'
-		ORDER BY accountgroups.sequenceintb,
-			chartmaster.accountcode";
+	$SQL = "SELECT weberp_chartmaster.accountcode,
+			weberp_chartmaster.accountname
+		FROM weberp_chartmaster,
+			weberp_accountgroups
+		WHERE weberp_chartmaster.group_=weberp_accountgroups.groupname
+		AND weberp_accountgroups.pandl='1'
+		ORDER BY weberp_accountgroups.sequenceintb,
+			weberp_chartmaster.accountcode";
 
 	$result = DB_query($SQL);
 

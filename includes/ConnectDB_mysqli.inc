@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: ConnectDB_mysqli.inc 7653 2016-10-24 01:18:52Z rchacon $ */
 /* Database abstraction for mysqli */
 
 /* PeterMoulding.com
@@ -103,8 +103,8 @@ function DB_query ($SQL,
 			OR ($SQLArray[0] == 'UPDATE')
 			OR ($SQLArray[0] == 'DELETE')) {
 
-			if ($SQLArray[2]!='audittrail'){ // to ensure the auto delete of audit trail history is not logged
-				$AuditSQL = "INSERT INTO audittrail (transactiondate,
+			if ($SQLArray[2]!='weberp_audittrail'){ // to ensure the auto delete of audit trail history is not logged
+				$AuditSQL = "INSERT INTO weberp_audittrail (transactiondate,
 									userid,
 									querystring)
 						VALUES('" . Date('Y-m-d H:i:s') . "',
@@ -205,7 +205,7 @@ function DB_Maintenance(){
 		$Result = DB_query('OPTIMIZE TABLE ' . $myrow[0]);
 	}
 
-	$Result = DB_query("UPDATE config
+	$Result = DB_query("UPDATE weberp_config
 				SET confvalue='" . Date('Y-m-d') . "'
 				WHERE confname='DB_Maintenance_LastRun'");
 }

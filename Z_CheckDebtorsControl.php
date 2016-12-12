@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CheckDebtorsControl.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title=_('Debtors Control Integrity');
@@ -25,7 +25,7 @@ include('includes/header.inc');
 
 	if ( !isset($_POST['ToPeriod']) OR $_POST['ToPeriod']=='' )
 	{
-			$SQL = "SELECT Max(periodno) FROM periods";
+			$SQL = "SELECT Max(periodno) FROM weberp_periods";
 			$prdResult = DB_query($SQL);
 			$MaxPrdrow = DB_fetch_row($prdResult);
 			DB_free_result($prdResult);
@@ -41,7 +41,7 @@ include('includes/header.inc');
 	$ToSelect = '<tr><td>' . _('End Period:')  . '</td>
 					<td><select name="ToPeriod">';
 
-	$SQL = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno";
+	$SQL = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno";
 	$perResult = DB_query($SQL);
 
 	while ( $perRow=DB_fetch_array($perResult) ) {
@@ -84,7 +84,7 @@ include('includes/header.inc');
 		while ( $CurPeriod <= $_POST['ToPeriod'] ) {
 			$SQL = "SELECT bfwd,
 					actual
-				FROM chartdetails
+				FROM weberp_chartdetails
 				WHERE period = " . $CurPeriod . "
 				AND accountcode=" . $_SESSION['CompanyRecord']['debtorsact'];
 			$dtResult = DB_query($SQL);
@@ -105,7 +105,7 @@ include('includes/header.inc');
 					<td class="number">' . locale_number_format($dtRow['bfwd'],2) . '</td>';
 
 			$SQL = "SELECT SUM((ovamount+ovgst)/rate) AS totinvnetcrds
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE prd = '" . $CurPeriod . "'
 					AND (type=10 OR type=11)";
 			$invResult = DB_query($SQL);
@@ -117,7 +117,7 @@ include('includes/header.inc');
 			echo '<td class="number">' . locale_number_format($invRow['totinvnetcrds'],2) . '</td>';
 
 			$SQL = "SELECT SUM((ovamount+ovgst)/rate) AS totreceipts
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE prd = '" . $CurPeriod . "'
 					AND type=12";
 			$recResult = DB_query($SQL);

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SelectSalesOrder.php 7651 2016-10-20 07:25:57Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Search Outstanding Sales Orders');
@@ -44,40 +44,40 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 		prnMsg(_('There were no sales orders checked to place purchase orders for. No purchase orders will be created.'),'info');
 	} else {
    /*  Now build SQL of items to purchase with purchasing data and preferred suppliers - sorted by preferred supplier */
-		$sql = "SELECT purchdata.supplierno,
-						purchdata.stockid,
-						purchdata.price,
-						purchdata.suppliers_partno,
-						purchdata.supplierdescription,
-						purchdata.conversionfactor,
-						purchdata.leadtime,
-						purchdata.suppliersuom,
-						stockmaster.grossweight,
-						stockmaster.volume,
-						stockcategory.stockact,
-						SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS orderqty
-				FROM purchdata INNER JOIN salesorderdetails ON
-				purchdata.stockid = salesorderdetails.stkcode
-				INNER JOIN stockmaster  ON
-				purchdata.stockid = stockmaster.stockid
-				INNER JOIN stockcategory ON
-				stockmaster.categoryid = stockcategory.categoryid
-				WHERE purchdata.preferred=1
-				AND purchdata.effectivefrom <='" . Date('Y-m-d') . "'
+		$sql = "SELECT weberp_purchdata.supplierno,
+						weberp_purchdata.stockid,
+						weberp_purchdata.price,
+						weberp_purchdata.suppliers_partno,
+						weberp_purchdata.supplierdescription,
+						weberp_purchdata.conversionfactor,
+						weberp_purchdata.leadtime,
+						weberp_purchdata.suppliersuom,
+						weberp_stockmaster.grossweight,
+						weberp_stockmaster.volume,
+						weberp_stockcategory.stockact,
+						SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS orderqty
+				FROM weberp_purchdata INNER JOIN weberp_salesorderdetails ON
+				weberp_purchdata.stockid = weberp_salesorderdetails.stkcode
+				INNER JOIN weberp_stockmaster  ON
+				weberp_purchdata.stockid = weberp_stockmaster.stockid
+				INNER JOIN weberp_stockcategory ON
+				weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+				WHERE weberp_purchdata.preferred=1
+				AND weberp_purchdata.effectivefrom <='" . Date('Y-m-d') . "'
 				AND (" . $OrdersToPlacePOFor . ")
-				GROUP BY purchdata.supplierno,
-					purchdata.stockid,
-					purchdata.price,
-					purchdata.suppliers_partno,
-					purchdata.supplierdescription,
-					purchdata.conversionfactor,
-					purchdata.leadtime,
-					purchdata.suppliersuom,
-					stockmaster.grossweight,
-					stockmaster.volume,
-					stockcategory.stockact
-				ORDER BY purchdata.supplierno,
-					 purchdata.stockid";
+				GROUP BY weberp_purchdata.supplierno,
+					weberp_purchdata.stockid,
+					weberp_purchdata.price,
+					weberp_purchdata.suppliers_partno,
+					weberp_purchdata.supplierdescription,
+					weberp_purchdata.conversionfactor,
+					weberp_purchdata.leadtime,
+					weberp_purchdata.suppliersuom,
+					weberp_stockmaster.grossweight,
+					weberp_stockmaster.volume,
+					weberp_stockcategory.stockact
+				ORDER BY weberp_purchdata.supplierno,
+					 weberp_purchdata.stockid";
 
 		$ErrMsg = _('Unable to retrieve the items on the selected orders for creating purchase orders for');
 		$ItemResult = DB_query($sql,$ErrMsg);
@@ -89,52 +89,52 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 		}
 
 		/* Now figure out if there are any components of Assembly items that  need to be ordered too */
-		$sql = "SELECT purchdata.supplierno,
-						purchdata.stockid,
-						purchdata.price,
-						purchdata.suppliers_partno,
-						purchdata.supplierdescription,
-						purchdata.conversionfactor,
-						purchdata.leadtime,
-						purchdata.suppliersuom,
-						stockmaster.grossweight,
-						stockmaster.volume,
-						stockcategory.stockact,
-						SUM(bom.quantity *(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)) AS orderqty
-				FROM purchdata INNER JOIN bom
-				ON purchdata.stockid=bom.component
-				INNER JOIN salesorderdetails ON
-				bom.parent=salesorderdetails.stkcode
-				INNER JOIN stockmaster ON
-				purchdata.stockid = stockmaster.stockid
-				INNER JOIN stockmaster AS stockmaster2
-				ON stockmaster2.stockid=salesorderdetails.stkcode
-				INNER JOIN stockcategory ON
-				stockmaster.categoryid = stockcategory.categoryid
-				WHERE purchdata.preferred=1
+		$sql = "SELECT weberp_purchdata.supplierno,
+						weberp_purchdata.stockid,
+						weberp_purchdata.price,
+						weberp_purchdata.suppliers_partno,
+						weberp_purchdata.supplierdescription,
+						weberp_purchdata.conversionfactor,
+						weberp_purchdata.leadtime,
+						weberp_purchdata.suppliersuom,
+						weberp_stockmaster.grossweight,
+						weberp_stockmaster.volume,
+						weberp_stockcategory.stockact,
+						SUM(weberp_bom.quantity *(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)) AS orderqty
+				FROM weberp_purchdata INNER JOIN weberp_bom
+				ON weberp_purchdata.stockid=weberp_bom.component
+				INNER JOIN weberp_salesorderdetails ON
+				weberp_bom.parent=weberp_salesorderdetails.stkcode
+				INNER JOIN weberp_stockmaster ON
+				weberp_purchdata.stockid = weberp_stockmaster.stockid
+				INNER JOIN weberp_stockmaster AS stockmaster2
+				ON stockmaster2.stockid=weberp_salesorderdetails.stkcode
+				INNER JOIN weberp_stockcategory ON
+				weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+				WHERE weberp_purchdata.preferred=1
 				AND stockmaster2.mbflag='A'
-				AND bom.loccode ='" . $_SESSION['UserStockLocation'] . "'
-				AND purchdata.effectivefrom <='" . Date('Y-m-d') . "'
-				AND bom.effectiveafter <='" . Date('Y-m-d') . "'
-				AND bom.effectiveto > '" . Date('Y-m-d') . "'
+				AND weberp_bom.loccode ='" . $_SESSION['UserStockLocation'] . "'
+				AND weberp_purchdata.effectivefrom <='" . Date('Y-m-d') . "'
+				AND weberp_bom.effectiveafter <='" . Date('Y-m-d') . "'
+				AND weberp_bom.effectiveto > '" . Date('Y-m-d') . "'
 				AND (" . $OrdersToPlacePOFor . ")
-				GROUP BY purchdata.supplierno,
-					purchdata.stockid,
-					purchdata.price,
-					purchdata.suppliers_partno,
-					purchdata.supplierdescription,
-					purchdata.conversionfactor,
-					purchdata.leadtime,
-					purchdata.suppliersuom,
-					stockmaster.grossweight,
-					stockmaster.volume,
-					stockcategory.stockact
-				ORDER BY purchdata.supplierno,
-					 purchdata.stockid";
+				GROUP BY weberp_purchdata.supplierno,
+					weberp_purchdata.stockid,
+					weberp_purchdata.price,
+					weberp_purchdata.suppliers_partno,
+					weberp_purchdata.supplierdescription,
+					weberp_purchdata.conversionfactor,
+					weberp_purchdata.leadtime,
+					weberp_purchdata.suppliersuom,
+					weberp_stockmaster.grossweight,
+					weberp_stockmaster.volume,
+					weberp_stockcategory.stockact
+				ORDER BY weberp_purchdata.supplierno,
+					 weberp_purchdata.stockid";
 		$ErrMsg = _('Unable to retrieve the items on the selected orders for creating purchase orders for');
 		$ItemResult = DB_query($sql,$ErrMsg);
 
-		/* add any assembly item components from salesorders to the ItemArray */
+		/* add any assembly item components from weberp_salesorders to the ItemArray */
 		while ($myrow = DB_fetch_array($ItemResult)){
 			if (isset($ItemArray[$myrow['stockid']])){
 			  /* if the item is already in the ItemArray then just add the quantity to the existing item */
@@ -173,9 +173,9 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 							deladd6,
 							tel,
 							contact
-						FROM locations
-						INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-						WHERE locations.loccode = '" .$_SESSION['UserStockLocation']  . "'";
+						FROM weberp_locations
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+						WHERE weberp_locations.loccode = '" .$_SESSION['UserStockLocation']  . "'";
 			$ErrMsg = _('The delivery address for the order could not be obtained from the user default stock location');
 			$DelAddResult = DB_query($sql,$ErrMsg);
 			$DelAddRow = DB_fetch_array($DelAddResult);
@@ -197,7 +197,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 						/* if an order is/has been created already and the supplier of this item has changed - so need to finish off the order */
 						//if the user has authority to authorise the PO then it should be created as authorised
 						$AuthSQL ="SELECT authlevel
-					 				FROM purchorderauth
+					 				FROM weberp_purchorderauth
 								    WHERE userid='" . $_SESSION['UserID'] . "'
 									AND currabrev='" . $SuppRow['currcode'] . "'";
 
@@ -211,7 +211,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 							$StatusComment = date($_SESSION['DefaultDateFormat']).' - ' . _('Order Created and Authorised by') . ' ' . $UserDetails . ' - '._('Auto created from sales orders')  . '<br />';
 							$ErrMsg = _('Could not update purchase order status to Authorised');
 							$DbgMsg = _('The SQL that failed was');
-							$result = DB_query("UPDATE purchorders SET allowprint=1,
+							$result = DB_query("UPDATE weberp_purchorders SET allowprint=1,
 												   status='Authorised',
 												   stat_comment='" . $StatusComment . "'
 												WHERE orderno='" . $PO_OrderNo . "'",
@@ -256,8 +256,8 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 	 							paymentterms,
 	 							currcode,
 	 							rate
-						 FROM suppliers INNER JOIN currencies
-						    ON suppliers.currcode = currencies.currabrev
+						 FROM weberp_suppliers INNER JOIN weberp_currencies
+						    ON weberp_suppliers.currcode = weberp_currencies.currabrev
 						    WHERE supplierid='" . $SupplierID . "'";
 
 					$ErrMsg = _('Could not get the supplier information for the order');
@@ -266,7 +266,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 
 					$StatusComment=date($_SESSION['DefaultDateFormat']).' - ' . _('Order Created by') . ' ' . $UserDetails . ' - '._('Auto created from sales orders')  . '<br />';
 					/*Insert to purchase order header record */
-					$sql = "INSERT INTO purchorders ( orderno,
+					$sql = "INSERT INTO weberp_purchorders ( orderno,
 		  									  supplierno,
 		  									  orddate,
 		  									  rate,
@@ -330,7 +330,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 
 				/*reminder we are in a loop of the total of each item to place a purchase order for based on a selection of sales orders */
 				$DeliveryDate = DateAdd(Date($_SESSION['DefaultDateFormat']),'d',$ItemRow['leadtime']);
-				$sql = "INSERT INTO purchorderdetails ( orderno,
+				$sql = "INSERT INTO weberp_purchorderdetails ( orderno,
 		      									itemcode,
 		      									deliverydate,
 		      									itemdescription,
@@ -363,7 +363,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 			if ($SupplierID !='' AND $_SESSION['AutoAuthorisePO']==1) {
 				//if the user has authority to authorise the PO then it should be created as authorised
 				$AuthSQL ="SELECT authlevel
-							FROM purchorderauth
+							FROM weberp_purchorderauth
 							WHERE userid='".$_SESSION['UserID']."'
 							AND currabrev='".$SuppRow['currcode']."'";
 
@@ -377,7 +377,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 					$StatusComment = date($_SESSION['DefaultDateFormat']).' - ' . _('Order Created and Authorised by') . $UserDetails . ' - '._('Auto created from sales orders')  . '<br />';
 					$ErrMsg = _('Could not update purchase order status to Authorised');
 					$DbgMsg = _('The SQL that failed was');
-					$result = DB_query("UPDATE purchorders SET allowprint=1,
+					$result = DB_query("UPDATE weberp_purchorders SET allowprint=1,
 															status='Authorised',
 															stat_comment='" . $StatusComment . "'
 												 WHERE orderno='" . $PO_OrderNo . "'",
@@ -400,7 +400,7 @@ if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders
 				prnMsg(_('Purchase Order') . ' ' . $PO_OrderNo . ' ' . _('on') . ' ' . $SupplierID . ' ' . _('has been created'),'success');
 				DB_Txn_Commit();
 			}
-			$result = DB_query("UPDATE salesorders SET poplaced=1 WHERE " . $OrdersToPlacePOFor);
+			$result = DB_query("UPDATE weberp_salesorders SET poplaced=1 WHERE " . $OrdersToPlacePOFor);
 		}/*There were items that had purchasing data set up to create POs for */
 	} /* there were sales orders checked to place POs for */
 }/*end of purchase order creation code */
@@ -482,8 +482,8 @@ if (!isset($StockID)) {
 				<td>' . _('From Stock Location') . ':</td>
 				<td><select name="StockLocation"> ';
 
-		$sql = "SELECT locations.loccode, locationname, canview FROM locations
-					INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+		$sql = "SELECT weberp_locations.loccode, locationname, canview FROM weberp_locations
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 		$resultStkLocs = DB_query($sql);
 
 		while ($myrow=DB_fetch_array($resultStkLocs)){
@@ -559,7 +559,7 @@ if (!isset($StockID)) {
 
 	$SQL="SELECT categoryid,
 			categorydescription
-		FROM stockcategory
+		FROM weberp_stockcategory
 		ORDER BY categorydescription";
 
 	$result1 = DB_query($SQL);
@@ -680,110 +680,110 @@ if (isset($StockItemsResult)
 		AND (!isset($DueDateFrom) OR !is_date($DueDateFrom))
 		AND (!isset($DueDateTo) OR !is_date($DueDateTo))) {
 
-			$SQL = "SELECT salesorders.orderno,
-					debtorsmaster.name,
-					custbranch.brname,
-					salesorders.customerref,
-					salesorders.orddate,
-					salesorders.deliverydate,
-					salesorders.deliverto,
-					salesorders.printedpackingslip,
-					salesorders.poplaced,
-					SUM(salesorderdetails.unitprice*(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
-				FROM salesorders INNER JOIN salesorderdetails
-					ON salesorders.orderno = salesorderdetails.orderno
-					INNER JOIN debtorsmaster
-					ON salesorders.debtorno = debtorsmaster.debtorno
-					INNER JOIN custbranch
-					ON debtorsmaster.debtorno = custbranch.debtorno
-					AND salesorders.branchcode = custbranch.branchcode
-					INNER JOIN currencies
-					ON debtorsmaster.currcode = currencies.currabrev
-					WHERE salesorderdetails.completed=0 ";
+			$SQL = "SELECT weberp_salesorders.orderno,
+					weberp_debtorsmaster.name,
+					weberp_custbranch.brname,
+					weberp_salesorders.customerref,
+					weberp_salesorders.orddate,
+					weberp_salesorders.deliverydate,
+					weberp_salesorders.deliverto,
+					weberp_salesorders.printedpackingslip,
+					weberp_salesorders.poplaced,
+					SUM(weberp_salesorderdetails.unitprice*(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*(1-weberp_salesorderdetails.discountpercent)/weberp_currencies.rate) AS ordervalue
+				FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+					ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+					INNER JOIN weberp_debtorsmaster
+					ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+					INNER JOIN weberp_custbranch
+					ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+					AND weberp_salesorders.branchcode = weberp_custbranch.branchcode
+					INNER JOIN weberp_currencies
+					ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+					WHERE weberp_salesorderdetails.completed=0 ";
 			$SQL .= $OrderDateFrom . $OrderDateTo;
 		} else {
 			if ($Quotations !==0 AND $Quotations !==1) {//overdue inquiry only
-				$SQL = "SELECT salesorders.orderno,
-						debtorsmaster.name,
-						custbranch.brname,
-						salesorders.customerref,
-						salesorders.orddate,
-						salesorders.deliverydate,
-						salesorders.deliverto,
-						salesorders.printedpackingslip,
-						salesorders.poplaced,
+				$SQL = "SELECT weberp_salesorders.orderno,
+						weberp_debtorsmaster.name,
+						weberp_custbranch.brname,
+						weberp_salesorders.customerref,
+						weberp_salesorders.orddate,
+						weberp_salesorders.deliverydate,
+						weberp_salesorders.deliverto,
+						weberp_salesorders.printedpackingslip,
+						weberp_salesorders.poplaced,
 						SUM(CASE WHEN itemdue<'" . Date('Y-m-d') . "'
-						     THEN salesorderdetails.unitprice*(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*(1-salesorderdetails.discountpercent)/currencies.rate
+						     THEN weberp_salesorderdetails.unitprice*(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*(1-weberp_salesorderdetails.discountpercent)/weberp_currencies.rate
 						     ELSE 0 END) as ordervalue";
 			} elseif (isset($DueDateFrom) AND is_date($DueDateFrom) AND (!isset($DueDateTo) OR !is_date($DueDateTo))) {
-					$SQL = "SELECT salesorders.orderno,
-						debtorsmaster.name,
-						custbranch.brname,
-						salesorders.customerref,
-						salesorders.orddate,
-						salesorders.deliverydate,
-						salesorders.deliverto,
-						salesorders.printedpackingslip,
-						salesorders.poplaced,
+					$SQL = "SELECT weberp_salesorders.orderno,
+						weberp_debtorsmaster.name,
+						weberp_custbranch.brname,
+						weberp_salesorders.customerref,
+						weberp_salesorders.orddate,
+						weberp_salesorders.deliverydate,
+						weberp_salesorders.deliverto,
+						weberp_salesorders.printedpackingslip,
+						weberp_salesorders.poplaced,
 						SUM(CASE WHEN itemdue>='" . FormatDateFromSQL($DueDateFrom) . "'
-						     THEN salesorderdetails.unitprice*(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*(1-salesorderdetails.discountpercent)/currencies.rate
+						     THEN weberp_salesorderdetails.unitprice*(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*(1-weberp_salesorderdetails.discountpercent)/weberp_currencies.rate
 						     ELSE 0 END) as ordervalue";
 			} elseif (isset($DueDateFrom) AND is_date($DueDateFrom) AND isset($DueDateTo) AND is_date($DueDateTo)) {
-					$SQL = "SELECT salesorders.orderno,
-						debtorsmaster.name,
-						custbranch.brname,
-						salesorders.customerref,
-						salesorders.orddate,
-						salesorders.deliverydate,
-						salesorders.deliverto,
-						salesorders.printedpackingslip,
-						salesorders.poplaced,
+					$SQL = "SELECT weberp_salesorders.orderno,
+						weberp_debtorsmaster.name,
+						weberp_custbranch.brname,
+						weberp_salesorders.customerref,
+						weberp_salesorders.orddate,
+						weberp_salesorders.deliverydate,
+						weberp_salesorders.deliverto,
+						weberp_salesorders.printedpackingslip,
+						weberp_salesorders.poplaced,
 						SUM (CASE WHEN itemdue>='" . FormatDateForSQL($DueDateFrom) . "' AND itemdue<='" . FormatDateForSQL($DueDateTo) ."'
-						     THEN salesorderdetails.unitprice*(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*(1-salesorderdetails.discountpercent)/currencies.rate
+						     THEN weberp_salesorderdetails.unitprice*(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*(1-weberp_salesorderdetails.discountpercent)/weberp_currencies.rate
 						     ELSE 0 END) as ordervalue";
 			} elseif ((!isset($DueDateFrom) OR !is_date($DueDateFrom)) AND isset($DueDateTo) AND is_date($DueDateTo)) {
-						$SQL = "SELECT salesorders.orderno,
-						debtorsmaster.name,
-						custbranch.brname,
-						salesorders.customerref,
-						salesorders.orddate,
-						salesorders.deliverydate,
-						salesorders.deliverto,
-						salesorders.printedpackingslip,
-						salesorders.poplaced,
+						$SQL = "SELECT weberp_salesorders.orderno,
+						weberp_debtorsmaster.name,
+						weberp_custbranch.brname,
+						weberp_salesorders.customerref,
+						weberp_salesorders.orddate,
+						weberp_salesorders.deliverydate,
+						weberp_salesorders.deliverto,
+						weberp_salesorders.printedpackingslip,
+						weberp_salesorders.poplaced,
 						SUM(CASE WHEN AND itemdue<='" . FormatDateForSQL($DueDateTo) ."'
-						     THEN salesorderdetails.unitprice*(salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*(1-salesorderdetails.discountpercent)/currencies.rate
+						     THEN weberp_salesorderdetails.unitprice*(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*(1-weberp_salesorderdetails.discountpercent)/weberp_currencies.rate
 						     ELSE 0 END) as ordervalue";
 			}//end of due date inquiry
 				$SQL .= $OrderDateFrom . $OrderDateTo;
 
 
-				$SQL .=" FROM salesorders INNER JOIN salesorderdetails
-						ON salesorders.orderno = salesorderdetails.orderno
-						INNER JOIN debtorsmaster
-						ON salesorders.debtorno = debtorsmaster.debtorno
-						INNER JOIN custbranch
-						ON debtorsmaster.debtorno = custbranch.debtorno
-						AND salesorders.branchcode = custbranch.branchcode
-						INNER JOIN currencies
-						ON debtorsmaster.currcode = currencies.currabrev
-						WHERE salesorderdetails.completed=0 ";
+				$SQL .=" FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+						ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						INNER JOIN weberp_debtorsmaster
+						ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_custbranch
+						ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+						AND weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+						WHERE weberp_salesorderdetails.completed=0 ";
 		}
 
 		//Add salesman role control
 			if ($_SESSION['SalesmanLogin'] != '') {
-				$SQL .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$SQL .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
 			if (isset($OrderNumber)
 				AND $OrderNumber !='') {
 
-				$SQL .= "AND salesorders.orderno=". $OrderNumber ."
-				    AND salesorders.quotation=" .$Quotations;
+				$SQL .= "AND weberp_salesorders.orderno=". $OrderNumber ."
+				    AND weberp_salesorders.quotation=" .$Quotations;
 
 			} elseif (isset($CustomerRef) AND $CustomerRef != ''){
-				$SQL .= "AND salesorders.customerref='" . $CustomerRef . "'
-					AND salesorders.quotation=" . $Quotations;
+				$SQL .= "AND weberp_salesorders.customerref='" . $CustomerRef . "'
+					AND weberp_salesorders.quotation=" . $Quotations;
 
 			} else {
 	      			/* $DateAfterCriteria = FormatDateforSQL($OrdersAfterDate); */
@@ -791,40 +791,40 @@ if (isset($StockItemsResult)
 				if (isset($SelectedCustomer)) {
 
 					if (isset($SelectedStockItem)) {
-						$SQL .= "AND salesorders.quotation =" .$Quotations . "
-							AND salesorderdetails.stkcode='". $SelectedStockItem ."'
-							AND salesorders.debtorno='" . $SelectedCustomer ."'
-							AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
+						$SQL .= "AND weberp_salesorders.quotation =" .$Quotations . "
+							AND weberp_salesorderdetails.stkcode='". $SelectedStockItem ."'
+							AND weberp_salesorders.debtorno='" . $SelectedCustomer ."'
+							AND weberp_salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
 
 					} else {
-						$SQL .= "AND  salesorders.quotation =" .$Quotations . "
-							AND salesorders.debtorno='" . $SelectedCustomer . "'
-							AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
+						$SQL .= "AND  weberp_salesorders.quotation =" .$Quotations . "
+							AND weberp_salesorders.debtorno='" . $SelectedCustomer . "'
+							AND weberp_salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
 
 					}
 				} else { //no customer selected
 					if (isset($SelectedStockItem)) {
-							$SQL .= "AND salesorders.quotation =" .$Quotations . "
-								AND salesorderdetails.stkcode='". $SelectedStockItem . "'
-								AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
+							$SQL .= "AND weberp_salesorders.quotation =" .$Quotations . "
+								AND weberp_salesorderdetails.stkcode='". $SelectedStockItem . "'
+								AND weberp_salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
 					} else {
-							$SQL .= "AND salesorders.quotation =" .$Quotations . "
-								AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
+							$SQL .= "AND weberp_salesorders.quotation =" .$Quotations . "
+								AND weberp_salesorders.fromstkloc = '". $_POST['StockLocation'] . "'";
 					}
 
 				} //end selected customer
 				$SQL .= $DueDateFrom . $DueDateTo;
 
-				$SQL .= ' GROUP BY salesorders.orderno,
-							debtorsmaster.name,
-							custbranch.brname,
-							salesorders.customerref,
-							salesorders.orddate,
-							salesorders.deliverydate,
-							salesorders.deliverto,
-							salesorders.printedpackingslip,
-							salesorders.poplaced
-							ORDER BY salesorders.orderno';
+				$SQL .= ' GROUP BY weberp_salesorders.orderno,
+							weberp_debtorsmaster.name,
+							weberp_custbranch.brname,
+							weberp_salesorders.customerref,
+							weberp_salesorders.orddate,
+							weberp_salesorders.deliverydate,
+							weberp_salesorders.deliverto,
+							weberp_salesorders.printedpackingslip,
+							weberp_salesorders.poplaced
+							ORDER BY weberp_salesorders.orderno';
 			} //end not order number selected
 
 	$ErrMsg = _('No orders or quotations were returned by the SQL because');
@@ -835,7 +835,7 @@ if (isset($StockItemsResult)
 
 		/* Get users authority to place POs */
 		$AuthSQL="SELECT cancreate
-					FROM purchorderauth
+					FROM weberp_purchorderauth
 					WHERE userid='". $_SESSION['UserID'] . "'";
 
 		/*we don't know what currency these orders might be in but if no authority at all then don't show option*/
@@ -1034,42 +1034,42 @@ function GetSearchItems ($SQLConstraint='') {
 	if ($_POST['Keywords'] AND $_POST['StockCode']) {
 		 echo _('Stock description keywords have been used in preference to the Stock code extract entered');
 	}
-	$SQL =  "SELECT stockmaster.stockid,
-				   stockmaster.description,
-				   stockmaster.decimalplaces,
-				   SUM(locstock.quantity) AS qoh,
-				   stockmaster.units
-			FROM salesorderdetails INNER JOIN stockmaster
-				ON salesorderdetails.stkcode = stockmaster.stockid AND completed=0
-			INNER JOIN locstock
-			  ON stockmaster.stockid=locstock.stockid";
+	$SQL =  "SELECT weberp_stockmaster.stockid,
+				   weberp_stockmaster.description,
+				   weberp_stockmaster.decimalplaces,
+				   SUM(weberp_locstock.quantity) AS qoh,
+				   weberp_stockmaster.units
+			FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+				ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid AND completed=0
+			INNER JOIN weberp_locstock
+			  ON weberp_stockmaster.stockid=weberp_locstock.stockid";
 	if (isset($_POST['StockCat'])
 		AND ((trim($_POST['StockCat']) == '') OR $_POST['StockCat'] == 'All')){
 		 $WhereStockCat = '';
 	} else {
-		 $WhereStockCat = " AND stockmaster.categoryid='" . $_POST['StockCat'] . "' ";
+		 $WhereStockCat = " AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "' ";
 	}
 	if ($_POST['Keywords']) {
 		 //insert wildcard characters in spaces
 		 $SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		 $SQL .= " WHERE stockmaster.description " . LIKE . " '" . $SearchString . "'
+		 $SQL .= " WHERE weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
 			  " . $WhereStockCat ;
 
 
 	 } elseif (isset($_POST['StockCode'])){
-		 $SQL .= " WHERE stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'" . $WhereStockCat;
+		 $SQL .= " WHERE weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'" . $WhereStockCat;
 
 	 } elseif (!isset($_POST['StockCode']) AND !isset($_POST['Keywords'])) {
-		 $SQL .= " WHERE stockmaster.categoryid='" . $_POST['StockCat'] ."'";
+		 $SQL .= " WHERE weberp_stockmaster.categoryid='" . $_POST['StockCat'] ."'";
 
 	 }
 	$SQL .= $SQLConstraint;
-	$SQL .= " GROUP BY stockmaster.stockid,
-					    stockmaster.description,
-					    stockmaster.decimalplaces,
-					    stockmaster.units
-					    ORDER BY stockmaster.stockid";
+	$SQL .= " GROUP BY weberp_stockmaster.stockid,
+					    weberp_stockmaster.description,
+					    weberp_stockmaster.decimalplaces,
+					    weberp_stockmaster.units
+					    ORDER BY weberp_stockmaster.stockid";
 
 	$ErrMsg =  _('No stock items were returned by the SQL because');
 	$DbgMsg = _('The SQL used to retrieve the searched parts was');

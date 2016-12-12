@@ -20,37 +20,37 @@ function submit(&$db, $TabToShow, $FromDate, $ToDate) {
 
 	if ($InputError == 0){
 		// Search absic PC Tab information
-		$SQL = "SELECT pctabs.tabcode,
-					   pctabs.usercode,
-					   pctabs.typetabcode,
-					   pctabs.currency,
-					   pctabs.tablimit,
-					   pctabs.assigner,
-					   pctabs.authorizer
-				FROM  pctabs
-				WHERE pctabs.tabcode = '" . $TabToShow . "'";
+		$SQL = "SELECT weberp_pctabs.tabcode,
+					   weberp_pctabs.usercode,
+					   weberp_pctabs.typetabcode,
+					   weberp_pctabs.currency,
+					   weberp_pctabs.tablimit,
+					   weberp_pctabs.assigner,
+					   weberp_pctabs.authorizer
+				FROM  weberp_pctabs
+				WHERE weberp_pctabs.tabcode = '" . $TabToShow . "'";
 		$result = DB_query($SQL);
 		$myTab = DB_fetch_array($result);
 
-		$SQL = "SELECT SUM(pcashdetails.amount) AS previous
-				FROM  pcashdetails
-				WHERE pcashdetails.tabcode = '" . $TabToShow . "'
-					AND pcashdetails.date < '" . FormatDateForSQL($FromDate) . "'";
+		$SQL = "SELECT SUM(weberp_pcashdetails.amount) AS previous
+				FROM  weberp_pcashdetails
+				WHERE weberp_pcashdetails.tabcode = '" . $TabToShow . "'
+					AND weberp_pcashdetails.date < '" . FormatDateForSQL($FromDate) . "'";
 		$result = DB_query($SQL);
 		$myPreviousBalance = DB_fetch_array($result);
 
-		$SQL = "SELECT pcashdetails.date,
-					   pcashdetails.codeexpense,
-					   pcashdetails.amount,
-					   pcashdetails.authorized,
-					   pcashdetails.notes,
-					   pcashdetails.receipt
-				FROM  pcashdetails
-				WHERE pcashdetails.tabcode = '" . $TabToShow . "'
-					AND pcashdetails.date >= '" . FormatDateForSQL($FromDate) . "'
-					AND pcashdetails.date <= '" . FormatDateForSQL($ToDate) . "'
-				ORDER BY pcashdetails.date, 
-					pcashdetails.counterindex";
+		$SQL = "SELECT weberp_pcashdetails.date,
+					   weberp_pcashdetails.codeexpense,
+					   weberp_pcashdetails.amount,
+					   weberp_pcashdetails.authorized,
+					   weberp_pcashdetails.notes,
+					   weberp_pcashdetails.receipt
+				FROM  weberp_pcashdetails
+				WHERE weberp_pcashdetails.tabcode = '" . $TabToShow . "'
+					AND weberp_pcashdetails.date >= '" . FormatDateForSQL($FromDate) . "'
+					AND weberp_pcashdetails.date <= '" . FormatDateForSQL($ToDate) . "'
+				ORDER BY weberp_pcashdetails.date, 
+					weberp_pcashdetails.counterindex";
 		$result = DB_query($SQL);
 		if (DB_num_rows($result) != 0){
 
@@ -194,7 +194,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 		<td><select name="Tabs">';
 
 	$sql = "SELECT tabcode
-			FROM pctabs 
+			FROM weberp_pctabs 
 			ORDER BY tabcode";
 	$CatResult=DB_query($sql);
 

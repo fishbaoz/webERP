@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockMovements.php 7329 2015-07-28 01:00:01Z tehonu $*/
 
 include('includes/session.inc');
 $Title = _('Stock Movements');
@@ -17,7 +17,7 @@ if (isset($_GET['StockID'])){
 	$StockID = '';
 }
 
-$result = DB_query("SELECT description, units FROM stockmaster WHERE stockid='".$StockID."'");
+$result = DB_query("SELECT description, units FROM weberp_stockmaster WHERE stockid='".$StockID."'");
 $myrow = DB_fetch_row($result);
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/inventory.png" title="' . _('Inventory') . '" alt="" /><b>' . ' ' . $StockID . ' - ' . $myrow['0'] . ' : ' . _('in units of') . ' : ' . $myrow[1] . '</b></p>';
 
@@ -37,11 +37,11 @@ echo '<tr><th colspan="10">' . _('Stock Code') . ':<input type="text" name="Stoc
 
 echo '  ' . _('From Stock Location') . ':<select name="StockLocation"> ';
 
-$sql = "SELECT locations.loccode, locationname FROM locations
-		INNER JOIN locationusers 
-			ON locationusers.loccode=locations.loccode 
-				AND locationusers.userid='" .  $_SESSION['UserID'] . "' 
-				AND locationusers.canview=1
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+		INNER JOIN weberp_locationusers 
+			ON weberp_locationusers.loccode=weberp_locations.loccode 
+				AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' 
+				AND weberp_locationusers.canview=1
 		ORDER BY locationname
 		";
 $resultStkLocs = DB_query($sql);
@@ -70,27 +70,27 @@ echo '<tr>
 $SQLBeforeDate = FormatDateForSQL($_POST['BeforeDate']);
 $SQLAfterDate = FormatDateForSQL($_POST['AfterDate']);
 
-$sql = "SELECT stockmoves.stockid,
-				systypes.typename,
-				stockmoves.type,
-				stockmoves.transno,
-				stockmoves.trandate,
-				stockmoves.userid,
-				stockmoves.debtorno,
-				stockmoves.branchcode,
-				stockmoves.qty,
-				stockmoves.reference,
-				stockmoves.price,
-				stockmoves.discountpercent,
-				stockmoves.newqoh,
-				stockmaster.decimalplaces
-		FROM stockmoves
-		INNER JOIN systypes ON stockmoves.type=systypes.typeid
-		INNER JOIN stockmaster ON stockmoves.stockid=stockmaster.stockid
-		WHERE  stockmoves.loccode='" . $_POST['StockLocation'] . "'
-		AND stockmoves.trandate >= '". $SQLAfterDate . "'
-		AND stockmoves.stockid = '" . $StockID . "'
-		AND stockmoves.trandate <= '" . $SQLBeforeDate . "'
+$sql = "SELECT weberp_stockmoves.stockid,
+				weberp_systypes.typename,
+				weberp_stockmoves.type,
+				weberp_stockmoves.transno,
+				weberp_stockmoves.trandate,
+				weberp_stockmoves.userid,
+				weberp_stockmoves.debtorno,
+				weberp_stockmoves.branchcode,
+				weberp_stockmoves.qty,
+				weberp_stockmoves.reference,
+				weberp_stockmoves.price,
+				weberp_stockmoves.discountpercent,
+				weberp_stockmoves.newqoh,
+				weberp_stockmaster.decimalplaces
+		FROM weberp_stockmoves
+		INNER JOIN weberp_systypes ON weberp_stockmoves.type=weberp_systypes.typeid
+		INNER JOIN weberp_stockmaster ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+		WHERE  weberp_stockmoves.loccode='" . $_POST['StockLocation'] . "'
+		AND weberp_stockmoves.trandate >= '". $SQLAfterDate . "'
+		AND weberp_stockmoves.stockid = '" . $StockID . "'
+		AND weberp_stockmoves.trandate <= '" . $SQLBeforeDate . "'
 		AND hidemovt=0
 		ORDER BY stkmoveno DESC";
 

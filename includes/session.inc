@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: session.inc 7056 2015-01-02 00:53:14Z rchacon $*/
 
 if (!isset($PathPrefix)) {
 	$PathPrefix='';

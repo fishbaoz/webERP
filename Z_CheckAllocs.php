@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CheckAllocs.php 6941 2014-10-26 23:18:08Z daintree $*/
 /*This page adds the total of allocation records and compares this to the recorded allocation total in DebtorTrans table */
 
 include('includes/session.inc');
@@ -7,20 +7,20 @@ $Title = _('Customer Allocations != DebtorTrans.Alloc');
 include('includes/header.inc');
 
 /*First off get the DebtorTransID of all invoices where allocations dont agree to the recorded allocation */
-$sql = "SELECT debtortrans.id,
-		debtortrans.debtorno,
-		debtortrans.transno,
+$sql = "SELECT weberp_debtortrans.id,
+		weberp_debtortrans.debtorno,
+		weberp_debtortrans.transno,
 		ovamount+ovgst AS totamt,
-		SUM(custallocns.Amt) AS totalalloc,
-		debtortrans.alloc
-	FROM debtortrans INNER JOIN custallocns
-	ON debtortrans.id=custallocns.transid_allocto
-	WHERE debtortrans.type=10
-	GROUP BY debtortrans.ID,
-		debtortrans.type,
+		SUM(weberp_custallocns.Amt) AS totalalloc,
+		weberp_debtortrans.alloc
+	FROM weberp_debtortrans INNER JOIN weberp_custallocns
+	ON weberp_debtortrans.id=weberp_custallocns.transid_allocto
+	WHERE weberp_debtortrans.type=10
+	GROUP BY weberp_debtortrans.ID,
+		weberp_debtortrans.type,
 		ovamount+ovgst,
-		debtortrans.alloc
-	HAVING SUM(custallocns.amt) < debtortrans.alloc - 1";
+		weberp_debtortrans.alloc
+	HAVING SUM(weberp_custallocns.amt) < weberp_debtortrans.alloc - 1";
 
 $result = DB_query($sql);
 
@@ -39,19 +39,19 @@ while ($myrow = DB_fetch_array($result)){
 	$sql = "SELECT type,
 				transno,
 				trandate,
-				debtortrans.debtorno,
+				weberp_debtortrans.debtorno,
 				reference,
-				debtortrans.rate,
+				weberp_debtortrans.rate,
 				ovamount+ovgst+ovfreight+ovdiscount AS totalamt,
-				custallocns.amt,
+				weberp_custallocns.amt,
 				decimalplaces AS currdecimalplaces
-			FROM debtortrans INNER JOIN custallocns
-			ON debtortrans.id=custallocns.transid_allocfrom
-			INNER JOIN debtorsmaster ON
-			debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN currencies ON
-			debtorsmaster.currcode=currencies.currabrev
-			WHERE custallocns.transid_allocto='" . $AllocToID . "'";
+			FROM weberp_debtortrans INNER JOIN weberp_custallocns
+			ON weberp_debtortrans.id=weberp_custallocns.transid_allocfrom
+			INNER JOIN weberp_debtorsmaster ON
+			weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_currencies ON
+			weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_custallocns.transid_allocto='" . $AllocToID . "'";
 
 	$ErrMsg = _('The customer transactions for the selected criteria could not be retrieved because');
 	$TransResult = DB_query($sql,$ErrMsg);

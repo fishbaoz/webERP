@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SuppTransGLAnalysis.php 7489 2016-04-10 17:12:51Z rchacon $*/
 
 /*The supplier transaction uses the SuppTrans class to hold the information about the invoice or credit note
 the SuppTrans class contains an array of GRNs objects - containing details of GRNs for invoicing/crediting and also
@@ -40,7 +40,7 @@ if (isset($_POST['AddGLCodeToTrans'])
 
 	$sql = "SELECT accountcode,
 			accountname
-		FROM chartmaster
+		FROM weberp_chartmaster
 		WHERE accountcode='" . $_POST['GLCode'] . "'";
 	$result = DB_query($sql);
 	if (DB_num_rows($result) == 0 and $_POST['GLCode'] != ''){
@@ -53,7 +53,7 @@ if (isset($_POST['AddGLCodeToTrans'])
 			prnMsg( _('The amount entered is not numeric') . '. ' . _('This line cannot be added to the transaction'),'error');
 			$InputError = True;
 		} elseif ($_POST['JobRef'] != ''){
-			$sql = "SELECT contractref FROM contracts WHERE contractref='" . $_POST['JobRef'] . "'";
+			$sql = "SELECT contractref FROM weberp_contracts WHERE contractref='" . $_POST['JobRef'] . "'";
 			$result = DB_query($sql);
 			if (DB_num_rows($result) == 0){
 				prnMsg( _('The contract reference entered is not a valid contract, this line cannot be added to the transaction'),'error');
@@ -172,7 +172,7 @@ echo '<tr>
 
 $SQL = "SELECT tagref,
 			tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result=DB_query($SQL);
@@ -198,7 +198,7 @@ echo '<tr>
 		<br />' . _('otherwise select the account from the list') . ')</td>
 	<td><select name="AcctSelection">';
 
-$sql = "SELECT accountcode, accountname FROM chartmaster ORDER BY accountcode";
+$sql = "SELECT accountcode, accountname FROM weberp_chartmaster ORDER BY accountcode";
 
 $result = DB_query($sql);
 echo '<option value=""></option>';

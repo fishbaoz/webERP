@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: FixedAssetCategories.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -57,9 +57,9 @@ if (isset($_POST['submit'])) {
 		$InputError =1;
 	}
 	/*Make an array of the defined bank accounts */
-	$SQL = "SELECT bankaccounts.accountcode
-			FROM bankaccounts INNER JOIN chartmaster
-			ON bankaccounts.accountcode=chartmaster.accountcode";
+	$SQL = "SELECT weberp_bankaccounts.accountcode
+			FROM weberp_bankaccounts INNER JOIN weberp_chartmaster
+			ON weberp_bankaccounts.accountcode=weberp_chartmaster.accountcode";
 	$result = DB_query($SQL);
 	$BankAccounts = array();
 	$i=0;
@@ -83,7 +83,7 @@ if (isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE fixedassetcategories
+		$sql = "UPDATE weberp_fixedassetcategories
 					SET categorydescription = '" . $_POST['CategoryDescription'] . "',
 						costact = '" . $_POST['CostAct'] . "',
 						depnact = '" . $_POST['DepnAct'] . "',
@@ -98,7 +98,7 @@ if (isset($_POST['submit'])) {
 
 	} elseif ($InputError !=1) {
 
-		$sql = "INSERT INTO fixedassetcategories (categoryid,
+		$sql = "INSERT INTO weberp_fixedassetcategories (categoryid,
 												categorydescription,
 												costact,
 												depnact,
@@ -127,9 +127,9 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-// PREVENT DELETES IF DEPENDENT RECORDS IN 'fixedassets'
+// PREVENT DELETES IF DEPENDENT RECORDS IN 'weberp_fixedassets'
 
-	$sql= "SELECT COUNT(*) FROM fixedassets WHERE fixedassets.assetcategoryid='" . $SelectedCategory . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_fixedassets WHERE weberp_fixedassets.assetcategoryid='" . $SelectedCategory . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -137,7 +137,7 @@ if (isset($_POST['submit'])) {
 			'<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('fixed assets referring to this category code'),'warn');
 
 	} else {
-		$sql="DELETE FROM fixedassetcategories WHERE categoryid='" . $SelectedCategory . "'";
+		$sql="DELETE FROM weberp_fixedassetcategories WHERE categoryid='" . $SelectedCategory . "'";
 		$result = DB_query($sql);
 		prnMsg(_('The fixed asset category') . ' ' . $SelectedCategory . ' ' . _('has been deleted'),'success');
 		unset ($SelectedCategory);
@@ -157,7 +157,7 @@ or deletion of the records*/
 				depnact,
 				disposalact,
 				accumdepnact
-			FROM fixedassetcategories";
+			FROM weberp_fixedassetcategories";
 	$result = DB_query($sql);
 
 	echo '<br />
@@ -224,7 +224,7 @@ if (isset($SelectedCategory) and !isset($_POST['submit'])) {
 					depnact,
 					disposalact,
 					accumdepnact
-				FROM fixedassetcategories
+				FROM weberp_fixedassetcategories
 				WHERE categoryid='" . $SelectedCategory . "'";
 
 		$result = DB_query($sql);
@@ -259,18 +259,18 @@ if (isset($SelectedCategory) and !isset($_POST['submit'])) {
 //SQL to poulate account selection boxes
 $sql = "SELECT accountcode,
 				 accountname
-		FROM chartmaster INNER JOIN accountgroups
-		ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl=0
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+		ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl=0
 		ORDER BY accountcode";
 
 $BSAccountsResult = DB_query($sql);
 
 $sql = "SELECT accountcode,
 				 accountname
-		FROM chartmaster INNER JOIN accountgroups
-		ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl!=0
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+		ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl!=0
 		ORDER BY accountcode";
 
 $PnLAccountsResult = DB_query($sql);

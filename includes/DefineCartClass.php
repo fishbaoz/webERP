@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: DefineCartClass.php 7444 2016-01-13 07:32:36Z daintree $*/
 
 /* Definition of the cart class
 this class can hold all the information for:
@@ -152,7 +152,7 @@ Class Cart {
 				errors anyway */
 
 				global $db;
-				$sql = "INSERT INTO salesorderdetails (orderlineno,
+				$sql = "INSERT INTO weberp_salesorderdetails (orderlineno,
 														orderno,
 														stkcode,
 														quantity,
@@ -200,7 +200,7 @@ Class Cart {
 		$this->LineItems[$UpdateLineNumber]->GPPercent = $GPPercent;
 		if ($UpdateDB=='Yes'){
 			global $db;
-			$result = DB_query("UPDATE salesorderdetails SET quantity=" . $Qty . ",
+			$result = DB_query("UPDATE weberp_salesorderdetails SET quantity=" . $Qty . ",
 															unitprice=" . $Price . ",
 															discountpercent=" . $Disc . ",
 															narrative ='" . $Narrative . "',
@@ -222,7 +222,7 @@ Class Cart {
 			global $db;
 			if ($this->Some_Already_Delivered($LineNumber)==0){
 				/* nothing has been delivered, delete it. */
-				$result = DB_query("DELETE FROM salesorderdetails
+				$result = DB_query("DELETE FROM weberp_salesorderdetails
 									WHERE orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'
 									AND orderlineno='" . $LineNumber . "'",
 									_('The order line could not be deleted because')
@@ -230,7 +230,7 @@ Class Cart {
 				prnMsg( _('Deleted Line Number'). ' ' . $LineNumber . ' ' . _('from existing Order Number').' ' . $_SESSION['ExistingOrder' . $identifier], 'success');
 			} else {
 				/* something has been delivered. Clear the remaining Qty and Mark Completed */
-				$result = DB_query("UPDATE salesorderdetails SET quantity=qtyinvoiced,
+				$result = DB_query("UPDATE weberp_salesorderdetails SET quantity=qtyinvoiced,
 																completed=1
 									WHERE orderno='" . $_SESSION['ExistingOrder' . $identifier] ."'
 									AND orderlineno='" . $LineNumber . "'" ,
@@ -297,14 +297,14 @@ Class Cart {
 		/*Gets the Taxes and rates applicable to this line from the TaxGroup of the branch and TaxCategory of the item
 		and the taxprovince of the dispatch location */
 
-		$sql = "SELECT stockmovestaxes.taxauthid,
-					taxauthorities.description,
-					taxauthorities.taxglcode,
-					stockmovestaxes.taxcalculationorder,
-					stockmovestaxes.taxontax,
-					stockmovestaxes.taxrate
-				FROM stockmovestaxes INNER JOIN taxauthorities
-					ON stockmovestaxes.taxauthid = taxauthorities.taxid
+		$sql = "SELECT weberp_stockmovestaxes.taxauthid,
+					weberp_taxauthorities.description,
+					weberp_taxauthorities.taxglcode,
+					weberp_stockmovestaxes.taxcalculationorder,
+					weberp_stockmovestaxes.taxontax,
+					weberp_stockmovestaxes.taxrate
+				FROM weberp_stockmovestaxes INNER JOIN weberp_taxauthorities
+					ON weberp_stockmovestaxes.taxauthid = weberp_taxauthorities.taxid
 				WHERE stkmoveno = '" . $stkmoveno . "'
 				ORDER BY taxcalculationorder";
 
@@ -330,20 +330,20 @@ Class Cart {
 		/*Gets the Taxes and rates applicable to this line from the TaxGroup of the branch and TaxCategory of the item
 		and the taxprovince of the dispatch location */
 
-		$SQL = "SELECT taxgrouptaxes.calculationorder,
-					taxauthorities.description,
-					taxgrouptaxes.taxauthid,
-					taxauthorities.taxglcode,
-					taxgrouptaxes.taxontax,
-					taxauthrates.taxrate
-			FROM taxauthrates INNER JOIN taxgrouptaxes ON
-				taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-				INNER JOIN taxauthorities ON
-				taxauthrates.taxauthority=taxauthorities.taxid
-			WHERE taxgrouptaxes.taxgroupid=" . $this->TaxGroup . "
-			AND taxauthrates.dispatchtaxprovince=" . $this->DispatchTaxProvince . "
-			AND taxauthrates.taxcatid = " . $this->LineItems[$LineNumber]->TaxCategory . "
-			ORDER BY taxgrouptaxes.calculationorder";
+		$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+					weberp_taxauthorities.description,
+					weberp_taxgrouptaxes.taxauthid,
+					weberp_taxauthorities.taxglcode,
+					weberp_taxgrouptaxes.taxontax,
+					weberp_taxauthrates.taxrate
+			FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+				weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+				INNER JOIN weberp_taxauthorities ON
+				weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+			WHERE weberp_taxgrouptaxes.taxgroupid=" . $this->TaxGroup . "
+			AND weberp_taxauthrates.dispatchtaxprovince=" . $this->DispatchTaxProvince . "
+			AND weberp_taxauthrates.taxcatid = " . $this->LineItems[$LineNumber]->TaxCategory . "
+			ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 		$ErrMsg = _('The taxes and rates for this item could not be retrieved because');
 		$GetTaxRatesResult = DB_query($SQL,$ErrMsg);
@@ -371,7 +371,7 @@ Class Cart {
 		/*Gets the Taxes and rates applicable to the freight based on the tax group of the branch combined with the tax category for this particular freight
 		and SESSION['FreightTaxCategory'] the taxprovince of the dispatch location */
 
-		$sql = "SELECT taxcatid FROM taxcategories WHERE taxcatname='Freight'";// This tax category is hardcoded inside the database.
+		$sql = "SELECT taxcatid FROM weberp_taxcategories WHERE taxcatname='Freight'";// This tax category is hardcoded inside the database.
 		$TaxCatQuery = DB_query($sql);
 
 		if ($TaxCatRow = DB_fetch_array($TaxCatQuery)) {
@@ -381,20 +381,20 @@ Class Cart {
 		  exit();
 		}
 
-		$SQL = "SELECT taxgrouptaxes.calculationorder,
-					taxauthorities.description,
-					taxgrouptaxes.taxauthid,
-					taxauthorities.taxglcode,
-					taxgrouptaxes.taxontax,
-					taxauthrates.taxrate
-				FROM taxauthrates INNER JOIN taxgrouptaxes ON
-					taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-					INNER JOIN taxauthorities ON
-					taxauthrates.taxauthority=taxauthorities.taxid
-				WHERE taxgrouptaxes.taxgroupid='" . $this->TaxGroup . "'
-				AND taxauthrates.dispatchtaxprovince='" . $this->DispatchTaxProvince . "'
-				AND taxauthrates.taxcatid = '" . $TaxCatID . "'
-				ORDER BY taxgrouptaxes.calculationorder";
+		$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+					weberp_taxauthorities.description,
+					weberp_taxgrouptaxes.taxauthid,
+					weberp_taxauthorities.taxglcode,
+					weberp_taxgrouptaxes.taxontax,
+					weberp_taxauthrates.taxrate
+				FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+					weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+					INNER JOIN weberp_taxauthorities ON
+					weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+				WHERE weberp_taxgrouptaxes.taxgroupid='" . $this->TaxGroup . "'
+				AND weberp_taxauthrates.dispatchtaxprovince='" . $this->DispatchTaxProvince . "'
+				AND weberp_taxauthrates.taxcatid = '" . $TaxCatID . "'
+				ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 		$ErrMsg = _('The taxes and rates for this item could not be retrieved because');
 		$GetTaxRatesResult = DB_query($SQL,$ErrMsg);

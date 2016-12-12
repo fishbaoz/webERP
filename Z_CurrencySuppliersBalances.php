@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CurrencySuppliersBalances.php 7052 2014-12-28 21:40:12Z rchacon $*/
 /* This script is an utility to show suppliers balances in total by currency. */
 
 include ('includes/session.inc');
@@ -15,9 +15,9 @@ echo '<p class="page_title_text"><img alt="" src="'.$RootPath.'/css/'.$Theme.
 $sql = "SELECT SUM(ovamount+ovgst-alloc) AS currencybalance,
 		currcode,
 		decimalplaces AS currdecimalplaces,
-		SUM((ovamount+ovgst-alloc)/supptrans.rate) AS localbalance
-		FROM supptrans INNER JOIN suppliers ON supptrans.supplierno=suppliers.supplierid
-		INNER JOIN currencies ON suppliers.currcode=currencies.currabrev
+		SUM((ovamount+ovgst-alloc)/weberp_supptrans.rate) AS localbalance
+		FROM weberp_supptrans INNER JOIN weberp_suppliers ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+		INNER JOIN weberp_currencies ON weberp_suppliers.currcode=weberp_currencies.currabrev
 		WHERE (ovamount+ovgst-alloc)<>0
 		GROUP BY currcode";
 

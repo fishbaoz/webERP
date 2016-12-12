@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SalesGraph.php 7682 2016-11-24 14:10:25Z rchacon $*/
 
 include('includes/session.inc');
 include('includes/phplot/phplot.php');
@@ -48,7 +48,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	} else {
 		$DefaultFromDate = Date ('Y-m-d', Mktime(0,0,0,$_SESSION['YearEnd'] + 2,0,Date('Y')-1));
 	}
-	$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno";
+	$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno";
 	$Periods = DB_query($sql);
 
 	while ($myrow=DB_fetch_array($Periods,$db)){
@@ -90,7 +90,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	}
 	echo '</select></td></tr>';
 
-	$AreasResult = DB_query("SELECT areacode, areadescription FROM areas ORDER BY areadescription");
+	$AreasResult = DB_query("SELECT areacode, areadescription FROM weberp_areas ORDER BY areadescription");
 
 	if (!isset($_POST['SalesArea'])){
 		$_POST['SalesArea']='';
@@ -112,7 +112,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	}
 	echo '</select></td></tr>';
 
-	$CategoriesResult = DB_query("SELECT categoryid, categorydescription FROM stockcategory ORDER BY categorydescription");
+	$CategoriesResult = DB_query("SELECT categoryid, categorydescription FROM weberp_stockcategory ORDER BY categorydescription");
 
 	if (!isset($_POST['CategoryID'])){
 		$_POST['CategoryID']='';
@@ -134,7 +134,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	}
 	echo '</select></td></tr>';
 
-	$SalesFolkResult = DB_query("SELECT salesmancode, salesmanname FROM salesman ORDER BY salesmanname");
+	$SalesFolkResult = DB_query("SELECT salesmancode, salesmanname FROM weberp_salesman ORDER BY salesmanname");
 
 	if (! isset($_POST['SalesmanCode'])){
  		$_POST['SalesmanCode'] = '';
@@ -223,7 +223,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	if ($_POST['SalesArea']=='All'){
 		$GraphTitle .= ' ' . _('For All Sales Areas');
 	} else {
-		$result = DB_query("SELECT areadescription FROM areas WHERE areacode='" . $_POST['SalesArea'] . "'");
+		$result = DB_query("SELECT areadescription FROM weberp_areas WHERE areacode='" . $_POST['SalesArea'] . "'");
 		$myrow = DB_fetch_row($result);
 		$GraphTitle .= ' ' . _('For') . ' ' . $myrow[0];
 		$WhereClause .= " area='" . $_POST['SalesArea'] . "' AND";
@@ -231,7 +231,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	if ($_POST['CategoryID']=='All'){
 		$GraphTitle .= ' ' . _('For All Stock Categories');
 	} else {
-		$result = DB_query("SELECT categorydescription FROM stockcategory WHERE categoryid='" . $_POST['CategoryID'] . "'");
+		$result = DB_query("SELECT categorydescription FROM weberp_stockcategory WHERE categoryid='" . $_POST['CategoryID'] . "'");
 		$myrow = DB_fetch_row($result);
 		$GraphTitle .= ' ' . _('For') . ' ' . $myrow[0];
 		$WhereClause .= " stkcategory='" . $_POST['CategoryID'] . "' AND";
@@ -240,7 +240,7 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 	if ($_POST['SalesmanCode']=='All'){
 		$GraphTitle .= ' ' . _('For All Salespeople');
 	} else {
-		$result = DB_query("SELECT salesmanname FROM salesman WHERE salesmancode='" . $_POST['SalesmanCode'] . "'");
+		$result = DB_query("SELECT salesmanname FROM weberp_salesman WHERE salesmancode='" . $_POST['SalesmanCode'] . "'");
 		$myrow = DB_fetch_row($result);
 		$GraphTitle .= ' ' . _('For Salesperson:') . ' ' . $myrow[0];
 		$WhereClause .= " salesperson='" . $_POST['SalesmanCode'] . "' AND";
@@ -255,16 +255,16 @@ if ((! isset($_POST['FromPeriod']) OR ! isset($_POST['ToPeriod']))
 		$WhereClause .= "  stockid >='" . $_POST['ValueFrom'] . "' AND stockid <='" . $_POST['ValueTo'] . "' AND";
 	}
 
-	$WhereClause = "WHERE " . $WhereClause . " salesanalysis.periodno>='" . $_POST['FromPeriod'] . "' AND salesanalysis.periodno <= '" . $_POST['ToPeriod'] . "'";
+	$WhereClause = "WHERE " . $WhereClause . " weberp_salesanalysis.periodno>='" . $_POST['FromPeriod'] . "' AND weberp_salesanalysis.periodno <= '" . $_POST['ToPeriod'] . "'";
 
-	$SQL = "SELECT salesanalysis.periodno,
-				periods.lastdate_in_period,
+	$SQL = "SELECT weberp_salesanalysis.periodno,
+				weberp_periods.lastdate_in_period,
 				SUM(CASE WHEN budgetoractual=1 THEN " . $SelectClause . " ELSE 0 END) AS sales,
 				SUM(CASE WHEN  budgetoractual=0 THEN " . $SelectClause . " ELSE 0 END) AS budget
-		FROM salesanalysis INNER JOIN periods ON salesanalysis.periodno=periods.periodno " . $WhereClause . "
-		GROUP BY salesanalysis.periodno,
-			periods.lastdate_in_period
-		ORDER BY salesanalysis.periodno";
+		FROM weberp_salesanalysis INNER JOIN weberp_periods ON weberp_salesanalysis.periodno=weberp_periods.periodno " . $WhereClause . "
+		GROUP BY weberp_salesanalysis.periodno,
+			weberp_periods.lastdate_in_period
+		ORDER BY weberp_salesanalysis.periodno";
 
 
 	$graph->SetTitle($GraphTitle);

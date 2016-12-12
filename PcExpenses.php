@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PcExpenses.php 7482 2016-04-01 08:36:03Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Maintenance Of Petty Cash Of Expenses');
@@ -89,7 +89,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedExpense) AND $InputError !=1) {
 
-		$sql = "UPDATE pcexpenses
+		$sql = "UPDATE weberp_pcexpenses
 				SET description = '" . $_POST['Description'] . "',
 					glaccount = '" . $_POST['GLAccount'] . "',
 					tag = '" . $_POST['Tag'] . "'
@@ -101,7 +101,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-			     FROM pcexpenses
+			     FROM weberp_pcexpenses
 			     WHERE codeexpense = '" . $_POST['CodeExpense'] . "'";
 
 		$checkresult = DB_query($checkSql);
@@ -114,7 +114,7 @@ if (isset($_POST['submit'])) {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO pcexpenses
+			$sql = "INSERT INTO weberp_pcexpenses
 						(codeexpense,
 			 			 description,
 			 			 glaccount,
@@ -126,7 +126,7 @@ if (isset($_POST['submit'])) {
 
 			$msg = _('Expense ') . ' ' . $_POST['CodeExpense'] .  ' ' . _('has been created');
 			$checkSql = "SELECT count(codeexpense)
-						FROM pcexpenses";
+						FROM weberp_pcexpenses";
 			$result = DB_query($checkSql);
 			$row = DB_fetch_row($result);
 
@@ -150,7 +150,7 @@ if (isset($_POST['submit'])) {
 	// PREVENT DELETES IF DEPENDENT RECORDS IN 'PcTabExpenses'
 
 	$sql= "SELECT COUNT(*)
-	       FROM pctabexpenses
+	       FROM weberp_pctabexpenses
 	       WHERE codeexpense='" . $SelectedExpense . "'";
 
 	$ErrMsg = _('The number of type of tabs using this expense code could not be retrieved');
@@ -162,7 +162,7 @@ if (isset($_POST['submit'])) {
 
 	} else {
 
-			$sql="DELETE FROM pcexpenses
+			$sql="DELETE FROM weberp_pcexpenses
                   WHERE codeexpense='" . $SelectedExpense . "'";
 			$ErrMsg = _('The expense type record could not be deleted because');
 			$result = DB_query($sql,$ErrMsg);
@@ -181,7 +181,7 @@ links to delete or edit each. These will call the same page again and allow upda
 or deletion of the records*/
 
 	$sql = "SELECT *
-			FROM pcexpenses";
+			FROM weberp_pcexpenses";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -205,14 +205,14 @@ or deletion of the records*/
 		}
 
 		$sqldesc="SELECT accountname
-					FROM chartmaster
+					FROM weberp_chartmaster
 					WHERE accountcode='". $myrow[2] . "'";
 
 		$ResultDes = DB_query($sqldesc);
 		$Description=DB_fetch_array($ResultDes);
 
 		$SqlDescTag="SELECT tagdescription
-					FROM tags
+					FROM weberp_tags
 					WHERE tagref='". $myrow[3] . "'";
 
 		$ResultDesTag = DB_query($SqlDescTag);
@@ -257,7 +257,7 @@ if (! isset($_GET['delete'])) {
 			       description,
 				   glaccount,
 				   tag
-		        FROM pcexpenses
+		        FROM weberp_pcexpenses
 		        WHERE codeexpense='" . $SelectedExpense . "'";
 
 		$result = DB_query($sql);
@@ -304,7 +304,7 @@ if (! isset($_GET['delete'])) {
 	DB_free_result($result);
 	$SQL = "SELECT accountcode,
 				accountname
-			FROM chartmaster
+			FROM weberp_chartmaster
 			ORDER BY accountcode";
 	$result = DB_query($SQL);
 	echo '<option value="">' . _('Not Yet Selected') . '</option>';
@@ -327,7 +327,7 @@ if (! isset($_GET['delete'])) {
 
 	$SQL = "SELECT tagref,
 					tagdescription
-			FROM tags
+			FROM weberp_tags
 			ORDER BY tagref";
 
 	$result=DB_query($SQL);

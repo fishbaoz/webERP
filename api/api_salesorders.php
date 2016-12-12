@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_salesorders.php 7093 2015-01-22 20:15:40Z vvs2012 $*/
 
 
 // InsertSalesOrderHeader and ModifySalesOrderHeader have date fields
@@ -39,7 +39,7 @@ $SOH_DateFields = array ('orddate',
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifyOrderDate($orddate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=api_DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -74,7 +74,7 @@ $SOH_DateFields = array ('orddate',
 /* Check that the order type is set up in the weberp database */
 	function VerifyOrderType($ordertype, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(typeabbrev)
-					 FROM salestypes
+					 FROM weberp_salestypes
 					 WHERE typeabbrev='" . $ordertype."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -103,7 +103,7 @@ $SOH_DateFields = array ('orddate',
 /* Check that the from stock location is set up in the weberp database */
 	function VerifyFromStockLocation($FromStockLocn, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(loccode)
-					 FROM locations
+					 FROM weberp_locations
 					  WHERE loccode='". $FromStockLocn."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -117,7 +117,7 @@ $SOH_DateFields = array ('orddate',
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifyDeliveryDate($DeliveryDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=api_DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -160,7 +160,7 @@ $SOH_DateFields = array ('orddate',
 /* Fetch the next line number */
 	function GetOrderLineNumber($OrderNo, $i, $Errors, $db) {
 		$linesql = "SELECT MAX(orderlineno)
-					FROM salesorderdetails
+					FROM weberp_salesorderdetails
 					 WHERE orderno='" . $OrderNo . "'";
 		$lineresult = api_DB_query($linesql);
 		if ($myrow=DB_fetch_row($lineresult)) {
@@ -173,7 +173,7 @@ $SOH_DateFields = array ('orddate',
 /* Check that the order header already exists */
 	function VerifyOrderHeaderExists($OrderNo, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(orderno)
-					 FROM salesorders
+					 FROM weberp_salesorders
 					  WHERE orderno='".$OrderNo."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -227,7 +227,7 @@ $SOH_DateFields = array ('orddate',
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifyItemDueDate($ItemDue, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=api_DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -345,7 +345,7 @@ $SOH_DateFields = array ('orddate',
 			}
 			$FieldValues.="'".$value."', ";
 		}
-		$sql = "INSERT INTO salesorders (" . mb_substr($FieldNames,0,-2) . ")
+		$sql = "INSERT INTO weberp_salesorders (" . mb_substr($FieldNames,0,-2) . ")
 					VALUES (" . mb_substr($FieldValues,0,-2). ")";
 		if (sizeof($Errors)==0) {
 
@@ -438,7 +438,7 @@ $SOH_DateFields = array ('orddate',
 			$Errors=VerifyQuotation($OrderHeader['quotation'], sizeof($Errors), $Errors);
 		}
 		global  $SOH_DateFields;
-		$sql='UPDATE salesorders SET ';
+		$sql='UPDATE weberp_salesorders SET ';
 		foreach ($OrderHeader as $key => $value) {
 			if (in_array($key, $SOH_DateFields) ) {
 			    $value = FormatDateforSQL($value);	// Fix dates
@@ -510,7 +510,7 @@ $SOH_DateFields = array ('orddate',
 			$FieldValues.= "'" . $value . "', ";
 		}
 
-		$sql = "INSERT INTO salesorderdetails (" . mb_substr($FieldNames,0,-2) . ")
+		$sql = "INSERT INTO weberp_salesorderdetails (" . mb_substr($FieldNames,0,-2) . ")
 			VALUES (" . mb_substr($FieldValues,0,-2) . ")";
 
 		if (sizeof($Errors)==0) {
@@ -559,7 +559,7 @@ $SOH_DateFields = array ('orddate',
 		if (isset($OrderLine['poline'])){
 			$Errors=VerifyPOLine($OrderLine['poline'], sizeof($Errors), $Errors);
 		}
-		$sql='UPDATE salesorderdetails SET ';
+		$sql='UPDATE weberp_salesorderdetails SET ';
 		foreach ($OrderLine as $key => $value) {
 			if ($key == 'actualdispatchdate') {
 			    $value = FormatDateWithTimeForSQL($value);
@@ -600,7 +600,7 @@ $SOH_DateFields = array ('orddate',
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM salesorders WHERE orderno='".$OrderNo."'";
+		$sql="SELECT * FROM weberp_salesorders WHERE orderno='".$OrderNo."'";
 		$result = api_DB_Query($sql);
 		if (sizeof($Errors)==0) {
 			return DB_fetch_array($result);
@@ -625,7 +625,7 @@ $SOH_DateFields = array ('orddate',
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM salesorderdetails WHERE orderno='" . $OrderNo . "'";
+		$sql="SELECT * FROM weberp_salesorderdetails WHERE orderno='" . $OrderNo . "'";
 		$result = api_DB_query($sql);
 		if (sizeof($Errors)==0) {
 			return DB_fetch_array($result);
@@ -653,7 +653,7 @@ $SOH_DateFields = array ('orddate',
 												freightact,
 												gllink_debtors,
 												gllink_stock
-										FROM companies
+										FROM weberp_companies
 										WHERE coycode=1");
 
 		$CompanyRecord = DB_fetch_array($ReadCoyResult);
@@ -661,30 +661,30 @@ $SOH_DateFields = array ('orddate',
 			$Errors[] = NoCompanyRecord;
 		}
 
-		$OrderHeaderSQL = "SELECT salesorders.debtorno,
-				 				  debtorsmaster.name,
-								  salesorders.branchcode,
-								  salesorders.customerref,
-								  salesorders.orddate,
-								  salesorders.ordertype,
-								  salesorders.shipvia,
-								  custbranch.area,
-								  custbranch.taxgroupid,
-								  debtorsmaster.currcode,
-								  currencies.rate,
-								  salesorders.fromstkloc,
-								  custbranch.salesman
-							FROM salesorders
-							INNER JOIN debtorsmaster
-							ON salesorders.debtorno = debtorsmaster.debtorno
-							INNER JOIN custbranch
-							ON salesorders.debtorno = custbranch.debtorno
-							AND salesorders.branchcode = custbranch.branchcode
-							INNER JOIN locations
-							ON locations.loccode=salesorders.fromstkloc
-							INNER JOIN currencies
-							ON debtorsmaster.currcode=currencies.currabrev
-							WHERE salesorders.orderno = '" . $OrderNo . "'";
+		$OrderHeaderSQL = "SELECT weberp_salesorders.debtorno,
+				 				  weberp_debtorsmaster.name,
+								  weberp_salesorders.branchcode,
+								  weberp_salesorders.customerref,
+								  weberp_salesorders.orddate,
+								  weberp_salesorders.ordertype,
+								  weberp_salesorders.shipvia,
+								  weberp_custbranch.area,
+								  weberp_custbranch.taxgroupid,
+								  weberp_debtorsmaster.currcode,
+								  weberp_currencies.rate,
+								  weberp_salesorders.fromstkloc,
+								  weberp_custbranch.salesman
+							FROM weberp_salesorders
+							INNER JOIN weberp_debtorsmaster
+							ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							INNER JOIN weberp_custbranch
+							ON weberp_salesorders.debtorno = weberp_custbranch.debtorno
+							AND weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							INNER JOIN weberp_locations
+							ON weberp_locations.loccode=weberp_salesorders.fromstkloc
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+							WHERE weberp_salesorders.orderno = '" . $OrderNo . "'";
 
 		$OrderHeaderResult = api_DB_query($OrderHeaderSQL);
 		if (DB_error_no() != 0) {
@@ -693,7 +693,7 @@ $SOH_DateFields = array ('orddate',
 
 		$OrderHeader = DB_fetch_array($OrderHeaderResult);
 
-		$TaxProvResult = api_DB_query("SELECT taxprovinceid FROM locations WHERE loccode='" . $OrderHeader['fromstkloc'] ."'");
+		$TaxProvResult = api_DB_query("SELECT taxprovinceid FROM weberp_locations WHERE loccode='" . $OrderHeader['fromstkloc'] ."'");
 		if (DB_error_no() != 0) {
 			$Errors[] = NoTaxProvince;
 		}
@@ -707,8 +707,8 @@ $SOH_DateFields = array ('orddate',
 								taxcatid,
 								mbflag,
 								materialcost+labourcost+overheadcost AS standardcost
-						FROM salesorderdetails INNER JOIN stockmaster
-						ON salesorderdetails.stkcode = stockmaster.stockid
+						FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+						ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
 						WHERE orderno ='" . $OrderNo . "'
 						AND completed=0";
 
@@ -739,20 +739,20 @@ $SOH_DateFields = array ('orddate',
 			/*Gets the Taxes and rates applicable to this line from the TaxGroup of the branch and TaxCategory of the item
 			and the taxprovince of the dispatch location */
 
-			$SQL = "SELECT taxgrouptaxes.calculationorder,
-							taxauthorities.description,
-							taxgrouptaxes.taxauthid,
-							taxauthorities.taxglcode,
-							taxgrouptaxes.taxontax,
-							taxauthrates.taxrate
-					FROM taxauthrates INNER JOIN taxgrouptaxes ON
-						taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-						INNER JOIN taxauthorities ON
-						taxauthrates.taxauthority=taxauthorities.taxid
-					WHERE taxgrouptaxes.taxgroupid='" . $OrderHeader['taxgroupid'] . "'
-					AND taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
-					AND taxauthrates.taxcatid = '" . $OrderLineRow['taxcatid'] . "'
-					ORDER BY taxgrouptaxes.calculationorder";
+			$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+							weberp_taxauthorities.description,
+							weberp_taxgrouptaxes.taxauthid,
+							weberp_taxauthorities.taxglcode,
+							weberp_taxgrouptaxes.taxontax,
+							weberp_taxauthrates.taxrate
+					FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+						weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+						INNER JOIN weberp_taxauthorities ON
+						weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+					WHERE weberp_taxgrouptaxes.taxgroupid='" . $OrderHeader['taxgroupid'] . "'
+					AND weberp_taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
+					AND weberp_taxauthrates.taxcatid = '" . $OrderLineRow['taxcatid'] . "'
+					ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 			$GetTaxRatesResult = api_DB_query($SQL);
 
@@ -793,7 +793,7 @@ $SOH_DateFields = array ('orddate',
 			$TotalFXTax += $LineTaxAmount;
 
 			/*Now update SalesOrderDetails for the quantity invoiced and the actual dispatch dates. */
-			$SQL = "UPDATE salesorderdetails
+			$SQL = "UPDATE weberp_salesorderdetails
 					SET qtyinvoiced = qtyinvoiced + " . $OrderLineRow['quantity'] . ",
 						actualdispatchdate = '" . $OrderHeader['orddate'] .  "',
 						completed='1'
@@ -808,9 +808,9 @@ $SOH_DateFields = array ('orddate',
 
 				/* Need to get the current location quantity
 				will need it later for the stock movement */
-               	$SQL="SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $OrderLineRow['stkcode'] . "'
+               	$SQL="SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $OrderLineRow['stkcode'] . "'
 						AND loccode= '" . $OrderHeader['fromstkloc'] . "'";
 				$Result = api_DB_query($SQL);
 
@@ -822,13 +822,13 @@ $SOH_DateFields = array ('orddate',
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "UPDATE locstock
-						SET quantity = locstock.quantity - " . $OrderLineRow['quantity'] . "
-						WHERE locstock.stockid = '" . $OrderLineRow['stkcode'] . "'
+				$SQL = "UPDATE weberp_locstock
+						SET quantity = weberp_locstock.quantity - " . $OrderLineRow['quantity'] . "
+						WHERE weberp_locstock.stockid = '" . $OrderLineRow['stkcode'] . "'
 						AND loccode = '" . $OrderHeader['fromstkloc'] . "'";
 				$Result = api_DB_query($SQL,'','',true);
 
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -864,14 +864,14 @@ $SOH_DateFields = array ('orddate',
 				stock moves for the components then update the Location stock balances */
 				$Assembly=True;
 				$StandardCost =0; /*To start with - accumulate the cost of the comoponents for use in journals later on */
-				$SQL = "SELECT bom.component,
-								bom.quantity,
-								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
-							FROM bom INNER JOIN stockmaster
-							ON bom.component=stockmaster.stockid
-							WHERE bom.parent='" . $OrderLineRow['stkcode'] . "'
-                            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                            AND bom.effectiveto > '" . date('Y-m-d') . "'";
+				$SQL = "SELECT weberp_bom.component,
+								weberp_bom.quantity,
+								weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standard
+							FROM weberp_bom INNER JOIN weberp_stockmaster
+							ON weberp_bom.component=weberp_stockmaster.stockid
+							WHERE weberp_bom.parent='" . $OrderLineRow['stkcode'] . "'
+                            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                            AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 				$AssResult = api_DB_query($SQL);
 
@@ -880,9 +880,9 @@ $SOH_DateFields = array ('orddate',
 					$StandardCost += ($AssParts['standard'] * $AssParts['quantity']) ;
 					/* Need to get the current location quantity
 					will need it later for the stock movement */
-					$SQL="SELECT locstock.quantity
-							FROM locstock
-							WHERE locstock.stockid='" . $AssParts['component'] . "'
+					$SQL="SELECT weberp_locstock.quantity
+							FROM weberp_locstock
+							WHERE weberp_locstock.stockid='" . $AssParts['component'] . "'
 							AND loccode= '" . $OrderHeader['fromstkloc'] . "'";
 
 					$Result = api_DB_query($SQL);
@@ -896,7 +896,7 @@ $SOH_DateFields = array ('orddate',
 					if (empty($AssParts['standard'])) {
 						$AssParts['standard']=0;
 					}
-					$SQL = "INSERT INTO stockmoves (stockid,
+					$SQL = "INSERT INTO weberp_stockmoves (stockid,
 													type,
 													transno,
 													loccode,
@@ -925,9 +925,9 @@ $SOH_DateFields = array ('orddate',
 
 					$Result = DB_query($SQL,'','',true);
 
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . ($AssParts['quantity'] * $OrderLineRow['quantity']) . "
-							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+					$SQL = "UPDATE weberp_locstock
+							SET quantity = weberp_locstock.quantity - " . ($AssParts['quantity'] * $OrderLineRow['quantity']) . "
+							WHERE weberp_locstock.stockid = '" . $AssParts['component'] . "'
 							AND loccode = '" . $OrderHeader['fromlocstk'] . "'";
 
 					$Result = DB_query($SQL,'','',true);
@@ -938,7 +938,7 @@ $SOH_DateFields = array ('orddate',
 			if ($OrderLineRow['mbflag']=='A' OR $OrderLineRow['mbflag']=='D'){
 				/*it's a Dummy/Service item or an Assembly item - still need stock movement record
 				 * but quantites on hand are always nil */
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -970,11 +970,11 @@ $SOH_DateFields = array ('orddate',
 				$Result = api_DB_query($SQL,'','',true);
 			}
 			/*Get the ID of the StockMove... */
-			$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+			$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 			/*Insert the taxes that applied to this line */
 			foreach ($LineTaxes[$LineCounter] as $Tax) {
 
-				$SQL = "INSERT INTO stockmovestaxes (stkmoveno,
+				$SQL = "INSERT INTO weberp_stockmovestaxes (stkmoveno,
 									taxauthid,
 									taxrate,
 									taxcalculationorder,
@@ -991,37 +991,37 @@ $SOH_DateFields = array ('orddate',
 			/*Insert Sales Analysis records */
 
 			$SQL="SELECT COUNT(*),
-						salesanalysis.stkcategory,
-						salesanalysis.area,
-						salesanalysis.salesperson,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.stockid
-					FROM salesanalysis,
-						custbranch,
-						stockmaster
-					WHERE salesanalysis.stkcategory=stockmaster.categoryid
-					AND salesanalysis.stockid=stockmaster.stockid
-					AND salesanalysis.cust=custbranch.debtorno
-					AND salesanalysis.custbranch=custbranch.branchcode
-					AND salesanalysis.area=custbranch.area
-					AND salesanalysis.salesperson=custbranch.salesman
-					AND salesanalysis.typeabbrev ='" . $OrderHeader['ordertype'] . "'
-					AND salesanalysis.periodno='" . $PeriodNo . "'
-					AND salesanalysis.cust " . LIKE . "  '" . $OrderHeader['debtorno'] . "'
-					AND salesanalysis.custbranch  " . LIKE . " '" . $OrderHeader['branchcode'] . "'
-					AND salesanalysis.stockid  " . LIKE . " '" . $OrderLineRow['stkcode'] . "'
-					AND salesanalysis.budgetoractual='1'
-					GROUP BY salesanalysis.stockid,
-						salesanalysis.stkcategory,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.area,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.salesperson";
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.salesperson,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.stockid
+					FROM weberp_salesanalysis,
+						weberp_custbranch,
+						weberp_stockmaster
+					WHERE weberp_salesanalysis.stkcategory=weberp_stockmaster.categoryid
+					AND weberp_salesanalysis.stockid=weberp_stockmaster.stockid
+					AND weberp_salesanalysis.cust=weberp_custbranch.debtorno
+					AND weberp_salesanalysis.custbranch=weberp_custbranch.branchcode
+					AND weberp_salesanalysis.area=weberp_custbranch.area
+					AND weberp_salesanalysis.salesperson=weberp_custbranch.salesman
+					AND weberp_salesanalysis.typeabbrev ='" . $OrderHeader['ordertype'] . "'
+					AND weberp_salesanalysis.periodno='" . $PeriodNo . "'
+					AND weberp_salesanalysis.cust " . LIKE . "  '" . $OrderHeader['debtorno'] . "'
+					AND weberp_salesanalysis.custbranch  " . LIKE . " '" . $OrderHeader['branchcode'] . "'
+					AND weberp_salesanalysis.stockid  " . LIKE . " '" . $OrderLineRow['stkcode'] . "'
+					AND weberp_salesanalysis.budgetoractual='1'
+					GROUP BY weberp_salesanalysis.stockid,
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.salesperson";
 
 			$ErrMsg = _('The count of existing Sales analysis records could not run because');
 			$DbgMsg = _('SQL to count the no of sales analysis records');
@@ -1031,23 +1031,23 @@ $SOH_DateFields = array ('orddate',
 
 			if ($myrow[0]>0){  /*Update the existing record that already exists */
 
-				$SQL = "UPDATE salesanalysis
+				$SQL = "UPDATE weberp_salesanalysis
 						SET amt=amt+" . filter_number_format($OrderLineRow['unitprice'] * $OrderLineRow['quantity'] / $OrderHeader['rate']) . ",
 						qty=qty +" . $OrderLineRow['quantity'] . ",
 						disc=disc+" . filter_number_format($OrderLineRow['discountpercent'] * $OrderLineRow['unitprice'] * $OrderLineRow['quantity'] / $OrderHeader['rate']) . "
-						WHERE salesanalysis.area='" . $myrow[2] . "'
-						AND salesanalysis.salesperson='" . $myrow[3] . "'
+						WHERE weberp_salesanalysis.area='" . $myrow[2] . "'
+						AND weberp_salesanalysis.salesperson='" . $myrow[3] . "'
 						AND typeabbrev ='" . $OrderHeader['ordertype'] . "'
 						AND periodno = '" . $PeriodNo . "'
 						AND cust  " . LIKE . " '" . $OrderHeader['debtorno'] . "'
 						AND custbranch  " . LIKE . "  '" . $OrderHeader['branchcode'] . "'
 						AND stockid  " . LIKE . " '" . $OrderLineRow['stkcode'] . "'
-						AND salesanalysis.stkcategory ='" . $myrow[1] . "'
+						AND weberp_salesanalysis.stkcategory ='" . $myrow[1] . "'
 						AND budgetoractual='1'";
 
 			} else { /* insert a new sales analysis record */
 
-				$SQL = "INSERT INTO salesanalysis (	typeabbrev,
+				$SQL = "INSERT INTO weberp_salesanalysis (	typeabbrev,
 													periodno,
 													amt,
 													cost,
@@ -1069,14 +1069,14 @@ $SOH_DateFields = array ('orddate',
 									'" . $OrderLineRow['quantity'] . "',
 									'" . $OrderLineRow['discountpercent'] * $OrderLineRow['unitprice'] * $OrderLineRow['quantity'] / $OrderHeader['rate'] . "',
 									'" . $OrderLineRow['stkcode'] . "',
-									custbranch.area,
+									weberp_custbranch.area,
 									1,
-									custbranch.salesman,
-									stockmaster.categoryid
-								FROM stockmaster, custbranch
-								WHERE stockmaster.stockid = '" . $OrderLineRow['stkcode'] . "'
-								AND custbranch.debtorno = '" . $OrderHeader['debtorno'] . "'
-								AND custbranch.branchcode='" . $OrderHeader['branchcode'] . "'";
+									weberp_custbranch.salesman,
+									weberp_stockmaster.categoryid
+								FROM weberp_stockmaster, weberp_custbranch
+								WHERE weberp_stockmaster.stockid = '" . $OrderLineRow['stkcode'] . "'
+								AND weberp_custbranch.debtorno = '" . $OrderHeader['debtorno'] . "'
+								AND weberp_custbranch.branchcode='" . $OrderHeader['branchcode'] . "'";
 
 			}
 
@@ -1086,7 +1086,7 @@ $SOH_DateFields = array ('orddate',
 
 /*first the cost of sales entry - GL accounts are retrieved using the function GetCOGSGLAccount from includes/GetSalesTransGLCodes.inc  */
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1106,7 +1106,7 @@ $SOH_DateFields = array ('orddate',
 /*now the stock entry - this is set to the cost act in the case of a fixed asset disposal */
 				$StockGLCode = GetStockGLCode($OrderLineRow['stkcode'],$db);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1130,7 +1130,7 @@ $SOH_DateFields = array ('orddate',
 				//Post sales transaction to GL credit sales
 				$SalesGLAccounts = GetSalesGLAccount($OrderHeader['area'], $OrderLineRow['stkcode'], $OrderHeader['ordertype'], $db);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1149,7 +1149,7 @@ $SOH_DateFields = array ('orddate',
 
 				if ($OrderLineRow['discountpercent'] !=0){
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1181,7 +1181,7 @@ $SOH_DateFields = array ('orddate',
 
 				/*Loop through the tax authorities array to post each total to the taxauth glcode */
 				foreach ($TaxTotals as $Tax){
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1202,7 +1202,7 @@ $SOH_DateFields = array ('orddate',
 
 			/*Post debtors transaction to GL debit debtors, credit freight re-charged and credit sales */
 			if (($TotalInvLocalCurr) !=0) {
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1224,12 +1224,12 @@ $SOH_DateFields = array ('orddate',
 		} /*end of if Sales and GL integrated */
 
 	/*Update order header for invoice charged on */
-		$SQL = "UPDATE salesorders SET comments = CONCAT(comments,' Inv ','" . $InvoiceNo . "') WHERE orderno= '" . $OrderNo . "'";
+		$SQL = "UPDATE weberp_salesorders SET comments = CONCAT(comments,' Inv ','" . $InvoiceNo . "') WHERE orderno= '" . $OrderNo . "'";
 		$Result = api_DB_query($SQL,'','',true);
 
 	/*Now insert the DebtorTrans */
 
-		$SQL = "INSERT INTO debtortrans (transno,
+		$SQL = "INSERT INTO weberp_debtortrans (transno,
 										type,
 										debtorno,
 										branchcode,
@@ -1263,12 +1263,12 @@ $SOH_DateFields = array ('orddate',
 
 		$Result = api_DB_query($SQL,'','',true);
 
-		$DebtorTransID = DB_Last_Insert_ID($db,'debtortrans','id');
+		$DebtorTransID = DB_Last_Insert_ID($db,'weberp_debtortrans','id');
 
-		/*for each Tax - need to insert into debtortranstaxes */
+		/*for each Tax - need to insert into weberp_debtortranstaxes */
 		foreach ($TaxTotals AS $TaxAuthID => $Tax) {
 
-			$SQL = "INSERT INTO debtortranstaxes (debtortransid,
+			$SQL = "INSERT INTO weberp_debtortranstaxes (debtortransid,
 												taxauthid,
 												taxamount)
 								VALUES ('" . $DebtorTransID . "',
@@ -1293,13 +1293,13 @@ $SOH_DateFields = array ('orddate',
 
 		$TransDate = time(); //The current date to find the period for
 		/* Find the unix timestamp of the last period end date in periods table */
-		$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from periods";
+		$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from weberp_periods";
 		$result = DB_query($sql);
 		$myrow=DB_fetch_row($result);
 
 		if (is_null($myrow[0])){
-			$InsertFirstPeriodResult = api_DB_query("INSERT INTO periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')");
-			$InsertFirstPeriodResult = api_DB_query("INSERT INTO periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')");
+			$InsertFirstPeriodResult = api_DB_query("INSERT INTO weberp_periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')");
+			$InsertFirstPeriodResult = api_DB_query("INSERT INTO weberp_periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')");
 			$LastPeriod=1;
 			$LastPeriodEnd = mktime(0,0,0,Date('m')+2,0,Date('Y'));
 		} else {
@@ -1308,7 +1308,7 @@ $SOH_DateFields = array ('orddate',
 			$LastPeriod = $myrow[1];
 		}
 		/* Find the unix timestamp of the first period end date in periods table */
-		$sql = "SELECT MIN(lastdate_in_period), MIN(periodno) from periods";
+		$sql = "SELECT MIN(lastdate_in_period), MIN(periodno) from weberp_periods";
 		$result = api_DB_query($sql);
 		$myrow=DB_fetch_row($result);
 		$Date_Array = explode('-', $myrow[0]);
@@ -1347,7 +1347,7 @@ $SOH_DateFields = array ('orddate',
 			}
 		} else if (!PeriodExists(mktime(0,0,0,Date('m',$TransDate)+1,Date('d',$TransDate),Date('Y',$TransDate)), $db)) {
 			/* Make sure the following months period exists */
-			$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from periods";
+			$sql = "SELECT MAX(lastdate_in_period), MAX(periodno) from weberp_periods";
 			$result = DB_query($sql);
 			$myrow=DB_fetch_row($result);
 			$Date_Array = explode('-', $myrow[0]);
@@ -1360,7 +1360,7 @@ $SOH_DateFields = array ('orddate',
 
 		$MonthAfterTransDate = Mktime(0,0,0,Date('m',$TransDate)+1,Date('d',$TransDate),Date('Y',$TransDate));
 		$GetPrdSQL = "SELECT periodno
-						FROM periods
+						FROM weberp_periods
 						WHERE lastdate_in_period < '" . Date('Y-m-d', $MonthAfterTransDate) . "'
 						AND lastdate_in_period >= '" . Date('Y-m-d', $TransDate) . "'";
 

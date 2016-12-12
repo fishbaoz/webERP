@@ -17,8 +17,8 @@ if (!isset($_POST['Show'])) {
 	echo '<table class="selection">';
 	echo '<tr><th colspan="3">' . _('Selection Criteria') . '</th></tr>';
 
-	$sql = "SELECT typeid,systypes.typeno,typename FROM 
-		systypes INNER JOIN gltrans ON systypes.typeid=gltrans.type
+	$sql = "SELECT typeid,weberp_systypes.typeno,typename FROM 
+		weberp_systypes INNER JOIN weberp_gltrans ON weberp_systypes.typeid=weberp_gltrans.type
 		GROUP BY typeid";
 	$result = DB_query($sql);
 	if (DB_num_rows($result)>0) {
@@ -46,7 +46,7 @@ if (!isset($_POST['Show'])) {
 		</tr>';
 
 	$sql = "SELECT MIN(trandate) AS fromdate,
-					MAX(trandate) AS todate FROM gltrans WHERE type=0";
+					MAX(trandate) AS todate FROM weberp_gltrans WHERE type=0";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 	if (isset($myrow['fromdate']) and $myrow['fromdate'] != '') {
@@ -67,26 +67,26 @@ if (!isset($_POST['Show'])) {
 	echo '</form>';
 } else {
 
-	$sql="SELECT gltrans.typeno,
-				gltrans.trandate,
-				gltrans.account,
-				chartmaster.accountname,
-				gltrans.narrative,
-				gltrans.amount,
-				gltrans.tag,
-				tags.tagdescription,
-				gltrans.jobref
-			FROM gltrans
-			INNER JOIN chartmaster
-				ON gltrans.account=chartmaster.accountcode
-			LEFT JOIN tags
-				ON gltrans.tag=tags.tagref
-			WHERE gltrans.type='" . $_POST['TransType'] . "'
-				AND gltrans.trandate>='" . FormatDateForSQL($_POST['FromTransDate']) . "'
-				AND gltrans.trandate<='" . FormatDateForSQL($_POST['ToTransDate']) . "'
-				AND gltrans.typeno>='" . $_POST['NumberFrom'] . "'
-				AND gltrans.typeno<='" . $_POST['NumberTo'] . "'
-			ORDER BY gltrans.typeno";
+	$sql="SELECT weberp_gltrans.typeno,
+				weberp_gltrans.trandate,
+				weberp_gltrans.account,
+				weberp_chartmaster.accountname,
+				weberp_gltrans.narrative,
+				weberp_gltrans.amount,
+				weberp_gltrans.tag,
+				weberp_tags.tagdescription,
+				weberp_gltrans.jobref
+			FROM weberp_gltrans
+			INNER JOIN weberp_chartmaster
+				ON weberp_gltrans.account=weberp_chartmaster.accountcode
+			LEFT JOIN weberp_tags
+				ON weberp_gltrans.tag=weberp_tags.tagref
+			WHERE weberp_gltrans.type='" . $_POST['TransType'] . "'
+				AND weberp_gltrans.trandate>='" . FormatDateForSQL($_POST['FromTransDate']) . "'
+				AND weberp_gltrans.trandate<='" . FormatDateForSQL($_POST['ToTransDate']) . "'
+				AND weberp_gltrans.typeno>='" . $_POST['NumberFrom'] . "'
+				AND weberp_gltrans.typeno<='" . $_POST['NumberTo'] . "'
+			ORDER BY weberp_gltrans.typeno";
 
 	$result = DB_query($sql);
 	if (DB_num_rows($result)==0) {
@@ -131,7 +131,7 @@ if (!isset($_POST['Show'])) {
 			
 			// if user is allowed to see the account we show it, other wise we show "OTHERS ACCOUNTS"
 			$CheckSql = "SELECT count(*)
-						 FROM glaccountusers
+						 FROM weberp_glaccountusers
 						 WHERE accountcode= '" . $myrow['account'] . "'
 							 AND userid = '" . $_SESSION['UserID'] . "'
 							 AND canview = '1'";

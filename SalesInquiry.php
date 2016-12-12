@@ -1,9 +1,9 @@
 <?php
-/* $Id$*/
+/* $Id: SalesInquiry.php 7675 2016-11-21 14:55:36Z rchacon $*/
 /*  */
 // SalesInquiry.php
-// Inquiry on Sales Orders - If Date Type is Order Date, salesorderdetails is the main table
-// If Date Type is Invoice, stockmoves is the main table
+// Inquiry on Sales Orders - If Date Type is Order Date, weberp_salesorderdetails is the main table
+// If Date Type is Invoice, weberp_stockmoves is the main table
 
 include('includes/session.inc');
 $Title = _('Sales Inquiry');
@@ -92,13 +92,13 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 		return;
 	}
 
-	if($_POST['ReportType'] == 'Detail' AND $_POST['DateType'] == 'Order'  AND $_POST['SortBy'] == 'tempstockmoves.transno,salesorderdetails.stkcode') {
+	if($_POST['ReportType'] == 'Detail' AND $_POST['DateType'] == 'Order'  AND $_POST['SortBy'] == 'tempstockmoves.transno,weberp_salesorderdetails.stkcode') {
 		$InputError = 1;
 		prnMsg(_('Cannot sort by transaction number with a date type of Order Date'),'error');
 		return;
 	}
 
-// TempStockmoves function creates a temporary table of stockmoves that is used when the DateType
+// TempStockmoves function creates a temporary table of weberp_stockmoves that is used when the DateType
 // is Invoice Date
 	if($_POST['DateType'] == 'Invoice') {
 		TempStockmoves($db);
@@ -113,7 +113,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 	    $PartNumberOp = '=';
 	}
 	if(mb_strlen($PartNumber) > 0) {
-	    $WherePart = " AND salesorderdetails.stkcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
+	    $WherePart = " AND weberp_salesorderdetails.stkcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
 	}
 
 	$WhereDebtorNo = ' ';
@@ -123,7 +123,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 	    $DebtorNoOp = '=';
 	}
 	if(mb_strlen($DebtorNo) > 0) {
-	    $WhereDebtorNo = " AND salesorders.debtorno " . $DebtorNoOp . " '" . $DebtorNo . "'  ";
+	    $WhereDebtorNo = " AND weberp_salesorders.debtorno " . $DebtorNoOp . " '" . $DebtorNo . "'  ";
 	} else {
 		$WhereDebtorNo = ' ';
 	}
@@ -135,10 +135,10 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 	    $DebtorNameOp = '=';
 	}
 	if(mb_strlen($DebtorName) > 0) {
-	    $WhereDebtorName = " AND debtorsmaster.name " . $DebtorNameOp . " '" . $DebtorName . "'  ";
+	    $WhereDebtorName = " AND weberp_debtorsmaster.name " . $DebtorNameOp . " '" . $DebtorName . "'  ";
 	}
 	if(mb_strlen($_POST['OrderNo']) > 0) {
-	    $WhereOrderNo = " AND salesorderdetails.orderno = " . " '" . $_POST['OrderNo'] . "'  ";
+	    $WhereOrderNo = " AND weberp_salesorderdetails.orderno = " . " '" . $_POST['OrderNo'] . "'  ";
 	} else {
 		$WhereOrderNo =  " ";
 	}
@@ -148,8 +148,8 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
     #in WHERE clause because the WHERE clause did not recognize
     # that had used the IF statement to create a field caused linestatus
     if($_POST['LineStatus'] != 'All') {
-        $WhereLineStatus = " AND IF(salesorderdetails.quantity = salesorderdetails.qtyinvoiced ||
-		  salesorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
+        $WhereLineStatus = " AND IF(weberp_salesorderdetails.quantity = weberp_salesorderdetails.qtyinvoiced ||
+		  weberp_salesorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
     }
 
     // The following is from PDFCustomerList.php and shows how to set up WHERE clause
@@ -157,61 +157,61 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
     // a time, so used simpler code
 	 $WhereArea = ' ';
     if($_POST['Area'] != 'All') {
-        $WhereArea = " AND custbranch.area = '" . $_POST['Area'] . "'";
+        $WhereArea = " AND weberp_custbranch.area = '" . $_POST['Area'] . "'";
     }
 
 	$WhereSalesman = ' ';
 	if($_SESSION['SalesmanLogin'] != '') {
 
-		$WhereSalesman .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+		$WhereSalesman .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 
 	}elseif($_POST['Salesman'] != 'All') {
 
-        $WhereSalesman = " AND custbranch.salesman = '" . $_POST['Salesman'] . "'";
+        $WhereSalesman = " AND weberp_custbranch.salesman = '" . $_POST['Salesman'] . "'";
     }
 
  	 $WhereCategory = ' ';
     if($_POST['Category'] != 'All') {
-        $WhereCategory = " AND stockmaster.categoryid = '" . $_POST['Category'] . "'";
+        $WhereCategory = " AND weberp_stockmaster.categoryid = '" . $_POST['Category'] . "'";
     }
 
 // Only used for Invoice Date type where tempstockmoves is the main table
- 	 $WhereType = " AND (tempstockmoves.type='10' OR tempstockmoves.type='11')";
+ 	 $WhereType = " AND (weberp_tempstockmoves.type='10' OR weberp_tempstockmoves.type='11')";
     if($_POST['InvoiceType'] != 'All') {
-        $WhereType = " AND tempstockmoves.type = '" . $_POST['InvoiceType'] . "'";
+        $WhereType = " AND weberp_tempstockmoves.type = '" . $_POST['InvoiceType'] . "'";
     }
     if($InputError !=1) {
 		$FromDate = FormatDateForSQL($_POST['FromDate']);
 		$ToDate = FormatDateForSQL($_POST['ToDate']);
 		if($_POST['ReportType'] == 'Detail') {
 		    if($_POST['DateType'] == 'Order') {
-				$sql = "SELECT salesorderdetails.orderno,
-							   salesorderdetails.stkcode,
-							   salesorderdetails.itemdue,
-							   salesorders.debtorno,
-							   salesorders.orddate,
-							   salesorders.branchcode,
-							   salesorderdetails.quantity,
-							   salesorderdetails.qtyinvoiced,
-							   (salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-							   (salesorderdetails.quantity * stockmaster.actualcost) as extcost,
-							   IF(salesorderdetails.quantity = salesorderdetails.qtyinvoiced ||
-								  salesorderdetails.completed = 1,'Completed','Open') as linestatus,
-							   debtorsmaster.name,
-							   custbranch.brname,
-							   custbranch.area,
-							   custbranch.salesman,
-							   stockmaster.decimalplaces,
-							   stockmaster.description
-							   FROM salesorderdetails
-						LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-						LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-						LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-						LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-						WHERE salesorders.orddate >='" . $FromDate . "'
-						 AND salesorders.orddate <='" . $ToDate . "'
-						 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+				$sql = "SELECT weberp_salesorderdetails.orderno,
+							   weberp_salesorderdetails.stkcode,
+							   weberp_salesorderdetails.itemdue,
+							   weberp_salesorders.debtorno,
+							   weberp_salesorders.orddate,
+							   weberp_salesorders.branchcode,
+							   weberp_salesorderdetails.quantity,
+							   weberp_salesorderdetails.qtyinvoiced,
+							   (weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+							   (weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost,
+							   IF(weberp_salesorderdetails.quantity = weberp_salesorderdetails.qtyinvoiced ||
+								  weberp_salesorderdetails.completed = 1,'Completed','Open') as linestatus,
+							   weberp_debtorsmaster.name,
+							   weberp_custbranch.brname,
+							   weberp_custbranch.area,
+							   weberp_custbranch.salesman,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description
+							   FROM weberp_salesorderdetails
+						LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+						LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+						LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+						WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+						 AND weberp_salesorders.orddate <='" . $ToDate . "'
+						 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 						$WherePart .
 						$WhereOrderNo .
 						$WhereDebtorNo .
@@ -223,40 +223,40 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 						"ORDER BY " . $_POST['SortBy'];
 			  } else {
 			    // Selects by tempstockmoves.trandate not order date
-				$sql = "SELECT salesorderdetails.orderno,
-							   salesorderdetails.stkcode,
-							   salesorderdetails.itemdue,
-							   salesorders.debtorno,
-							   salesorders.orddate,
-							   salesorders.branchcode,
-							   salesorderdetails.quantity,
-							   salesorderdetails.qtyinvoiced,
-							   (tempstockmoves.qty * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) * -1 / currencies.rate) as extprice,
-							   (tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-							   IF(salesorderdetails.quantity = salesorderdetails.qtyinvoiced ||
-								  salesorderdetails.completed = 1,'Completed','Open') as linestatus,
-							   debtorsmaster.name,
-							   custbranch.brname,
-							   custbranch.area,
-							   custbranch.salesman,
-							   stockmaster.decimalplaces,
-							   stockmaster.description,
-							   (tempstockmoves.qty * -1) as qty,
-							   tempstockmoves.transno,
-							   tempstockmoves.trandate,
-							   tempstockmoves.type
-							   FROM tempstockmoves
-						LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-						LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-						LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-						LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-						LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-						WHERE tempstockmoves.trandate >='" . $FromDate . "'
-						 AND tempstockmoves.trandate <='" . $ToDate . "'
-						 AND tempstockmoves.stockid=salesorderdetails.stkcode
-						 AND tempstockmoves.hidemovt=0
-						 AND salesorders.quotation = '" . $_POST['OrderType'] . "' " .
+				$sql = "SELECT weberp_salesorderdetails.orderno,
+							   weberp_salesorderdetails.stkcode,
+							   weberp_salesorderdetails.itemdue,
+							   weberp_salesorders.debtorno,
+							   weberp_salesorders.orddate,
+							   weberp_salesorders.branchcode,
+							   weberp_salesorderdetails.quantity,
+							   weberp_salesorderdetails.qtyinvoiced,
+							   (weberp_tempstockmoves.qty * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) * -1 / weberp_currencies.rate) as extprice,
+							   (weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+							   IF(weberp_salesorderdetails.quantity = weberp_salesorderdetails.qtyinvoiced ||
+								  weberp_salesorderdetails.completed = 1,'Completed','Open') as linestatus,
+							   weberp_debtorsmaster.name,
+							   weberp_custbranch.brname,
+							   weberp_custbranch.area,
+							   weberp_custbranch.salesman,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description,
+							   (weberp_tempstockmoves.qty * -1) as qty,
+							   weberp_tempstockmoves.transno,
+							   weberp_tempstockmoves.trandate,
+							   weberp_tempstockmoves.type
+							   FROM weberp_tempstockmoves
+						LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+						LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+						LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+						LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+						WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+						 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						 AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+						 AND weberp_tempstockmoves.hidemovt=0
+						 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "' " .
 						$WherePart .
 						$WhereType .
 						$WhereOrderNo .
@@ -280,25 +280,25 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 		  }
 		  if($_POST['DateType'] == 'Order') {
 		      if($_POST['SummaryType'] == 'extprice' OR $_POST['SummaryType'] == 'stkcode') {
-					$sql = "SELECT salesorderdetails.stkcode,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost,
-								   stockmaster.description,
-								   stockmaster.decimalplaces
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "' " .
+					$sql = "SELECT weberp_salesorderdetails.stkcode,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost,
+								   weberp_stockmaster.description,
+								   weberp_stockmaster.decimalplaces
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "' " .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -308,30 +308,30 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",salesorderdetails.stkcode,
-								   stockmaster.description,
-								   stockmaster.decimalplaces
+							",weberp_salesorderdetails.stkcode,
+								   weberp_stockmaster.description,
+								   weberp_stockmaster.decimalplaces
 								   ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT salesorderdetails.orderno,
-					               salesorders.debtorno,
-					               debtorsmaster.name,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate  . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "' " .
+					$sql = "SELECT weberp_salesorderdetails.orderno,
+					               weberp_salesorders.debtorno,
+					               weberp_debtorsmaster.name,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate  . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "' " .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -341,31 +341,31 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",salesorders.debtorno,
-								   debtorsmaster.name
+							",weberp_salesorders.debtorno,
+								   weberp_debtorsmaster.name
 								   ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'debtorno' OR $_POST['SummaryType'] == 'name') {
 				    if($_POST['SummaryType'] == 'name') {
 				        $orderby = 'name';
 				    }
-					$sql = "SELECT debtorsmaster.debtorno,
-					               debtorsmaster.name,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "' " .
+					$sql = "SELECT weberp_debtorsmaster.debtorno,
+					               weberp_debtorsmaster.name,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "' " .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -374,28 +374,28 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereArea .
 							$WhereSalesman .
 							$WhereCategory .
-							"GROUP BY debtorsmaster.debtorno
-							,debtorsmaster.name
+							"GROUP BY weberp_debtorsmaster.debtorno
+							,weberp_debtorsmaster.name
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from salesorders.orddate) as month,
-								   CONCAT(MONTHNAME(salesorders.orddate),' ',YEAR(salesorders.orddate)) as monthname,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_salesorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_salesorders.orddate),' ',YEAR(weberp_salesorders.orddate)) as monthname,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -408,24 +408,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							",monthname
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT stockmaster.categoryid,
-								   stockcategory.categorydescription,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -439,24 +439,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'salesman') {
-					$sql = "SELECT custbranch.salesman,
-								   salesman.salesmanname,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_custbranch.salesman,
+								   weberp_salesman.salesmanname,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -469,24 +469,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							",salesmanname
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'area') {
-					$sql = "SELECT custbranch.area,
-								   areas.areadescription,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(salesorderdetails.quantity * salesorderdetails.unitprice * (1 - salesorderdetails.discountpercent) / currencies.rate) as extprice,
-								   SUM(salesorderdetails.quantity * stockmaster.actualcost) as extcost
-								   FROM salesorderdetails
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-							LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE salesorders.orddate >='" . $FromDate . "'
-							 AND salesorders.orddate <='" . $ToDate . "'
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "' " .
+					$sql = "SELECT weberp_custbranch.area,
+								   weberp_areas.areadescription,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice * (1 - weberp_salesorderdetails.discountpercent) / weberp_currencies.rate) as extprice,
+								   SUM(weberp_salesorderdetails.quantity * weberp_stockmaster.actualcost) as extcost
+								   FROM weberp_salesorderdetails
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+							LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_salesorders.orddate >='" . $FromDate . "'
+							 AND weberp_salesorders.orddate <='" . $ToDate . "'
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "' " .
 							$WherePart .
 							$WhereOrderNo .
 							$WhereDebtorNo .
@@ -496,34 +496,34 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",areas.areadescription
+							",weberp_areas.areadescription
 							ORDER BY " . $orderby;
 				}
 		   } else {
 		        // Selects by tempstockmoves.trandate not order date
 		      if($_POST['SummaryType'] == 'extprice' OR $_POST['SummaryType'] == 'stkcode') {
-					$sql = "SELECT salesorderdetails.stkcode,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   stockmaster.description,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_salesorderdetails.stkcode,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   weberp_stockmaster.description,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -534,32 +534,32 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",stockmaster.description
+							",weberp_stockmaster.description
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT salesorderdetails.orderno,
-					               salesorders.debtorno,
-					               debtorsmaster.name,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_salesorderdetails.orderno,
+					               weberp_salesorders.debtorno,
+					               weberp_debtorsmaster.name,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -570,35 +570,35 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",salesorders.debtorno,
-							  debtorsmaster.name
+							",weberp_salesorders.debtorno,
+							  weberp_debtorsmaster.name
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'debtorno' OR $_POST['SummaryType'] == 'name') {
 				    if($_POST['SummaryType'] == 'name') {
 				        $orderby = 'name';
 				    }
-					$sql = "SELECT debtorsmaster.debtorno,
-					               debtorsmaster.name,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_debtorsmaster.debtorno,
+					               weberp_debtorsmaster.name,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -608,32 +608,32 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereArea .
 							$WhereSalesman .
 							$WhereCategory .
-							"GROUP BY debtorsmaster.debtorno" . ' ' .
-							",debtorsmaster.name
+							"GROUP BY weberp_debtorsmaster.debtorno" . ' ' .
+							",weberp_debtorsmaster.name
 							ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from salesorders.orddate) as month,
-								   CONCAT(MONTHNAME(salesorders.orddate),' ',YEAR(salesorders.orddate)) as monthname,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_salesorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_salesorders.orddate),' ',YEAR(weberp_salesorders.orddate)) as monthname,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -647,28 +647,28 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							",monthname
 						    ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT stockmaster.categoryid,
-								   stockcategory.categorydescription,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -682,28 +682,28 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							",categorydescription
 						    ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'salesman') {
-					$sql = "SELECT custbranch.salesman,
-								   salesman.salesmanname,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_custbranch.salesman,
+								   weberp_salesman.salesmanname,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -717,28 +717,28 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							",salesmanname
 						    ORDER BY " . $orderby;
 				} elseif($_POST['SummaryType'] == 'area') {
-					$sql = "SELECT custbranch.area,
-								   areas.areadescription,
-								   SUM(salesorderdetails.quantity) as quantity,
-								   SUM(salesorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(tempstockmoves.qty * tempstockmoves.price * -1 / currencies.rate) as extprice,
-								   SUM(tempstockmoves.qty * tempstockmoves.standardcost) * -1 as extcost,
-								   SUM(tempstockmoves.qty * -1) as qty
-								   FROM tempstockmoves
-							LEFT JOIN salesorderdetails ON tempstockmoves.reference=salesorderdetails.orderno
-							LEFT JOIN salesorders ON salesorders.orderno=salesorderdetails.orderno
-							LEFT JOIN debtorsmaster ON salesorders.debtorno = debtorsmaster.debtorno
-							LEFT JOIN custbranch ON salesorders.branchcode = custbranch.branchcode
-						    LEFT JOIN stockmaster ON salesorderdetails.stkcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							LEFT JOIN salesman ON salesman.salesmancode = custbranch.salesman
-							LEFT JOIN areas ON areas.areacode = custbranch.area
-							LEFT JOIN currencies ON currencies.currabrev = debtorsmaster.currcode
-							WHERE tempstockmoves.trandate >='" . $FromDate . "'
-							 AND tempstockmoves.trandate <='" . $ToDate . "'
-						     AND tempstockmoves.stockid=salesorderdetails.stkcode
-							 AND tempstockmoves.hidemovt=0
-							 AND salesorders.quotation = '" . $_POST['OrderType'] . "'" .
+					$sql = "SELECT weberp_custbranch.area,
+								   weberp_areas.areadescription,
+								   SUM(weberp_salesorderdetails.quantity) as quantity,
+								   SUM(weberp_salesorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.price * -1 / weberp_currencies.rate) as extprice,
+								   SUM(weberp_tempstockmoves.qty * weberp_tempstockmoves.standardcost) * -1 as extcost,
+								   SUM(weberp_tempstockmoves.qty * -1) as qty
+								   FROM weberp_tempstockmoves
+							LEFT JOIN weberp_salesorderdetails ON weberp_tempstockmoves.reference=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_salesorders ON weberp_salesorders.orderno=weberp_salesorderdetails.orderno
+							LEFT JOIN weberp_debtorsmaster ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+							LEFT JOIN weberp_custbranch ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						    LEFT JOIN weberp_stockmaster ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							LEFT JOIN weberp_salesman ON weberp_salesman.salesmancode = weberp_custbranch.salesman
+							LEFT JOIN weberp_areas ON weberp_areas.areacode = weberp_custbranch.area
+							LEFT JOIN weberp_currencies ON weberp_currencies.currabrev = weberp_debtorsmaster.currcode
+							WHERE weberp_tempstockmoves.trandate >='" . $FromDate . "'
+							 AND weberp_tempstockmoves.trandate <='" . $ToDate . "'
+						     AND weberp_tempstockmoves.stockid=weberp_salesorderdetails.stkcode
+							 AND weberp_tempstockmoves.hidemovt=0
+							 AND weberp_salesorders.quotation = '" . $_POST['OrderType'] . "'" .
 							$WherePart .
 							$WhereType .
 							$WhereOrderNo .
@@ -749,7 +749,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 							$WhereSalesman .
 							$WhereCategory .
 							"GROUP BY " . $_POST['SummaryType'] .
-							",areas.areadescription
+							",weberp_areas.areadescription
 						    ORDER BY " . $orderby;
 				}
 		   }
@@ -776,11 +776,11 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 	$Summary_Array['area'] = _('Sales Area');
 	$Summary_Array['transno'] = _('Transaction Number');
     // Create array for sort for detail report to display in header
-    $Detail_Array['salesorderdetails.orderno'] = _('Order Number');
-	$Detail_Array['salesorderdetails.stkcode'] = _('Stock Code');
-	$Detail_Array['debtorsmaster.debtorno,salesorderdetails.orderno'] = _('Customer Code');
-	$Detail_Array['debtorsmaster.name,debtorsmaster.debtorno,salesorderdetails.orderno'] = _('Customer Name');
-	$Detail_Array['tempstockmoves.transno,salesorderdetails.stkcode'] = _('Transaction Number');
+    $Detail_Array['weberp_salesorderdetails.orderno'] = _('Order Number');
+	$Detail_Array['weberp_salesorderdetails.stkcode'] = _('Stock Code');
+	$Detail_Array['weberp_debtorsmaster.debtorno,weberp_salesorderdetails.orderno'] = _('Customer Code');
+	$Detail_Array['weberp_debtorsmaster.name,weberp_debtorsmaster.debtorno,weberp_salesorderdetails.orderno'] = _('Customer Name');
+	$Detail_Array['weberp_tempstockmoves.transno,weberp_salesorderdetails.stkcode'] = _('Transaction Number');
 
 		// Display Header info
 		if($_POST['ReportType'] == 'Summary') {
@@ -1013,10 +1013,10 @@ function submit(&$db,$PartNumber,$PartNumberOp,$DebtorNo,$DebtorNoOp,$DebtorName
 				    $column7 =  $myrow['orderno'];
 				}
 				if($_POST['DateType'] == 'Order') {
-				    // quantity is from salesorderdetails
+				    // quantity is from weberp_salesorderdetails
 				    $DisplayQty = $myrow['quantity'];
 				} else {
-				    // qty is from stockmoves
+				    // qty is from weberp_stockmoves
 				    $DisplayQty = $myrow['qty'];
 				}
 				printf('    %-30s | %-40s | %12s | %14s | %14s | %14s |  %-40s',
@@ -1167,7 +1167,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 			<td>' . _('Stock Categories') . ':</td>
 			<td><select name="Category">';
 
-	$CategoryResult= DB_query("SELECT categoryid, categorydescription FROM stockcategory");
+	$CategoryResult= DB_query("SELECT categoryid, categorydescription FROM weberp_stockcategory");
 	echo '<option selected="selected" value="All">' . _('All Categories')  . '</option>';
 	while($myrow = DB_fetch_array($CategoryResult)) {
 		echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription']  . '</option>';
@@ -1183,7 +1183,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 		echo '</td>';
 	}else{
 		echo '<td><select name="Salesman">';
-		$sql="SELECT salesmancode, salesmanname FROM salesman";
+		$sql="SELECT salesmancode, salesmanname FROM weberp_salesman";
 		$SalesmanResult= DB_query($sql);
 		echo '<option selected="selected" value="All">' . _('All Salespeople')  . '</option>';
 		while($myrow = DB_fetch_array($SalesmanResult)) {
@@ -1196,7 +1196,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 // Use name='Areas[]' multiple - if want to create an array for Areas and allow multiple selections
 	echo '<tr><td>' . _('For Sales Areas') . ':</td>
 				<td><select name="Area">';
-	$AreasResult= DB_query("SELECT areacode, areadescription FROM areas");
+	$AreasResult= DB_query("SELECT areacode, areadescription FROM weberp_areas");
 	echo '<option selected="selected" value="All">' . _('All Areas')  . '</option>';
 	while($myrow = DB_fetch_array($AreasResult)) {
 		echo '<option value="' . $myrow['areacode'] . '">' . $myrow['areadescription']  . '</option>';
@@ -1207,11 +1207,11 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
     echo '<tr>
 			<td>' . _('Sort By') . ':</td>
 			<td><select name="SortBy">
-				<option selected="selected" value="salesorderdetails.orderno">' . _('Order Number') . '</option>
-				<option value="salesorderdetails.stkcode">' . _('Stock Code') . '</option>
-				<option value="debtorsmaster.debtorno,salesorderdetails.orderno">' . _('Customer Number') . '</option>
-				<option value="debtorsmaster.name,debtorsmaster.debtorno,salesorderdetails.orderno">' . _('Customer Name') . '</option>
-				<option value="tempstockmoves.transno,salesorderdetails.stkcode">' . _('Transaction Number') . '</option>
+				<option selected="selected" value="weberp_salesorderdetails.orderno">' . _('Order Number') . '</option>
+				<option value="weberp_salesorderdetails.stkcode">' . _('Stock Code') . '</option>
+				<option value="weberp_debtorsmaster.debtorno,weberp_salesorderdetails.orderno">' . _('Customer Number') . '</option>
+				<option value="weberp_debtorsmaster.name,weberp_debtorsmaster.debtorno,weberp_salesorderdetails.orderno">' . _('Customer Name') . '</option>
+				<option value="weberp_tempstockmoves.transno,weberp_salesorderdetails.stkcode">' . _('Transaction Number') . '</option>
 			</select></td>
 			<td>&nbsp;</td>
 			<td>' . _('Transaction Number sort only valid for Invoice Date Type') . '</td>
@@ -1254,34 +1254,34 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 } // End of function display()
 
 function TempStockmoves(&$db) {
-// When report based on Invoice Date, use stockmoves as the main file, but credit
-// notes, which are type 11 in stockmoves, do not have the order number in the
+// When report based on Invoice Date, use weberp_stockmoves as the main file, but credit
+// notes, which are type 11 in weberp_stockmoves, do not have the order number in the
 // reference field; instead they have "Ex Inv - " and then the transno from the
-// type 10 stockmoves the credit note was applied to. Use this function to load all
-// type 10 and 11 stockmoves into a temporary table and then update the
+// type 10 weberp_stockmoves the credit note was applied to. Use this function to load all
+// type 10 and 11 weberp_stockmoves into a temporary table and then update the
 // reference field for type 11 records with the orderno from the type 10 records.
 
 	$FromDate = FormatDateForSQL($_POST['FromDate']);
 	$ToDate = FormatDateForSQL($_POST['ToDate']);
 
-	$sql = "CREATE TEMPORARY TABLE tempstockmoves LIKE stockmoves";
+	$sql = "CREATE TEMPORARY TABLE weberp_tempstockmoves LIKE weberp_stockmoves";
 	$ErrMsg = _('The SQL to the create temp stock moves table failed with the message');
 	$result = DB_query($sql,$ErrMsg);
 
-	$sql = "INSERT tempstockmoves
-	          SELECT * FROM stockmoves
-	          WHERE (stockmoves.type='10' OR stockmoves.type='11')
-	          AND stockmoves.trandate >='" . $FromDate .
-			  "' AND stockmoves.trandate <='" . $ToDate . "'";
+	$sql = "INSERT weberp_tempstockmoves
+	          SELECT * FROM weberp_stockmoves
+	          WHERE (weberp_stockmoves.type='10' OR weberp_stockmoves.type='11')
+	          AND weberp_stockmoves.trandate >='" . $FromDate .
+			  "' AND weberp_stockmoves.trandate <='" . $ToDate . "'";
 	$ErrMsg = _('The SQL to insert temporary stockmoves records failed with the message');
 	$result = DB_query($sql,$ErrMsg);
 
-	$sql = "UPDATE tempstockmoves, stockmoves
-	          SET tempstockmoves.reference = stockmoves.reference
-	          WHERE tempstockmoves.type='11'
-	            AND SUBSTR(tempstockmoves.reference,10,10) = stockmoves.transno
-                AND tempstockmoves.stockid = stockmoves.stockid
-                AND stockmoves.type ='10'";
+	$sql = "UPDATE weberp_tempstockmoves, weberp_stockmoves
+	          SET weberp_tempstockmoves.reference = weberp_stockmoves.reference
+	          WHERE weberp_tempstockmoves.type='11'
+	            AND SUBSTR(weberp_tempstockmoves.reference,10,10) = weberp_stockmoves.transno
+                AND weberp_tempstockmoves.stockid = weberp_stockmoves.stockid
+                AND weberp_stockmoves.type ='10'";
 	$ErrMsg = _('The SQL to update tempstockmoves failed with the message');
 	$result = DB_query($sql,$ErrMsg);
 

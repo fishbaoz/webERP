@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PO_PDFPurchOrder.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -76,40 +76,40 @@ if (isset($_POST['DoIt']) AND ($_POST['PrintOrEmail'] == 'Print' OR $ViewingOnly
 if (isset($OrderNo) AND $OrderNo != '' AND $OrderNo > 0 AND $OrderNo != 'Preview') {
 	/*retrieve the order details from the database to print */
 	$ErrMsg = _('There was a problem retrieving the purchase order header details for Order Number') . ' ' . $OrderNo . ' ' . _('from the database');
-	$sql = "SELECT	purchorders.supplierno,
-					suppliers.suppname,
-					suppliers.address1,
-					suppliers.address2,
-					suppliers.address3,
-					suppliers.address4,
-					suppliers.address5,
-					suppliers.address6,
-					purchorders.comments,
-					purchorders.orddate,
-					purchorders.rate,
-					purchorders.dateprinted,
-					purchorders.deladd1,
-					purchorders.deladd2,
-					purchorders.deladd3,
-					purchorders.deladd4,
-					purchorders.deladd5,
-					purchorders.deladd6,
-					purchorders.allowprint,
-					purchorders.requisitionno,
-					www_users.realname as initiator,
-					purchorders.paymentterms,
-					suppliers.currcode,
-					purchorders.status,
-					purchorders.stat_comment,
-					currencies.decimalplaces AS currdecimalplaces
-				FROM purchorders INNER JOIN suppliers
-					ON purchorders.supplierno = suppliers.supplierid
-				INNER JOIN currencies
-					ON suppliers.currcode=currencies.currabrev
-				INNER JOIN www_users
-					ON purchorders.initiator=www_users.userid
-				INNER JOIN locationusers ON locationusers.loccode=purchorders.intostocklocation AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE purchorders.orderno='" . $OrderNo . "'";
+	$sql = "SELECT	weberp_purchorders.supplierno,
+					weberp_suppliers.suppname,
+					weberp_suppliers.address1,
+					weberp_suppliers.address2,
+					weberp_suppliers.address3,
+					weberp_suppliers.address4,
+					weberp_suppliers.address5,
+					weberp_suppliers.address6,
+					weberp_purchorders.comments,
+					weberp_purchorders.orddate,
+					weberp_purchorders.rate,
+					weberp_purchorders.dateprinted,
+					weberp_purchorders.deladd1,
+					weberp_purchorders.deladd2,
+					weberp_purchorders.deladd3,
+					weberp_purchorders.deladd4,
+					weberp_purchorders.deladd5,
+					weberp_purchorders.deladd6,
+					weberp_purchorders.allowprint,
+					weberp_purchorders.requisitionno,
+					weberp_www_users.realname as initiator,
+					weberp_purchorders.paymentterms,
+					weberp_suppliers.currcode,
+					weberp_purchorders.status,
+					weberp_purchorders.stat_comment,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+				FROM weberp_purchorders INNER JOIN weberp_suppliers
+					ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+				INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode=weberp_currencies.currabrev
+				INNER JOIN weberp_www_users
+					ON weberp_purchorders.initiator=weberp_www_users.userid
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_purchorders.orderno='" . $OrderNo . "'";
 	$result = DB_query($sql, $ErrMsg);
 	if (DB_num_rows($result) == 0) {
 		/*There is no order header returned */
@@ -216,8 +216,8 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 						decimalplaces,
 						conversionfactor,
 						suppliers_partno
-				FROM purchorderdetails LEFT JOIN stockmaster
-					ON purchorderdetails.itemcode=stockmaster.stockid
+				FROM weberp_purchorderdetails LEFT JOIN weberp_stockmaster
+					ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
 				WHERE orderno ='" . $OrderNo . "'
 				ORDER BY itemcode";	/*- ADDED: Sort by our item code -*/
 		$result = DB_query($sql);
@@ -361,11 +361,11 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 	if ($ViewingOnly == 0 AND $Success == 1) {
 		$StatusComment = date($_SESSION['DefaultDateFormat']) . ' - ' . _('Printed by') . ' <a href="mailto:' . $_SESSION['UserEmail'] . '">' . $_SESSION['UsersRealName'] . '</a><br />' . html_entity_decode($POHeader['stat_comment'], ENT_QUOTES, 'UTF-8');
 
-		$sql = "UPDATE purchorders	SET	allowprint =  0,
+		$sql = "UPDATE weberp_purchorders	SET	allowprint =  0,
 										dateprinted  = '" . Date('Y-m-d') . "',
 										status = 'Printed',
 										stat_comment = '" . htmlspecialchars($StatusComment, ENT_QUOTES, 'UTF-8') . "'
-				WHERE purchorders.orderno = '" . $OrderNo . "'";
+				WHERE weberp_purchorders.orderno = '" . $OrderNo . "'";
 		$result = DB_query($sql);
 	}
 	include('includes/footer.inc');
@@ -419,11 +419,11 @@ else {
 	echo '</select></td></tr>';
 	if ($_POST['PrintOrEmail'] == 'Email') {
 		$ErrMsg = _('There was a problem retrieving the contact details for the supplier');
-		$SQL = "SELECT suppliercontacts.contact,
-						suppliercontacts.email
-				FROM suppliercontacts INNER JOIN purchorders
-				ON suppliercontacts.supplierid=purchorders.supplierno
-				WHERE purchorders.orderno='" . $OrderNo . "'";
+		$SQL = "SELECT weberp_suppliercontacts.contact,
+						weberp_suppliercontacts.email
+				FROM weberp_suppliercontacts INNER JOIN weberp_purchorders
+				ON weberp_suppliercontacts.supplierid=weberp_purchorders.supplierno
+				WHERE weberp_purchorders.orderno='" . $OrderNo . "'";
 		$ContactsResult = DB_query($SQL, $ErrMsg);
 		if (DB_num_rows($ContactsResult) > 0) {
 			echo '<tr><td>' . _('Email to') . ':</td><td><select name="EmailTo">';

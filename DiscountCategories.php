@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: DiscountCategories.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 
@@ -30,7 +30,7 @@ if (isset($_POST['submit']) and !isset($_POST['SubmitCategory'])) {
 	//first off validate inputs sensible
 
 	$result = DB_query("SELECT stockid
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE mbflag <>'K'
 						AND mbflag<>'D'
 						AND stockid='" . mb_strtoupper($_POST['StockID']) . "'");
@@ -41,7 +41,7 @@ if (isset($_POST['submit']) and !isset($_POST['SubmitCategory'])) {
 
 	if ($InputError !=1) {
 
-		$sql = "UPDATE stockmaster SET discountcategory='" . $_POST['DiscountCategory'] . "'
+		$sql = "UPDATE weberp_stockmaster SET discountcategory='" . $_POST['DiscountCategory'] . "'
 				WHERE stockid='" . mb_strtoupper($_POST['StockID']) . "'";
 
 		$result = DB_query($sql, _('The discount category') . ' ' . $_POST['DiscountCategory'] . ' ' . _('record for') . ' ' . mb_strtoupper($_POST['StockID']) . ' ' . _('could not be updated because'));
@@ -55,18 +55,18 @@ if (isset($_POST['submit']) and !isset($_POST['SubmitCategory'])) {
 } elseif (isset($_GET['Delete']) and $_GET['Delete']=='yes') {
 /*the link to delete a selected record was clicked instead of the submit button */
 
-	$sql="UPDATE stockmaster SET discountcategory='' WHERE stockid='" . trim(mb_strtoupper($_GET['StockID'])) ."'";
+	$sql="UPDATE weberp_stockmaster SET discountcategory='' WHERE stockid='" . trim(mb_strtoupper($_GET['StockID'])) ."'";
 	$result = DB_query($sql);
 	prnMsg( _('The stock master record has been updated to no discount category'),'success');
 	echo '<br />';
 } elseif (isset($_POST['SubmitCategory'])) {
-	$sql = "SELECT stockid FROM stockmaster WHERE categoryid='".$_POST['stockcategory']."'";
+	$sql = "SELECT stockid FROM weberp_stockmaster WHERE categoryid='".$_POST['weberp_stockcategory']."'";
 	$ErrMsg = _('Failed to retrieve stock category data');
 	$result = DB_query($sql,$ErrMsg);
 	if(DB_num_rows($result)>0){
-		$sql="UPDATE stockmaster
+		$sql="UPDATE weberp_stockmaster
 				SET discountcategory='".$_POST['DiscountCategory']."'
-				WHERE categoryid='".$_POST['stockcategory']."'";
+				WHERE categoryid='".$_POST['weberp_stockcategory']."'";
 		$result=DB_query($sql);
 	}else{
 		prnMsg(_('There are no stock defined for this stock category, you must define stock for it first'),'error');
@@ -80,7 +80,7 @@ if (isset($_POST['SelectChoice'])) {
     echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-	$sql = "SELECT DISTINCT discountcategory FROM stockmaster WHERE discountcategory <>''";
+	$sql = "SELECT DISTINCT discountcategory FROM weberp_stockmaster WHERE discountcategory <>''";
 	$result = DB_query($sql);
 	if (DB_num_rows($result) > 0) {
 		echo '<table class="selection"><tr><td>' .  _('Discount Category Code') .': </td>';
@@ -155,13 +155,13 @@ if (isset($_POST['SelectChoice'])) {
 
 		if (isset($_POST['search'])) {
 			if ($_POST['PartID']!='' and $_POST['PartDesc']=='')
-				$sql="SELECT stockid, description FROM stockmaster
+				$sql="SELECT stockid, description FROM weberp_stockmaster
 						WHERE stockid " . LIKE  . " '%".$_POST['PartID']."%'";
 			if ($_POST['PartID']=='' and $_POST['PartDesc']!='')
-				$sql="SELECT stockid, description FROM stockmaster
+				$sql="SELECT stockid, description FROM weberp_stockmaster
 						WHERE description " . LIKE  . " '%".$_POST['PartDesc']."%'";
 			if ($_POST['PartID']!='' and $_POST['PartDesc']!='')
-				$sql="SELECT stockid, description FROM stockmaster
+				$sql="SELECT stockid, description FROM weberp_stockmaster
 						WHERE stockid " . LIKE  . " '%".$_POST['PartID']."%'
 						AND description " . LIKE . " '%".$_POST['PartDesc']."%'";
 			$result=DB_query($sql);
@@ -180,9 +180,9 @@ if (isset($_POST['SelectChoice'])) {
 		echo '<td>' . _('to all items in stock category') . '</td>';
 		$sql = "SELECT categoryid,
 				categorydescription
-				FROM stockcategory";
+				FROM weberp_stockcategory";
 		$result = DB_query($sql);
-		echo '<td><select name="stockcategory">';
+		echo '<td><select name="weberp_stockcategory">';
 		while ($myrow=DB_fetch_array($result)) {
 			echo '<option value="'.$myrow['categoryid'].'">' . $myrow['categorydescription'] . '</option>';
 		}
@@ -194,7 +194,7 @@ if (isset($_POST['SelectChoice'])) {
 
 	if (! isset($_POST['DiscCat'])){ /*set DiscCat to something to show results for first cat defined */
 
-		$sql = "SELECT DISTINCT discountcategory FROM stockmaster WHERE discountcategory <>''";
+		$sql = "SELECT DISTINCT discountcategory FROM weberp_stockmaster WHERE discountcategory <>''";
 		$result = DB_query($sql);
 		if (DB_num_rows($result)>0){
 			DB_data_seek($result,0);
@@ -207,12 +207,12 @@ if (isset($_POST['SelectChoice'])) {
 
 	if ($_POST['DiscCat']!='0'){
 
-		$sql = "SELECT stockmaster.stockid,
-			stockmaster.description,
+		$sql = "SELECT weberp_stockmaster.stockid,
+			weberp_stockmaster.description,
 			discountcategory
-		FROM stockmaster
+		FROM weberp_stockmaster
 		WHERE discountcategory='" . $_POST['DiscCat'] . "'
-		ORDER BY stockmaster.stockid";
+		ORDER BY weberp_stockmaster.stockid";
 
 		$result = DB_query($sql);
 

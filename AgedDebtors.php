@@ -1,5 +1,5 @@
 <?php
- /* $Id$ */
+ /* $Id: AgedDebtors.php 7675 2016-11-21 14:55:36Z rchacon $ */
  /* Lists customer account balances in detail or summary in selected currency */
 
 include('includes/session.inc');
@@ -22,245 +22,245 @@ if(isset($_POST['PrintPDF'])
 		$_POST['Salesman'] = $_SESSION['SalesmanLogin'];
 	}
 	if(trim($_POST['Salesman'])!='') {
-		$SalesLimit = " AND debtorsmaster.debtorno IN (SELECT DISTINCT debtorno FROM custbranch WHERE salesman = '".$_POST['Salesman']."') ";
+		$SalesLimit = " AND weberp_debtorsmaster.debtorno IN (SELECT DISTINCT debtorno FROM weberp_custbranch WHERE salesman = '".$_POST['Salesman']."') ";
 	} else {
 		$SalesLimit = "";
 	}
 	if($_POST['All_Or_Overdues']=='All') {
-		$SQL = "SELECT debtorsmaster.debtorno,
-				debtorsmaster.name,
-				currencies.currency,
-				currencies.decimalplaces,
-				paymentterms.terms,
-				debtorsmaster.creditlimit,
-				holdreasons.dissallowinvoices,
-				holdreasons.reasondescription,
+		$SQL = "SELECT weberp_debtorsmaster.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.currency,
+				weberp_currencies.decimalplaces,
+				weberp_paymentterms.terms,
+				weberp_debtorsmaster.creditlimit,
+				weberp_holdreasons.dissallowinvoices,
+				weberp_holdreasons.reasondescription,
 				SUM(
-					debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+					weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 				) AS balance,
 				SUM(
-					CASE WHEN (paymentterms.daysbeforedue > 0)
+					CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 					THEN
-						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) >= paymentterms.daysbeforedue
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) >= weberp_paymentterms.daysbeforedue
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 						ELSE 0 END
 					ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= 0
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 						ELSE 0 END
 					END
 				) AS due,
 				SUM(
-					CASE WHEN (paymentterms.daysbeforedue > 0)
+					CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 					THEN
-						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 					ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 						ELSE 0 END
 					END
 				) AS overdue1,
 				SUM(
-					CASE WHEN (paymentterms.daysbeforedue > 0)
+					CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 					THEN
-						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 					ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 						ELSE 0 END
 					END
 				) AS overdue2
-				FROM debtorsmaster,
-					paymentterms,
-					holdreasons,
-					currencies,
-					debtortrans
-				WHERE debtorsmaster.paymentterms = paymentterms.termsindicator
-					AND debtorsmaster.currcode = currencies.currabrev
-					AND debtorsmaster.holdreason = holdreasons.reasoncode
-					AND debtorsmaster.debtorno = debtortrans.debtorno
-					AND debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
-					AND debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
-					AND debtorsmaster.currcode ='" . $_POST['Currency'] . "'
+				FROM weberp_debtorsmaster,
+					weberp_paymentterms,
+					weberp_holdreasons,
+					weberp_currencies,
+					weberp_debtortrans
+				WHERE weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+					AND weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+					AND weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+					AND weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+					AND weberp_debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
+					AND weberp_debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
+					AND weberp_debtorsmaster.currcode ='" . $_POST['Currency'] . "'
 					" . $SalesLimit . "
-				GROUP BY debtorsmaster.debtorno,
-					debtorsmaster.name,
-					currencies.currency,
-					paymentterms.terms,
-					paymentterms.daysbeforedue,
-					paymentterms.dayinfollowingmonth,
-					debtorsmaster.creditlimit,
-					holdreasons.dissallowinvoices,
-					holdreasons.reasondescription
+				GROUP BY weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_currencies.currency,
+					weberp_paymentterms.terms,
+					weberp_paymentterms.daysbeforedue,
+					weberp_paymentterms.dayinfollowingmonth,
+					weberp_debtorsmaster.creditlimit,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_holdreasons.reasondescription
 				HAVING
-					ROUND(ABS(SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)),currencies.decimalplaces) > 0";
+					ROUND(ABS(SUM(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc)),weberp_currencies.decimalplaces) > 0";
 
 	} elseif($_POST['All_Or_Overdues']=='OverduesOnly') {
 
-		$SQL = "SELECT debtorsmaster.debtorno,
-				debtorsmaster.name,
-				currencies.currency,
-				currencies.decimalplaces,
-				paymentterms.terms,
-				debtorsmaster.creditlimit,
-				holdreasons.dissallowinvoices,
-				holdreasons.reasondescription,
+		$SQL = "SELECT weberp_debtorsmaster.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.currency,
+				weberp_currencies.decimalplaces,
+				weberp_paymentterms.terms,
+				weberp_debtorsmaster.creditlimit,
+				weberp_holdreasons.dissallowinvoices,
+				weberp_holdreasons.reasondescription,
 			SUM(
-					debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+					weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 				) AS balance,
 			SUM(
-					CASE WHEN (paymentterms.daysbeforedue > 0)
+					CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 						THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= paymentterms.daysbeforedue
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= weberp_paymentterms.daysbeforedue
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= 0
-						THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0
+						THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 					END
 				) AS due,
 			SUM(
-			  		CASE WHEN (paymentterms.daysbeforedue > 0)
+			  		CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 						THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 					END
 				) AS overdue1,
 			SUM(
-					CASE WHEN (paymentterms.daysbeforedue > 0)
+					CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 						THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 					END
 				) AS overdue2
-			FROM debtorsmaster,
-					paymentterms,
-					holdreasons,
-					currencies,
-					debtortrans
-				WHERE debtorsmaster.paymentterms = paymentterms.termsindicator
-				AND debtorsmaster.currcode = currencies.currabrev
-				AND debtorsmaster.holdreason = holdreasons.reasoncode
-				AND debtorsmaster.debtorno = debtortrans.debtorno
-				AND debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
-				AND debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
-				AND debtorsmaster.currcode ='" . $_POST['Currency'] . "'
+			FROM weberp_debtorsmaster,
+					weberp_paymentterms,
+					weberp_holdreasons,
+					weberp_currencies,
+					weberp_debtortrans
+				WHERE weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+				AND weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+				AND weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+				AND weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+				AND weberp_debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
+				AND weberp_debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
+				AND weberp_debtorsmaster.currcode ='" . $_POST['Currency'] . "'
 				" . $SalesLimit . "
-			GROUP BY debtorsmaster.debtorno,
-					debtorsmaster.name,
-					currencies.currency,
-					paymentterms.terms,
-					paymentterms.daysbeforedue,
-					paymentterms.dayinfollowingmonth,
-					debtorsmaster.creditlimit,
-					holdreasons.dissallowinvoices,
-					holdreasons.reasondescription
+			GROUP BY weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_currencies.currency,
+					weberp_paymentterms.terms,
+					weberp_paymentterms.daysbeforedue,
+					weberp_paymentterms.dayinfollowingmonth,
+					weberp_debtorsmaster.creditlimit,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_holdreasons.reasondescription
 			HAVING SUM(
-				CASE WHEN (paymentterms.daysbeforedue > 0)
+				CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 						THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-							THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+							THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 					END
 					) > 0.01";
 
 	} elseif($_POST['All_Or_Overdues']=='HeldOnly') {
 
-		$SQL = "SELECT debtorsmaster.debtorno,
-					debtorsmaster.name,
-					currencies.currency,
-					currencies.decimalplaces,
-					paymentterms.terms,
-					debtorsmaster.creditlimit,
-					holdreasons.dissallowinvoices,
-					holdreasons.reasondescription,
-					SUM(debtortrans.ovamount +
-						debtortrans.ovgst +
-						debtortrans.ovfreight +
-						debtortrans.ovdiscount -
-						debtortrans.alloc) AS balance,
+		$SQL = "SELECT weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+					weberp_currencies.currency,
+					weberp_currencies.decimalplaces,
+					weberp_paymentterms.terms,
+					weberp_debtorsmaster.creditlimit,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_holdreasons.reasondescription,
+					SUM(weberp_debtortrans.ovamount +
+						weberp_debtortrans.ovgst +
+						weberp_debtortrans.ovfreight +
+						weberp_debtortrans.ovdiscount -
+						weberp_debtortrans.alloc) AS balance,
 					SUM(
-						CASE WHEN (paymentterms.daysbeforedue > 0)
+						CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= paymentterms.daysbeforedue
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= weberp_paymentterms.daysbeforedue
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= 0
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 						END
 					) AS due,
 					SUM(
-						CASE WHEN (paymentterms.daysbeforedue > 0)
+						CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
-								AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue
+								AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						END
 					) AS overdue1,
 					SUM(
-						CASE WHEN (paymentterms.daysbeforedue > 0)
+						CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
-								AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue
+								AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= ".$_SESSION['PastDueDays2'] . "
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= ".$_SESSION['PastDueDays2'] . "
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 							ELSE 0 END
 						END
 					) AS overdue2
-				FROM debtorsmaster,
-				paymentterms,
-				holdreasons,
-				currencies,
-				debtortrans
-				WHERE debtorsmaster.paymentterms = paymentterms.termsindicator
-				AND debtorsmaster.currcode = currencies.currabrev
-				AND debtorsmaster.holdreason = holdreasons.reasoncode
-				AND debtorsmaster.debtorno = debtortrans.debtorno
-				AND holdreasons.dissallowinvoices=1
-				AND debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
-				AND debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
-				AND debtorsmaster.currcode ='" . $_POST['Currency'] . "'
+				FROM weberp_debtorsmaster,
+				weberp_paymentterms,
+				weberp_holdreasons,
+				weberp_currencies,
+				weberp_debtortrans
+				WHERE weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+				AND weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+				AND weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+				AND weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+				AND weberp_holdreasons.dissallowinvoices=1
+				AND weberp_debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
+				AND weberp_debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
+				AND weberp_debtorsmaster.currcode ='" . $_POST['Currency'] . "'
 				" . $SalesLimit . "
-				GROUP BY debtorsmaster.debtorno,
-				debtorsmaster.name,
-				currencies.currency,
-				paymentterms.terms,
-				paymentterms.daysbeforedue,
-				paymentterms.dayinfollowingmonth,
-				debtorsmaster.creditlimit,
-				holdreasons.dissallowinvoices,
-				holdreasons.reasondescription
+				GROUP BY weberp_debtorsmaster.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.currency,
+				weberp_paymentterms.terms,
+				weberp_paymentterms.daysbeforedue,
+				weberp_paymentterms.dayinfollowingmonth,
+				weberp_debtorsmaster.creditlimit,
+				weberp_holdreasons.dissallowinvoices,
+				weberp_holdreasons.reasondescription
 				HAVING ABS(SUM(
-					debtortrans.ovamount +
-					debtortrans.ovgst +
-					debtortrans.ovfreight +
-					debtortrans.ovdiscount -
-					debtortrans.alloc)) >0.005";
+					weberp_debtortrans.ovamount +
+					weberp_debtortrans.ovgst +
+					weberp_debtortrans.ovfreight +
+					weberp_debtortrans.ovdiscount -
+					weberp_debtortrans.alloc)) >0.005";
 	}
 	$CustomerResult = DB_query($SQL,'','',False,False); /*dont trap errors handled below*/
 
@@ -319,50 +319,50 @@ if(isset($_POST['PrintPDF'])
 			/*draw a line under the customer aged analysis*/
 			$pdf->line($Page_Width-$Right_Margin, $YPos+10,$Left_Margin, $YPos+10);
 
-			$sql = "SELECT systypes.typename,
-						debtortrans.transno,
-						debtortrans.trandate,
-						(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) as balance,
-						(CASE WHEN (paymentterms.daysbeforedue > 0)
+			$sql = "SELECT weberp_systypes.typename,
+						weberp_debtortrans.transno,
+						weberp_debtortrans.trandate,
+						(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc) as balance,
+						(CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) >= paymentterms.daysbeforedue
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) >= weberp_paymentterms.daysbeforedue
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= 0
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 						END) AS due,
-						(CASE WHEN (paymentterms.daysbeforedue > 0)
+						(CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . "
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 						END) AS overdue1,
-						(CASE WHEN (paymentterms.daysbeforedue > 0)
+						(CASE WHEN (weberp_paymentterms.daysbeforedue > 0)
 							THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
-								THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . "
+								THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc
 								ELSE 0 END
 						END) AS overdue2
-				   FROM debtorsmaster,
-						paymentterms,
-						debtortrans,
-						systypes
-				   WHERE systypes.typeid = debtortrans.type
-						AND debtorsmaster.paymentterms = paymentterms.termsindicator
-						AND debtorsmaster.debtorno = debtortrans.debtorno
-						AND debtortrans.debtorno = '" . $AgedAnalysis['debtorno'] . "'
-						AND ABS(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)>0.004";
+				   FROM weberp_debtorsmaster,
+						weberp_paymentterms,
+						weberp_debtortrans,
+						weberp_systypes
+				   WHERE weberp_systypes.typeid = weberp_debtortrans.type
+						AND weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+						AND weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+						AND weberp_debtortrans.debtorno = '" . $AgedAnalysis['debtorno'] . "'
+						AND ABS(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc)>0.004";
 
 			if($_SESSION['SalesmanLogin'] != '') {
-				$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
 			$DetailResult = DB_query($sql,'','',False,False); /*Dont trap errors */
@@ -487,7 +487,7 @@ if(isset($_POST['PrintPDF'])
 		}else{
 			echo '<td><select tabindex="4" name="Salesman">';
 
-			$sql = "SELECT salesmancode, salesmanname FROM salesman";
+			$sql = "SELECT salesmancode, salesmanname FROM weberp_salesman";
 
 			$result=DB_query($sql);
 			echo '<option value="">' . _('All Salespeople') . '</option>';
@@ -501,7 +501,7 @@ if(isset($_POST['PrintPDF'])
 				<td>' . _('Only show customers trading in') . ':' . '</td>
 				<td><select tabindex="5" name="Currency">';
 
-		$sql = "SELECT currency, currabrev FROM currencies";
+		$sql = "SELECT currency, currabrev FROM weberp_currencies";
 
 		$result=DB_query($sql);
 		while ($myrow=DB_fetch_array($result)) {

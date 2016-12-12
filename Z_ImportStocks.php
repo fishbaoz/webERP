@@ -1,5 +1,5 @@
  <?php
-/* $Id$*/
+/* $Id: Z_ImportStocks.php 7347 2015-09-05 22:20:44Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Import Items');
@@ -97,7 +97,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 		}
 
 		//first off check if the item already exists
-		$sql = "SELECT COUNT(stockid) FROM stockmaster WHERE stockid='".$StockID."'";
+		$sql = "SELECT COUNT(stockid) FROM weberp_stockmaster WHERE stockid='".$StockID."'";
 		$result = DB_query($sql);
 		$testrow = DB_fetch_row($result);
 		if ($testrow[0] != 0) {
@@ -189,7 +189,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 
 			//attempt to insert the stock item
 			$sql = "
-				INSERT INTO stockmaster (
+				INSERT INTO weberp_stockmaster (
 					stockid,
 					description,
 					longdescription,
@@ -236,11 +236,11 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 
 			if (DB_error_no() ==0) { //the insert of the new code worked so bang in the stock location records too
 
-				$sql = "INSERT INTO locstock (loccode,
+				$sql = "INSERT INTO weberp_locstock (loccode,
 												stockid)
-									SELECT locations.loccode,
+									SELECT weberp_locations.loccode,
 									'" . $StockID . "'
-									FROM locations";
+									FROM weberp_locations";
 
 				$ErrMsg =  _('The locations for the item') . ' ' . $StockID .  ' ' . _('could not be added because');
 				$DbgMsg = _('NB Locations records can be added by opening the utility page') . ' <i>Z_MakeStockLocns.php</i> ' . _('The SQL that was used to add the location records that failed was');

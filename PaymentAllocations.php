@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PaymentAllocations.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*
 	This page is called from SupplierInquiry.php when the 'view payments' button is selected
@@ -35,20 +35,20 @@ echo '<div class="page_help_text">' .
 	</div>
 	<br />';
 
-$SQL= "SELECT supptrans.supplierno,
-				supptrans.suppreference,
-				supptrans.trandate,
-				supptrans.alloc,
-				currencies.decimalplaces AS currdecimalplaces
-		FROM supptrans INNER JOIN suppliers
-		ON supptrans.supplierno=suppliers.supplierid
-		INNER JOIN currencies
-		ON suppliers.currcode=currencies.currabrev
-		WHERE supptrans.id IN (SELECT suppallocs.transid_allocfrom
-								FROM supptrans, suppallocs
-								WHERE supptrans.supplierno = '" . $SuppID . "'
-								AND supptrans.suppreference = '" . $InvID . "'
-								AND supptrans.id = suppallocs.transid_allocto)";
+$SQL= "SELECT weberp_supptrans.supplierno,
+				weberp_supptrans.suppreference,
+				weberp_supptrans.trandate,
+				weberp_supptrans.alloc,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+		FROM weberp_supptrans INNER JOIN weberp_suppliers
+		ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+		INNER JOIN weberp_currencies
+		ON weberp_suppliers.currcode=weberp_currencies.currabrev
+		WHERE weberp_supptrans.id IN (SELECT weberp_suppallocs.transid_allocfrom
+								FROM weberp_supptrans, weberp_suppallocs
+								WHERE weberp_supptrans.supplierno = '" . $SuppID . "'
+								AND weberp_supptrans.suppreference = '" . $InvID . "'
+								AND weberp_supptrans.id = weberp_suppallocs.transid_allocto)";
 
 
 $Result = DB_query($SQL);

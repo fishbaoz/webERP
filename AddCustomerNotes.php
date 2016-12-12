@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: AddCustomerNotes.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Customer Notes');
@@ -42,7 +42,7 @@ if ( isset($_POST['submit']) ) {
 
 	if (isset($Id) and $InputError !=1) {
 
-		$sql = "UPDATE custnotes SET note='" . $_POST['Note'] . "',
+		$sql = "UPDATE weberp_custnotes SET note='" . $_POST['Note'] . "',
 									date='" . FormatDateForSQL($_POST['NoteDate']) . "',
 									href='" . $_POST['Href'] . "',
 									priority='" . $_POST['Priority'] . "'
@@ -51,7 +51,7 @@ if ( isset($_POST['submit']) ) {
 		$msg = _('Customer Notes') . ' ' . $DebtorNo  . ' ' . _('has been updated');
 	} elseif ($InputError !=1) {
 
-		$sql = "INSERT INTO custnotes (debtorno,
+		$sql = "INSERT INTO weberp_custnotes (debtorno,
 										href,
 										note,
 										date,
@@ -82,7 +82,7 @@ if ( isset($_POST['submit']) ) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'SalesOrders'
 
-	$sql="DELETE FROM custnotes
+	$sql="DELETE FROM weberp_custnotes
 			WHERE noteid='".$Id."'
 			AND debtorno='".$DebtorNo."'";
 	$result = DB_query($sql);
@@ -94,7 +94,7 @@ if ( isset($_POST['submit']) ) {
 }
 
 if (!isset($Id)) {
-	$SQLname="SELECT * FROM debtorsmaster
+	$SQLname="SELECT * FROM weberp_debtorsmaster
 				WHERE debtorno='".$DebtorNo."'";
 	$Result = DB_query($SQLname);
 	$row = DB_fetch_array($Result);
@@ -107,7 +107,7 @@ if (!isset($Id)) {
 					note,
 					date,
 					priority
-				FROM custnotes
+				FROM weberp_custnotes
 				WHERE debtorno='".$DebtorNo."'
 				ORDER BY date DESC";
 	$result = DB_query($sql);
@@ -174,7 +174,7 @@ if (!isset($_GET['delete'])) {
 						note,
 						date,
 						priority
-					FROM custnotes
+					FROM weberp_custnotes
 					WHERE noteid='".$Id."'
 						AND debtorno='".$DebtorNo."'";
 

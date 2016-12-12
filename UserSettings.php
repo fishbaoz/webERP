@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: UserSettings.php 7516 2016-05-12 17:04:59Z rchacon $*/
 /* Allows the user to change system wide defaults for the theme - appearance, the number of records to show in searches and the language to display messages in */
 
 include('includes/session.inc');
@@ -60,7 +60,7 @@ if (isset($_POST['Modify'])) {
 	if ($InputError != 1) {
 		// no errors
 		if ($UpdatePassword != 'Y'){
-			$sql = "UPDATE www_users
+			$sql = "UPDATE weberp_www_users
 					SET displayrecordsmax='" . $_POST['DisplayRecordsMax'] . "',
 						theme='" . $_POST['Theme'] . "',
 						language='" . $_POST['Language'] . "',
@@ -75,7 +75,7 @@ if (isset($_POST['Modify'])) {
 
 			prnMsg( _('The user settings have been updated') . '. ' . _('Be sure to remember your password for the next time you login'),'success');
 		} else {
-			$sql = "UPDATE www_users
+			$sql = "UPDATE weberp_www_users
 				SET displayrecordsmax='" . $_POST['DisplayRecordsMax'] . "',
 					theme='" . $_POST['Theme'] . "',
 					language='" . $_POST['Language'] . "',
@@ -185,7 +185,7 @@ echo '</select></td></tr>
 	<tr>
 		<td>' . _('Email') . ':</td>';
 
-$sql = "SELECT email from www_users WHERE userid = '" . $_SESSION['UserID'] . "'";
+$sql = "SELECT email from weberp_www_users WHERE userid = '" . $_SESSION['UserID'] . "'";
 $result = DB_query($sql);
 $myrow = DB_fetch_array($result);
 if(!isset($_POST['email'])){

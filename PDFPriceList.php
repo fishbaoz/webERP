@@ -1,14 +1,14 @@
 <?php
-/* $Id$*/
+/* $Id: PDFPriceList.php 7494 2016-04-25 09:53:53Z daintree $*/
 /*	Script to print a price list by inventory category */
 /*	Output column sizes:
-		* stockmaster.stockid, varchar(20), len = 20chr
-		* stockmaster.description, varchar(50), len = 50chr
-		* prices.startdate, date, len = 10chr
-		* prices.enddate, date/'No End Date', len = 12chr
-		* custbranch.brname, varchar(40), len = 40chr
+		* weberp_stockmaster.stockid, varchar(20), len = 20chr
+		* weberp_stockmaster.description, varchar(50), len = 50chr
+		* weberp_prices.startdate, date, len = 10chr
+		* weberp_prices.enddate, date/'No End Date', len = 12chr
+		* weberp_custbranch.brname, varchar(40), len = 40chr
 		* Gross Profit, calculated, len = 8chr
-		* prices.price, decimal(20,4), len = 20chr + 4spaces */
+		* weberp_prices.price, decimal(20,4), len = 20chr + 4spaces */
 
 /*	Please note that addTextWrap() YPos is a font-size-height further down than
 	addText() and other functions. Use addText() instead of addTextWrap() to
@@ -30,7 +30,7 @@ If (isset($_POST['PrintPDF'])) {
 	$line_height=12;
 
 	if ($_POST['Currency'] != "All"){
-		$WhereCurrency = " AND prices.currabrev = '" . $_POST['Currency'] ."' ";
+		$WhereCurrency = " AND weberp_prices.currabrev = '" . $_POST['Currency'] ."' ";
 	}else{
 		$WhereCurrency = "";
 	}
@@ -59,84 +59,84 @@ If (isset($_POST['PrintPDF'])) {
 			exit;
 		}
 
-		$SQL = "SELECT debtorsmaster.name,
-				debtorsmaster.salestype
-				FROM debtorsmaster
+		$SQL = "SELECT weberp_debtorsmaster.name,
+				weberp_debtorsmaster.salestype
+				FROM weberp_debtorsmaster
 				WHERE debtorno = '" . $_SESSION['CustomerID'] . "'";
 		$CustNameResult = DB_query($SQL);
 		$CustNameRow = DB_fetch_row($CustNameResult);
 		$CustomerName = $CustNameRow[0];
 		$SalesType = $CustNameRow[1];
-		$SQL = "SELECT prices.typeabbrev,
-  						prices.stockid,
-  						stockmaster.description,
-  						stockmaster.longdescription,
-  						prices.currabrev,
-  						prices.startdate,
-  						prices.enddate,
-  						prices.price,
-  						stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standardcost,
-  						stockmaster.categoryid,
-  						stockcategory.categorydescription,
-  						prices.debtorno,
-  						prices.branchcode,
-  						custbranch.brname,
-  						currencies.decimalplaces
-						FROM stockmaster INNER JOIN	stockcategory
-						ON stockmaster.categoryid=stockcategory.categoryid
-						INNER JOIN prices
-						ON stockmaster.stockid=prices.stockid
-						INNER JOIN currencies
-						ON prices.currabrev=currencies.currabrev
-                        LEFT JOIN custbranch
-						ON prices.debtorno=custbranch.debtorno
-						AND prices.branchcode=custbranch.branchcode
-						WHERE prices.typeabbrev = '" . $SalesType . "'
-						AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-						AND prices.debtorno='" . $_SESSION['CustomerID'] . "'
-						AND prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
-						AND (prices.enddate='0000-00-00' OR prices.enddate >'" . FormatDateForSQL($_POST['EffectiveDate']) . "')" .
+		$SQL = "SELECT weberp_prices.typeabbrev,
+  						weberp_prices.stockid,
+  						weberp_stockmaster.description,
+  						weberp_stockmaster.longdescription,
+  						weberp_prices.currabrev,
+  						weberp_prices.startdate,
+  						weberp_prices.enddate,
+  						weberp_prices.price,
+  						weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standardcost,
+  						weberp_stockmaster.categoryid,
+  						weberp_stockcategory.categorydescription,
+  						weberp_prices.debtorno,
+  						weberp_prices.branchcode,
+  						weberp_custbranch.brname,
+  						weberp_currencies.decimalplaces
+						FROM weberp_stockmaster INNER JOIN	weberp_stockcategory
+						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+						INNER JOIN weberp_prices
+						ON weberp_stockmaster.stockid=weberp_prices.stockid
+						INNER JOIN weberp_currencies
+						ON weberp_prices.currabrev=weberp_currencies.currabrev
+                        LEFT JOIN weberp_custbranch
+						ON weberp_prices.debtorno=weberp_custbranch.debtorno
+						AND weberp_prices.branchcode=weberp_custbranch.branchcode
+						WHERE weberp_prices.typeabbrev = '" . $SalesType . "'
+						AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+						AND weberp_prices.debtorno='" . $_SESSION['CustomerID'] . "'
+						AND weberp_prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
+						AND (weberp_prices.enddate='0000-00-00' OR weberp_prices.enddate >'" . FormatDateForSQL($_POST['EffectiveDate']) . "')" .
 						$WhereCurrency . "
-						ORDER BY prices.currabrev,
-							stockcategory.categorydescription,
-							stockmaster.stockid,
-							prices.startdate";
+						ORDER BY weberp_prices.currabrev,
+							weberp_stockcategory.categorydescription,
+							weberp_stockmaster.stockid,
+							weberp_prices.startdate";
 
 	} else { /* the sales type list only */
 
-		$SQL = "SELECT sales_type FROM salestypes WHERE typeabbrev='" . $_POST['SalesType'] . "'";
+		$SQL = "SELECT sales_type FROM weberp_salestypes WHERE typeabbrev='" . $_POST['SalesType'] . "'";
 		$SalesTypeResult = DB_query($SQL);
 		$SalesTypeRow = DB_fetch_row($SalesTypeResult);
 		$SalesTypeName = $SalesTypeRow[0];
 
-		$SQL = "SELECT	prices.typeabbrev,
-        				prices.stockid,
-        				prices.startdate,
-        				prices.enddate,
-        				stockmaster.description,
-        				stockmaster.longdescription,
-        				prices.currabrev,
-        				prices.price,
-        				stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost as standardcost,
-        				stockmaster.categoryid,
-        				stockcategory.categorydescription,
-        				currencies.decimalplaces
-				FROM stockmaster INNER JOIN	stockcategory
-	   			     ON stockmaster.categoryid=stockcategory.categoryid
-				INNER JOIN prices
-    				ON stockmaster.stockid=prices.stockid
-				INNER JOIN currencies
-					ON prices.currabrev=currencies.currabrev
-                WHERE stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-				AND prices.typeabbrev='" . $_POST['SalesType'] . "'
-    			AND prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
-    			AND (prices.enddate='0000-00-00' OR prices.enddate>'" . FormatDateForSQL($_POST['EffectiveDate']) . "')" .
+		$SQL = "SELECT	weberp_prices.typeabbrev,
+        				weberp_prices.stockid,
+        				weberp_prices.startdate,
+        				weberp_prices.enddate,
+        				weberp_stockmaster.description,
+        				weberp_stockmaster.longdescription,
+        				weberp_prices.currabrev,
+        				weberp_prices.price,
+        				weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost as standardcost,
+        				weberp_stockmaster.categoryid,
+        				weberp_stockcategory.categorydescription,
+        				weberp_currencies.decimalplaces
+				FROM weberp_stockmaster INNER JOIN	weberp_stockcategory
+	   			     ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+				INNER JOIN weberp_prices
+    				ON weberp_stockmaster.stockid=weberp_prices.stockid
+				INNER JOIN weberp_currencies
+					ON weberp_prices.currabrev=weberp_currencies.currabrev
+                WHERE weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+				AND weberp_prices.typeabbrev='" . $_POST['SalesType'] . "'
+    			AND weberp_prices.startdate<='" . FormatDateForSQL($_POST['EffectiveDate']) . "'
+    			AND (weberp_prices.enddate='0000-00-00' OR weberp_prices.enddate>'" . FormatDateForSQL($_POST['EffectiveDate']) . "')" .
 				$WhereCurrency . "
-    			AND prices.debtorno=''
-    			ORDER BY prices.currabrev,
-    				stockcategory.categorydescription,
-    				stockmaster.stockid,
-    				prices.startdate";
+    			AND weberp_prices.debtorno=''
+    			ORDER BY weberp_prices.currabrev,
+    				weberp_stockcategory.categorydescription,
+    				weberp_stockmaster.stockid,
+    				weberp_prices.startdate";
 	}
 	$PricesResult = DB_query($SQL,'','',false,false);
 
@@ -240,7 +240,7 @@ If (isset($_POST['PrintPDF'])) {
 				$LeftOvers = $pdf->Image($imagefile,$Left_Margin+3, $Page_Height-$YPos, 36, 36);
 				$YPosImage = $YPos-36;// Stores the $YPos of the image bottom (see bottom).
 			}
-			// Prints stockmaster.longdescription:
+			// Prints weberp_stockmaster.longdescription:
 			$XPos = $Left_Margin+80;// Takes out this calculation from the loop.
 			$Width = $Page_Width-$Right_Margin-$XPos;// Takes out this calculation from the loop.
 			$FontSize2 = $FontSize*0.80;// Font size and line height of Full Description section.
@@ -293,7 +293,7 @@ If (isset($_POST['PrintPDF'])) {
 				<td>' . _('Select Inventory Categories') . ':</td>
 				<td><select autofocus="autofocus" required="required" minlength="1" size="12" name="Categories[]"multiple="multiple">';
 	$SQL = 'SELECT categoryid, categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription';
 	$CatResult = DB_query($SQL);
 	while ($MyRow = DB_fetch_array($CatResult)) {
@@ -309,7 +309,7 @@ If (isset($_POST['PrintPDF'])) {
 
 	echo '<tr><td>' . _('For Sales Type/Price List').':</td>
 			  <td><select name="SalesType">';
-	$sql = "SELECT sales_type, typeabbrev FROM salestypes";
+	$sql = "SELECT sales_type, typeabbrev FROM weberp_salestypes";
 	$SalesTypesResult=DB_query($sql);
 
 	while ($myrow=DB_fetch_array($SalesTypesResult)) {
@@ -319,7 +319,7 @@ If (isset($_POST['PrintPDF'])) {
 
 	echo '<tr><td>' . _('For Currency').':</td>
 			  <td><select name="Currency">';
-	$sql = "SELECT currabrev, currency FROM currencies ORDER BY currency";
+	$sql = "SELECT currabrev, currency FROM weberp_currencies ORDER BY currency";
 	$CurrencyResult=DB_query($sql);
 	echo '<option selected="selected" value="All">' . _('All')  . '</option>';
 	while ($myrow=DB_fetch_array($CurrencyResult)) {

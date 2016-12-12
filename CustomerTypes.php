@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: CustomerTypes.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Customer Types') . ' / ' . _('Maintenance');
@@ -47,7 +47,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	$checksql = "SELECT count(*)
-		     FROM debtortype
+		     FROM weberp_debtortype
 		     WHERE typename = '" . $_POST['TypeName'] . "'";
 	$checkresult=DB_query($checksql);
 	$checkrow=DB_fetch_row($checkresult);
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedType) AND $InputError !=1) {
 
-		$sql = "UPDATE debtortype
+		$sql = "UPDATE weberp_debtortype
 			SET typename = '" . $_POST['TypeName'] . "'
 			WHERE typeid = '" .$SelectedType."'";
 
@@ -71,7 +71,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-			     FROM debtortype
+			     FROM weberp_debtortype
 			     WHERE typename = '" . $_POST['TypeName'] . "'";
 
 		$checkresult = DB_query($checkSql);
@@ -84,14 +84,14 @@ if (isset($_POST['submit'])) {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO debtortype
+			$sql = "INSERT INTO weberp_debtortype
 						(typename)
 					VALUES ('" . $_POST['TypeName'] . "')";
 
 
 			$msg = _('Customer type') . ' ' . $_POST["typename"] .  ' ' . _('has been created');
 			$checkSql = "SELECT count(typeid)
-			     FROM debtortype";
+			     FROM weberp_debtortype";
 			$result = DB_query($checkSql);
 			$row = DB_fetch_row($result);
 
@@ -108,14 +108,14 @@ if (isset($_POST['submit'])) {
 
 	// Does it exist
 		$checkSql = "SELECT count(*)
-			     FROM debtortype
+			     FROM weberp_debtortype
 			     WHERE typeid = '" . $DefaultCustomerType . "'";
 		$checkresult = DB_query($checkSql);
 		$checkrow = DB_fetch_row($checkresult);
 
 	// If it doesnt then update config with newly created one.
 		if ($checkrow[0] == 0) {
-			$sql = "UPDATE config
+			$sql = "UPDATE weberp_config
 					SET confvalue='" . $_POST['typeid'] . "'
 					WHERE confname='DefaultCustomerType'";
 			$result = DB_query($sql);
@@ -135,8 +135,8 @@ if (isset($_POST['submit'])) {
 	// Prevent delete if saletype exist in customer transactions
 
 	$sql= "SELECT COUNT(*)
-	       FROM debtortrans
-	       WHERE debtortrans.type='".$SelectedType."'";
+	       FROM weberp_debtortrans
+	       WHERE weberp_debtortrans.type='".$SelectedType."'";
 
 	$ErrMsg = _('The number of transactions using this customer type could not be retrieved');
 	$result = DB_query($sql,$ErrMsg);
@@ -147,7 +147,7 @@ if (isset($_POST['submit'])) {
 
 	} else {
 
-		$sql = "SELECT COUNT(*) FROM debtorsmaster WHERE typeid='".$SelectedType."'";
+		$sql = "SELECT COUNT(*) FROM weberp_debtorsmaster WHERE typeid='".$SelectedType."'";
 
 		$ErrMsg = _('The number of transactions using this Type record could not be retrieved because');
 		$result = DB_query($sql,$ErrMsg);
@@ -155,12 +155,12 @@ if (isset($_POST['submit'])) {
 		if ($myrow[0]>0) {
 			prnMsg (_('Cannot delete this type because customers are currently set up to use this type') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('customers with this type code'));
 		} else {
-			$result = DB_query("SELECT typename FROM debtortype WHERE typeid='".$SelectedType."'");
+			$result = DB_query("SELECT typename FROM weberp_debtortype WHERE typeid='".$SelectedType."'");
 			if (DB_Num_Rows($result)>0){
 				$TypeRow = DB_fetch_array($result);
 				$TypeName = $TypeRow['typename'];
 
-				$sql="DELETE FROM debtortype WHERE typeid='".$SelectedType."'";
+				$sql="DELETE FROM weberp_debtortype WHERE typeid='".$SelectedType."'";
 				$ErrMsg = _('The Type record could not be deleted because');
 				$result = DB_query($sql,$ErrMsg);
 				echo '<br />';
@@ -180,7 +180,7 @@ then none of the above are true and the list of sales types will be displayed wi
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = "SELECT typeid, typename FROM debtortype";
+	$sql = "SELECT typeid, typename FROM weberp_debtortype";
 	$result = DB_query($sql);
 
 	echo '<br /><table class="selection">';
@@ -233,7 +233,7 @@ if (! isset($_GET['delete'])) {
 
 		$sql = "SELECT typeid,
 			       typename
-		        FROM debtortype
+		        FROM weberp_debtortype
 		        WHERE typeid='".$SelectedType."'";
 
 		$result = DB_query($sql);

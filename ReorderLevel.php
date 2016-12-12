@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: ReorderLevel.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 // ReorderLevel.php - Report of parts with quantity below reorder level
 // Shows if there are other locations that have quantities for the parts that are short
@@ -19,10 +19,10 @@ if (isset($_POST['PrintPDF'])) {
 	$WhereCategory = ' ';
 	$CategoryDescription = ' ';
 	if ($_POST['StockCat'] != 'All') {
-		$WhereCategory = " AND stockmaster.categoryid='" . $_POST['StockCat'] . "'";
+		$WhereCategory = " AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'";
 		$sql= "SELECT categoryid,
 					categorydescription
-				FROM stockcategory
+				FROM weberp_stockcategory
 				WHERE categoryid='" . $_POST['StockCat'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -30,29 +30,29 @@ if (isset($_POST['PrintPDF'])) {
 	}
 	$WhereLocation = " ";
 	if ($_POST['StockLocation'] != 'All') {
-		$WhereLocation = " AND locstock.loccode='" . $_POST['StockLocation'] . "' ";
+		$WhereLocation = " AND weberp_locstock.loccode='" . $_POST['StockLocation'] . "' ";
 	}
 
-	$sql = "SELECT locstock.stockid,
-					stockmaster.description,
-					locstock.loccode,
-					locations.locationname,
-					locstock.quantity,
-					locstock.reorderlevel,
-					stockmaster.decimalplaces,
-					stockmaster.serialised,
-					stockmaster.controlled
-				FROM locstock INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1,
-					stockmaster
-				LEFT JOIN stockcategory
-				ON stockmaster.categoryid=stockcategory.categoryid,
-					locations
-				WHERE locstock.stockid=stockmaster.stockid " .
+	$sql = "SELECT weberp_locstock.stockid,
+					weberp_stockmaster.description,
+					weberp_locstock.loccode,
+					weberp_locations.locationname,
+					weberp_locstock.quantity,
+					weberp_locstock.reorderlevel,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.serialised,
+					weberp_stockmaster.controlled
+				FROM weberp_locstock INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1,
+					weberp_stockmaster
+				LEFT JOIN weberp_stockcategory
+				ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid,
+					weberp_locations
+				WHERE weberp_locstock.stockid=weberp_stockmaster.stockid " .
 				$WhereLocation .
-				"AND locstock.loccode=locations.loccode
-				AND locstock.reorderlevel > locstock.quantity
-				AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M') " .
-				$WhereCategory . " ORDER BY locstock.loccode,locstock.stockid";
+				"AND weberp_locstock.loccode=weberp_locations.loccode
+				AND weberp_locstock.reorderlevel > weberp_locstock.quantity
+				AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M') " .
+				$WhereCategory . " ORDER BY weberp_locstock.loccode,weberp_locstock.stockid";
 
 	$result = DB_query($sql,'','',false,true);
 
@@ -81,14 +81,14 @@ if (isset($_POST['PrintPDF'])) {
 		$ListCount ++;
 
 		$OnOrderSQL = "SELECT SUM(quantityord-quantityrecd) AS quantityonorder
-								FROM purchorders
-								LEFT JOIN purchorderdetails
-								ON purchorders.orderno=purchorderdetails.orderno
-								WHERE purchorders.status !='Cancelled'
-								AND purchorders.status !='Rejected'
-								AND purchorders.status !='Pending'
-								AND purchorderdetails.itemcode='".$myrow['stockid']."'
-								      AND purchorders.intostocklocation='".$myrow['loccode']."'";
+								FROM weberp_purchorders
+								LEFT JOIN weberp_purchorderdetails
+								ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+								WHERE weberp_purchorders.status !='Cancelled'
+								AND weberp_purchorders.status !='Rejected'
+								AND weberp_purchorders.status !='Pending'
+								AND weberp_purchorderdetails.itemcode='".$myrow['stockid']."'
+								      AND weberp_purchorders.intostocklocation='".$myrow['loccode']."'";
 		$OnOrderResult = DB_query($OnOrderSQL);
 		$OnOrderRow = DB_fetch_array($OnOrderResult);
 		// Parameters for addTextWrap are defined in /includes/class.pdf.php
@@ -110,28 +110,28 @@ if (isset($_POST['PrintPDF'])) {
 					   $Right_Margin,$CategoryDescription);
 		}
 		$OnOrderSQL = "SELECT SUM(quantityord-quantityrecd) AS quantityonorder
-								FROM purchorders
-								LEFT JOIN purchorderdetails
-								ON purchorders.orderno=purchorderdetails.orderno
-								WHERE purchorders.status != 'Cancelled'
-									AND purchorders.status != 'Rejected'
-									AND purchorders.status != 'Pending'
-								      AND purchorderdetails.itemcode='".$myrow['stockid']."'
-								      AND purchorders.intostocklocation='".$myrow['loccode']."'";
+								FROM weberp_purchorders
+								LEFT JOIN weberp_purchorderdetails
+								ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+								WHERE weberp_purchorders.status != 'Cancelled'
+									AND weberp_purchorders.status != 'Rejected'
+									AND weberp_purchorders.status != 'Pending'
+								      AND weberp_purchorderdetails.itemcode='".$myrow['stockid']."'
+								      AND weberp_purchorders.intostocklocation='".$myrow['loccode']."'";
 		$OnOrderResult = DB_query($OnOrderSQL);
 		$OnOrderRow = DB_fetch_array($OnOrderResult);
 
 		// Print if stock for part in other locations
-		$sql2 = "SELECT locstock.quantity,
-								locstock.loccode,
-								locstock.reorderlevel,
-								stockmaster.decimalplaces
-						 FROM locstock INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1, stockmaster
-						 WHERE locstock.quantity > 0
-						 AND locstock.quantity > reorderlevel
-						 AND locstock.stockid = stockmaster.stockid
-						 AND locstock.stockid ='" . $myrow['stockid'] .
-						 "' AND locstock.loccode !='" . $myrow['loccode'] . "'";
+		$sql2 = "SELECT weberp_locstock.quantity,
+								weberp_locstock.loccode,
+								weberp_locstock.reorderlevel,
+								weberp_stockmaster.decimalplaces
+						 FROM weberp_locstock INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1, weberp_stockmaster
+						 WHERE weberp_locstock.quantity > 0
+						 AND weberp_locstock.quantity > reorderlevel
+						 AND weberp_locstock.stockid = weberp_stockmaster.stockid
+						 AND weberp_locstock.stockid ='" . $myrow['stockid'] .
+						 "' AND weberp_locstock.loccode !='" . $myrow['loccode'] . "'";
 		$OtherResult = DB_query($sql2,'','',false,true);
 		while ($myrow2 = DB_fetch_array($OtherResult,$db)){
 			$YPos -=$line_height;
@@ -141,14 +141,14 @@ if (isset($_POST['PrintPDF'])) {
 			// 4) Height 5) Text 6) Alignment 7) Border 8) Fill - True to use SetFillColor
 			// and False to set to transparent
 			$OnOrderSQL = "SELECT SUM(quantityord-quantityrecd) AS quantityonorder
-								FROM purchorders
-								LEFT JOIN purchorderdetails
-								ON purchorders.orderno=purchorderdetails.orderno
-								WHERE purchorders.status !='Cancelled'
-									AND purchorders.status !='Rejected'
-									AND purchorders.status !='Pending'
-							      	      AND purchorderdetails.itemcode='".$myrow['stockid']."'
-								      AND purchorders.intostocklocation='".$myrow2['loccode']."'";
+								FROM weberp_purchorders
+								LEFT JOIN weberp_purchorderdetails
+								ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+								WHERE weberp_purchorders.status !='Cancelled'
+									AND weberp_purchorders.status !='Rejected'
+									AND weberp_purchorders.status !='Pending'
+							      	      AND weberp_purchorderdetails.itemcode='".$myrow['stockid']."'
+								      AND weberp_purchorders.intostocklocation='".$myrow2['loccode']."'";
 			$OnOrderResult = DB_query($OnOrderSQL);
 			$OnOrderRow = DB_fetch_array($OnOrderResult);
 
@@ -197,9 +197,9 @@ if (isset($_POST['PrintPDF'])) {
 	echo '<br /><form action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post">';
     echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 			locationname
-		FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+		FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$resultStkLocs = DB_query($sql);
 	echo '<table class="selection">
 			<tr>
@@ -222,7 +222,7 @@ if (isset($_POST['PrintPDF'])) {
 	}
 	echo '</select></td></tr>';
 
-	$SQL="SELECT categoryid, categorydescription FROM stockcategory WHERE stocktype<>'A' ORDER BY categorydescription";
+	$SQL="SELECT categoryid, categorydescription FROM weberp_stockcategory WHERE stocktype<>'A' ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 	if (DB_num_rows($result1)==0){
 		echo '</td></tr>

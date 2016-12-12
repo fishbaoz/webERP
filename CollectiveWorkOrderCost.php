@@ -25,16 +25,16 @@ if (isset($_POST['Submit'])) {//users have selected the WO to calculate and subm
 			prnMsg(_('There are no work orders selected'),'error');
 		} else {
 			//lets do the workorder issued items retrieve
-			$sql = "SELECT stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
+			$sql = "SELECT weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
 				trandate,
 				qty,
 				reference,
-				stockmoves.standardcost
-				FROM stockmoves INNER JOIN stockmaster
-				ON stockmoves.stockid=stockmaster.stockid
-				WHERE stockmoves.type=28
+				weberp_stockmoves.standardcost
+				FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+				ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+				WHERE weberp_stockmoves.type=28
 				AND reference IN (" . $WOSelected . ")
 				ORDER BY reference";
 			$ErrMsg = _('Failed to retrieve wo cost data');
@@ -127,57 +127,57 @@ if (isset($_POST['SearchParts'])){
 		//insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units
-					FROM stockmaster,
-						locstock
-					WHERE stockmaster.stockid=locstock.stockid
-					AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat']. "'
-					AND stockmaster.mbflag='M'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster,
+						weberp_locstock
+					WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+					AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat']. "'
+					AND weberp_stockmaster.mbflag='M'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 
 	 } elseif (isset($_POST['StockCode'])){
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						sum(locstock.quantity) as qoh,
-						stockmaster.units
-					FROM stockmaster,
-						locstock
-					WHERE stockmaster.stockid=locstock.stockid
-					AND stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					AND stockmaster.mbflag='M'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						sum(weberp_locstock.quantity) as qoh,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster,
+						weberp_locstock
+					WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+					AND weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					AND weberp_stockmaster.mbflag='M'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 
 	 } elseif (!isset($_POST['StockCode']) AND !isset($_POST['Keywords'])) {
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						sum(locstock.quantity) as qoh,
-						stockmaster.units
-					FROM stockmaster,
-						locstock
-					WHERE stockmaster.stockid=locstock.stockid
-					AND stockmaster.categoryid='" . $_POST['StockCat'] ."'
-					AND stockmaster.mbflag='M'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						sum(weberp_locstock.quantity) as qoh,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster,
+						weberp_locstock
+					WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] ."'
+					AND weberp_stockmaster.mbflag='M'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 	 }
 
 	$ErrMsg =  _('No items were returned by the SQL because');
@@ -205,12 +205,12 @@ if (!isset($StockID)) {
 		}
 		echo _('Work Order number') . ': <input type="text" name="WO" autofocus="autofocus" maxlength="8" size="9" />&nbsp; ' . _('Processing at') . ':<select name="StockLocation"> ';
 
-		$sql = "SELECT locations.loccode, locationname FROM locations
-				INNER JOIN locationusers 
-					ON locationusers.loccode=locations.loccode 
-					AND locationusers.userid='" .  $_SESSION['UserID'] . "' 
-					AND locationusers.canview=1
-				WHERE locations.usedforwo = 1";
+		$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+				INNER JOIN weberp_locationusers 
+					ON weberp_locationusers.loccode=weberp_locations.loccode 
+					AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' 
+					AND weberp_locationusers.canview=1
+				WHERE weberp_locations.usedforwo = 1";
 
 		$resultStkLocs = DB_query($sql);
 
@@ -278,7 +278,7 @@ if (!isset($StockID)) {
 
 	$SQL="SELECT categoryid,
 			categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 
 	$result1 = DB_query($SQL);
@@ -352,75 +352,75 @@ if (!isset($StockID)) {
 
 		//figure out the SQL required from the inputs available
 		if (isset($_POST['ClosedOrOpen']) and $_POST['ClosedOrOpen']=='Open_Only'){
-			$ClosedOrOpen = ' AND workorders.closed=0';
+			$ClosedOrOpen = ' AND weberp_workorders.closed=0';
 		} elseif(isset($_POST['ClosedOrOpen']) AND $_POST['ClosedOrOpen'] == 'Closed_Only') {
-			$ClosedOrOpen = ' AND workorders.closed=1';
+			$ClosedOrOpen = ' AND weberp_workorders.closed=1';
 		} else {
 			$ClosedOrOpen = '';
 		}
 		//start date and end date
 		if (!empty($_POST['DateFrom'])) {
-			$StartDateFrom = " AND workorders.startdate>='" . FormatDateForSQL($_POST['DateFrom']) . "'";
+			$StartDateFrom = " AND weberp_workorders.startdate>='" . FormatDateForSQL($_POST['DateFrom']) . "'";
 		}
 		if (!empty($_POST['DateTo'])) {
-			$StartDateTo = " AND workorders.startdate<='" . FormatDateForSQL($_POST['DateTo']) . "'";
+			$StartDateTo = " AND weberp_workorders.startdate<='" . FormatDateForSQL($_POST['DateTo']) . "'";
 		}
 	
 		if (isset($SelectedWO) AND $SelectedWO !='') {
-				$SQL = "SELECT workorders.wo,
-								woitems.stockid,
-								stockmaster.description,
-								stockmaster.decimalplaces,
-								woitems.qtyreqd,
-								woitems.qtyrecd,
-								workorders.requiredby,
-								workorders.startdate
-						FROM workorders
-						INNER JOIN woitems ON workorders.wo=woitems.wo
-						INNER JOIN stockmaster ON woitems.stockid=stockmaster.stockid
-						INNER JOIN locationusers ON locationusers.loccode=workorders.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+				$SQL = "SELECT weberp_workorders.wo,
+								weberp_woitems.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmaster.decimalplaces,
+								weberp_woitems.qtyreqd,
+								weberp_woitems.qtyrecd,
+								weberp_workorders.requiredby,
+								weberp_workorders.startdate
+						FROM weberp_workorders
+						INNER JOIN weberp_woitems ON weberp_workorders.wo=weberp_woitems.wo
+						INNER JOIN weberp_stockmaster ON weberp_woitems.stockid=weberp_stockmaster.stockid
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workorders.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 						WHERE 1 " . $ClosedOrOpen . $StartDateFrom . $StartDateTo . "
-						AND workorders.wo='". $SelectedWO ."'
-						ORDER BY workorders.wo,
-								woitems.stockid";
+						AND weberp_workorders.wo='". $SelectedWO ."'
+						ORDER BY weberp_workorders.wo,
+								weberp_woitems.stockid";
 		} else {
 			  /* $DateAfterCriteria = FormatDateforSQL($OrdersAfterDate); */
 
 				if (isset($SelectedStockItem)) {
-					$SQL = "SELECT workorders.wo,
-									woitems.stockid,
-									stockmaster.description,
-									stockmaster.decimalplaces,
-									woitems.qtyreqd,
-									woitems.qtyrecd,
-									workorders.requiredby,
-									workorders.startdate
-							FROM workorders
-							INNER JOIN woitems ON workorders.wo=woitems.wo
-							INNER JOIN stockmaster ON woitems.stockid=stockmaster.stockid
-							INNER JOIN locationusers ON locationusers.loccode=workorders.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+					$SQL = "SELECT weberp_workorders.wo,
+									weberp_woitems.stockid,
+									weberp_stockmaster.description,
+									weberp_stockmaster.decimalplaces,
+									weberp_woitems.qtyreqd,
+									weberp_woitems.qtyrecd,
+									weberp_workorders.requiredby,
+									weberp_workorders.startdate
+							FROM weberp_workorders
+							INNER JOIN weberp_woitems ON weberp_workorders.wo=weberp_woitems.wo
+							INNER JOIN weberp_stockmaster ON weberp_woitems.stockid=weberp_stockmaster.stockid
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workorders.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 							WHERE 1 " . $ClosedOrOpen . $StartDateFrom . $StartDateTo . "
-							AND woitems.stockid='". $SelectedStockItem ."'
-							AND workorders.loccode='" . $_POST['StockLocation'] . "'
-							ORDER BY workorders.wo,
-								 woitems.stockid";
+							AND weberp_woitems.stockid='". $SelectedStockItem ."'
+							AND weberp_workorders.loccode='" . $_POST['StockLocation'] . "'
+							ORDER BY weberp_workorders.wo,
+								 weberp_woitems.stockid";
 				} else {
-					$SQL = "SELECT workorders.wo,
-									woitems.stockid,
-									stockmaster.description,
-									stockmaster.decimalplaces,
-									woitems.qtyreqd,
-									woitems.qtyrecd,
-									workorders.requiredby,
-									workorders.startdate
-							FROM workorders
-							INNER JOIN woitems ON workorders.wo=woitems.wo
-							INNER JOIN locationusers ON locationusers.loccode=workorders.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-							INNER JOIN stockmaster ON woitems.stockid=stockmaster.stockid
+					$SQL = "SELECT weberp_workorders.wo,
+									weberp_woitems.stockid,
+									weberp_stockmaster.description,
+									weberp_stockmaster.decimalplaces,
+									weberp_woitems.qtyreqd,
+									weberp_woitems.qtyrecd,
+									weberp_workorders.requiredby,
+									weberp_workorders.startdate
+							FROM weberp_workorders
+							INNER JOIN weberp_woitems ON weberp_workorders.wo=weberp_woitems.wo
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workorders.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							INNER JOIN weberp_stockmaster ON weberp_woitems.stockid=weberp_stockmaster.stockid
 							WHERE  1 " . $ClosedOrOpen . $StartDateFrom . $StartDateTo ."
-							AND workorders.loccode='" . $_POST['StockLocation'] . "'
-							ORDER BY workorders.wo,
-									 woitems.stockid";
+							AND weberp_workorders.loccode='" . $_POST['StockLocation'] . "'
+							ORDER BY weberp_workorders.wo,
+									 weberp_woitems.stockid";
 				}
 		} //end not order number selected
 

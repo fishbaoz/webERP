@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WorkCentres.php 7490 2016-04-11 02:00:42Z rchacon $*/
 /* Defines the various centres of work within a manufacturing company. Also the overhead and labour rates applicable to the work centre and its standard capacity */
 
 include('includes/session.inc');
@@ -43,7 +43,7 @@ if (isset($_POST['submit'])) {
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE workcentres SET location = '" . $_POST['Location'] . "',
+		$sql = "UPDATE weberp_workcentres SET location = '" . $_POST['Location'] . "',
 						description = '" . $_POST['Description'] . "',
 						overheadrecoveryact ='" . $_POST['OverheadRecoveryAct'] . "',
 						overheadperhour = '" . $_POST['OverheadPerHour'] . "'
@@ -53,7 +53,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected work centre is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new work centre form */
 
-		$sql = "INSERT INTO workcentres (code,
+		$sql = "INSERT INTO weberp_workcentres (code,
 										location,
 										description,
 										overheadrecoveryact,
@@ -84,19 +84,19 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'BOM'
 
-	$sql= "SELECT COUNT(*) FROM bom WHERE bom.workcentreadded='" . $SelectedWC . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_bom WHERE weberp_bom.workcentreadded='" . $SelectedWC . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this work centre because bills of material have been created requiring components to be added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' ._('BOM items referring to this work centre code'),'warn');
 	}  else {
-		$sql= "SELECT COUNT(*) FROM contractbom WHERE contractbom.workcentreadded='" . $SelectedWC . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_contractbom WHERE weberp_contractbom.workcentreadded='" . $SelectedWC . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
 			prnMsg(_('Cannot delete this work centre because contract bills of material have been created having components added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('Contract BOM items referring to this work centre code'),'warn');
 		} else {
-			$sql="DELETE FROM workcentres WHERE code='" . $SelectedWC . "'";
+			$sql="DELETE FROM weberp_workcentres WHERE code='" . $SelectedWC . "'";
 			$result = DB_query($sql);
 			prnMsg(_('The selected work centre record has been deleted'),'succes');
 		} // end of Contract BOM test
@@ -113,15 +113,15 @@ or deletion of the records*/
 			<img src="'.$RootPath.'/css/'.$Theme.'/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '
 		</p>';
 
-	$sql = "SELECT workcentres.code,
-				workcentres.description,
-				locations.locationname,
-				workcentres.overheadrecoveryact,
-				workcentres.overheadperhour
-			FROM workcentres,
-				locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE workcentres.location = locations.loccode";
+	$sql = "SELECT weberp_workcentres.code,
+				weberp_workcentres.description,
+				weberp_locations.locationname,
+				weberp_workcentres.overheadrecoveryact,
+				weberp_workcentres.overheadperhour
+			FROM weberp_workcentres,
+				weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_workcentres.location = weberp_locations.loccode";
 
 	$result = DB_query($sql);
 	echo '<table class="selection">
@@ -183,8 +183,8 @@ if (isset($SelectedWC)) {
 					description,
 					overheadrecoveryact,
 					overheadperhour
-			FROM workcentres
-			INNER JOIN locationusers ON locationusers.loccode=workcentres.location AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+			FROM weberp_workcentres
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workcentres.location AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 			WHERE code='" . $SelectedWC . "'";
 
 	$result = DB_query($sql);
@@ -216,9 +216,9 @@ if (isset($SelectedWC)) {
 }
 
 $SQL = "SELECT locationname,
-				locations.loccode
-		FROM locations
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+				weberp_locations.loccode
+		FROM weberp_locations
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 $result = DB_query($SQL);
 
 if (!isset($_POST['Description'])) {
@@ -254,9 +254,9 @@ echo '</select></td>
 //SQL to poulate account selection boxes
 $SQL = "SELECT accountcode,
 				accountname
-		FROM chartmaster INNER JOIN accountgroups
-			ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl!=0
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+			ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl!=0
 		ORDER BY accountcode";
 
 $result = DB_query($SQL);

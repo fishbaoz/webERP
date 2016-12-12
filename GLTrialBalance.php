@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GLTrialBalance.php 7663 2016-11-07 03:25:49Z rchacon $*/
 /* Shows the trial balance for the month and the for the period selected together with the budgeted trial balances. */
 
 /*Through deviousness AND cunning, this system allows trial balances for any date range that recalculates the P&L balances
@@ -57,7 +57,7 @@ if ((! isset($_POST['FromPeriod'])
 	$NextYear = date('Y-m-d',strtotime('+1 Year'));
 	$sql = "SELECT periodno,
 					lastdate_in_period
-				FROM periods
+				FROM weberp_periods
 				WHERE lastdate_in_period < '" . $NextYear . "'
 				ORDER BY periodno DESC";
 	$Periods = DB_query($sql);
@@ -128,7 +128,7 @@ if ((! isset($_POST['FromPeriod'])
 	$NumberOfMonths = $_POST['ToPeriod'] - $_POST['FromPeriod'] + 1;
 
 	$sql = "SELECT lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			WHERE periodno='" . $_POST['ToPeriod'] . "'";
 	$PrdResult = DB_query($sql);
 	$myrow = DB_fetch_row($PrdResult);
@@ -136,31 +136,31 @@ if ((! isset($_POST['FromPeriod'])
 
 	$RetainedEarningsAct = $_SESSION['CompanyRecord']['retainedearnings'];
 
-	$SQL = "SELECT accountgroups.groupname,
-			accountgroups.parentgroupname,
-			accountgroups.pandl,
-			chartdetails.accountcode ,
-			chartmaster.accountname,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['FromPeriod'] . "' THEN chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['FromPeriod'] . "' THEN chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS lastprdcfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.actual ELSE 0 END) AS monthactual,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.budget ELSE 0 END) AS monthbudget,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.bfwdbudget + chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
-		FROM chartmaster
-			INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname
-			INNER JOIN chartdetails ON chartmaster.accountcode= chartdetails.accountcode
-			INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" . $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-		GROUP BY accountgroups.groupname,
-				accountgroups.parentgroupname,
-				accountgroups.pandl,
-				accountgroups.sequenceintb,
-				chartdetails.accountcode,
-				chartmaster.accountname
-		ORDER BY accountgroups.pandl desc,
-			accountgroups.sequenceintb,
-			accountgroups.groupname,
-			chartdetails.accountcode";
+	$SQL = "SELECT weberp_accountgroups.groupname,
+			weberp_accountgroups.parentgroupname,
+			weberp_accountgroups.pandl,
+			weberp_chartdetails.accountcode ,
+			weberp_chartmaster.accountname,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['FromPeriod'] . "' THEN weberp_chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['FromPeriod'] . "' THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS lastprdcfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.actual ELSE 0 END) AS monthactual,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.budget ELSE 0 END) AS monthbudget,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.bfwdbudget + weberp_chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
+		FROM weberp_chartmaster
+			INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
+			INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode= weberp_chartdetails.accountcode
+			INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" . $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		GROUP BY weberp_accountgroups.groupname,
+				weberp_accountgroups.parentgroupname,
+				weberp_accountgroups.pandl,
+				weberp_accountgroups.sequenceintb,
+				weberp_chartdetails.accountcode,
+				weberp_chartmaster.accountname
+		ORDER BY weberp_accountgroups.pandl desc,
+			weberp_accountgroups.sequenceintb,
+			weberp_accountgroups.groupname,
+			weberp_chartdetails.accountcode";
 
 	$AccountsResult = DB_query($SQL);
 	if (DB_error_no() !=0) {
@@ -400,7 +400,7 @@ if ((! isset($_POST['FromPeriod'])
 	$NumberOfMonths = $_POST['ToPeriod'] - $_POST['FromPeriod'] + 1;
 
 	$sql = "SELECT lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			WHERE periodno='" . $_POST['ToPeriod'] . "'";
 	$PrdResult = DB_query($sql);
 	$myrow = DB_fetch_row($PrdResult);
@@ -408,31 +408,31 @@ if ((! isset($_POST['FromPeriod'])
 
 	$RetainedEarningsAct = $_SESSION['CompanyRecord']['retainedearnings'];
 
-	$SQL = "SELECT accountgroups.groupname,
-			accountgroups.parentgroupname,
-			accountgroups.pandl,
-			chartdetails.accountcode ,
-			chartmaster.accountname,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['FromPeriod'] . "' THEN chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['FromPeriod'] . "' THEN chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS lastprdcfwd,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.actual ELSE 0 END) AS monthactual,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.budget ELSE 0 END) AS monthbudget,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['ToPeriod'] . "' THEN chartdetails.bfwdbudget + chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
-		FROM chartmaster
-			INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname
-			INNER JOIN chartdetails ON chartmaster.accountcode= chartdetails.accountcode
-			INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" . $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-		GROUP BY accountgroups.groupname,
-				accountgroups.pandl,
-				accountgroups.sequenceintb,
-				accountgroups.parentgroupname,
-				chartdetails.accountcode,
-				chartmaster.accountname
-		ORDER BY accountgroups.pandl desc,
-			accountgroups.sequenceintb,
-			accountgroups.groupname,
-			chartdetails.accountcode";
+	$SQL = "SELECT weberp_accountgroups.groupname,
+			weberp_accountgroups.parentgroupname,
+			weberp_accountgroups.pandl,
+			weberp_chartdetails.accountcode ,
+			weberp_chartmaster.accountname,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['FromPeriod'] . "' THEN weberp_chartdetails.bfwd ELSE 0 END) AS firstprdbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['FromPeriod'] . "' THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS firstprdbudgetbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS lastprdcfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.actual ELSE 0 END) AS monthactual,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.budget ELSE 0 END) AS monthbudget,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['ToPeriod'] . "' THEN weberp_chartdetails.bfwdbudget + weberp_chartdetails.budget ELSE 0 END) AS lastprdbudgetcfwd
+		FROM weberp_chartmaster
+			INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
+			INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode= weberp_chartdetails.accountcode
+			INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" . $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		GROUP BY weberp_accountgroups.groupname,
+				weberp_accountgroups.pandl,
+				weberp_accountgroups.sequenceintb,
+				weberp_accountgroups.parentgroupname,
+				weberp_chartdetails.accountcode,
+				weberp_chartmaster.accountname
+		ORDER BY weberp_accountgroups.pandl desc,
+			weberp_accountgroups.sequenceintb,
+			weberp_accountgroups.groupname,
+			weberp_chartdetails.accountcode";
 
 
 	$AccountsResult = DB_query($SQL, _('No general ledger accounts were returned by the SQL because'), _('The SQL that failed was:'));

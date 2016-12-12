@@ -1,5 +1,5 @@
 <?php
-/*	$Id$*/
+/*	$Id: Z_ChangeStockCode.php 7494 2016-04-25 09:53:53Z daintree $*/
 /*	This script is an utility to change an inventory item code. */
 /*	It uses function ChangeFieldInTable($TableName, $FieldName, $OldValue, 
 	$NewValue, $db) from .../includes/MiscFunctions.php.*/
@@ -23,7 +23,7 @@ if (isset($_POST['ProcessStockChange'])){
 	$_POST['NewStockID'] = mb_strtoupper($_POST['NewStockID']);
 
 /*First check the stock code exists */
-	$result=DB_query("SELECT stockid FROM stockmaster WHERE stockid='" . $_POST['OldStockID'] . "'");
+	$result=DB_query("SELECT stockid FROM weberp_stockmaster WHERE stockid='" . $_POST['OldStockID'] . "'");
 	if (DB_num_rows($result)==0){
 		prnMsg(_('The stock code') . ': ' . $_POST['OldStockID'] . ' ' . _('does not currently exist as a stock code in the system'),'error');
 		$InputError =1;
@@ -41,7 +41,7 @@ if (isset($_POST['ProcessStockChange'])){
 
 
 /*Now check that the new code doesn't already exist */
-	$result=DB_query("SELECT stockid FROM stockmaster WHERE stockid='" . $_POST['NewStockID'] . "'");
+	$result=DB_query("SELECT stockid FROM weberp_stockmaster WHERE stockid='" . $_POST['NewStockID'] . "'");
 	if (DB_num_rows($result)!=0){
 		echo '<br /><br />';
 		prnMsg(_('The replacement stock code') . ': ' . $_POST['NewStockID'] . ' ' . _('already exists as a stock code in the system') . ' - ' . _('a unique stock code must be entered for the new code'),'error');
@@ -54,7 +54,7 @@ if (isset($_POST['ProcessStockChange'])){
 		DB_IgnoreForeignKeys();
 		$result = DB_Txn_Begin();
 		echo '<br />' . _('Adding the new stock master record');
-		$sql = "INSERT INTO stockmaster (stockid,
+		$sql = "INSERT INTO weberp_stockmaster (stockid,
 										categoryid,
 										description,
 										longdescription,
@@ -106,7 +106,7 @@ if (isset($_POST['ProcessStockChange'])){
 					netweight,
 					perishable,
 					nextserialno
-				FROM stockmaster
+				FROM weberp_stockmaster
 				WHERE stockid='" . $_POST['OldStockID'] . "'";
 
 		$DbgMsg = _('The SQL statement that failed was');
@@ -114,51 +114,51 @@ if (isset($_POST['ProcessStockChange'])){
 		$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 		echo ' ... ' . _('completed');
 
-		ChangeFieldInTable("locstock", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockmoves", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("loctransfers", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("mrpdemands", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_locstock", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockmoves", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_loctransfers", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_mrpdemands", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 
 		//check if MRP tables exist before assuming
-		$sql = "SELECT * FROM mrpparameters";
+		$sql = "SELECT * FROM weberp_mrpparameters";
 		$result = DB_query($sql, '', '', false, false);
 		if (DB_error_no() == 0) {
-			$result = DB_query("SELECT COUNT(*) FROM mrpplannedorders",'','',false,false);
+			$result = DB_query("SELECT COUNT(*) FROM weberp_mrpplannedorders",'','',false,false);
 			if (DB_error_no()==0) {
-				ChangeFieldInTable("mrpplannedorders", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+				ChangeFieldInTable("weberp_mrpplannedorders", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 			}
 	
-			$result = DB_query("SELECT * FROM mrprequirements" ,'','',false,false);
+			$result = DB_query("SELECT * FROM weberp_mrprequirements" ,'','',false,false);
 			if (DB_error_no()==0){
-				ChangeFieldInTable("mrprequirements", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+				ChangeFieldInTable("weberp_mrprequirements", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 			}
 			
-			$result = DB_query("SELECT * FROM mrpsupplies" ,'','',false,false);
+			$result = DB_query("SELECT * FROM weberp_mrpsupplies" ,'','',false,false);
 			if (DB_error_no()==0){
-				ChangeFieldInTable("mrpsupplies", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+				ChangeFieldInTable("weberp_mrpsupplies", "part", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 			}
 		}
-		ChangeFieldInTable("salesanalysis", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("orderdeliverydifferenceslog", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("prices", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("salesorderdetails", "stkcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("purchorderdetails", "itemcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("purchdata", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("shipmentcharges", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockcheckfreeze", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockcounts", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("grns", "itemcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("contractbom", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("bom", "component", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_salesanalysis", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_orderdeliverydifferenceslog", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_prices", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_salesorderdetails", "stkcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_purchorderdetails", "itemcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_purchdata", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_shipmentcharges", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockcheckfreeze", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockcounts", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_grns", "itemcode", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_contractbom", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_bom", "component", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 		
 		DB_IgnoreForeignKeys($db);
 
-		ChangeFieldInTable("bom", "parent", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockrequestitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockdescriptiontranslations", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);// Updates the translated item titles (StockTitles)
-		ChangeFieldInTable("custitem", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("pricematrix", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-/*		ChangeFieldInTable("Stockdescriptions", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);// Updates the translated item descriptions (StockDescriptions)*/
+		ChangeFieldInTable("weberp_bom", "parent", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockrequestitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockdescriptiontranslations", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);// Updates the translated item titles (StockTitles)
+		ChangeFieldInTable("weberp_custitem", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_pricematrix", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+/*		ChangeFieldInTable("weberp_Stockdescriptions", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);// Updates the translated item descriptions (StockDescriptions)*/
 
 		echo '<br />' . _('Changing any image files');
 		$SupportedImgExt = array('png','jpg','jpeg');
@@ -176,24 +176,24 @@ if (isset($_POST['ProcessStockChange'])){
 			}
 		}
 
-		ChangeFieldInTable("stockitemproperties", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("worequirements", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("worequirements", "parentstockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("woitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("salescatprod", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockserialitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("stockserialmoves", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("offers", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("tenderitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("prodspecs", "keyval", $_POST['OldStockID'], $_POST['NewStockID'], $db);
-		ChangeFieldInTable("qasamples", "prodspeckey", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockitemproperties", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_worequirements", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_worequirements", "parentstockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_woitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_salescatprod", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockserialitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_stockserialmoves", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_offers", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_tenderitems", "stockid", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_prodspecs", "keyval", $_POST['OldStockID'], $_POST['NewStockID'], $db);
+		ChangeFieldInTable("weberp_qasamples", "prodspeckey", $_POST['OldStockID'], $_POST['NewStockID'], $db);
 
 		DB_ReinstateForeignKeys();
 
 		$result = DB_Txn_Commit();
 
 		echo '<br />' . _('Deleting the old stock master record');
-		$sql = "DELETE FROM stockmaster WHERE stockid='" . $_POST['OldStockID'] . "'";
+		$sql = "DELETE FROM weberp_stockmaster WHERE stockid='" . $_POST['OldStockID'] . "'";
 		$ErrMsg = _('The SQL to delete the old stock master record failed');
 		$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 		echo ' ... ' . _('completed');

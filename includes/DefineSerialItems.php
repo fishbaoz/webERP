@@ -1,11 +1,11 @@
 <?php
-/* $Id$*/
+/* $Id: DefineSerialItems.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 function ValidBundleRef ($StockID, $LocCode, $BundleRef){
 	global $db;
 
 	$SQL = "SELECT quantity
-				FROM stockserialitems
+				FROM weberp_stockserialitems
 				WHERE stockid='" . $StockID . "'
 				AND loccode ='" . $LocCode . "'
 				AND serialno='" . $BundleRef . "'";
@@ -21,7 +21,7 @@ function GetExpiryDate ($StockID, $LocCode, $BundleRef){
 	global $db;
 
 	$SQL = "SELECT expirationdate 
-				FROM stockserialitems
+				FROM weberp_stockserialitems
 				WHERE stockid = '" . $StockID . "'
 				AND loccode = '" . $LocCode . "'
 				AND serialno = '" . $BundleRef . "'";

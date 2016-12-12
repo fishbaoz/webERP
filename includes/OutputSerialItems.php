@@ -21,7 +21,7 @@ $EditLink =  '<br /><div class="centre"><a href="' . htmlspecialchars($_SERVER['
 $RemoveLink = '<a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?DELETEALL=YES&StockID=' . $LineItem->StockID .
 	'&LineNo=' . $LineNo .'">' .  _('Remove All'). '</a><br /></div>';
 $sql="SELECT perishable
-		FROM stockmaster
+		FROM weberp_stockmaster
 		WHERE stockid='".$StockID."'";
 $result=DB_query($sql);
 $myrow=DB_fetch_array($result);
@@ -173,7 +173,7 @@ if (isset($_SESSION['Transfer']->StockLocationFrom)) {
 $sql="SELECT serialno,
 			quantity,
 			expirationdate
-		FROM stockserialitems
+		FROM weberp_stockserialitems
 		WHERE stockid='".$StockID."'
 		AND loccode='" . $Location . "'";
 $result=DB_query($sql);

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: BOMListing.php 7113 2015-02-01 18:10:18Z vvs2012 $*/
 
 include('includes/session.inc');
 
@@ -18,23 +18,23 @@ If (isset($_POST['PrintPDF'])
 	$line_height=12;
 
       /*Now figure out the bills to report for the part range under review */
-	$SQL = "SELECT bom.parent,
-				bom.component,
-				stockmaster.description as compdescription,
-				stockmaster.decimalplaces,
-				bom.quantity,
-				bom.loccode,
-				bom.workcentreadded,
-				bom.effectiveto AS eff_to,
-				bom.effectiveafter AS eff_frm
-			FROM stockmaster INNER JOIN bom
-			ON stockmaster.stockid=bom.component
-			INNER JOIN locationusers ON locationusers.loccode=bom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE bom.parent >= '" . $_POST['FromCriteria'] . "'
-			AND bom.parent <= '" . $_POST['ToCriteria'] . "'
-			AND bom.effectiveto > '" . date('Y-m-d') . "' AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-			ORDER BY bom.parent,
-					bom.component";
+	$SQL = "SELECT weberp_bom.parent,
+				weberp_bom.component,
+				weberp_stockmaster.description as compdescription,
+				weberp_stockmaster.decimalplaces,
+				weberp_bom.quantity,
+				weberp_bom.loccode,
+				weberp_bom.workcentreadded,
+				weberp_bom.effectiveto AS eff_to,
+				weberp_bom.effectiveafter AS eff_frm
+			FROM weberp_stockmaster INNER JOIN weberp_bom
+			ON weberp_stockmaster.stockid=weberp_bom.component
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_bom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_bom.parent >= '" . $_POST['FromCriteria'] . "'
+			AND weberp_bom.parent <= '" . $_POST['ToCriteria'] . "'
+			AND weberp_bom.effectiveto > '" . date('Y-m-d') . "' AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+			ORDER BY weberp_bom.parent,
+					weberp_bom.component";
 
 	$BOMResult = DB_query($SQL,'','',false,false); //dont do error trapping inside DB_query
 
@@ -72,7 +72,7 @@ If (isset($_POST['PrintPDF'])
 				$pdf->line($Page_Width-$Right_Margin, $YPos,$Left_Margin, $YPos);
 				$YPos -=$line_height;
 			}
-			$SQL = "SELECT description FROM stockmaster WHERE stockmaster.stockid = '" . $BOMList['parent'] . "'";
+			$SQL = "SELECT description FROM weberp_stockmaster WHERE weberp_stockmaster.stockid = '" . $BOMList['parent'] . "'";
 			$ParentResult = DB_query($SQL);
 			$ParentRow = DB_fetch_row($ParentResult);
 			$LeftOvers = $pdf->addTextWrap($Left_Margin,$YPos,400-$Left_Margin,$FontSize,$BOMList['parent'] . ' - ' . $ParentRow[0],'left');
@@ -119,11 +119,11 @@ If (isset($_POST['PrintPDF'])
 			  <table class="selection">';
 
 		echo '<tr><td>' . _('From Inventory Part Code') . ':' . '</td>
-				<td><input tabindex="1" type="text" autofocus="autofocus" required="required" data-type="no-illegal-chars" title="' . _('Enter the lowest alpha code of parent bom items to list the bill of material for') .  '" name="FromCriteria" size="20" maxlength="20" value="1" /></td>
+				<td><input tabindex="1" type="text" autofocus="autofocus" required="required" data-type="no-illegal-chars" title="' . _('Enter the lowest alpha code of parent weberp_bom items to list the bill of material for') .  '" name="FromCriteria" size="20" maxlength="20" value="1" /></td>
 			</tr>';
 
 		echo '<tr><td>' . _('To Inventory Part Code') . ':' . '</td>
-				<td><input tabindex="2" type="text" required="required" data-type="no-illegal-chars" title="' . _('Enter the end alpha numeric code of any parent bom items to list the bill of material for') .  '" name="ToCriteria" size="20" maxlength="20" value="zzzzzzz" /></td>
+				<td><input tabindex="2" type="text" required="required" data-type="no-illegal-chars" title="' . _('Enter the end alpha numeric code of any parent weberp_bom items to list the bill of material for') .  '" name="ToCriteria" size="20" maxlength="20" value="zzzzzzz" /></td>
 			</tr>';
 
 

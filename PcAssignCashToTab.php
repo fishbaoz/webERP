@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PcAssignCashToTab.php 7482 2016-04-01 08:36:03Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Assignment of Cash to Petty Cash Tab');
@@ -68,13 +68,13 @@ if (isset($_POST['submit'])) {
 		prnMsg('<br />' . _('The Amount must be input'),'error');
 	}
 
-	$sqlLimit = "SELECT pctabs.tablimit,
-					pctabs.currency,
-					currencies.decimalplaces
-				FROM pctabs,
-					currencies
-				WHERE pctabs.currency = currencies.currabrev
-					AND pctabs.tabcode='" . $SelectedTabs . "'";
+	$sqlLimit = "SELECT weberp_pctabs.tablimit,
+					weberp_pctabs.currency,
+					weberp_currencies.decimalplaces
+				FROM weberp_pctabs,
+					weberp_currencies
+				WHERE weberp_pctabs.currency = weberp_currencies.currabrev
+					AND weberp_pctabs.tabcode='" . $SelectedTabs . "'";
 
 	$ResultLimit = DB_query($sqlLimit);
 	$Limit=DB_fetch_array($ResultLimit);
@@ -92,7 +92,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1 AND isset($SelectedIndex) ) {
 
-		$sql = "UPDATE pcashdetails
+		$sql = "UPDATE weberp_pcashdetails
 				SET date = '".FormatDateForSQL($_POST['Date'])."',
 					amount = '" . filter_number_format($_POST['Amount']) . "',
 					authorized = '0000-00-00',
@@ -103,7 +103,7 @@ if (isset($_POST['submit'])) {
 
 	} elseif ($InputError !=1 ) {
 		// Add new record on submit
-		$sql = "INSERT INTO pcashdetails
+		$sql = "INSERT INTO weberp_pcashdetails
 					(counterindex,
 					tabcode,
 					date,
@@ -142,7 +142,7 @@ if (isset($_POST['submit'])) {
 
 	echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/money_add.png" title="' .
 		_('Search') . '" alt="" />' . ' ' . $Title. '</p>';
-	$sql="DELETE FROM pcashdetails
+	$sql="DELETE FROM weberp_pcashdetails
 		WHERE counterindex='" . $SelectedIndex . "'";
 	$ErrMsg = _('The assignment of cash record could not be deleted because');
 	$result = DB_query($sql,$ErrMsg);
@@ -164,7 +164,7 @@ if (!isset($SelectedTabs)){
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 	$SQL = "SELECT tabcode, assigner
-			FROM pctabs
+			FROM weberp_pctabs
 			WHERE assigner LIKE '%" . $_SESSION['UserID'] . "%'
 			ORDER BY tabcode";
 
@@ -225,14 +225,14 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 
 		/* Retrieve decimal places to display */
 		$SqlDecimalPlaces="SELECT decimalplaces
-					FROM currencies,pctabs
-					WHERE currencies.currabrev = pctabs.currency
+					FROM weberp_currencies,weberp_pctabs
+					WHERE weberp_currencies.currabrev = weberp_pctabs.currency
 						AND tabcode='" . $SelectedTabs . "'";
 		$result = DB_query($SqlDecimalPlaces);
 		$myrow=DB_fetch_array($result);
 		$CurrDecimalPlaces = $myrow['decimalplaces'];
 
-		$sql = "SELECT * FROM pcashdetails
+		$sql = "SELECT * FROM weberp_pcashdetails
 				WHERE tabcode='" . $SelectedTabs . "'
 				AND date >=DATE_SUB(CURDATE(), INTERVAL " . $Days . " DAY)
 				ORDER BY date, counterindex ASC";
@@ -269,7 +269,7 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 		}
 
 		$sqldes="SELECT description
-					FROM pcexpenses
+					FROM weberp_pcexpenses
 					WHERE codeexpense='". $myrow['3'] . "'";
 
 		$ResultDes = DB_query($sqldes);
@@ -307,7 +307,7 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 		//END WHILE LIST LOOP
 
 		$sqlamount="SELECT sum(amount)
-					FROM pcashdetails
+					FROM weberp_pcashdetails
 					WHERE tabcode='".$SelectedTabs."'";
 
 		$ResultAmount = DB_query($sqlamount);
@@ -337,7 +337,7 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 				<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 		if ( isset($_GET['edit'])) {
 
-		$sql = "SELECT * FROM pcashdetails
+		$sql = "SELECT * FROM weberp_pcashdetails
 				WHERE counterindex='".$SelectedIndex."'";
 
 			$result = DB_query($sql);

@@ -26,20 +26,20 @@ if (!isset($_GET['SelectedContract'])){
 }
 
 /*Now read in actual usage of stock */
-$sql = "SELECT stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.units,
-				stockmaster.decimalplaces,
-				SUM(stockmoves.qty) AS quantity,
-				SUM(stockmoves.qty*stockmoves.standardcost) AS totalcost
-		FROM stockmoves INNER JOIN stockmaster
-		ON stockmoves.stockid=stockmaster.stockid
-		WHERE stockmoves.type=28
-		AND stockmoves.reference='" . $_SESSION['Contract'.$identifier]->WO . "'
-		GROUP BY stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.units,
-				stockmaster.decimalplaces";
+$sql = "SELECT weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.units,
+				weberp_stockmaster.decimalplaces,
+				SUM(weberp_stockmoves.qty) AS quantity,
+				SUM(weberp_stockmoves.qty*weberp_stockmoves.standardcost) AS totalcost
+		FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+		ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+		WHERE weberp_stockmoves.type=28
+		AND weberp_stockmoves.reference='" . $_SESSION['Contract'.$identifier]->WO . "'
+		GROUP BY weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.units,
+				weberp_stockmaster.decimalplaces";
 $ErrMsg = _('Could not get the inventory issues for this contract because');
 $InventoryIssuesResult = DB_query($sql,$ErrMsg);
 $InventoryIssues = array();
@@ -181,17 +181,17 @@ echo '<td colspan="6">
 			 </tr>';
 
 /*Now read in the actual other items charged to the contract */
-$sql = "SELECT supptrans.supplierno,
-				supptrans.suppreference,
-				supptrans.trandate,
-				contractcharges.amount,
-				contractcharges.narrative,
-				contractcharges.anticipated
-		FROM supptrans INNER JOIN contractcharges
-		ON supptrans.type=contractcharges.transtype
-		AND supptrans.transno=contractcharges.transno
-		WHERE contractcharges.contractref='" . $ContractRef . "'
-		ORDER BY contractcharges.anticipated";
+$sql = "SELECT weberp_supptrans.supplierno,
+				weberp_supptrans.suppreference,
+				weberp_supptrans.trandate,
+				weberp_contractcharges.amount,
+				weberp_contractcharges.narrative,
+				weberp_contractcharges.anticipated
+		FROM weberp_supptrans INNER JOIN weberp_contractcharges
+		ON weberp_supptrans.type=weberp_contractcharges.transtype
+		AND weberp_supptrans.transno=weberp_contractcharges.transno
+		WHERE weberp_contractcharges.contractref='" . $ContractRef . "'
+		ORDER BY weberp_contractcharges.anticipated";
 $ErrMsg = _('Could not get the other charges to the contract because');
 $OtherChargesResult = DB_query($sql,$ErrMsg);
 $OtherReqtsActual =0;
@@ -240,7 +240,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 
 	DB_Txn_Begin();
 
-	$SQL = "INSERT INTO gltrans (type,
+	$SQL = "INSERT INTO weberp_gltrans (type,
 								typeno,
 								trandate,
 								periodno,
@@ -258,7 +258,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The gl entry of WIP for the variance on closing the contract could not be inserted because');
 	$DbgMsg = _('The following SQL to insert the GLTrans record was used');
 	$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
-	$SQL = "INSERT INTO gltrans (type,
+	$SQL = "INSERT INTO weberp_gltrans (type,
 								typeno,
 								trandate,
 								periodno,
@@ -278,7 +278,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 	$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 //Now update the status of the contract to closed
-	$SQL = "UPDATE contracts
+	$SQL = "UPDATE weberp_contracts
 				SET status=3
 				WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The status of the contract could not be updated to closed because');
@@ -287,12 +287,12 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 
 /*Check if the contract work order is still open */
 	$CheckIfWOOpenResult = DB_query("SELECT closed
-									FROM workorders
+									FROM weberp_workorders
 									WHERE wo='" . $_SESSION['Contract'.$identifier]->WO . "'");
 	$CheckWORow=DB_fetch_row($CheckIfWOOpenResult);
 	if ($CheckWORow[0]==0){
 		//then close the work order
-		$CloseWOResult =DB_query("UPDATE workorders
+		$CloseWOResult =DB_query("UPDATE weberp_workorders
 									SET closed=1
 									WHERE wo='" . $_SESSION['Contract'.$identifier]->WO . "'",
 									_('Could not update the work order to closed because:'),
@@ -305,7 +305,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 	 *  If work done on the contract is a write off then the user must also write off the stock of the contract item as a separate job
 	 */
 
-		$result =DB_query("SELECT qtyrecd FROM woitems
+		$result =DB_query("SELECT qtyrecd FROM weberp_woitems
 							WHERE stockid='" . $_SESSION['Contract'.$identifier]->ContractRef . "'
 							AND wo='" . $_SESSION['Contract'.$identifier]->WO . "'");
 		if (DB_num_rows($result)==1) {
@@ -315,9 +315,9 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 				$WOReceiptNo = GetNextTransNo(26, $db);
 
 				/* Need to get the current location quantity will need it later for the stock movement */
-				$SQL = "SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $_SESSION['Contract'.$identifier]->ContractRef . "'
+				$SQL = "SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $_SESSION['Contract'.$identifier]->ContractRef . "'
 						AND loccode= '" . $_SESSION['Contract'.$identifier]->LocCode . "'";
 
 				$Result = DB_query($SQL);
@@ -329,9 +329,9 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "UPDATE locstock
-						SET quantity = locstock.quantity + 1
-						WHERE locstock.stockid = '" . $_SESSION['Contract'.$identifier]->ContractRef . "'
+				$SQL = "UPDATE weberp_locstock
+						SET quantity = weberp_locstock.quantity + 1
+						WHERE weberp_locstock.stockid = '" . $_SESSION['Contract'.$identifier]->ContractRef . "'
 						AND loccode= '" . $_SESSION['Contract'.$identifier]->LocCode . "'";
 
 				$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
@@ -340,7 +340,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 
 					/*Insert stock movements - with unit cost */
 
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -370,7 +370,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 				$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
 				/*Get the ID of the StockMove... */
-				$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+				$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 				/* If GLLink_Stock then insert GLTrans to debit the GL Code  and credit GRN Suspense account at standard cost*/
 				if ($_SESSION['CompanyRecord']['gllink_stock']==1 AND ($OtherReqtsBudget+$ContractBOMBudget)!=0){
@@ -379,7 +379,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 				  the appropriate account was already retrieved into the $StockGLCode variable as the Processing code is kicked off
 				  it is retrieved from the stock category record of the item by a function in SQL_CommonFunctions.inc*/
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -399,7 +399,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 					$Result = DB_query($SQL,$ErrMsg, $DbgMsg, true);
 
 					/*now the credit WIP entry*/
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -423,7 +423,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 				//update the wo with the new qtyrecd
 				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' ._('Could not update the work order item record with the total quantity received because');
 				$DbgMsg = _('The following SQL was used to update the work order');
-				$UpdateWOResult =DB_query("UPDATE woitems
+				$UpdateWOResult =DB_query("UPDATE weberp_woitems
 										SET qtyrecd=qtyrecd+1
 										WHERE wo='" . $_SESSION['Contract'.$identifier]->WO . "'
 										AND stockid='" . $_SESSION['Contract'.$identifier]->ContractRef . "'",
@@ -431,7 +431,7 @@ if (isset($_POST['CloseContract']) AND $_SESSION['Contract'.$identifier]->Status
 										$DbgMsg,
 										true);
 			}//end if the contract wo was not received - work order item received/processed above if not
-		}//end if there was a row returned from the woitems query
+		}//end if there was a row returned from the weberp_woitems query
 	} //end if the work order was still open (so end of closing it and processing receipt if necessary)
 
 	DB_Txn_Commit();

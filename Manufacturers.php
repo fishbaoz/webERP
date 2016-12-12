@@ -91,7 +91,7 @@ if (isset($_POST['submit'])) {
 			}
 		}
 
-		$sql = "UPDATE manufacturers SET manufacturers_name='" . $_POST['ManufacturersName'] . "',
+		$sql = "UPDATE weberp_manufacturers SET manufacturers_name='" . $_POST['ManufacturersName'] . "',
 									manufacturers_url='" . $_POST['ManufacturersURL'] . "'";
 		if (isset($_POST['ManufacturersImage'])){
 			$sql .= ", manufacturers_image='" . $_POST['ManufacturersImage'] . "'";
@@ -113,7 +113,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedManufacturer is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new Location form */
 
-		$sql = "INSERT INTO manufacturers (manufacturers_name,
+		$sql = "INSERT INTO weberp_manufacturers (manufacturers_name,
 										manufacturers_url)
 						VALUES ('" . $_POST['ManufacturersName'] . "',
 								'" . $_POST['ManufacturersURL'] . "')";
@@ -155,7 +155,7 @@ if (isset($_POST['submit'])) {
 			if ($UploadTheFile=='Yes'){
 				$result  =  move_uploaded_file($_FILES['BrandPicture']['tmp_name'], $FileName);
 				$message = ($result)?_('File url')  . '<a href="' . $FileName .'">' .  $FileName . '</a>' : _('Something is wrong with uploading a file');
-				DB_query("UPDATE manufacturers 
+				DB_query("UPDATE weberp_manufacturers 
 					SET  manufacturers_image='" . 'BRAND-' . $_SESSION['LastInsertId'] . "'
 					WHERE manufacturers_id = '" . $_SESSION['LastInsertId'] . "'
 					");
@@ -176,7 +176,7 @@ if (isset($_POST['submit'])) {
 	$CancelDelete = false;
 
 // PREVENT DELETES IF DEPENDENT RECORDS
-	$sql= "SELECT COUNT(*) FROM salescatprod WHERE manufacturers_id='". $SelectedManufacturer . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_salescatprod WHERE manufacturers_id='". $SelectedManufacturer . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -187,7 +187,7 @@ if (isset($_POST['submit'])) {
 	
 	if (!$CancelDelete) {
 		
-		$result = DB_query("DELETE FROM manufacturers WHERE manufacturers_id='" . $SelectedManufacturer . "'");
+		$result = DB_query("DELETE FROM weberp_manufacturers WHERE manufacturers_id='" . $SelectedManufacturer . "'");
 		foreach ($SupportedImgExt as $ext) {
 			$file = $_SESSION['part_pics_dir'] . '/BRAND-' . $SelectedManufacturer . '.' . $ext;
 			if (file_exists ($file) ) {
@@ -212,7 +212,7 @@ or deletion of the records*/
 				manufacturers_name,
 				manufacturers_url,
 				manufacturers_image
-			FROM manufacturers";
+			FROM weberp_manufacturers";
 	$result = DB_query($sql);
 
 	if (DB_num_rows($result)==0){
@@ -298,7 +298,7 @@ if (!isset($_GET['delete'])) {
 					manufacturers_name,
 					manufacturers_url,
 					manufacturers_image
-				FROM manufacturers
+				FROM weberp_manufacturers
 				WHERE manufacturers_id='" . $SelectedManufacturer . "'";
 
 		$result = DB_query($sql);

@@ -4,7 +4,7 @@
  *
  * Script to duplicate BoMs.
  */
-/* $Id$*/
+/* $Id: CopyBOM.php 7691 2016-12-02 07:56:18Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -34,7 +34,7 @@ if(isset($_POST['Submit'])) {
 
 		if($NewOrExisting == 'N') {
 	      /* duplicate rows into stockmaster */
-			$sql = "INSERT INTO stockmaster( stockid,
+			$sql = "INSERT INTO weberp_stockmaster( stockid,
 									categoryid,
 									description,
 									longdescription,
@@ -90,7 +90,7 @@ if(isset($_POST['Submit'])) {
 									pansize,
 									shrinkfactor,
 									netweight
-							FROM stockmaster
+							FROM weberp_stockmaster
 							WHERE stockid='".$StockID."';";
 			$result = DB_query($sql);
 		} else {
@@ -101,13 +101,13 @@ if(isset($_POST['Submit'])) {
 							labourcost,
 							overheadcost,
 							lowestlevel
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='".$StockID."';";
 			$result = DB_query($sql);
 
 			$myrow = DB_fetch_row($result);
 
-			$sql = "UPDATE stockmaster set
+			$sql = "UPDATE weberp_stockmaster set
 					lastcostupdate  = '" . $myrow[0] . "',
 					actualcost      = " . $myrow[1] . ",
 					lastcost        = " . $myrow[2] . ",
@@ -119,7 +119,7 @@ if(isset($_POST['Submit'])) {
 			$result = DB_query($sql);
 		}
 
-		$sql = "INSERT INTO bom
+		$sql = "INSERT INTO weberp_bom
 					SELECT '".$NewStockID."' AS parent,
 					        sequence,
 							component,
@@ -132,12 +132,12 @@ if(isset($_POST['Submit'])) {
 							remark,
 							digitals,
 							digitals
-					FROM bom
+					FROM weberp_bom
 					WHERE parent='".$StockID."';";
 		$result = DB_query($sql);
 
 		if($NewOrExisting == 'N') {
-			$sql = "INSERT INTO locstock (loccode,
+			$sql = "INSERT INTO weberp_locstock (loccode,
 								            stockid,
 								            quantity,
 								            reorderlevel,
@@ -147,7 +147,7 @@ if(isset($_POST['Submit'])) {
 							0 AS quantity,
 							reorderlevel,
 							bin
-						FROM locstock
+						FROM weberp_locstock
 						WHERE stockid='".$StockID."'";
 
 			$result = DB_query($sql);
@@ -170,8 +170,8 @@ if(isset($_POST['Submit'])) {
 
 	$sql = "SELECT stockid,
 					description
-				FROM stockmaster
-				WHERE stockid IN (SELECT DISTINCT parent FROM bom)
+				FROM weberp_stockmaster
+				WHERE stockid IN (SELECT DISTINCT parent FROM weberp_bom)
 				AND  mbflag IN ('M', 'A', 'K', 'G');";
 	$result = DB_query($sql);
 
@@ -190,8 +190,8 @@ if(isset($_POST['Submit'])) {
 
 	$sql = "SELECT stockid,
 					description
-				FROM stockmaster
-				WHERE stockid NOT IN (SELECT DISTINCT parent FROM bom)
+				FROM weberp_stockmaster
+				WHERE stockid NOT IN (SELECT DISTINCT parent FROM weberp_bom)
 				AND mbflag IN ('M', 'A', 'K', 'G');";
 	$result = DB_query($sql);
 

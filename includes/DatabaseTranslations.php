@@ -12,13 +12,13 @@ and used to display.
 // scripts.description:
 // RChacon: It could be taken from each php script?
 
-// securityroles.secrolename:
+// weberp_securityroles.secrolename:
 // RChacon: It can be directly modified by the user.
 
-// securitytokens.tokenname:
+// weberp_securitytokens.tokenname:
 // RChacon: It can be directly modified by the user.
 
-// systypes.typename:
+// weberp_systypes.typename:
 $systypes_typename[0] = _('Journal - GL');
 $systypes_typename[1] = _('Payment - GL');
 $systypes_typename[2] = _('Receipt - GL');
@@ -55,7 +55,7 @@ $systypes_typename[49] = _('Import Fixed Assets');
 $systypes_typename[50] = _('Opening Balance');
 $systypes_typename[500] = _('Auto Debtor Number');
 
-// taxcategories.taxcatname:
+// weberp_taxcategories.taxcatname:
 $taxcategories_taxcatname[4] = _('Exempt');
 $taxcategories_taxcatname[5] = _('Freight');
 $taxcategories_taxcatname[6] = _('Handling');

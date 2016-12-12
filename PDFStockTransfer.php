@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFStockTransfer.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* This script is superseded by the PDFStockLocTransfer.php which produces a multiple item stock transfer listing - this was for the old individual stock transfers where there is just single items being transferred */
 
@@ -68,20 +68,20 @@ include('includes/PDFStockTransferHeader.inc');
 
 /*Print out the category totals */
 
-$sql="SELECT stockmoves.stockid,
+$sql="SELECT weberp_stockmoves.stockid,
 			description,
 			transno,
-			stockmoves.loccode,
+			weberp_stockmoves.loccode,
 			locationname,
 			trandate,
 			qty,
 			reference
-		FROM stockmoves
-		INNER JOIN stockmaster
-		ON stockmoves.stockid=stockmaster.stockid
-		INNER JOIN locations
-		ON stockmoves.loccode=locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+		FROM weberp_stockmoves
+		INNER JOIN weberp_stockmaster
+		ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+		INNER JOIN weberp_locations
+		ON weberp_stockmoves.loccode=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 		WHERE transno='".$_GET['TransferNo']."'
 		AND qty < 0
 		AND type=16";
@@ -116,20 +116,20 @@ while ($myrow=DB_fetch_array($result)) {
 	   include('includes/PDFStockTransferHeader.inc');
 	}
 
-	$SQL = "SELECT stockmaster.controlled
-			FROM stockmaster WHERE stockid ='" . $StockID . "'";
+	$SQL = "SELECT weberp_stockmaster.controlled
+			FROM weberp_stockmaster WHERE stockid ='" . $StockID . "'";
 	$CheckControlledResult = DB_query($SQL,'<br />' . _('Could not determine if the item was controlled or not because') . ' ');
 	$ControlledRow = DB_fetch_row($CheckControlledResult);
 	
 	if ($ControlledRow[0]==1) { /*Then its a controlled item */
-		$SQL = "SELECT stockserialmoves.serialno,
-				stockserialmoves.moveqty
-				FROM stockmoves INNER JOIN stockserialmoves
-				ON stockmoves.stkmoveno= stockserialmoves.stockmoveno
-				WHERE stockmoves.stockid='" . $StockID . "'
-				AND stockmoves.type =16
+		$SQL = "SELECT weberp_stockserialmoves.serialno,
+				weberp_stockserialmoves.moveqty
+				FROM weberp_stockmoves INNER JOIN weberp_stockserialmoves
+				ON weberp_stockmoves.stkmoveno= weberp_stockserialmoves.stockmoveno
+				WHERE weberp_stockmoves.stockid='" . $StockID . "'
+				AND weberp_stockmoves.type =16
 				AND qty > 0
-				AND stockmoves.transno='" .$_GET['TransferNo']. "'";
+				AND weberp_stockmoves.transno='" .$_GET['TransferNo']. "'";
 		$GetStockMoveResult = DB_query($SQL,_('Could not retrieve the stock movement reference number which is required in order to retrieve details of the serial items that came in with this GRN'));
 		while ($SerialStockMoves = DB_fetch_array($GetStockMoveResult)){
 			$LeftOvers = $pdf->addTextWrap($Left_Margin+40,$YPos-10,300-$Left_Margin,$FontSize, _('Lot/Serial:'));

@@ -22,9 +22,9 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 				$sql = "SELECT description,
 							units,
 							stockact
-						FROM stockmaster INNER JOIN stockcategory
-						ON stockcategory.categoryid = stockmaster.categoryid
-						WHERE  stockmaster.stockid = '". $StockID . "'";
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+						ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+						WHERE  weberp_stockmaster.stockid = '". $StockID . "'";
 
 				$ErrMsg = _('The item details for') . ' ' . $StockID . ' ' . _('could not be retrieved because');
 				$DbgMsg = _('The SQL used to retrieve the item details but failed was');
@@ -38,17 +38,17 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 								suppliersuom,
 								suppliers_partno,
 								leadtime,
-								MAX(purchdata.effectivefrom) AS latesteffectivefrom
-							FROM purchdata
-							WHERE purchdata.supplierno = '" . $_POST['Supplier'] . "'
-							AND purchdata.effectivefrom <='" . Date('Y-m-d') . "'
-							AND purchdata.stockid = '". $StockID . "'
-							GROUP BY purchdata.price,
-									purchdata.conversionfactor,
-									purchdata.supplierdescription,
-									purchdata.suppliersuom,
-									purchdata.suppliers_partno,
-									purchdata.leadtime
+								MAX(weberp_purchdata.effectivefrom) AS latesteffectivefrom
+							FROM weberp_purchdata
+							WHERE weberp_purchdata.supplierno = '" . $_POST['Supplier'] . "'
+							AND weberp_purchdata.effectivefrom <='" . Date('Y-m-d') . "'
+							AND weberp_purchdata.stockid = '". $StockID . "'
+							GROUP BY weberp_purchdata.price,
+									weberp_purchdata.conversionfactor,
+									weberp_purchdata.supplierdescription,
+									weberp_purchdata.suppliersuom,
+									weberp_purchdata.suppliers_partno,
+									weberp_purchdata.leadtime
 							ORDER BY latesteffectivefrom DESC";
 
 					$ErrMsg = _('The purchasing data for') . ' ' . $StockID . ' ' . _('could not be retrieved because');
@@ -60,7 +60,7 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 						/* Now to get the applicable discounts */
 						$sql = "SELECT discountpercent,
 										discountamount
-								FROM supplierdiscounts
+								FROM weberp_supplierdiscounts
 								WHERE supplierno= '" . $_POST['Supplier'] . "'
 								AND effectivefrom <='" . Date('Y-m-d') . "'
 								AND (effectiveto >='" . Date('Y-m-d') . "'
@@ -114,20 +114,20 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 
 	if ($InputError==0) { //only if all continues smoothly
 	
-		$sql = "SELECT suppliers.suppname,
-						suppliers.currcode,
-						currencies.decimalplaces,
-						currencies.rate,
-						suppliers.paymentterms,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3,
-						suppliers.address4,
-						suppliers.address5,
-						suppliers.address6,
-						suppliers.telephone
-				FROM suppliers INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
+		$sql = "SELECT weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_currencies.decimalplaces,
+						weberp_currencies.rate,
+						weberp_suppliers.paymentterms,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3,
+						weberp_suppliers.address4,
+						weberp_suppliers.address5,
+						weberp_suppliers.address6,
+						weberp_suppliers.telephone
+				FROM weberp_suppliers INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
 				WHERE supplierid='" . $_POST['Supplier'] . "'";
 		$SupplierResult = DB_query($sql);
 		$SupplierRow = DB_fetch_array($SupplierResult);
@@ -140,7 +140,7 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 							deladd6,
 							tel,
 							contact
-						FROM locations
+						FROM weberp_locations
 						WHERE loccode='" . $_SESSION['UserStockLocation'] . "'";
 		$LocnAddrResult = DB_query($sql);
 		if (DB_num_rows($LocnAddrResult) == 1) {
@@ -157,7 +157,7 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 		if ($_SESSION['AutoAuthorisePO']==1) {
 			//if the user has authority to authorise the PO then it will automatically be authorised
 			$AuthSQL ="SELECT authlevel
-						FROM purchorderauth
+						FROM weberp_purchorderauth
 						WHERE userid='" . $_SESSION['UserID'] . "'
 						AND currabrev='" . $SupplierRow['currcode'] ."'";
 	
@@ -194,7 +194,7 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 		$OrderNo = GetNextTransNo(18, $db);
 	
 		/*Insert to purchase order header record */
-		$sql = "INSERT INTO purchorders ( orderno,
+		$sql = "INSERT INTO weberp_purchorders ( orderno,
 										supplierno,
 										orddate,
 										rate,
@@ -260,7 +260,7 @@ if (isset($_POST['CreatePO']) AND isset($_POST['Supplier'])){
 	
 			//print_r($POLine);
 			
-			$sql = "INSERT INTO purchorderdetails (orderno,
+			$sql = "INSERT INTO weberp_purchorderdetails (orderno,
 										itemcode,
 										deliverydate,
 										itemdescription,
@@ -311,7 +311,7 @@ echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/i
 		<td>' . _('For Supplier') . ':</td>
 		<td><select name="Supplier">';
 		
-$sql = "SELECT supplierid, suppname FROM suppliers WHERE supptype<>7 ORDER BY suppname";
+$sql = "SELECT supplierid, suppname FROM weberp_suppliers WHERE supptype<>7 ORDER BY suppname";
 $SuppResult=DB_query($sql);
 
 echo '<option value="">' . _('Not Yet Selected') . '</option>';
@@ -364,33 +364,33 @@ echo '</table>
 
 if (isset($_POST['Supplier']) AND isset($_POST['ShowItems']) AND $_POST['Supplier']!=''){ 
 
-		$SQL = "SELECT stockmaster.description,
-						stockmaster.eoq,
-						stockmaster.decimalplaces,
-						locstock.stockid,
-						purchdata.supplierno,
-						suppliers.suppname,
-						purchdata.leadtime/30 AS monthsleadtime,
-						locstock.bin,
-						SUM(locstock.quantity) AS qoh
-					FROM locstock,
-						stockmaster,
-						purchdata,
-						suppliers
-					WHERE locstock.stockid=stockmaster.stockid
-					AND purchdata.supplierno=suppliers.supplierid
-					AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M')
-					AND purchdata.stockid=stockmaster.stockid
-					AND purchdata.preferred=1
-					AND purchdata.supplierno='" . $_POST['Supplier'] . "'
-					AND locstock.loccode='" . $_SESSION['UserStockLocation'] . "'
+		$SQL = "SELECT weberp_stockmaster.description,
+						weberp_stockmaster.eoq,
+						weberp_stockmaster.decimalplaces,
+						weberp_locstock.stockid,
+						weberp_purchdata.supplierno,
+						weberp_suppliers.suppname,
+						weberp_purchdata.leadtime/30 AS monthsleadtime,
+						weberp_locstock.bin,
+						SUM(weberp_locstock.quantity) AS qoh
+					FROM weberp_locstock,
+						weberp_stockmaster,
+						weberp_purchdata,
+						weberp_suppliers
+					WHERE weberp_locstock.stockid=weberp_stockmaster.stockid
+					AND weberp_purchdata.supplierno=weberp_suppliers.supplierid
+					AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M')
+					AND weberp_purchdata.stockid=weberp_stockmaster.stockid
+					AND weberp_purchdata.preferred=1
+					AND weberp_purchdata.supplierno='" . $_POST['Supplier'] . "'
+					AND weberp_locstock.loccode='" . $_SESSION['UserStockLocation'] . "'
 					GROUP BY
-						purchdata.supplierno,
-						stockmaster.description,
-						stockmaster.eoq,
-						locstock.stockid
-					ORDER BY purchdata.supplierno,
-						stockmaster.stockid";
+						weberp_purchdata.supplierno,
+						weberp_stockmaster.description,
+						weberp_stockmaster.eoq,
+						weberp_locstock.stockid
+					ORDER BY weberp_purchdata.supplierno,
+						weberp_stockmaster.stockid";
 	
 	$ItemsResult = DB_query($SQL, '', '', false, false);
 	$ListCount = DB_num_rows($ItemsResult);
@@ -438,7 +438,7 @@ if (isset($_POST['Supplier']) AND isset($_POST['ShowItems']) AND $_POST['Supplie
 								trandate<='" . Date('Y-m-d',mktime(0,0,0, date('m'), date('d')-7, date('Y'))) . "') THEN -qty ELSE 0 END) AS wk2,
 						SUM(CASE WHEN (trandate>='" . Date('Y-m-d',mktime(0,0,0, date('m'), date('d')-7, date('Y'))) . "' AND
 								trandate<='" . Date('Y-m-d') . "') THEN -qty ELSE 0 END) AS wk1
-					FROM stockmoves
+					FROM weberp_stockmoves
 					WHERE stockid='" . $ItemRow['stockid'] . "'
 					AND (type=10 OR type=11)"; 
 			$SalesResult=DB_query($SQL,'','',FALSE,FALSE);
@@ -457,12 +457,12 @@ if (isset($_POST['Supplier']) AND isset($_POST['ShowItems']) AND $_POST['Supplie
 	
 			$SalesRow = DB_fetch_array($SalesResult);
 	
-			$SQL = "SELECT SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qtydemand
-					FROM salesorderdetails INNER JOIN salesorders
-					ON salesorderdetails.orderno=salesorders.orderno
-					WHERE salesorderdetails.stkcode = '" . $ItemRow['stockid'] . "'
-					AND salesorderdetails.completed = 0
-					AND salesorders.quotation=0";
+			$SQL = "SELECT SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qtydemand
+					FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+					ON weberp_salesorderdetails.orderno=weberp_salesorders.orderno
+					WHERE weberp_salesorderdetails.stkcode = '" . $ItemRow['stockid'] . "'
+					AND weberp_salesorderdetails.completed = 0
+					AND weberp_salesorders.quotation=0";
 			
 			$DemandResult = DB_query($SQL, '', '', false, false);
 	
@@ -481,18 +481,18 @@ if (isset($_POST['Supplier']) AND isset($_POST['ShowItems']) AND $_POST['Supplie
 	
 	// Also need to add in the demand as a component of an assembly items if this items has any assembly parents.
 	
-			$SQL = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-					FROM salesorderdetails INNER JOIN bom
-					ON salesorderdetails.stkcode=bom.parent
-					INNER JOIN	stockmaster
-					ON stockmaster.stockid=bom.parent
-					INNER JOIN salesorders
-					ON salesorders.orderno = salesorderdetails.orderno
-					WHERE  salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-					AND bom.component='" . $ItemRow['stockid'] . "'
-					AND stockmaster.mbflag='A'
-					AND salesorderdetails.completed=0
-					AND salesorders.quotation=0";
+			$SQL = "SELECT SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+					FROM weberp_salesorderdetails INNER JOIN weberp_bom
+					ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+					INNER JOIN	weberp_stockmaster
+					ON weberp_stockmaster.stockid=weberp_bom.parent
+					INNER JOIN weberp_salesorders
+					ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+					WHERE  weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+					AND weberp_bom.component='" . $ItemRow['stockid'] . "'
+					AND weberp_stockmaster.mbflag='A'
+					AND weberp_salesorderdetails.completed=0
+					AND weberp_salesorders.quotation=0";
 			
 			$BOMDemandResult = DB_query($SQL,'','',false,false);
 	
@@ -508,19 +508,19 @@ if (isset($_POST['Supplier']) AND isset($_POST['ShowItems']) AND $_POST['Supplie
 		   		exit;
 			}
 	
-			$SQL = "SELECT SUM(purchorderdetails.quantityord- purchorderdetails.quantityrecd) as qtyonorder
-					FROM purchorderdetails
-					LEFT JOIN purchorders
-					ON purchorderdetails.orderno = purchorders.orderno
-					LEFT JOIN purchdata
-					ON purchorders.supplierno=purchdata.supplierno
-					AND purchorderdetails.itemcode=purchdata.stockid
-					WHERE  purchorderdetails.itemcode = '" . $ItemRow['stockid'] . "'
-					AND purchorderdetails.completed = 0
-					AND purchorders.status <> 'Cancelled'
-					AND purchorders.status <> 'Rejected'
-					AND purchorders.status <> 'Pending'
-					AND purchorders.status <> 'Completed'";
+			$SQL = "SELECT SUM(weberp_purchorderdetails.quantityord- weberp_purchorderdetails.quantityrecd) as qtyonorder
+					FROM weberp_purchorderdetails
+					LEFT JOIN weberp_purchorders
+					ON weberp_purchorderdetails.orderno = weberp_purchorders.orderno
+					LEFT JOIN weberp_purchdata
+					ON weberp_purchorders.supplierno=weberp_purchdata.supplierno
+					AND weberp_purchorderdetails.itemcode=weberp_purchdata.stockid
+					WHERE  weberp_purchorderdetails.itemcode = '" . $ItemRow['stockid'] . "'
+					AND weberp_purchorderdetails.completed = 0
+					AND weberp_purchorders.status <> 'Cancelled'
+					AND weberp_purchorders.status <> 'Rejected'
+					AND weberp_purchorders.status <> 'Pending'
+					AND weberp_purchorders.status <> 'Completed'";
 			
 			$DemandRow = DB_fetch_array($DemandResult);
 			$BOMDemandRow = DB_fetch_array($BOMDemandResult);

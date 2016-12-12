@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: PcTabs.php 7482 2016-04-01 08:36:03Z exsonqu $ */
 
 include('includes/session.inc');
 $Title = _('Maintenance Of Petty Cash Tabs');
@@ -111,7 +111,7 @@ if (isset($_POST['Submit'])) {
 		//get the authorisers value
 	
 
-		$sql = "UPDATE pctabs SET usercode = '" . $_POST['SelectUser'] . "',
+		$sql = "UPDATE weberp_pctabs SET usercode = '" . $_POST['SelectUser'] . "',
 									typetabcode = '" . $_POST['SelectTabs'] . "',
 									currency = '" . $_POST['SelectCurrency'] . "',
 									tablimit = '" . filter_number_format($_POST['TabLimit']) . "',
@@ -127,7 +127,7 @@ if (isset($_POST['Submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-					 FROM pctabs
+					 FROM weberp_pctabs
 					 WHERE tabcode = '" . $_POST['TabCode'] . "'";
 
 		$CheckResult = DB_query($checkSql);
@@ -140,7 +140,7 @@ if (isset($_POST['Submit'])) {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO pctabs	(tabcode,
+			$sql = "INSERT INTO weberp_pctabs	(tabcode,
 							 			 usercode,
 										 typetabcode,
 										 currency,
@@ -182,7 +182,7 @@ if (isset($_POST['Submit'])) {
 
 } elseif ( isset($_GET['delete']) ) {
 
-			$sql="DELETE FROM pctabs WHERE tabcode='".$SelectedTab."'";
+			$sql="DELETE FROM weberp_pctabs WHERE tabcode='".$SelectedTab."'";
 			$ErrMsg = _('The Tab record could not be deleted because');
 			$result = DB_query($sql,$ErrMsg);
 			prnMsg(_('The Petty Cash Tab') .  ' ' . $SelectedTab  . ' ' . _('has been deleted') ,'success');
@@ -206,17 +206,17 @@ or deletion of the records*/
 					authorizer,
 					glaccountassignment,
 					glaccountpcash,
-					currencies.decimalplaces,
+					weberp_currencies.decimalplaces,
 					chartmaster1.accountname AS glactassigntname,
 					chartmaster2.accountname AS glactpcashname
-				FROM pctabs INNER JOIN currencies
-				ON pctabs.currency=currencies.currabrev
-				INNER JOIN pctypetabs
-				ON pctabs.typetabcode=pctypetabs.typetabcode
-				INNER JOIN chartmaster AS chartmaster1 ON
-				pctabs.glaccountassignment = chartmaster1.accountcode
-				INNER JOIN chartmaster AS chartmaster2 ON
-				pctabs.glaccountpcash = chartmaster2.accountcode
+				FROM weberp_pctabs INNER JOIN weberp_currencies
+				ON weberp_pctabs.currency=weberp_currencies.currabrev
+				INNER JOIN weberp_pctypetabs
+				ON weberp_pctabs.typetabcode=weberp_pctypetabs.typetabcode
+				INNER JOIN weberp_chartmaster AS chartmaster1 ON
+				weberp_pctabs.glaccountassignment = chartmaster1.accountcode
+				INNER JOIN weberp_chartmaster AS chartmaster2 ON
+				weberp_pctabs.glaccountpcash = chartmaster2.accountcode
 				ORDER BY tabcode";
 	$result = DB_query($sql);
 	if (DB_num_rows($result)>0){
@@ -287,7 +287,7 @@ if (!isset($_GET['delete'])) {
 
 	if ( isset($SelectedTab) AND $SelectedTab!='' ) {
 
-		$sql = "SELECT * FROM pctabs
+		$sql = "SELECT * FROM weberp_pctabs
 				WHERE tabcode='".$SelectedTab."'";
 
 		$result = DB_query($sql);
@@ -329,7 +329,7 @@ if (!isset($_GET['delete'])) {
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users ORDER BY userid";
+			FROM weberp_www_users ORDER BY userid";
 
 	$result = DB_query($SQL);
 
@@ -353,7 +353,7 @@ if (!isset($_GET['delete'])) {
 
 	$SQL = "SELECT typetabcode,
 					typetabdescription
-			FROM pctypetabs
+			FROM weberp_pctypetabs
 			ORDER BY typetabcode";
 
 	$result = DB_query($SQL);
@@ -375,7 +375,7 @@ if (!isset($_GET['delete'])) {
 			<td>' . _('Currency') . ':</td>
 			<td><select name="SelectCurrency">';
 
-	$SQL = "SELECT currency, currabrev FROM currencies";
+	$SQL = "SELECT currency, currabrev FROM weberp_currencies";
 
 	$result = DB_query($SQL);
 
@@ -407,7 +407,7 @@ if (!isset($_GET['delete'])) {
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users
+			FROM weberp_www_users
 			ORDER BY userid";
 
 	$result = DB_query($SQL);
@@ -433,7 +433,7 @@ if (!isset($_GET['delete'])) {
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users
+			FROM weberp_www_users
 			ORDER BY userid";
 
 	$result = DB_query($SQL);
@@ -457,11 +457,11 @@ if (!isset($_GET['delete'])) {
 			<td>' . _('GL Account Cash Assignment') . ':</td>
 			<td><select name="GLAccountCash">';
 
-	$SQL = "SELECT chartmaster.accountcode,
-					chartmaster.accountname
-			FROM chartmaster INNER JOIN bankaccounts
-			ON chartmaster.accountcode = bankaccounts.accountcode
-			ORDER BY chartmaster.accountcode";
+	$SQL = "SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname
+			FROM weberp_chartmaster INNER JOIN weberp_bankaccounts
+			ON weberp_chartmaster.accountcode = weberp_bankaccounts.accountcode
+			ORDER BY weberp_chartmaster.accountcode";
 
 	$result = DB_query($SQL);
 
@@ -484,7 +484,7 @@ if (!isset($_GET['delete'])) {
 			<td><select name="GLAccountPcashTab">';
 
 	$SQL = "SELECT accountcode, accountname
-			FROM chartmaster
+			FROM weberp_chartmaster
 			ORDER BY accountcode";
 
 	$result = DB_query($SQL);

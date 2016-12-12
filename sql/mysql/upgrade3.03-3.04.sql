@@ -7,6 +7,6 @@ UPDATE config SET confvalue='companies/weberp/EDI_Incoming_Orders'  WHERE confna
 UPDATE config SET confvalue='companies/weberp/EDI_MsgPending' WHERE confname='EDI_MsgPending';
 UPDATE config SET confvalue='companies/weberp/EDI_Sent' WHERE confname='EDI_Sent';
 UPDATE config SET confvalue='companies/weberp/reports' WHERE confname='reports_dir';
-ALTER TABLE `www_users` DROP `pinno` ;
-ALTER TABLE `www_users` DROP `swipecard` ;
-ALTER TABLE `suppliers` CHANGE `bankact` `bankact` VARCHAR( 30 ) NOT NULL;
+ALTER TABLE `weberp_www_users` DROP `pinno` ;
+ALTER TABLE `weberp_www_users` DROP `swipecard` ;
+ALTER TABLE `weberp_suppliers` CHANGE `bankact` `bankact` VARCHAR( 30 ) NOT NULL;

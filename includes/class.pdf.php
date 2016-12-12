@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: class.pdf.php 7641 2016-10-04 20:37:44Z rchacon $ */
 
      /* -----------------------------------------------------------------------------------------------
 	This class was an extension to the FPDF class to use the syntax of the R&OS pdf.php class,

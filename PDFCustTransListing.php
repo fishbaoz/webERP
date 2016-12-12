@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFCustTransListing.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 include('includes/SQL_CommonFunctions.inc');
 include ('includes/session.inc');
@@ -61,18 +61,18 @@ if (!isset($_POST['Date'])){
 }
 
 $sql= "SELECT type,
-			debtortrans.debtorno,
+			weberp_debtortrans.debtorno,
 			transno,
 			trandate,
 			ovamount,
 			ovgst,
 			invtext,
-			debtortrans.rate,
+			weberp_debtortrans.rate,
 			decimalplaces
-		FROM debtortrans INNER JOIN debtorsmaster
-		ON debtortrans.debtorno=debtorsmaster.debtorno
-		INNER JOIN currencies
-		ON debtorsmaster.currcode=currencies.currabrev
+		FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+		ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+		INNER JOIN weberp_currencies
+		ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 		WHERE type='" . $_POST['TransType'] . "'
 		AND date_format(inputdate, '%Y-%m-%d')='".FormatDateForSQL($_POST['Date'])."'";
 
@@ -110,7 +110,7 @@ include ('includes/PDFCustTransListingPageHeader.inc');
 
 while ($myrow=DB_fetch_array($result)){
 
-	$sql="SELECT name FROM debtorsmaster WHERE debtorno='" . $myrow['debtorno'] . "'";
+	$sql="SELECT name FROM weberp_debtorsmaster WHERE debtorno='" . $myrow['debtorno'] . "'";
 	$CustomerResult=DB_query($sql);
 	$CustomerRow=DB_fetch_array($CustomerResult);
 

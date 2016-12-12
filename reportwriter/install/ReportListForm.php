@@ -17,7 +17,7 @@ function GetReports($GroupID) {
 	$RptForm .= '<table align="center" border="0" cellspacing="1" cellpadding="1" class="table_index">';
 	for ($Def=1; $Def>=0; $Def--) {
 		$RptForm .= '<tr><td colspan="2"><div align="center">'.$Title[$Def].'</div></td></tr>';
-		$sql= "SELECT id, reportname FROM reports
+		$sql= "SELECT id, reportname FROM weberp_reports
 			WHERE defaultreport='".$Def."' AND groupname='".$GroupID."'
 			ORDER BY reportname";
 		$Result=DB_query($sql,'','',false,true);

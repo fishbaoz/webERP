@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PcClaimExpensesFromTab.php 7593 2016-08-18 07:09:07Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Claim Petty Cash Expenses From Tab');
@@ -75,7 +75,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	if (isset($SelectedIndex) AND $InputError !=1)  {
-		$sql = "UPDATE pcashdetails
+		$sql = "UPDATE weberp_pcashdetails
 			SET date = '".FormatDateForSQL($_POST['Date'])."',
 			codeexpense = '" . $_POST['SelectedExpense'] . "',
 			amount = '" .-filter_number_format($_POST['Amount']) . "',
@@ -90,7 +90,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 		// Add new record on submit
 
-		$sql = "INSERT INTO pcashdetails (counterindex,
+		$sql = "INSERT INTO weberp_pcashdetails (counterindex,
 										tabcode,
 										date,
 										codeexpense,
@@ -127,7 +127,7 @@ if (isset($_POST['submit'])) {
 
 } elseif ( isset($_GET['delete']) ) {
 
-	$sql="DELETE FROM pcashdetails
+	$sql="DELETE FROM weberp_pcashdetails
 			WHERE counterindex='".$SelectedIndex."'";
 	$ErrMsg = _('Petty Cash Expense record could not be deleted because');
 	$result = DB_query($sql,$ErrMsg);
@@ -154,7 +154,7 @@ if (!isset($SelectedTabs)){
 				<td><select name="SelectedTabs">';
 
 	$SQL = "SELECT tabcode
-		FROM pctabs
+		FROM weberp_pctabs
 		WHERE usercode='" . $_SESSION['UserID'] . "'";
 
 	$result = DB_query($SQL);
@@ -207,8 +207,8 @@ if (!isset($SelectedTabs)){
 
 		/* Retrieve decimal places to display */
 		$SqlDecimalPlaces="SELECT decimalplaces
-					FROM currencies,pctabs
-					WHERE currencies.currabrev = pctabs.currency
+					FROM weberp_currencies,weberp_pctabs
+					WHERE weberp_currencies.currabrev = weberp_pctabs.currency
 						AND tabcode='" . $SelectedTabs . "'";
 		$result = DB_query($SqlDecimalPlaces);
 		$myrow=DB_fetch_array($result);
@@ -227,7 +227,7 @@ if (!isset($SelectedTabs)){
 			unset($_POST['Receipt']);
 		}
 
-		$sql = "SELECT * FROM pcashdetails
+		$sql = "SELECT * FROM weberp_pcashdetails
 				WHERE tabcode='".$SelectedTabs."'
 					AND date >=DATE_SUB(CURDATE(), INTERVAL ".$Days." DAY)
 				ORDER BY date, counterindex ASC";
@@ -255,7 +255,7 @@ if (!isset($SelectedTabs)){
 			}
 
 			$sqldes="SELECT description
-						FROM pcexpenses
+						FROM weberp_pcexpenses
 						WHERE codeexpense='". $myrow['3'] . "'";
 
 			$ResultDes = DB_query($sqldes);
@@ -309,7 +309,7 @@ if (!isset($SelectedTabs)){
 		//END WHILE LIST LOOP
 
 		$sqlAmount="SELECT sum(amount)
-					FROM pcashdetails
+					FROM weberp_pcashdetails
 					WHERE tabcode='".$SelectedTabs."'";
 
 		$ResultAmount = DB_query($sqlAmount);
@@ -336,7 +336,7 @@ if (!isset($SelectedTabs)){
 
 		if ( isset($_GET['edit'])) {
 			$sql = "SELECT *
-				FROM pcashdetails
+				FROM weberp_pcashdetails
 				WHERE counterindex='".$SelectedIndex."'";
 
 			$result = DB_query($sql);
@@ -369,13 +369,13 @@ if (!isset($SelectedTabs)){
 
 		DB_free_result($result);
 
-		$SQL = "SELECT pcexpenses.codeexpense,
-					pcexpenses.description
-			FROM pctabexpenses, pcexpenses, pctabs
-			WHERE pctabexpenses.codeexpense = pcexpenses.codeexpense
-				AND pctabexpenses.typetabcode = pctabs.typetabcode
-				AND pctabs.tabcode = '".$SelectedTabs."'
-			ORDER BY pcexpenses.codeexpense ASC";
+		$SQL = "SELECT weberp_pcexpenses.codeexpense,
+					weberp_pcexpenses.description
+			FROM weberp_pctabexpenses, weberp_pcexpenses, weberp_pctabs
+			WHERE weberp_pctabexpenses.codeexpense = weberp_pcexpenses.codeexpense
+				AND weberp_pctabexpenses.typetabcode = weberp_pctabs.typetabcode
+				AND weberp_pctabs.tabcode = '".$SelectedTabs."'
+			ORDER BY weberp_pcexpenses.codeexpense ASC";
 
 		$result = DB_query($SQL);
 		echo '<option value="">' . _('Not Yet Selected') . '</option>';

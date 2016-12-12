@@ -16,21 +16,21 @@ if (isset($_POST['UpdateAll'])) {
 	foreach ($_POST as $POSTVariableName => $POSTValue) {
 		if (mb_substr($POSTVariableName,0,6)=='status') {
 			$RequestNo=mb_substr($POSTVariableName,6);
-			$sql="UPDATE stockrequest
+			$sql="UPDATE weberp_stockrequest
 					SET authorised='1'
 					WHERE dispatchid='" . $RequestNo . "'";
 			$result=DB_query($sql);
 		}
 		if (strpos($POSTVariableName, 'cancel')) {
  			$CancelItems = explode('cancel', $POSTVariableName);
- 			$sql = "UPDATE stockrequestitems
+ 			$sql = "UPDATE weberp_stockrequestitems
  						SET completed=1
  						WHERE dispatchid='" . $CancelItems[0] . "'
  						AND dispatchitemsid='" . $CancelItems[1] . "'";
  			$result = DB_query($sql);
- 			$result = DB_query("SELECT stockid FROM stockrequestitems WHERE completed=0 AND dispatchid='" . $CancelItems[0] . "'");
+ 			$result = DB_query("SELECT stockid FROM weberp_stockrequestitems WHERE completed=0 AND dispatchid='" . $CancelItems[0] . "'");
  			if (DB_num_rows($result) ==0){
-				$result = DB_query("UPDATE stockrequest
+				$result = DB_query("UPDATE weberp_stockrequest
 									SET authorised='1'
 									WHERE dispatchid='" . $CancelItems[0] . "'");
 			}
@@ -41,23 +41,23 @@ if (isset($_POST['UpdateAll'])) {
 
 /* Retrieve the requisition header information
  */
-$sql="SELECT stockrequest.dispatchid,
-			locations.locationname,
-			stockrequest.despatchdate,
-			stockrequest.narrative,
-			departments.description,
-			www_users.realname,
-			www_users.email
-		FROM stockrequest INNER JOIN departments
-			ON stockrequest.departmentid=departments.departmentid
-		INNER JOIN locations
-			ON stockrequest.loccode=locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-		INNER JOIN www_users
-			ON www_users.userid=departments.authoriser
-		WHERE stockrequest.authorised=0
-		AND stockrequest.closed=0
-		AND www_users.userid='".$_SESSION['UserID']."'";
+$sql="SELECT weberp_stockrequest.dispatchid,
+			weberp_locations.locationname,
+			weberp_stockrequest.despatchdate,
+			weberp_stockrequest.narrative,
+			weberp_departments.description,
+			weberp_www_users.realname,
+			weberp_www_users.email
+		FROM weberp_stockrequest INNER JOIN weberp_departments
+			ON weberp_stockrequest.departmentid=weberp_departments.departmentid
+		INNER JOIN weberp_locations
+			ON weberp_stockrequest.loccode=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+		INNER JOIN weberp_www_users
+			ON weberp_www_users.userid=weberp_departments.authoriser
+		WHERE weberp_stockrequest.authorised=0
+		AND weberp_stockrequest.closed=0
+		AND weberp_www_users.userid='".$_SESSION['UserID']."'";
 $result=DB_query($sql);
 
 echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
@@ -83,15 +83,15 @@ while ($myrow=DB_fetch_array($result)) {
 			<td>' . $myrow['narrative'] . '</td>
 			<td><input type="checkbox" name="status'.$myrow['dispatchid'].'" /></td>
 		</tr>';
-	$LinesSQL="SELECT stockrequestitems.dispatchitemsid,
-						stockrequestitems.stockid,
-						stockrequestitems.decimalplaces,
-						stockrequestitems.uom,
-						stockmaster.description,
-						stockrequestitems.quantity
-				FROM stockrequestitems
-				INNER JOIN stockmaster
-				ON stockmaster.stockid=stockrequestitems.stockid
+	$LinesSQL="SELECT weberp_stockrequestitems.dispatchitemsid,
+						weberp_stockrequestitems.stockid,
+						weberp_stockrequestitems.decimalplaces,
+						weberp_stockrequestitems.uom,
+						weberp_stockmaster.description,
+						weberp_stockrequestitems.quantity
+				FROM weberp_stockrequestitems
+				INNER JOIN weberp_stockmaster
+				ON weberp_stockmaster.stockid=weberp_stockrequestitems.stockid
 			WHERE dispatchid='".$myrow['dispatchid'] . "'
 			AND completed=0";
 	$LineResult=DB_query($LinesSQL);

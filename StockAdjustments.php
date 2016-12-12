@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockAdjustments.php 7278 2015-04-26 02:56:08Z exsonqu $*/
 
 include('includes/DefineStockAdjustment.php');
 include('includes/DefineSerialItems.php');
@@ -52,7 +52,7 @@ if ($NewAdjustment==true){
 							perishable,
 							materialcost+labourcost+overheadcost AS totalcost,
 							units
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'");
 	$myrow = DB_fetch_array($result);
 	$_SESSION['Adjustment' . $identifier]->ItemDescription = $myrow['description'];
@@ -78,7 +78,7 @@ if (isset($_POST['Narrative'])){
 	$_SESSION['Adjustment' . $identifier]->Narrative = $_POST['Narrative'];
 }
 
-$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 $resultStkLocs = DB_query($sql);
 $LocationList=array();
 while ($myrow=DB_fetch_array($resultStkLocs)){
@@ -125,12 +125,12 @@ if (isset($_POST['CheckCode'])) {
 	if (mb_strlen($_POST['StockText'])>0) {
 		$sql="SELECT stockid,
 					description
-				FROM stockmaster
+				FROM weberp_stockmaster
 				WHERE description " . LIKE . " '%" . $_POST['StockText'] ."%'";
 	} else {
 		$sql="SELECT stockid,
 					description
-				FROM stockmaster
+				FROM weberp_stockmaster
 				WHERE stockid " . LIKE  . " '%" . $_POST['StockCode'] ."%'";
 	}
 	$ErrMsg=_('The stock information cannot be retrieved because');
@@ -156,7 +156,7 @@ if (isset($_POST['CheckCode'])) {
 if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 	$InputError = false; /*Start by hoping for the best */
-	$result = DB_query("SELECT * FROM stockmaster WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'");
+	$result = DB_query("SELECT * FROM weberp_stockmaster WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'");
 	$myrow = DB_fetch_row($result);
 	if (DB_num_rows($result)==0) {
 		prnMsg( _('The entered item code does not exist'),'error');
@@ -176,7 +176,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 	}
 
 	if ($_SESSION['ProhibitNegativeStock']==1){
-		$SQL = "SELECT quantity FROM locstock
+		$SQL = "SELECT quantity FROM weberp_locstock
 				WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
 				AND loccode='" . $_SESSION['Adjustment' . $identifier]->StockLocation . "'";
 		$CheckNegResult=DB_query($SQL);
@@ -198,9 +198,9 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 		$Result = DB_Txn_Begin();
 
 		// Need to get the current location quantity will need it later for the stock movement
-		$SQL="SELECT locstock.quantity
-			FROM locstock
-			WHERE locstock.stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
+		$SQL="SELECT weberp_locstock.quantity
+			FROM weberp_locstock
+			WHERE weberp_locstock.stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
 			AND loccode= '" . $_SESSION['Adjustment' . $identifier]->StockLocation . "'";
 		$Result = DB_query($SQL);
 		if (DB_num_rows($Result)==1){
@@ -210,7 +210,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 			// There must actually be some error this should never happen
 			$QtyOnHandPrior = 0;
 		}
-		$SQL = "INSERT INTO stockmoves (stockid,
+		$SQL = "INSERT INTO weberp_stockmoves (stockid,
 										type,
 										transno,
 										loccode,
@@ -238,7 +238,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 		$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
 /*Get the ID of the StockMove... */
-		$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+		$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 /*Insert the StockSerialMovements and update the StockSerialItems  for controlled items*/
 
@@ -249,7 +249,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 				/*First need to check if the serial items already exists or not */
 				$SQL = "SELECT COUNT(*)
-						FROM stockserialitems
+						FROM weberp_stockserialitems
 						WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
 						AND loccode='" . $_SESSION['Adjustment' . $identifier]->StockLocation . "'
 						AND serialno='" . $Item->BundleRef . "'";
@@ -259,7 +259,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 				if ($SerialItemExistsRow[0]==1){
 
-					$SQL = "UPDATE stockserialitems SET quantity= quantity + " . $Item->BundleQty . "
+					$SQL = "UPDATE weberp_stockserialitems SET quantity= quantity + " . $Item->BundleQty . "
 							WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
 							AND loccode='" . $_SESSION['Adjustment' . $identifier]->StockLocation . "'
 							AND serialno='" . $Item->BundleRef . "'";
@@ -269,7 +269,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 					$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 				} else {
 					/*Need to insert a new serial item record */
-					$SQL = "INSERT INTO stockserialitems (stockid,
+					$SQL = "INSERT INTO weberp_stockserialitems (stockid,
 														loccode,
 														serialno,
 														qualitytext,
@@ -290,7 +290,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 				/* now insert the serial stock movement */
 
-				$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+				$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 													stockid,
 													serialno,
 													moveqty)
@@ -307,7 +307,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 
 
-		$SQL = "UPDATE locstock SET quantity = quantity + " . floatval($_SESSION['Adjustment' . $identifier]->Quantity) . "
+		$SQL = "UPDATE weberp_locstock SET quantity = quantity + " . floatval($_SESSION['Adjustment' . $identifier]->Quantity) . "
 				WHERE stockid='" . $_SESSION['Adjustment' . $identifier]->StockID . "'
 				AND loccode='" . $_SESSION['Adjustment' . $identifier]->StockLocation . "'";
 
@@ -319,7 +319,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 
 			$StockGLCodes = GetStockGLCode($_SESSION['Adjustment' . $identifier]->StockID,$db);
 
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -341,7 +341,7 @@ if (isset($_POST['EnterAdjustment']) AND $_POST['EnterAdjustment']!= ''){
 			$DbgMsg = _('The following SQL to insert the GL entries was used');
 			$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -410,7 +410,7 @@ if (!isset($_SESSION['Adjustment' . $identifier])) {
 				overheadcost,
 				units,
 				decimalplaces
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid='".$StockID."'";
 
 	$result=DB_query($sql);
@@ -496,7 +496,7 @@ echo '<tr>
 
 $SQL = "SELECT tagref,
 				tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result=DB_query($SQL);

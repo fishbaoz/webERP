@@ -44,7 +44,7 @@ switch($_POST['Action']) {
 		unset($_POST['TokenDescription']);
 		break;
     case 'delete':
-		$Result = DB_query("SELECT script FROM scripts WHERE pagesecurity='" . $_POST['TokenId'] . "'");
+		$Result = DB_query("SELECT script FROM weberp_scripts WHERE pagesecurity='" . $_POST['TokenId'] . "'");
 		if(DB_num_rows($Result) > 0) {
 			$List = '';
 			while($ScriptRow = DB_fetch_array($Result)) {
@@ -52,7 +52,7 @@ switch($_POST['Action']) {
 				}
 			prnMsg(_('This security token is currently used by the following scripts and cannot be deleted') . ':' . $List, 'error');
 		} else {
-			$Result = DB_query("DELETE FROM securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
+			$Result = DB_query("DELETE FROM weberp_securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
 			if($Result) {prnMsg(_('The security token was deleted successfully'), 'success');}
 		}
 		unset($_POST['Action']);
@@ -60,20 +60,20 @@ switch($_POST['Action']) {
 		unset($_POST['TokenDescription']);
 		break;
     case 'edit':
-		$Result = DB_query("SELECT tokenid, tokenname FROM securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
+		$Result = DB_query("SELECT tokenid, tokenname FROM weberp_securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
 		$MyRow = DB_fetch_array($Result);
 		// Keeps $_POST['Action']=edit, and sets $_POST['TokenId'] and $_POST['TokenDescription'].
 		$_POST['TokenId'] = $MyRow['tokenid'];
 		$_POST['TokenDescription'] = $MyRow['tokenname'];
 		break;
     case 'insert':
-		$Result = DB_query("SELECT tokenid FROM securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
+		$Result = DB_query("SELECT tokenid FROM weberp_securitytokens WHERE tokenid='" . $_POST['TokenId'] . "'");
 		if(DB_num_rows($Result) != 0) {
 			prnMsg( _('This token ID has already been used. Please use a new one') , 'warn');
 			$InputError = 1;
 		}
 		if($InputError == 0) {
-			$Result = DB_query("INSERT INTO securitytokens values('" . $_POST['TokenId'] . "', '" . $_POST['TokenDescription'] . "')");
+			$Result = DB_query("INSERT INTO weberp_securitytokens values('" . $_POST['TokenId'] . "', '" . $_POST['TokenDescription'] . "')");
 			if($Result) {prnMsg(_('The security token was inserted successfully'), 'success');}
 			unset($_POST['Action']);
 			unset($_POST['TokenId']);
@@ -82,7 +82,7 @@ switch($_POST['Action']) {
 		break;
     case 'update':
 		if($InputError == 0) {
-			$Result = DB_query("UPDATE securitytokens SET tokenname='" . $_POST['TokenDescription'] . "' WHERE tokenid='" . $_POST['TokenId'] . "'");
+			$Result = DB_query("UPDATE weberp_securitytokens SET tokenname='" . $_POST['TokenDescription'] . "' WHERE tokenid='" . $_POST['TokenId'] . "'");
 			if($Result) {prnMsg(_('The security token was updated successfully'), 'success');}
 			unset($_POST['Action']);
 			unset($_POST['TokenId']);
@@ -108,7 +108,7 @@ echo '<p class="page_title_text"><img alt="" src="', $RootPath, '/css/', $Theme,
 			<th class="noprint" colspan="2">&nbsp;</th>
 		</tr>
 	</thead><tbody>';
-$Result = DB_query("SELECT tokenid, tokenname FROM securitytokens ORDER BY tokenid");
+$Result = DB_query("SELECT tokenid, tokenname FROM weberp_securitytokens ORDER BY tokenid");
 while($MyRow = DB_fetch_array($Result)) {
 	echo '<tr>
 			<td class="number">', $MyRow['tokenid'], '</td>

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_UpdateChartDetailsBFwd.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include ('includes/session.inc');
 $Title = _('Recalculation of Brought Forward Balances in Chart Details Table');
@@ -23,7 +23,7 @@ if (!isset($_POST['FromPeriod']) OR !isset($_POST['ToPeriod'])){
 /*Show a form to allow input of criteria for TB to show */
 	echo '<table><tr><td>' . _('Select Period From') . ':</td><td><select name="FromPeriod">';
 
-	$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno";
+	$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno";
 	$Periods = DB_query($sql);
 
 
@@ -33,7 +33,7 @@ if (!isset($_POST['FromPeriod']) OR !isset($_POST['ToPeriod'])){
 
 	echo '</select></td></tr>';
 
-	$sql = "SELECT MAX(periodno) FROM periods";
+	$sql = "SELECT MAX(periodno) FROM weberp_periods";
 	$MaxPrd = DB_query($sql);
 	$MaxPrdrow = DB_fetch_row($MaxPrd);
 
@@ -67,7 +67,7 @@ if (!isset($_POST['FromPeriod']) OR !isset($_POST['ToPeriod'])){
 					actual,
 					bfwd,
 					bfwdbudget
-				FROM chartdetails
+				FROM weberp_chartdetails
 				WHERE period ='" . $i . "'";
 
 		$ErrMsg = _('Could not retrieve the ChartDetail records because');
@@ -80,7 +80,7 @@ if (!isset($_POST['FromPeriod']) OR !isset($_POST['ToPeriod'])){
 
 			echo '<br />' . _('Account Code') . ': ' . $myrow['accountcode'] . ' ' . _('Period') .': ' . $myrow['period'];
 
-			$sql = "UPDATE chartdetails SET bfwd='" . $CFwd . "',
+			$sql = "UPDATE weberp_chartdetails SET bfwd='" . $CFwd . "',
 										bfwdbudget='" . $CFwdBudget . "'
 					WHERE period='" . ($myrow['period'] +1) . "'
 					AND  accountcode = '" . $myrow['accountcode'] . "'";

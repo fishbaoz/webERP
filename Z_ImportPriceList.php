@@ -73,7 +73,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 		}
 
 		//first off check that the item actually exist
-		$sql = "SELECT COUNT(stockid) FROM stockmaster WHERE stockid='" . $StockID . "'";
+		$sql = "SELECT COUNT(stockid) FROM weberp_stockmaster WHERE stockid='" . $StockID . "'";
 		$result = DB_query($sql);
 		$testrow = DB_fetch_row($result);
 		if ($testrow[0] == 0) {
@@ -81,7 +81,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 			prnMsg (_('Stock item') . ' "'. $myrow[0]. '" ' . _('does not exist'),'error');
 		}
 		//Then check that the price list actually exists
-		$sql = "SELECT COUNT(typeabbrev) FROM salestypes WHERE typeabbrev='" . $myrow[1] . "'";
+		$sql = "SELECT COUNT(typeabbrev) FROM weberp_salestypes WHERE typeabbrev='" . $myrow[1] . "'";
 		$result = DB_query($sql);
 		$testrow = DB_fetch_row($result);
 		if ($testrow[0] == 0) {
@@ -90,7 +90,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 		}
 
 		//Then check that the currency code actually exists
-		$sql = "SELECT COUNT(currabrev) FROM currencies WHERE currabrev='" . $myrow[2] . "'";
+		$sql = "SELECT COUNT(currabrev) FROM weberp_currencies WHERE currabrev='" . $myrow[2] . "'";
 		$result = DB_query($sql);
 		$testrow = DB_fetch_row($result);
 		if ($testrow[0] == 0) {
@@ -103,7 +103,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 		if ($InputError !=1){
 
 			//Firstly close any open prices for this item
-			$sql = "UPDATE prices
+			$sql = "UPDATE weberp_prices
 						SET enddate='" . FormatDateForSQL($_POST['StartDate']) . "'
 						WHERE stockid='" . $StockID . "'
 						AND enddate>'" . date('Y-m-d') . "'
@@ -111,7 +111,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 			$result = DB_query($sql);
 
 			//Insert the price
-			$sql = "INSERT INTO prices (stockid,
+			$sql = "INSERT INTO weberp_prices (stockid,
 										typeabbrev,
 										currabrev,
 										price,
@@ -153,7 +153,7 @@ if (isset($_FILES['PriceListFile']) and $_FILES['PriceListFile']['name']) { //st
 			_('This function loads a new sales price list from a comma separated variable (csv) file.') . '<br />' .
 			_('The file must contain four columns, and the first row should be the following headers:') . '<br />StockID, SalesType, CurrencyCode, Price<br />' .
 			_('followed by rows containing these four fields for each price to be uploaded.') .  '<br />' .
-			_('The StockID, SalesType, and CurrencyCode fields must have a corresponding entry in the stockmaster, salestypes, and currencies tables.') . '</div>';
+			_('The StockID, SalesType, and CurrencyCode fields must have a corresponding entry in the stockmaster, weberp_salestypes, and currencies tables.') . '</div>';
 
 	echo '<br /><input type="hidden" name="MAX_FILE_SIZE" value="1000000" />' .
 			_('Prices effective from') . ':&nbsp;<input type="text" name="StartDate" size="10" class="date" alt="' . $_SESSION['DefaultDateFormat'] . '" value="' . date($_SESSION['DefaultDateFormat']) . '" />&nbsp;' .

@@ -6,23 +6,23 @@ include ('includes/session.inc');
 $Title = _('Raw Materials Not Used Anywhere');
 include ('includes/header.inc');
 
-$SQL = "SELECT stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS stdcost,
+$SQL = "SELECT weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS stdcost,
 				(SELECT SUM(quantity)
-				FROM locstock
-				WHERE locstock.stockid = stockmaster.stockid) AS qoh
-		FROM stockmaster,
-			stockcategory
-		WHERE stockmaster.categoryid = stockcategory.categoryid
-			AND stockcategory.stocktype = 'M'
-			AND stockmaster.discontinued = 0
+				FROM weberp_locstock
+				WHERE weberp_locstock.stockid = weberp_stockmaster.stockid) AS qoh
+		FROM weberp_stockmaster,
+			weberp_stockcategory
+		WHERE weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+			AND weberp_stockcategory.stocktype = 'M'
+			AND weberp_stockmaster.discontinued = 0
 			AND NOT EXISTS(
 				SELECT *
-				FROM bom
-				WHERE bom.component = stockmaster.stockid )
-		ORDER BY stockmaster.stockid";
+				FROM weberp_bom
+				WHERE weberp_bom.component = weberp_stockmaster.stockid )
+		ORDER BY weberp_stockmaster.stockid";
 $result = DB_query($SQL);
 if (DB_num_rows($result) != 0){
 	$TotalValue = 0;

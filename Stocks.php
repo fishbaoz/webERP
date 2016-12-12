@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: Stocks.php 7494 2016-04-25 09:53:53Z daintree $ */
 
 include('includes/session.inc');
 $Title = _('Item Maintenance');
@@ -22,7 +22,7 @@ if (isset($_GET['StockID'])){
 $ItemDescriptionLanguagesArray = explode(',',$_SESSION['ItemDescriptionLanguages']);//WARNING: if the last character is a ",", there are n+1 languages.
 
 if (isset($_POST['NextItem'])){
-	$Result = DB_query("SELECT stockid FROM stockmaster WHERE stockid>'" . $StockID . "' ORDER BY stockid ASC LIMIT 1");
+	$Result = DB_query("SELECT stockid FROM weberp_stockmaster WHERE stockid>'" . $StockID . "' ORDER BY stockid ASC LIMIT 1");
 	$NextItemRow = DB_fetch_row($Result);
 	$StockID = $NextItemRow[0];
 	foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
@@ -30,7 +30,7 @@ if (isset($_POST['NextItem'])){
 	}
 }
 if (isset($_POST['PreviousItem'])){
-	$Result = DB_query("SELECT stockid FROM stockmaster WHERE stockid<'" . $StockID . "' ORDER BY stockid DESC LIMIT 1");
+	$Result = DB_query("SELECT stockid FROM weberp_stockmaster WHERE stockid<'" . $StockID . "' ORDER BY stockid DESC LIMIT 1");
 	$PreviousItemRow = DB_fetch_row($Result);
 	$StockID = $PreviousItemRow[0];
 	foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
@@ -40,7 +40,7 @@ if (isset($_POST['PreviousItem'])){
 
 if (isset($StockID) AND !isset($_POST['UpdateCategories'])) {
 	$sql = "SELECT COUNT(stockid)
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid='".$StockID."'
 			GROUP BY stockid";
 
@@ -265,13 +265,13 @@ if (isset($_POST['submit'])) {
 							controlled,
 							serialised,
 							materialcost+labourcost+overheadcost AS itemcost,
-							stockcategory.stockact,
-							stockcategory.wipact,
+							weberp_stockcategory.stockact,
+							weberp_stockcategory.wipact,
 							description,
 							longdescription
-					FROM stockmaster
-					INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
+					FROM weberp_stockmaster
+					INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
 					WHERE stockid = '".$StockID."'";
 			$MBFlagResult = DB_query($sql);
 			$myrow = DB_fetch_row($MBFlagResult);
@@ -285,8 +285,8 @@ if (isset($_POST['submit'])) {
 			$OldLongDescription = $myrow[7];
 
 
-			$sql = "SELECT SUM(locstock.quantity)
-					FROM locstock
+			$sql = "SELECT SUM(weberp_locstock.quantity)
+					FROM weberp_locstock
 					WHERE stockid='".$StockID."'
 					GROUP BY stockid";
 			$result = DB_query($sql);
@@ -296,7 +296,7 @@ if (isset($_POST['submit'])) {
 
 			$result = DB_query("SELECT stockact,
 										wipact
-								FROM stockcategory
+								FROM weberp_stockcategory
 								WHERE categoryid='" . $_POST['CategoryID'] . "'");
 			$NewStockActRow = DB_fetch_array($result);
 			$NewStockAct = $NewStockActRow['stockact'];
@@ -318,7 +318,7 @@ if (isset($_POST['submit'])) {
 				/*now check that if the item is being changed to a kitset, there are no items on sales orders or purchase orders*/
 				if ($_POST['MBFlag']=='K') {
 					$sql = "SELECT quantity-qtyinvoiced
-							FROM salesorderdetails
+							FROM weberp_salesorderdetails
 							WHERE stkcode = '".$StockID."'
 							AND completed=0";
 
@@ -333,13 +333,13 @@ if (isset($_POST['submit'])) {
 				if ($_POST['MBFlag']=='K' OR $_POST['MBFlag']=='A' OR $_POST['MBFlag']=='D') {
 
 					$sql = "SELECT quantityord-quantityrecd
-							FROM purchorderdetails INNER JOIN purchorders
-							ON purchorders.orderno=purchorderdetails.orderno
+							FROM weberp_purchorderdetails INNER JOIN weberp_purchorders
+							ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
 							WHERE itemcode = '".$StockID."'
-							AND purchorderdetails.completed=0
-							AND purchorders.status<>'Cancelled'
-							AND purchorders.status<>'Completed'
-							AND purchorders.status<>'Rejected'";
+							AND weberp_purchorderdetails.completed=0
+							AND weberp_purchorders.status<>'Cancelled'
+							AND weberp_purchorders.status<>'Completed'
+							AND weberp_purchorders.status<>'Rejected'";
 
 					$result = DB_query($sql);
 					$ChkPurchOrds = DB_fetch_row($result);
@@ -352,7 +352,7 @@ if (isset($_POST['submit'])) {
 				/*now check that if it was a Manufactured, Kitset, Phantom or Assembly and is being changed to a purchased or dummy - that no BOM exists */
 				if (($OldMBFlag=='M' OR $OldMBFlag =='K' OR $OldMBFlag=='A' OR $OldMBFlag=='G') AND ($_POST['MBFlag']=='B' OR $_POST['MBFlag']=='D')) {
 					$sql = "SELECT COUNT(*)
-							FROM bom
+							FROM weberp_bom
 							WHERE parent = '".$StockID."'
 							GROUP BY parent";
 					$result = DB_query($sql);
@@ -366,7 +366,7 @@ if (isset($_POST['submit'])) {
 				/*now check that if it was Manufac, Phantom or Purchased and is being changed to assembly or kitset, it is not a component on an existing BOM */
 				if (($OldMBFlag=='M' OR $OldMBFlag =='B' OR $OldMBFlag=='D' OR $OldMBFlag=='G') AND ($_POST['MBFlag']=='A' OR $_POST['MBFlag']=='K')) {
 					$sql = "SELECT COUNT(*)
-							FROM bom
+							FROM weberp_bom
 							WHERE component = '".$StockID."'
 							GROUP BY component";
 					$result = DB_query($sql);
@@ -403,7 +403,7 @@ if (isset($_POST['submit'])) {
 
 				DB_Txn_Begin();
 
-				$sql = "UPDATE stockmaster
+				$sql = "UPDATE weberp_stockmaster
 						SET longdescription='" . $_POST['LongDescription'] . "',
 							description='" . $_POST['Description'] . "',
 							discontinued='" . $_POST['Discontinued'] . "',
@@ -436,8 +436,8 @@ if (isset($_POST['submit'])) {
 				if (count($ItemDescriptionLanguagesArray)>0){
 					foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 						if ($LanguageId != ''){
-							$result = DB_query("DELETE FROM stockdescriptiontranslations WHERE stockid='" . $StockID . "' AND language_id='" . $LanguageId . "'", $ErrMsg, $DbgMsg, true);
-							$result = DB_query("INSERT INTO stockdescriptiontranslations (stockid,
+							$result = DB_query("DELETE FROM weberp_stockdescriptiontranslations WHERE stockid='" . $StockID . "' AND language_id='" . $LanguageId . "'", $ErrMsg, $DbgMsg, true);
+							$result = DB_query("INSERT INTO weberp_stockdescriptiontranslations (stockid,
 																						language_id,
 																						descriptiontranslation,
 																						longdescriptiontranslation)
@@ -452,7 +452,7 @@ if (isset($_POST['submit'])) {
 					foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 						$DescriptionTranslation = $_POST['Description_' . str_replace('.', '_', $LanguageId)];
 							//WARNING: It DOES NOT update if database row DOES NOT exist.
-							$sql = "UPDATE stockdescriptiontranslations " .
+							$sql = "UPDATE weberp_stockdescriptiontranslations " .
 									"SET descriptiontranslation='" . $DescriptionTranslation . "' " .
 									"WHERE stockid='" . $StockID . "' AND (language_id='" . $LanguageId. "')";
 							$result = DB_query($sql, $ErrMsg, $DbgMsg, true);
@@ -463,7 +463,7 @@ if (isset($_POST['submit'])) {
 
 				/* Activate the needs revision flag for translations for modified descriptions */
 				if ($OldDescription != $_POST['Description'] OR $OldLongDescription != $_POST['LongDescription']){
-					$sql = "UPDATE stockdescriptiontranslations
+					$sql = "UPDATE weberp_stockdescriptiontranslations
 						SET needsrevision = '0'
 						WHERE stockid='".$StockID."'";
 					$ErrMsg = _('The stock description translations could not be updated because');
@@ -473,7 +473,7 @@ if (isset($_POST['submit'])) {
 
 
 				//delete any properties for the item no longer relevant with the change of category
-				$result = DB_query("DELETE FROM stockitemproperties WHERE stockid ='" . $StockID . "'",$ErrMsg, $DbgMsg, true);
+				$result = DB_query("DELETE FROM weberp_stockitemproperties WHERE stockid ='" . $StockID . "'",$ErrMsg, $DbgMsg, true);
 
 				//now insert any item properties
 				for ($i=0;$i<$_POST['PropertyCounter'];$i++){
@@ -490,7 +490,7 @@ if (isset($_POST['submit'])) {
 					} else {
 						$_POST['PropValue' . $i]=$_POST['PropValue' . $i];
 					}
-					$result = DB_query("INSERT INTO stockitemproperties (stockid,
+					$result = DB_query("INSERT INTO weberp_stockitemproperties (stockid,
 																		stkcatpropid,
 																		value)
 														VALUES ('" . $StockID . "',
@@ -502,7 +502,7 @@ if (isset($_POST['submit'])) {
 				if ($OldStockAccount != $NewStockAct AND $_SESSION['CompanyRecord']['gllink_stock']==1) {
 				/*Then we need to make a journal to transfer the cost to the new stock account */
 					$JournalNo = GetNextTransNo(0,$db); //enter as a journal
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -519,7 +519,7 @@ if (isset($_POST['submit'])) {
 					$ErrMsg =  _('The stock cost journal could not be inserted because');
 					$DbgMsg = _('The SQL that was used to create the stock cost journal and failed was');
 					$result = DB_query($SQL, $ErrMsg, $DbgMsg,true);
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -540,15 +540,15 @@ if (isset($_POST['submit'])) {
 				/*Then we need to make a journal to transfer the cost  of WIP to the new WIP account */
 				/*First get the total cost of WIP for this category */
 
-					$WOCostsResult = DB_query("SELECT workorders.costissued,
-													SUM(woitems.qtyreqd * woitems.stdcost) AS costrecd
-												FROM woitems INNER JOIN workorders
-												ON woitems.wo = workorders.wo
-												INNER JOIN stockmaster
-												ON woitems.stockid=stockmaster.stockid
-												WHERE stockmaster.stockid='". $StockID . "'
-												AND workorders.closed=0
-												GROUP BY workorders.costissued",
+					$WOCostsResult = DB_query("SELECT weberp_workorders.costissued,
+													SUM(weberp_woitems.qtyreqd * weberp_woitems.stdcost) AS costrecd
+												FROM weberp_woitems INNER JOIN weberp_workorders
+												ON weberp_woitems.wo = weberp_workorders.wo
+												INNER JOIN weberp_stockmaster
+												ON weberp_woitems.stockid=weberp_stockmaster.stockid
+												WHERE weberp_stockmaster.stockid='". $StockID . "'
+												AND weberp_workorders.closed=0
+												GROUP BY weberp_workorders.costissued",
 												_('Error retrieving value of finished goods received and cost issued against work orders for this item'));
 					$WIPValue = 0;
 					while ($WIPRow=DB_fetch_array($WOCostsResult)){
@@ -556,7 +556,7 @@ if (isset($_POST['submit'])) {
 					}
 					if ($WIPValue !=0){
 						$JournalNo = GetNextTransNo(0,$db); //enter as a journal
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 													typeno,
 													trandate,
 													periodno,
@@ -573,7 +573,7 @@ if (isset($_POST['submit'])) {
 						$ErrMsg =  _('The WIP cost journal could not be inserted because');
 						$DbgMsg = _('The SQL that was used to create the WIP cost journal and failed was');
 						$result = DB_query($SQL, $ErrMsg, $DbgMsg,true);
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 													typeno,
 													trandate,
 													periodno,
@@ -598,7 +598,7 @@ if (isset($_POST['submit'])) {
 		} else { //it is a NEW part
 			//but lets be really sure here
 			$result = DB_query("SELECT stockid
-								FROM stockmaster
+								FROM weberp_stockmaster
 								WHERE stockid='" . $StockID ."'");
 
 			if (DB_num_rows($result)==1){
@@ -608,7 +608,7 @@ if (isset($_POST['submit'])) {
 				$i++;
 			} else {
 				DB_Txn_Begin();
-				$sql = "INSERT INTO stockmaster (stockid,
+				$sql = "INSERT INTO weberp_stockmaster (stockid,
 												description,
 												longdescription,
 												categoryid,
@@ -659,7 +659,7 @@ if (isset($_POST['submit'])) {
 					if (count($ItemDescriptionLanguages)>0){
 						foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 							if ($LanguageId != '' AND $_POST['Description_' . str_replace('.','_',$LanguageId)] != ''){
-								$result = DB_query("INSERT INTO stockdescriptiontranslations (stockid,
+								$result = DB_query("INSERT INTO weberp_stockdescriptiontranslations (stockid,
 																							language_id,
 																							descriptiontranslation,
 																							longdescriptiontranslation)
@@ -688,7 +688,7 @@ if (isset($_POST['submit'])) {
 							$_POST['PropValue' . $i]=$_POST['PropValue' . $i];
 						}
 
-					$result = DB_query("INSERT INTO stockitemproperties (stockid,
+					$result = DB_query("INSERT INTO weberp_stockitemproperties (stockid,
 													stkcatpropid,
 													value)
 													VALUES ('" . $StockID . "',
@@ -697,13 +697,13 @@ if (isset($_POST['submit'])) {
 								$ErrMsg,$DbgMsg,true);
 					} //end of loop around properties defined for the category
 
-					//Add data to locstock
+					//Add data to weberp_locstock
 
-					$sql = "INSERT INTO locstock (loccode,
+					$sql = "INSERT INTO weberp_locstock (loccode,
 													stockid)
-										SELECT locations.loccode,
+										SELECT weberp_locations.loccode,
 										'" . $StockID . "'
-										FROM locations";
+										FROM weberp_locations";
 
 					$ErrMsg =  _('The locations for the item') . ' ' . $StockID .  ' ' . _('could not be added because');
 					$DbgMsg = _('NB Locations records can be added by opening the utility page') . ' <i>Z_MakeStockLocns.php</i> ' . _('The SQL that was used to add the location records that failed was');
@@ -758,7 +758,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'StockMoves'
 
-	$sql= "SELECT COUNT(*) FROM stockmoves WHERE stockid='".$StockID."' GROUP BY stockid";
+	$sql= "SELECT COUNT(*) FROM weberp_stockmoves WHERE stockid='".$StockID."' GROUP BY stockid";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -767,7 +767,7 @@ if (isset($_POST['submit'])) {
 		echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('stock movements that refer to this item');
 
 	} else {
-		$sql= "SELECT COUNT(*) FROM bom WHERE component='".$StockID."' GROUP BY component";
+		$sql= "SELECT COUNT(*) FROM weberp_bom WHERE component='".$StockID."' GROUP BY component";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
@@ -775,7 +775,7 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('Cannot delete this item record because there are bills of material that require this part as a component'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('bills of material that require this part as a component');
 		} else {
-			$sql= "SELECT COUNT(*) FROM salesorderdetails WHERE stkcode='".$StockID."' GROUP BY stkcode";
+			$sql= "SELECT COUNT(*) FROM weberp_salesorderdetails WHERE stkcode='".$StockID."' GROUP BY stkcode";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			if ($myrow[0]>0) {
@@ -783,7 +783,7 @@ if (isset($_POST['submit'])) {
 				prnMsg( _('Cannot delete this item record because there are existing sales orders for this part'),'warn');
 				echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('sales order items against this part');
 			} else {
-				$sql= "SELECT COUNT(*) FROM salesanalysis WHERE stockid='".$StockID."' GROUP BY stockid";
+				$sql= "SELECT COUNT(*) FROM weberp_salesanalysis WHERE stockid='".$StockID."' GROUP BY stockid";
 				$result = DB_query($sql);
 				$myrow = DB_fetch_row($result);
 				if ($myrow[0]>0) {
@@ -791,7 +791,7 @@ if (isset($_POST['submit'])) {
 					prnMsg(_('Cannot delete this item because sales analysis records exist for it'),'warn');
 					echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('sales analysis records against this part');
 				} else {
-					$sql= "SELECT COUNT(*) FROM purchorderdetails WHERE itemcode='".$StockID."' GROUP BY itemcode";
+					$sql= "SELECT COUNT(*) FROM weberp_purchorderdetails WHERE itemcode='".$StockID."' GROUP BY itemcode";
 					$result = DB_query($sql);
 					$myrow = DB_fetch_row($result);
 					if ($myrow[0]>0) {
@@ -799,7 +799,7 @@ if (isset($_POST['submit'])) {
 						prnMsg(_('Cannot delete this item because there are existing purchase order items for it'),'warn');
 						echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('purchase order item record relating to this part');
 					} else {
-						$sql = "SELECT SUM(quantity) AS qoh FROM locstock WHERE stockid='".$StockID."' GROUP BY stockid";
+						$sql = "SELECT SUM(quantity) AS qoh FROM weberp_locstock WHERE stockid='".$StockID."' GROUP BY stockid";
 						$result = DB_query($sql);
 						$myrow = DB_fetch_row($result);
 						if ($myrow[0]!=0) {
@@ -807,7 +807,7 @@ if (isset($_POST['submit'])) {
 							prnMsg( _('Cannot delete this item because there is currently some stock on hand'),'warn');
 							echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('on hand for this part');
 						} else {
-							$sql = "SELECT COUNT(*) FROM offers WHERE stockid='".$StockID."' GROUP BY stockid";
+							$sql = "SELECT COUNT(*) FROM weberp_offers WHERE stockid='".$StockID."' GROUP BY stockid";
 							$result = DB_query($sql);
 							$myrow = DB_fetch_row($result);
 							if ($myrow[0]!=0) {
@@ -815,7 +815,7 @@ if (isset($_POST['submit'])) {
 								prnMsg( _('Cannot delete this item because there are offers for this item'),'warn');
 								echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('offers from suppliers for this part');
 							} else {
-								$sql = "SELECT COUNT(*) FROM tenderitems WHERE stockid='".$StockID."' GROUP BY stockid";
+								$sql = "SELECT COUNT(*) FROM weberp_tenderitems WHERE stockid='".$StockID."' GROUP BY stockid";
 								$result = DB_query($sql);
 								$myrow = DB_fetch_row($result);
 								if ($myrow[0]!=0) {
@@ -835,24 +835,24 @@ if (isset($_POST['submit'])) {
 		$result = DB_Txn_Begin();
 
 			/*Deletes LocStock records*/
-			$sql ="DELETE FROM locstock WHERE stockid='".$StockID."'";
+			$sql ="DELETE FROM weberp_locstock WHERE stockid='".$StockID."'";
 			$result=DB_query($sql,_('Could not delete the location stock records because'),'',true);
 			/*Deletes Price records*/
-			$sql ="DELETE FROM prices WHERE stockid='".$StockID."'";
+			$sql ="DELETE FROM weberp_prices WHERE stockid='".$StockID."'";
 			$result=DB_query($sql,_('Could not delete the prices for this stock record because'),'',true);
 			/*and cascade deletes in PurchData */
-			$sql ="DELETE FROM purchdata WHERE stockid='".$StockID."'";
+			$sql ="DELETE FROM weberp_purchdata WHERE stockid='".$StockID."'";
 			$result=DB_query($sql,_('Could not delete the purchasing data because'),'',true);
 			/*and cascade delete the bill of material if any */
-			$sql = "DELETE FROM bom WHERE parent='".$StockID."'";
+			$sql = "DELETE FROM weberp_bom WHERE parent='".$StockID."'";
 			$result=DB_query($sql,_('Could not delete the bill of material because'),'',true);
 			//and cascade delete the item properties
-			$sql="DELETE FROM stockitemproperties WHERE stockid='".$StockID."'";
+			$sql="DELETE FROM weberp_stockitemproperties WHERE stockid='".$StockID."'";
 			$result=DB_query($sql, _('Could not delete the item properties'),'',true);
 			//and cascade delete the item descriptions in other languages
-			$sql = "DELETE FROM stockdescriptiontranslations WHERE stockid='" . $StockID . "'";
+			$sql = "DELETE FROM weberp_stockdescriptiontranslations WHERE stockid='" . $StockID . "'";
 			$result=DB_query($sql,_('Could not delete the item language descriptions'),'',true);
-			$sql="DELETE FROM stockmaster WHERE stockid='".$StockID."'";
+			$sql="DELETE FROM weberp_stockmaster WHERE stockid='".$StockID."'";
 			$result=DB_query($sql, _('Could not delete the item record'),'',true);
 
 		$result = DB_Txn_Commit();
@@ -947,7 +947,7 @@ if (!isset($StockID) OR $StockID=='' or isset($_POST['UpdateCategories'])) {
 					nextserialno,
 					pansize,
 					shrinkfactor
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid = '".$StockID."'";
 
 	$result = DB_query($sql);
@@ -975,7 +975,7 @@ if (!isset($StockID) OR $StockID=='' or isset($_POST['UpdateCategories'])) {
 	$_POST['ShrinkFactor'] = $myrow['shrinkfactor'];
 
 
-	$sql = "SELECT descriptiontranslation, longdescriptiontranslation, language_id FROM stockdescriptiontranslations WHERE stockid='" . $StockID . "' AND (";
+	$sql = "SELECT descriptiontranslation, longdescriptiontranslation, language_id FROM weberp_stockdescriptiontranslations WHERE stockid='" . $StockID . "' AND (";
 	foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 		$sql .= "language_id='" . $LanguageId ."' OR ";
 	}
@@ -1089,7 +1089,7 @@ echo '<tr>
 		<td>' . _('Category') . ':</td>
 		<td><select name="CategoryID" onchange="ReloadForm(ItemForm.UpdateCategories)">';
 
-$sql = "SELECT categoryid, categorydescription FROM stockcategory";
+$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
 $ErrMsg = _('The stock categories could not be retrieved because');
 $DbgMsg = _('The SQL used to retrieve stock categories and failed was');
 $result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -1167,7 +1167,7 @@ echo '<tr>
 		<td>' . _('Units of Measure') . ':</td>
 		<td><select ' . (in_array('Description',$Errors) ?  'class="selecterror"' : '' ) .'  name="Units">';
 
-$sql = "SELECT unitname FROM unitsofmeasure ORDER by unitname";
+$sql = "SELECT unitname FROM weberp_unitsofmeasure ORDER by unitname";
 $UOMResult = DB_query($sql);
 
 if (!isset($_POST['Units'])) {
@@ -1322,7 +1322,7 @@ echo '<tr>
 echo '<tr>
 		<td>' . _('Tax Category') . ':</td>
 		<td><select name="TaxCat">';
-$sql = "SELECT taxcatid, taxcatname FROM taxcategories ORDER BY taxcatname";
+$sql = "SELECT taxcatid, taxcatname FROM weberp_taxcategories ORDER BY taxcatname";
 $result = DB_query($sql);
 
 if (!isset($_POST['TaxCat'])){
@@ -1363,7 +1363,7 @@ $sql = "SELECT stkcatpropid,
 				numericvalue,
 				minimumvalue,
 				maximumvalue
-		FROM stockcatproperties
+		FROM weberp_stockcatproperties
 		WHERE categoryid ='" . $_POST['CategoryID'] . "'
 		AND reqatsalesorder =0
 		ORDER BY stkcatpropid";
@@ -1383,7 +1383,7 @@ while ($PropertyRow=DB_fetch_array($PropertiesResult)){
 
 	if (isset($StockID)) {
 		$PropValResult = DB_query("SELECT value FROM
-									stockitemproperties
+									weberp_stockitemproperties
 									WHERE stockid='" . $StockID . "'
 									AND stkcatpropid ='" . $PropertyRow['stkcatpropid']."'");
 		$PropValRow = DB_fetch_row($PropValResult);

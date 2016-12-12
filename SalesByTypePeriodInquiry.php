@@ -185,72 +185,72 @@ if (isset($_POST['ShowSales'])){
 	}
 	switch ($_POST['DisplayData']) {
 		case 'Daily':
-			$sql = "SELECT debtortrans.trandate,
-							debtortrans.tpe,
-						SUM(CASE WHEN stockmoves.type=10 THEN
+			$sql = "SELECT weberp_debtortrans.trandate,
+							weberp_debtortrans.tpe,
+						SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END)
 						 as salesvalue,
-						 SUM(CASE WHEN stockmoves.type=10 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							1 ELSE 0 END)
 						 as nooforders,
-						 SUM(CASE WHEN stockmoves.type=11 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END)
 						 as returnvalue,
 						SUM((standardcost * -qty)) as cost
-					FROM stockmoves
-					INNER JOIN custbranch
-					ON stockmoves.debtorno=custbranch.debtorno
-					AND stockmoves.branchcode=custbranch.branchcode
-					INNER JOIN debtortrans
-					ON stockmoves.type=debtortrans.type
-					AND stockmoves.transno=debtortrans.transno
-					WHERE (stockmoves.type=10 or stockmoves.type=11)
+					FROM weberp_stockmoves
+					INNER JOIN weberp_custbranch
+					ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+					AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+					INNER JOIN weberp_debtortrans
+					ON weberp_stockmoves.type=weberp_debtortrans.type
+					AND weberp_stockmoves.transno=weberp_debtortrans.transno
+					WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 					AND show_on_inv_crds =1
-					AND debtortrans.trandate>='" . $FromDate . "'
-					AND debtortrans.trandate<='" . $ToDate . "'";
+					AND weberp_debtortrans.trandate>='" . $FromDate . "'
+					AND weberp_debtortrans.trandate<='" . $ToDate . "'";
 
 			if ($_SESSION['SalesmanLogin'] != '') {
-				$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
-			$sql .= " GROUP BY debtortrans.trandate,
+			$sql .= " GROUP BY weberp_debtortrans.trandate,
 							tpe
-					ORDER BY debtortrans.trandate,
+					ORDER BY weberp_debtortrans.trandate,
 							tpe";
 
 			break;
 		case 'Weekly':
-			$sql = "SELECT WEEKOFYEAR(debtortrans.trandate) as week_no,
-							YEAR(debtortrans.trandate) as transyear,
-							debtortrans.tpe,
-						SUM(CASE WHEN stockmoves.type=10 THEN
+			$sql = "SELECT WEEKOFYEAR(weberp_debtortrans.trandate) as week_no,
+							YEAR(weberp_debtortrans.trandate) as transyear,
+							weberp_debtortrans.tpe,
+						SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END)
 						 as salesvalue,
-						 SUM(CASE WHEN stockmoves.type=10 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							1 ELSE 0 END)
 						 as nooforders,
-						 SUM(CASE WHEN stockmoves.type=11 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END)
 						as returnvalue,
 						SUM((standardcost * -qty)) as cost
-					FROM stockmoves
-					INNER JOIN custbranch
-					ON stockmoves.debtorno=custbranch.debtorno
-					AND stockmoves.branchcode=custbranch.branchcode
-					INNER JOIN debtortrans
-					ON stockmoves.type=debtortrans.type
-					AND stockmoves.transno=debtortrans.transno
-					WHERE (stockmoves.type=10 or stockmoves.type=11)
+					FROM weberp_stockmoves
+					INNER JOIN weberp_custbranch
+					ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+					AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+					INNER JOIN weberp_debtortrans
+					ON weberp_stockmoves.type=weberp_debtortrans.type
+					AND weberp_stockmoves.transno=weberp_debtortrans.transno
+					WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 					AND show_on_inv_crds =1
-					AND debtortrans.trandate>='" . $FromDate . "'
-					AND debtortrans.trandate<='" . $ToDate . "'";
+					AND weberp_debtortrans.trandate>='" . $FromDate . "'
+					AND weberp_debtortrans.trandate<='" . $ToDate . "'";
 
 			if ($_SESSION['SalesmanLogin'] != '') {
-				$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
 			$sql .= " GROUP BY week_no,
@@ -262,77 +262,77 @@ if (isset($_POST['ShowSales'])){
 
 			break;
 		case 'Monthly':
-			$sql = "SELECT MONTH(debtortrans.trandate) as month_no,
-							MONTHNAME(debtortrans.trandate) as month_name,
-							YEAR(debtortrans.trandate) as transyear,
-							debtortrans.tpe,
-						SUM(CASE WHEN stockmoves.type=10 THEN
+			$sql = "SELECT MONTH(weberp_debtortrans.trandate) as month_no,
+							MONTHNAME(weberp_debtortrans.trandate) as month_name,
+							YEAR(weberp_debtortrans.trandate) as transyear,
+							weberp_debtortrans.tpe,
+						SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END)
 						 as salesvalue,
-						 SUM(CASE WHEN stockmoves.type=10 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							1 ELSE 0 END)
 						 as nooforders,
-						 SUM(CASE WHEN stockmoves.type=11 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END)
 						as returnvalue,
 						SUM((standardcost * -qty)) as cost
-					FROM stockmoves
-					INNER JOIN custbranch
-					ON stockmoves.debtorno=custbranch.debtorno
-					AND stockmoves.branchcode=custbranch.branchcode
-					INNER JOIN debtortrans
-					ON stockmoves.type=debtortrans.type
-					AND stockmoves.transno=debtortrans.transno
-					WHERE (stockmoves.type=10 or stockmoves.type=11)
+					FROM weberp_stockmoves
+					INNER JOIN weberp_custbranch
+					ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+					AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+					INNER JOIN weberp_debtortrans
+					ON weberp_stockmoves.type=weberp_debtortrans.type
+					AND weberp_stockmoves.transno=weberp_debtortrans.transno
+					WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 					AND show_on_inv_crds =1
-					AND debtortrans.trandate>='" . $FromDate . "'
-					AND debtortrans.trandate<='" . $ToDate . "'";
+					AND weberp_debtortrans.trandate>='" . $FromDate . "'
+					AND weberp_debtortrans.trandate<='" . $ToDate . "'";
 
 			if ($_SESSION['SalesmanLogin'] != '') {
-				$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
 			$sql .= " GROUP BY month_no,
 							month_name,
 							transyear,
-							debtortrans.tpe
+							weberp_debtortrans.tpe
 					ORDER BY transyear,
 							month_no,
 							tpe";
 
 			break;
 		case 'Quarterly':
-			$sql = "SELECT QUARTER(debtortrans.trandate) as quarter_no,
-							YEAR(debtortrans.trandate) as transyear,
-							debtortrans.tpe,
-						SUM(CASE WHEN stockmoves.type=10 THEN
+			$sql = "SELECT QUARTER(weberp_debtortrans.trandate) as quarter_no,
+							YEAR(weberp_debtortrans.trandate) as transyear,
+							weberp_debtortrans.tpe,
+						SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END)
 						 as salesvalue,
-						 SUM(CASE WHEN stockmoves.type=10 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							1 ELSE 0 END)
 						 as nooforders,
-						 SUM(CASE WHEN stockmoves.type=11 THEN
+						 SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END)
 						as returnvalue,
 						SUM((standardcost * -qty)) as cost
-					FROM stockmoves
-					INNER JOIN custbranch
-					ON stockmoves.debtorno=custbranch.debtorno
-					AND stockmoves.branchcode=custbranch.branchcode
-					INNER JOIN debtortrans
-					ON stockmoves.type=debtortrans.type
-					AND stockmoves.transno=debtortrans.transno
-					WHERE (stockmoves.type=10 or stockmoves.type=11)
+					FROM weberp_stockmoves
+					INNER JOIN weberp_custbranch
+					ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+					AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+					INNER JOIN weberp_debtortrans
+					ON weberp_stockmoves.type=weberp_debtortrans.type
+					AND weberp_stockmoves.transno=weberp_debtortrans.transno
+					WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 					AND show_on_inv_crds =1
-					AND debtortrans.trandate>='" . $FromDate . "'
-					AND debtortrans.trandate<='" . $ToDate . "'";
+					AND weberp_debtortrans.trandate>='" . $FromDate . "'
+					AND weberp_debtortrans.trandate<='" . $ToDate . "'";
 
 			if ($_SESSION['SalesmanLogin'] != '') {
-				$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+				$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 			}
 
 			$sql .= " GROUP BY quarter_no,

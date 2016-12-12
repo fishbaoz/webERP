@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Tax.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 
@@ -9,14 +9,14 @@ if(isset($_POST['TaxAuthority']) AND
 	isset($_POST['ToPeriod'])) {
 
 	$sql = "SELECT lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			WHERE periodno='" . $_POST['ToPeriod'] . "'";
 	$ErrMsg = _('Could not determine the last date of the period selected') . '. ' . _('The sql returned the following error');
 	$PeriodEndResult = DB_query($sql,$ErrMsg);
 	$PeriodEndRow = DB_fetch_row($PeriodEndResult);
 	$PeriodEnd = ConvertSQLDate($PeriodEndRow[0]);
 
-	$result = DB_query("SELECT description FROM taxauthorities WHERE taxid='" . $_POST['TaxAuthority'] . "'");
+	$result = DB_query("SELECT description FROM weberp_taxauthorities WHERE taxid='" . $_POST['TaxAuthority'] . "'");
 	$TaxAuthDescription = DB_fetch_row($result);
 	$TaxAuthorityName = $TaxAuthDescription[0];
 
@@ -25,28 +25,28 @@ if(isset($_POST['TaxAuthority']) AND
 	$pdf->addInfo('Subject', $_POST['NoOfPeriods'] . ' ' . _('months to') . ' ' . $PeriodEnd);
 
 	/*Now get the invoices for the tax report */
-	/* The amounts of taxes are inserted into debtortranstaxes.taxamount in
-	local currency and they are accumulated in debtortrans.ovgst in original
+	/* The amounts of taxes are inserted into weberp_debtortranstaxes.taxamount in
+	local currency and they are accumulated in weberp_debtortrans.ovgst in original
 	currency. */
 	$SQL = "SELECT
-				debtortrans.trandate,
-				debtortrans.type,
-				systypes.typename,
-				debtortrans.transno,
-				debtortrans.debtorno,
-				debtorsmaster.name,
-				debtortrans.branchcode,
-				(debtortrans.ovamount+debtortrans.ovfreight)/debtortrans.rate AS netamount,
-				debtortranstaxes.taxamount AS tax
-			FROM debtortrans
-			INNER JOIN debtorsmaster ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN systypes ON debtortrans.type=systypes.typeid
-			INNER JOIN debtortranstaxes ON debtortrans.id = debtortranstaxes.debtortransid
-			WHERE debtortrans.prd >= '" . ($_POST['ToPeriod'] - $_POST['NoOfPeriods'] + 1) . "'
-			AND debtortrans.prd <= '" . $_POST['ToPeriod'] . "'
-			AND (debtortrans.type=10 OR debtortrans.type=11)
-			AND debtortranstaxes.taxauthid = '" . $_POST['TaxAuthority'] . "'
-			ORDER BY debtortrans.id";// Order by debtortrans record number (primary key).
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.type,
+				weberp_systypes.typename,
+				weberp_debtortrans.transno,
+				weberp_debtortrans.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtortrans.branchcode,
+				(weberp_debtortrans.ovamount+weberp_debtortrans.ovfreight)/weberp_debtortrans.rate AS netamount,
+				weberp_debtortranstaxes.taxamount AS tax
+			FROM weberp_debtortrans
+			INNER JOIN weberp_debtorsmaster ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_systypes ON weberp_debtortrans.type=weberp_systypes.typeid
+			INNER JOIN weberp_debtortranstaxes ON weberp_debtortrans.id = weberp_debtortranstaxes.debtortransid
+			WHERE weberp_debtortrans.prd >= '" . ($_POST['ToPeriod'] - $_POST['NoOfPeriods'] + 1) . "'
+			AND weberp_debtortrans.prd <= '" . $_POST['ToPeriod'] . "'
+			AND (weberp_debtortrans.type=10 OR weberp_debtortrans.type=11)
+			AND weberp_debtortranstaxes.taxauthid = '" . $_POST['TaxAuthority'] . "'
+			ORDER BY weberp_debtortrans.id";// Order by weberp_debtortrans record number (primary key).
 
 	$DebtorTransResult = DB_query($SQL,'','',false,false); //don't trap errors in DB_query
 
@@ -144,23 +144,23 @@ if(isset($_POST['TaxAuthority']) AND
 
 	$SQL =
 		"SELECT
-			supptrans.trandate,
-			supptrans.type,
-			systypes.typename,
-			supptrans.transno,
-			suppliers.suppname,
-			supptrans.suppreference,
-			supptrans.ovamount/supptrans.rate AS netamount,
-			supptranstaxes.taxamount/supptrans.rate AS taxamt
-		FROM supptrans
-		INNER JOIN suppliers ON supptrans.supplierno=suppliers.supplierid
-		INNER JOIN systypes ON supptrans.type=systypes.typeid
-		INNER JOIN supptranstaxes ON supptrans.id = supptranstaxes.supptransid
-		WHERE supptrans.trandate >= '" . $StartDateSQL . "'
-		AND supptrans.trandate <= '" . FormatDateForSQL($PeriodEnd) . "'
-		AND (supptrans.type=20 OR supptrans.type=21)
-		AND supptranstaxes.taxauthid = '" . $_POST['TaxAuthority'] . "'
-		ORDER BY supptrans.id";// Order by supptrans record number (primary key).
+			weberp_supptrans.trandate,
+			weberp_supptrans.type,
+			weberp_systypes.typename,
+			weberp_supptrans.transno,
+			weberp_suppliers.suppname,
+			weberp_supptrans.suppreference,
+			weberp_supptrans.ovamount/weberp_supptrans.rate AS netamount,
+			weberp_supptranstaxes.taxamount/weberp_supptrans.rate AS taxamt
+		FROM weberp_supptrans
+		INNER JOIN weberp_suppliers ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+		INNER JOIN weberp_systypes ON weberp_supptrans.type=weberp_systypes.typeid
+		INNER JOIN weberp_supptranstaxes ON weberp_supptrans.id = weberp_supptranstaxes.supptransid
+		WHERE weberp_supptrans.trandate >= '" . $StartDateSQL . "'
+		AND weberp_supptrans.trandate <= '" . FormatDateForSQL($PeriodEnd) . "'
+		AND (weberp_supptrans.type=20 OR weberp_supptrans.type=21)
+		AND weberp_supptranstaxes.taxauthid = '" . $_POST['TaxAuthority'] . "'
+		ORDER BY weberp_supptrans.id";// Order by supptrans record number (primary key).
 
 	$SuppTransResult = DB_query($SQL,'','',false,false); //doint trap errors in DB_query
 
@@ -331,7 +331,7 @@ if(isset($_POST['TaxAuthority']) AND
 	echo '<tr><td>' . _('Tax Authority To Report On') . ':</td>
 			<td><select name="TaxAuthority">';
 
-	$result = DB_query("SELECT taxid, description FROM taxauthorities");
+	$result = DB_query("SELECT taxid, description FROM weberp_taxauthorities");
 	while($myrow = DB_fetch_array($result)) {
 		echo '<option value="' . $myrow['taxid'] . '">' . $myrow['description'] . '</option>';
 	}
@@ -357,7 +357,7 @@ if(isset($_POST['TaxAuthority']) AND
 
 	$sql = "SELECT periodno,
 			lastdate_in_period
-		FROM periods";
+		FROM weberp_periods";
 
 	$ErrMsg = _('Could not retrieve the period data because');
 	$Periods = DB_query($sql,$ErrMsg);

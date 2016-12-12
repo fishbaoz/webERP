@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: FreightCalculation.inc 6944 2014-10-27 07:15:34Z daintree $*/
 /*Function to calculate the freight cost.
 Freight cost is determined by looking for a match of destination city from the Address2 and Address3 fields then looking through the freight company rates for the total KGs and Cubic meters  to figure out the least cost shipping company. */
 
@@ -50,7 +50,7 @@ Function CalcFreightCost ($TotalValue,
 				cubrate * " . $TotalVolume . " AS cubcost,
 				fixedprice,
 				minimumchg
-			FROM freightcosts
+			FROM weberp_freightcosts
 			WHERE locationfrom = '" . $FromLocation . "'
 			AND destinationcountry = '" . strtoupper($BrAddCountry) . "'
 			AND maxkgs > " . $TotalWeight . "
@@ -110,7 +110,7 @@ Function CalcFreightCost ($TotalValue,
 	}
 
 	if ($Currency != $_SESSION['CompanyRecord']['currencydefault']){
-		$ExRateResult = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $Currency . "'");
+		$ExRateResult = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $Currency . "'");
 		if (DB_num_rows($ExRateResult)>0){
 			$ExRateRow = DB_fetch_row($ExRateResult);
 			$ExRate = $ExRateRow[0];

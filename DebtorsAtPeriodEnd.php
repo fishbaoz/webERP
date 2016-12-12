@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: DebtorsAtPeriodEnd.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 
@@ -19,37 +19,37 @@ if (isset($_POST['PrintPDF'])
 
 	/*Get the date of the last day in the period selected */
 
-	$SQL = "SELECT lastdate_in_period FROM periods WHERE periodno = '" . $_POST['PeriodEnd']."'";
+	$SQL = "SELECT lastdate_in_period FROM weberp_periods WHERE periodno = '" . $_POST['PeriodEnd']."'";
 	$PeriodEndResult = DB_query($SQL,_('Could not get the date of the last day in the period selected'));
 	$PeriodRow = DB_fetch_row($PeriodEndResult);
 	$PeriodEndDate = ConvertSQLDate($PeriodRow[0]);
 
 	  /*Now figure out the aged analysis for the customer range under review */
 
-	$SQL = "SELECT debtorsmaster.debtorno,
-					debtorsmaster.name,
-		  			currencies.currency,
-		  			currencies.decimalplaces,
-					SUM((debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)/debtortrans.rate) AS balance,
-					SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) AS fxbalance,
-					SUM(CASE WHEN debtortrans.prd > '" . $_POST['PeriodEnd'] . "' THEN
-					(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount)/debtortrans.rate ELSE 0 END) AS afterdatetrans,
-					SUM(CASE WHEN debtortrans.prd > '" . $_POST['PeriodEnd'] . "'
-						AND (debtortrans.type=11 OR debtortrans.type=12) THEN
-						debtortrans.diffonexch ELSE 0 END) AS afterdatediffonexch,
-					SUM(CASE WHEN debtortrans.prd > '" . $_POST['PeriodEnd'] . "' THEN
-					debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount ELSE 0 END
+	$SQL = "SELECT weberp_debtorsmaster.debtorno,
+					weberp_debtorsmaster.name,
+		  			weberp_currencies.currency,
+		  			weberp_currencies.decimalplaces,
+					SUM((weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc)/weberp_debtortrans.rate) AS balance,
+					SUM(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc) AS fxbalance,
+					SUM(CASE WHEN weberp_debtortrans.prd > '" . $_POST['PeriodEnd'] . "' THEN
+					(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount)/weberp_debtortrans.rate ELSE 0 END) AS afterdatetrans,
+					SUM(CASE WHEN weberp_debtortrans.prd > '" . $_POST['PeriodEnd'] . "'
+						AND (weberp_debtortrans.type=11 OR weberp_debtortrans.type=12) THEN
+						weberp_debtortrans.diffonexch ELSE 0 END) AS afterdatediffonexch,
+					SUM(CASE WHEN weberp_debtortrans.prd > '" . $_POST['PeriodEnd'] . "' THEN
+					weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount ELSE 0 END
 					) AS fxafterdatetrans
-			FROM debtorsmaster INNER JOIN currencies
-			ON debtorsmaster.currcode = currencies.currabrev
-			INNER JOIN debtortrans
-			ON debtorsmaster.debtorno = debtortrans.debtorno
-			WHERE debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
-			AND debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
-			GROUP BY debtorsmaster.debtorno,
-				debtorsmaster.name,
-				currencies.currency,
-				currencies.decimalplaces";
+			FROM weberp_debtorsmaster INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+			INNER JOIN weberp_debtortrans
+			ON weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+			WHERE weberp_debtorsmaster.debtorno >= '" . $_POST['FromCriteria'] . "'
+			AND weberp_debtorsmaster.debtorno <= '" . $_POST['ToCriteria'] . "'
+			GROUP BY weberp_debtorsmaster.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_currencies.currency,
+				weberp_currencies.decimalplaces";
 
 	$CustomerResult = DB_query($SQL,'','',false,false);
 
@@ -150,7 +150,7 @@ if (isset($_POST['PrintPDF'])
 				<td>' . _('Balances As At') . ':</td>
 				<td><select tabindex="3" name="PeriodEnd">';
 
-		$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+		$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 		$Periods = DB_query($sql,_('Could not retrieve period data because'),_('The SQL that failed to get the period data was'));
 
 		while ($myrow = DB_fetch_array($Periods,$db)){

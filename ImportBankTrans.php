@@ -28,7 +28,7 @@ if (!isset($_FILES['ImportFile']) AND !isset($_SESSION['Statement'])) {
 					bankaccountnumber,
 					currcode,
 					importformat
-			FROM bankaccounts WHERE importformat <>''";
+			FROM weberp_bankaccounts WHERE importformat <>''";
 
 	$ErrMsg = _('The bank accounts set up could not be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the bank accounts was') . '<br />' . $sql;
@@ -112,8 +112,8 @@ if (!isset($_FILES['ImportFile']) AND !isset($_SESSION['Statement'])) {
 					bankaccountname,
 					decimalplaces,
 					rate
-			FROM bankaccounts INNER JOIN currencies
-			ON bankaccounts.currcode=currencies.currabrev
+			FROM weberp_bankaccounts INNER JOIN weberp_currencies
+			ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
 			WHERE bankaccountnumber " . LIKE . " '" . $_SESSION['Statement']->AccountNumber ."'
 			AND currcode = '" . $_SESSION['Statement']->CurrCode . "'";
 
@@ -133,7 +133,7 @@ if (!isset($_FILES['ImportFile']) AND !isset($_SESSION['Statement'])) {
 		/* Now check to see if each transaction has already been entered */
 		for($i=1;$i<=count($_SESSION['Trans']);$i++){
 
-			$SQL = "SELECT banktransid FROM banktrans
+			$SQL = "SELECT banktransid FROM weberp_banktrans
 					WHERE transdate='" . FormatDateForSQL($_SESSION['Trans'][$i]->ValueDate) . "'
 					AND amount='" . $_SESSION['Trans'][$i]->Amount . "'
 					AND bankact='" . $_SESSION['Statement']->BankGLAccount . "'";
@@ -162,9 +162,9 @@ if (isset($_POST['ProcessBankTrans'])){
 		 * First check to see if the item is flagged as matching an existing bank transaction - if it does and there is no analysis of the transaction then we need to flag the existing bank transaction as matched off the bank statement for reconciliation purposes.
 		 * Then, if the transaction is analysed:
 			* 1. create the bank transaction
-			* 2. if it is a debtor receipt create a debtortrans systype 12 against the selected customer
+			* 2. if it is a debtor receipt create a weberp_debtortrans systype 12 against the selected customer
 			* 3. if it is a supplier payment create a supptrans systype 22 against the selected supplier
-			* 4. create the gltrans for either the gl analysis or the debtor/supplier receipt/payment created
+			* 4. create the weberp_gltrans for either the gl analysis or the debtor/supplier receipt/payment created
 		*/
 
 		for($i=1;$i<=count($_SESSION['Trans']);$i++){
@@ -177,8 +177,8 @@ if (isset($_POST['ProcessBankTrans'])){
 				$PeriodNo = GetPeriod($_SESSION['Trans'][$i]->ValueDate,$db);
 				$InsertBankTrans = true;
 			} elseif ($_SESSION['Trans'][$i]->BankTransID!=0) {
-				//Update the banktrans to show it has cleared the bank
-				$result = DB_query("UPDATE banktrans SET amountcleared=amount
+				//Update the weberp_banktrans to show it has cleared the bank
+				$result = DB_query("UPDATE weberp_banktrans SET amountcleared=amount
 									WHERE banktransid = '" . $_SESSION['Trans'][$i]->BankTransID . "'",
 									_('Could not update the bank transaction as cleared'),
 									_('The SQL that failed to update the bank transaction as cleared was'),
@@ -193,8 +193,8 @@ if (isset($_POST['ProcessBankTrans'])){
 				if ($_SESSION['Trans'][$i]->DebtorNo!='') {
 					$TransType = 12;
 					$TransNo = GetNextTransNo(12,$db); //debtors receipt
-					/* First insert the debtortrans record */
-					$result = DB_query("INSERT INTO debtortrans (transno,
+					/* First insert the weberp_debtortrans record */
+					$result = DB_query("INSERT INTO weberp_debtortrans (transno,
 																type,
 																debtorno,
 																trandate,
@@ -215,20 +215,20 @@ if (isset($_POST['ProcessBankTrans'])){
 												'" . DB_escape_string($_SESSION['Trans'][$i]->Description) . "',
 												'" . -$_SESSION['Trans'][$i]->Amount . "')",
 											_('Could not insert the customer transaction'),
-											_('The SQL used to insert the debtortrans was'),
+											_('The SQL used to insert the weberp_debtortrans was'),
 											true);
 					/*Now update the debtors master for the last payment date */
-					$result = DB_query("UPDATE debtorsmaster
+					$result = DB_query("UPDATE weberp_debtorsmaster
 										SET lastpaiddate = '" . FormatDateForSQL($_SESSION['Trans'][$i]->ValueDate) . "',
 											lastpaid='" . $_SESSION['Trans'][$i]->Amount ."'
 										WHERE debtorno='" . $_SESSION['Trans'][$i]->DebtorNo . "'",
 										_('Could not update the last payment date and amount paid'),
-										_('The SQL that failed to update the debtorsmaster was'),
+										_('The SQL that failed to update the weberp_debtorsmaster was'),
 										true);
 
 					/* Now insert the gl trans to credit debtors control and debit bank account */
 					/*First credit debtors control from CompanyRecord */
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -246,7 +246,7 @@ if (isset($_POST['ProcessBankTrans'])){
 										_('The SQL that failed to insert the receipt GL entry was'),
 										true);
 					/*Now debit the bank account from $_SESSION['Statement']->BankGLAccount */
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -269,7 +269,7 @@ if (isset($_POST['ProcessBankTrans'])){
 					$TransNo = GetNextTransNo(2,$db);
 					foreach ($_SESSION['Trans'][$i]->GLEntries as $GLAnalysis){
 						/*Credit each analysis account */
-						$result = DB_query("INSERT INTO gltrans (type,
+						$result = DB_query("INSERT INTO weberp_gltrans (type,
 													 			typeno,
 																trandate,
 																periodno,
@@ -289,7 +289,7 @@ if (isset($_POST['ProcessBankTrans'])){
 
 					} //end loop around GLAnalysis
 					/*Now debit the bank account from $_SESSION['Statement']->BankGLAccount */
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -311,7 +311,7 @@ if (isset($_POST['ProcessBankTrans'])){
 				if ($_SESSION['Trans'][$i]->SupplierID!='') { //its a supplier payment
 					$TransType = 22;
 					$TransNo = GetNextTransNo(22,$db);
-					$result = DB_query("INSERT INTO supptrans (transno,
+					$result = DB_query("INSERT INTO weberp_supptrans (transno,
 																type,
 																supplierno,
 																trandate,
@@ -335,7 +335,7 @@ if (isset($_POST['ProcessBankTrans'])){
 											_('The SQL used to insert the supptrans was'),
 											true);
 					/*Now update the suppliers master for the last payment date */
-					$result = DB_query("UPDATE suppliers
+					$result = DB_query("UPDATE weberp_suppliers
 										SET lastpaiddate = '" . FormatDateForSQL($_SESSION['Trans'][$i]->ValueDate) . "',
 											lastpaid='" . $_SESSION['Trans'][$i]->Amount ."'
 										WHERE supplierid='" . $_SESSION['Trans'][$i]->SupplierID . "'",
@@ -344,7 +344,7 @@ if (isset($_POST['ProcessBankTrans'])){
 										true);
 					/* Now insert the gl trans to debit creditors control and credit bank account */
 					/*First debit creditors control from CompanyRecord */
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -363,7 +363,7 @@ if (isset($_POST['ProcessBankTrans'])){
 										true);
 					/*Now credit the bank account from $_SESSION['Statement']->BankGLAccount
 					 * note payments are recorded as negatives in the import */
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -387,7 +387,7 @@ if (isset($_POST['ProcessBankTrans'])){
 					$TransNo = GetNextTransNo(1,$db);
 					foreach ($_SESSION['Trans'][$i]->GLEntries as $GLAnalysis){
 						/*Debit each analysis account  note payments are recorded as negative so need negative negative to make a debit (positive)*/
-						$result = DB_query("INSERT INTO gltrans (type,
+						$result = DB_query("INSERT INTO weberp_gltrans (type,
 													 			typeno,
 																trandate,
 																periodno,
@@ -408,7 +408,7 @@ if (isset($_POST['ProcessBankTrans'])){
 					} //end loop around GLAnalysis
 					/*Now credit the gl account from $_SESSION['Statement']->BankGLAccount
 					 * Note payments are negatives*/
-					$result = DB_query("INSERT INTO gltrans (type,
+					$result = DB_query("INSERT INTO weberp_gltrans (type,
 												 			typeno,
 															trandate,
 															periodno,
@@ -432,7 +432,7 @@ if (isset($_POST['ProcessBankTrans'])){
 			/* Now insert the bank transaction if necessary */
 			/* it is not possible to import transaction that were originally in another currency converted to the currency of the bank account by the bank - these entries would need to be done through the usual method */
 
-				$result=DB_query("INSERT INTO banktrans (transno,
+				$result=DB_query("INSERT INTO weberp_banktrans (transno,
 														type,
 														bankact,
 														ref,

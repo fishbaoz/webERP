@@ -15,7 +15,7 @@ echo '<p class="page_title_text"><img alt="" src="'.$RootPath.'/css/'.$Theme.
 
 
 if (isset($_POST['submit']) AND $_POST['MailServerSetting']==1) {//If there are already data setup, Update the table
-	$sql="UPDATE emailsettings SET
+	$sql="UPDATE weberp_emailsettings SET
 				host='".$_POST['Host']."',
 				port='".$_POST['Port']."',
 				heloaddress='".$_POST['HeloAddress']."',
@@ -31,7 +31,7 @@ if (isset($_POST['submit']) AND $_POST['MailServerSetting']==1) {//If there are 
 	echo '<br />';
 
 }elseif(isset($_POST['submit']) and $_POST['MailServerSetting']==0){//There is no data setup yet
-	$sql = "INSERT INTO emailsettings(host,
+	$sql = "INSERT INTO weberp_emailsettings(host,
 		 				port,
 						heloaddress,
 						username,
@@ -61,7 +61,7 @@ if (isset($_POST['submit']) AND $_POST['MailServerSetting']==1) {//If there are 
 				password,
 				timeout,
 				auth
-			FROM emailsettings";
+			FROM weberp_emailsettings";
 		$ErrMsg = _('The email settings information cannot be retrieved');
 		$DbgMsg = _('The SQL that failed was');
 

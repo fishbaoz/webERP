@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockUsage.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
 
@@ -33,7 +33,7 @@ $result = DB_query("SELECT description,
 						units,
 						mbflag,
 						decimalplaces
-					FROM stockmaster
+					FROM weberp_stockmaster
 					WHERE stockid='".$StockID."'");
 $myrow = DB_fetch_row($result);
 
@@ -65,8 +65,8 @@ echo '<tr><td>' . _('Stock Code') . ':<input type="text" pattern="(?!^\s+$)[^%]{
 
 echo _('From Stock Location') . ':<select name="StockLocation">';
 
-$sql = "SELECT locations.loccode, locationname FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 $resultStkLocs = DB_query($sql);
 while ($myrow=DB_fetch_array($resultStkLocs)){
 	if (isset($_POST['StockLocation'])){
@@ -105,33 +105,33 @@ $CurrentPeriod = GetPeriod(Date($_SESSION['DefaultDateFormat']),$db);
 
 if (isset($_POST['ShowUsage'])){
 	if($_POST['StockLocation']=='All'){
-		$sql = "SELECT periods.periodno,
-				periods.lastdate_in_period,
+		$sql = "SELECT weberp_periods.periodno,
+				weberp_periods.lastdate_in_period,
 				canview,
-				SUM(CASE WHEN (stockmoves.type=10 Or stockmoves.type=11 OR stockmoves.type=28)
-							AND stockmoves.hidemovt=0
-							AND stockmoves.stockid = '" . $StockID . "'
-						THEN -stockmoves.qty ELSE 0 END) AS qtyused
-				FROM periods LEFT JOIN stockmoves
-					ON periods.periodno=stockmoves.prd
-				INNER JOIN locationusers ON locationusers.loccode=stockmoves.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-				WHERE periods.periodno <='" . $CurrentPeriod . "'
-				GROUP BY periods.periodno,
-					periods.lastdate_in_period
+				SUM(CASE WHEN (weberp_stockmoves.type=10 Or weberp_stockmoves.type=11 OR weberp_stockmoves.type=28)
+							AND weberp_stockmoves.hidemovt=0
+							AND weberp_stockmoves.stockid = '" . $StockID . "'
+						THEN -weberp_stockmoves.qty ELSE 0 END) AS qtyused
+				FROM weberp_periods LEFT JOIN weberp_stockmoves
+					ON weberp_periods.periodno=weberp_stockmoves.prd
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_periods.periodno <='" . $CurrentPeriod . "'
+				GROUP BY weberp_periods.periodno,
+					weberp_periods.lastdate_in_period
 				ORDER BY periodno DESC LIMIT " . $_SESSION['NumberOfPeriodsOfStockUsage'];
 	} else {
-		$sql = "SELECT periods.periodno,
-				periods.lastdate_in_period,
-				SUM(CASE WHEN (stockmoves.type=10 Or stockmoves.type=11 OR stockmoves.type=28)
-								AND stockmoves.hidemovt=0
-								AND stockmoves.stockid = '" . $StockID . "'
-								AND stockmoves.loccode='" . $_POST['StockLocation'] . "'
-							THEN -stockmoves.qty ELSE 0 END) AS qtyused
-				FROM periods LEFT JOIN stockmoves
-					ON periods.periodno=stockmoves.prd
-				WHERE periods.periodno <='" . $CurrentPeriod . "'
-				GROUP BY periods.periodno,
-					periods.lastdate_in_period
+		$sql = "SELECT weberp_periods.periodno,
+				weberp_periods.lastdate_in_period,
+				SUM(CASE WHEN (weberp_stockmoves.type=10 Or weberp_stockmoves.type=11 OR weberp_stockmoves.type=28)
+								AND weberp_stockmoves.hidemovt=0
+								AND weberp_stockmoves.stockid = '" . $StockID . "'
+								AND weberp_stockmoves.loccode='" . $_POST['StockLocation'] . "'
+							THEN -weberp_stockmoves.qty ELSE 0 END) AS qtyused
+				FROM weberp_periods LEFT JOIN weberp_stockmoves
+					ON weberp_periods.periodno=weberp_stockmoves.prd
+				WHERE weberp_periods.periodno <='" . $CurrentPeriod . "'
+				GROUP BY weberp_periods.periodno,
+					weberp_periods.lastdate_in_period
 				ORDER BY periodno DESC LIMIT " . $_SESSION['NumberOfPeriodsOfStockUsage'];
 
 	}

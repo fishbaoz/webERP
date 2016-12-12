@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockCheck.php 6962 2014-11-06 02:59:12Z tehonu $*/
 
 include('includes/session.inc');
 
@@ -15,24 +15,24 @@ If (isset($_POST['PrintPDF'])){
 
 /*First off do the stock check file stuff */
 	if ($_POST['MakeStkChkData']=='New'){
-		$sql = "TRUNCATE TABLE stockcheckfreeze";
+		$sql = "TRUNCATE TABLE weberp_stockcheckfreeze";
 		$result = DB_query($sql);
-		$sql = "INSERT INTO stockcheckfreeze (stockid,
+		$sql = "INSERT INTO weberp_stockcheckfreeze (stockid,
 										  loccode,
 										  qoh,
 										  stockcheckdate)
-					   SELECT locstock.stockid,
-							  locstock.loccode,
-							  locstock.quantity,
+					   SELECT weberp_locstock.stockid,
+							  weberp_locstock.loccode,
+							  weberp_locstock.quantity,
 							  '" . Date('Y-m-d') . "'
-					   FROM locstock,
-							stockmaster
-					   WHERE locstock.stockid=stockmaster.stockid 
-					   AND locstock.loccode='" . $_POST['Location'] . "' 
-					   AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-					   AND stockmaster.mbflag!='A' 
-					   AND stockmaster.mbflag!='K' 
-					   AND stockmaster.mbflag!='D'";
+					   FROM weberp_locstock,
+							weberp_stockmaster
+					   WHERE weberp_locstock.stockid=weberp_stockmaster.stockid 
+					   AND weberp_locstock.loccode='" . $_POST['Location'] . "' 
+					   AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+					   AND weberp_stockmaster.mbflag!='A' 
+					   AND weberp_stockmaster.mbflag!='K' 
+					   AND weberp_stockmaster.mbflag!='D'";
 
 		$result = DB_query($sql,'','',false,false);
 		if (DB_error_no() !=0) {
@@ -49,11 +49,11 @@ If (isset($_POST['PrintPDF'])){
 	}
 
 	if ($_POST['MakeStkChkData']=='AddUpdate'){
-		$sql = "DELETE stockcheckfreeze
-				FROM stockcheckfreeze
-				INNER JOIN stockmaster ON stockcheckfreeze.stockid=stockmaster.stockid
-				WHERE stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-				AND stockcheckfreeze.loccode='" . $_POST['Location'] . "'";
+		$sql = "DELETE weberp_stockcheckfreeze
+				FROM weberp_stockcheckfreeze
+				INNER JOIN weberp_stockmaster ON weberp_stockcheckfreeze.stockid=weberp_stockmaster.stockid
+				WHERE weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+				AND weberp_stockcheckfreeze.loccode='" . $_POST['Location'] . "'";
 
 		$result = DB_query($sql,'','',false,false);
 		if (DB_error_no() !=0) {
@@ -68,22 +68,22 @@ If (isset($_POST['PrintPDF'])){
 			exit;
 		}
 
-		$sql = "INSERT INTO stockcheckfreeze (stockid,
+		$sql = "INSERT INTO weberp_stockcheckfreeze (stockid,
 										  loccode,
 										  qoh,
 										  stockcheckdate)
-				SELECT locstock.stockid,
+				SELECT weberp_locstock.stockid,
 					loccode ,
-					locstock.quantity,
+					weberp_locstock.quantity,
 					'" . Date('Y-m-d') . "'
-				FROM locstock INNER JOIN stockmaster
-				ON locstock.stockid=stockmaster.stockid
-				WHERE locstock.loccode='" . $_POST['Location'] . "'
-				AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-				AND stockmaster.mbflag!='A'
-				AND stockmaster.mbflag!='K'
-				AND stockmaster.mbflag!='G'
-				AND stockmaster.mbflag!='D'";
+				FROM weberp_locstock INNER JOIN weberp_stockmaster
+				ON weberp_locstock.stockid=weberp_stockmaster.stockid
+				WHERE weberp_locstock.loccode='" . $_POST['Location'] . "'
+				AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+				AND weberp_stockmaster.mbflag!='A'
+				AND weberp_stockmaster.mbflag!='K'
+				AND weberp_stockmaster.mbflag!='G'
+				AND weberp_stockmaster.mbflag!='D'";
 
 		$result = DB_query($sql,'','',false,false);
 		if (DB_error_no() !=0) {
@@ -107,24 +107,24 @@ If (isset($_POST['PrintPDF'])){
 	}
 
 
-	$SQL = "SELECT stockmaster.categoryid,
-				 stockcheckfreeze.stockid,
-				 stockmaster.description,
-				 stockmaster.decimalplaces,
-				 stockcategory.categorydescription,
-				 stockcheckfreeze.qoh
-			 FROM stockcheckfreeze INNER JOIN stockmaster
-			 ON stockcheckfreeze.stockid=stockmaster.stockid
-			 INNER JOIN stockcategory
-			 ON stockmaster.categoryid=stockcategory.categoryid
-			 WHERE stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-			 AND (stockmaster.mbflag='B' OR mbflag='M')
-			 AND stockcheckfreeze.loccode = '" . $_POST['Location'] . "'";
+	$SQL = "SELECT weberp_stockmaster.categoryid,
+				 weberp_stockcheckfreeze.stockid,
+				 weberp_stockmaster.description,
+				 weberp_stockmaster.decimalplaces,
+				 weberp_stockcategory.categorydescription,
+				 weberp_stockcheckfreeze.qoh
+			 FROM weberp_stockcheckfreeze INNER JOIN weberp_stockmaster
+			 ON weberp_stockcheckfreeze.stockid=weberp_stockmaster.stockid
+			 INNER JOIN weberp_stockcategory
+			 ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			 WHERE weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+			 AND (weberp_stockmaster.mbflag='B' OR mbflag='M')
+			 AND weberp_stockcheckfreeze.loccode = '" . $_POST['Location'] . "'";
 	if (isset($_POST['NonZerosOnly']) and $_POST['NonZerosOnly']==true){
-		$SQL .= " AND stockcheckfreeze.qoh<>0";
+		$SQL .= " AND weberp_stockcheckfreeze.qoh<>0";
 	}
 
-	$SQL .=  " ORDER BY stockmaster.categoryid, stockmaster.stockid";
+	$SQL .=  " ORDER BY weberp_stockmaster.categoryid, weberp_stockmaster.stockid";
 
 	$InventoryResult = DB_query($SQL,'','',false,false);
 
@@ -171,13 +171,13 @@ If (isset($_POST['PrintPDF'])){
 
 		if (isset($_POST['ShowInfo']) and $_POST['ShowInfo']==true){
 
-			$SQL = "SELECT SUM(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) AS qtydemand
-			   		FROM salesorderdetails INNER JOIN salesorders
-			   		ON salesorderdetails.orderno=salesorders.orderno
-			   		WHERE salesorders.fromstkloc ='" . $_POST['Location'] . "'
-			   		AND salesorderdetails.stkcode = '" . $InventoryCheckRow['stockid'] . "'
-			   		AND salesorderdetails.completed = 0
-			   		AND salesorders.quotation=0";
+			$SQL = "SELECT SUM(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) AS qtydemand
+			   		FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+			   		ON weberp_salesorderdetails.orderno=weberp_salesorders.orderno
+			   		WHERE weberp_salesorders.fromstkloc ='" . $_POST['Location'] . "'
+			   		AND weberp_salesorderdetails.stkcode = '" . $InventoryCheckRow['stockid'] . "'
+			   		AND weberp_salesorderdetails.completed = 0
+			   		AND weberp_salesorders.quotation=0";
 
 			$DemandResult = DB_query($SQL,'','',false, false);
 
@@ -197,18 +197,18 @@ If (isset($_POST['PrintPDF'])){
 			$DemandQty = $DemandRow['qtydemand'];
 
 			//Also need to add in the demand for components of assembly items
-			$sql = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-						   FROM salesorderdetails INNER JOIN salesorders
-						   ON salesorders.orderno = salesorderdetails.orderno
-						   INNER JOIN bom
-						   ON salesorderdetails.stkcode=bom.parent
-						   INNER JOIN stockmaster
-						   ON stockmaster.stockid=bom.parent
-						   WHERE salesorders.fromstkloc='" . $_POST['Location'] . "'
-						   AND salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-						   AND bom.component='" . $InventoryCheckRow['stockid'] . "'
-						   AND stockmaster.mbflag='A'
-						   AND salesorders.quotation=0";
+			$sql = "SELECT SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+						   FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+						   ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						   INNER JOIN weberp_bom
+						   ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+						   INNER JOIN weberp_stockmaster
+						   ON weberp_stockmaster.stockid=weberp_bom.parent
+						   WHERE weberp_salesorders.fromstkloc='" . $_POST['Location'] . "'
+						   AND weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+						   AND weberp_bom.component='" . $InventoryCheckRow['stockid'] . "'
+						   AND weberp_stockmaster.mbflag='A'
+						   AND weberp_salesorders.quotation=0";
 
 			$DemandResult = DB_query($sql,'','',false,false);
 			if (DB_error_no() !=0) {
@@ -262,7 +262,7 @@ If (isset($_POST['PrintPDF'])){
 				<td>' . _('Select Inventory Categories') . ':</td>
 				<td><select autofocus="autofocus" required="required" minlength="1" size="12" name="Categories[]"multiple="multiple">';
 	$SQL = 'SELECT categoryid, categorydescription 
-			FROM stockcategory 
+			FROM weberp_stockcategory 
 			ORDER BY categorydescription';
 	$CatResult = DB_query($SQL);
 	while ($MyRow = DB_fetch_array($CatResult)) {
@@ -279,8 +279,8 @@ If (isset($_POST['PrintPDF'])){
 	echo '<tr>
 			<td>' . _('For Inventory in Location') . ':</td>
 			<td><select name="Location">';
-	$sql = "SELECT locations.loccode, locationname FROM locations 
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+	$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations 
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 			ORDER BY locationname";
 	$LocnResult=DB_query($sql);
 

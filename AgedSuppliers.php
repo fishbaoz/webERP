@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: AgedSuppliers.php 7556 2016-06-16 11:11:45Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -20,85 +20,85 @@ if (isset($_POST['PrintPDF'])
 	  /*Now figure out the aged analysis for the Supplier range under review */
 
 	if ($_POST['All_Or_Overdues']=='All'){
-		$SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						currencies.currency,
-						currencies.decimalplaces AS currdecimalplaces,
-						paymentterms.terms,
-						SUM(supptrans.ovamount + supptrans.ovgst  - supptrans.alloc) as balance,
-						SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) >= paymentterms.daysbeforedue THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+		$SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_currencies.currency,
+						weberp_currencies.decimalplaces AS currdecimalplaces,
+						weberp_paymentterms.terms,
+						SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst  - weberp_supptrans.alloc) as balance,
+						SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+						CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) >= weberp_paymentterms.daysbeforedue THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= 0 THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS due,
-						SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS overdue1,
-						SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS overdue2
-				FROM suppliers INNER JOIN paymentterms
-				ON suppliers.paymentterms = paymentterms.termsindicator
-				INNER JOIN currencies
-				ON suppliers.currcode = currencies.currabrev
-				INNER JOIN supptrans
-				ON suppliers.supplierid = supptrans.supplierno
-				WHERE suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
-				AND suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
-				AND  suppliers.currcode ='" . $_POST['Currency'] . "'
-				GROUP BY suppliers.supplierid,
-						suppliers.suppname,
-						currencies.currency,
-						paymentterms.terms,
-						paymentterms.daysbeforedue,
-						paymentterms.dayinfollowingmonth
-				HAVING ROUND(ABS(SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc)), currencies.decimalplaces) > 0";
+				FROM weberp_suppliers INNER JOIN weberp_paymentterms
+				ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+				INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode = weberp_currencies.currabrev
+				INNER JOIN weberp_supptrans
+				ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+				WHERE weberp_suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
+				AND weberp_suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
+				AND  weberp_suppliers.currcode ='" . $_POST['Currency'] . "'
+				GROUP BY weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_currencies.currency,
+						weberp_paymentterms.terms,
+						weberp_paymentterms.daysbeforedue,
+						weberp_paymentterms.dayinfollowingmonth
+				HAVING ROUND(ABS(SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc)), weberp_currencies.decimalplaces) > 0";
 
 	} else {
 
-		$SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						currencies.currency,
-						currencies.decimalplaces AS currdecimalplaces,
-						paymentterms.terms,
-						SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) AS balance,
-						SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-							CASE WHEN (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) >= paymentterms.daysbeforedue  THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+		$SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_currencies.currency,
+						weberp_currencies.decimalplaces AS currdecimalplaces,
+						weberp_paymentterms.terms,
+						SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) AS balance,
+						SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+							CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) >= weberp_paymentterms.daysbeforedue  THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= 0 THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS due,
-						Sum(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-							CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						Sum(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+							CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS overdue1,
-						SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-							CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+						SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+							CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						ELSE
-							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+							CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 						END) AS overdue2
-				FROM suppliers INNER JOIN paymentterms
-				ON suppliers.paymentterms = paymentterms.termsindicator
-				INNER JOIN currencies
-				ON suppliers.currcode = currencies.currabrev
-				INNER JOIN supptrans
-				ON suppliers.supplierid = supptrans.supplierno
-				WHERE suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
-				AND suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
-				AND suppliers.currcode ='" . $_POST['Currency'] . "'
-				GROUP BY suppliers.supplierid,
-					suppliers.suppname,
-					currencies.currency,
-					paymentterms.terms,
-					paymentterms.daysbeforedue,
-					paymentterms.dayinfollowingmonth
-				HAVING SUM(IF (paymentterms.daysbeforedue > 0,
-				CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END,
-				CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END)) > 0";
+				FROM weberp_suppliers INNER JOIN weberp_paymentterms
+				ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+				INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode = weberp_currencies.currabrev
+				INNER JOIN weberp_supptrans
+				ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+				WHERE weberp_suppliers.supplierid >= '" . $_POST['FromCriteria'] . "'
+				AND weberp_suppliers.supplierid <= '" . $_POST['ToCriteria'] . "'
+				AND weberp_suppliers.currcode ='" . $_POST['Currency'] . "'
+				GROUP BY weberp_suppliers.supplierid,
+					weberp_suppliers.suppname,
+					weberp_currencies.currency,
+					weberp_paymentterms.terms,
+					weberp_paymentterms.daysbeforedue,
+					weberp_paymentterms.dayinfollowingmonth
+				HAVING SUM(IF (weberp_paymentterms.daysbeforedue > 0,
+				CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END,
+				CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END)) > 0";
 
 	}
 
@@ -160,35 +160,35 @@ if (isset($_POST['PrintPDF'])
 		   /*draw a line under the Supplier aged analysis*/
 		   $pdf->line($Page_Width-$Right_Margin, $YPos+10,$Left_Margin, $YPos+10);
 
-		   $sql = "SELECT systypes.typename,
-							supptrans.suppreference,
-							supptrans.trandate,
-							(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) as balance,
-							CASE WHEN paymentterms.daysbeforedue > 0 THEN
-								CASE WHEN (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) >= paymentterms.daysbeforedue  THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+		   $sql = "SELECT weberp_systypes.typename,
+							weberp_supptrans.suppreference,
+							weberp_supptrans.trandate,
+							(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) as balance,
+							CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+								CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) >= weberp_paymentterms.daysbeforedue  THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= 0 THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							END AS due,
-							CASE WHEN paymentterms.daysbeforedue > 0 THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue	   AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+							CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue	   AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate), paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate), weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							END AS overdue1,
-							CASE WHEN paymentterms.daysbeforedue > 0 THEN
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+							CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							ELSE
-								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+								CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 							END AS overdue2
-						FROM suppliers
-						LEFT JOIN paymentterms
-							ON suppliers.paymentterms = paymentterms.termsindicator
-						LEFT JOIN supptrans
-							ON suppliers.supplierid = supptrans.supplierno
-						LEFT JOIN systypes
-							ON systypes.typeid = supptrans.type
-						WHERE ABS(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) >0.009
-							AND supptrans.settled = 0
-							AND supptrans.supplierno = '" . $AgedAnalysis["supplierid"] . "'";
+						FROM weberp_suppliers
+						LEFT JOIN weberp_paymentterms
+							ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+						LEFT JOIN weberp_supptrans
+							ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+						LEFT JOIN weberp_systypes
+							ON weberp_systypes.typeid = weberp_supptrans.type
+						WHERE ABS(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) >0.009
+							AND weberp_supptrans.settled = 0
+							AND weberp_supptrans.supplierno = '" . $AgedAnalysis["supplierid"] . "'";
 
 			$DetailResult = DB_query($sql,'','',False,False); /*dont trap errors - trapped below*/
 			if (DB_error_no() !=0) {
@@ -302,7 +302,7 @@ if (isset($_POST['PrintPDF'])
 				<td>' . _('For suppliers trading in') . ':' . '</td>
 				<td><select tabindex="4" name="Currency">';
 
-		$sql = "SELECT currency, currabrev FROM currencies";
+		$sql = "SELECT currency, currabrev FROM weberp_currencies";
 		$result=DB_query($sql);
 
 		while ($myrow=DB_fetch_array($result)){

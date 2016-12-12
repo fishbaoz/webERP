@@ -1,11 +1,11 @@
 <?php
 
-/* $Id$ */
+/* $Id: POReport.php 7256 2015-04-01 11:24:48Z exsonqu $ */
 
 // POReport.php
 // Inquiry on Purchase Orders
-// If Date Type is Order, the main file is purchorderdetails
-// If Date Type is Delivery, the main file is grns
+// If Date Type is Order, the main file is weberp_purchorderdetails
+// If Date Type is Delivery, the main file is weberp_grns
 
 include('includes/session.inc');
 $Title = _('Purchase Order Report');
@@ -53,7 +53,7 @@ if (isset($_POST['SupplierName'])){
 // Had to add supplierid to SummaryType when do summary by name because there could be several accounts
 // with the same name. Tried passing 'suppname,supplierid' in form, but it only read 'suppname'
 if (isset($_POST['SummaryType']) and $_POST['SummaryType'] == 'suppname') {
-	$_POST['SummaryType'] = "suppname, suppliers.supplierid";
+	$_POST['SummaryType'] = "suppname, weberp_suppliers.supplierid";
 }
 
 if (isset($_POST['submit'])) {
@@ -100,7 +100,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 		$PartNumberOp = '=';
 	}
 	if (mb_strlen($PartNumber) > 0) {
-		$WherePart = " AND purchorderdetails.itemcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
+		$WherePart = " AND weberp_purchorderdetails.itemcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
 	} else {
 		$WherePart=' ';
 	}
@@ -112,7 +112,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 		$SupplierIdOp = '=';
 	}
 	if (mb_strlen($SupplierId) > 0) {
-		$WhereSupplierID = " AND purchorders.supplierno " . $SupplierIdOp . " '" . $SupplierId . "'  ";
+		$WhereSupplierID = " AND weberp_purchorders.supplierno " . $SupplierIdOp . " '" . $SupplierId . "'  ";
 	} else {
 		$WhereSupplierID=' ';
 	}
@@ -124,13 +124,13 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 		$SupplierNameOp = '=';
 	}
 	if (mb_strlen($SupplierName) > 0) {
-		$WhereSupplierName = " AND suppliers.suppname " . $SupplierNameOp . " '" . $SupplierName . "'  ";
+		$WhereSupplierName = " AND weberp_suppliers.suppname " . $SupplierNameOp . " '" . $SupplierName . "'  ";
 	} else {
 		$WhereSupplierName=' ';
 	}
 
 	if (mb_strlen($_POST['OrderNo']) > 0) {
-		$WhereOrderNo = " AND purchorderdetails.orderno = '" . $_POST['OrderNo'] . "'  ";
+		$WhereOrderNo = " AND weberp_purchorderdetails.orderno = '" . $_POST['OrderNo'] . "'  ";
 	} else {
 		$WhereOrderNo=' ';
 	}
@@ -141,10 +141,10 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 	# that had used the IF statement to create a field called linestatus
 	if ($_POST['LineStatus'] != 'All') {
 		if ($_POST['DateType'] == 'Order') {
-			$WhereLineStatus = " AND IF(purchorderdetails.quantityord = purchorderdetails.qtyinvoiced ||
-			  purchorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
+			$WhereLineStatus = " AND IF(weberp_purchorderdetails.quantityord = weberp_purchorderdetails.qtyinvoiced ||
+			  weberp_purchorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
 		 } else {
-			$WhereLineStatus = " AND IF(grns.qtyrecd - grns.quantityinv <> 0,'Open','Completed') = '"
+			$WhereLineStatus = " AND IF(weberp_grns.qtyrecd - weberp_grns.quantityinv <> 0,'Open','Completed') = '"
 			. $_POST['LineStatus'] . "'";
 		 }
 	}
@@ -152,7 +152,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 
 	$WhereCategory = ' ';
 	if ($_POST['Category'] != 'All') {
-		$WhereCategory = " AND stockmaster.categoryid = '" . $_POST['Category'] . "'";
+		$WhereCategory = " AND weberp_stockmaster.categoryid = '" . $_POST['Category'] . "'";
 	}
 
 	if ($InputError !=1) {
@@ -160,27 +160,27 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 		$ToDate = FormatDateForSQL($_POST['ToDate']);
 		if ($_POST['ReportType'] == 'Detail') {
 			if ($_POST['DateType'] == 'Order') {
-				$sql = "SELECT purchorderdetails.orderno,
-							   purchorderdetails.itemcode,
-							   purchorderdetails.deliverydate,
-							   purchorders.supplierno,
-							   purchorders.orddate,
-							   purchorderdetails.quantityord,
-							   purchorderdetails.quantityrecd,
-							   purchorderdetails.qtyinvoiced,
-							   (purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-							   (purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-							   IF(purchorderdetails.quantityord = purchorderdetails.qtyinvoiced ||
-								  purchorderdetails.completed = 1,'Completed','Open') as linestatus,
-							   suppliers.suppname,
-							   stockmaster.decimalplaces,
-							   stockmaster.description
-							   FROM purchorderdetails
-						LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-						LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-						LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-						WHERE purchorders.orddate >='$FromDate'
-						 AND purchorders.orddate <='$ToDate'
+				$sql = "SELECT weberp_purchorderdetails.orderno,
+							   weberp_purchorderdetails.itemcode,
+							   weberp_purchorderdetails.deliverydate,
+							   weberp_purchorders.supplierno,
+							   weberp_purchorders.orddate,
+							   weberp_purchorderdetails.quantityord,
+							   weberp_purchorderdetails.quantityrecd,
+							   weberp_purchorderdetails.qtyinvoiced,
+							   (weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+							   (weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+							   IF(weberp_purchorderdetails.quantityord = weberp_purchorderdetails.qtyinvoiced ||
+								  weberp_purchorderdetails.completed = 1,'Completed','Open') as linestatus,
+							   weberp_suppliers.suppname,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description
+							   FROM weberp_purchorderdetails
+						LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+						LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+						WHERE weberp_purchorders.orddate >='$FromDate'
+						 AND weberp_purchorders.orddate <='$ToDate'
 						$WherePart
 						$WhereSupplierID
 						$WhereSupplierName
@@ -189,28 +189,28 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 						$WhereCategory
 						ORDER BY " . $_POST['SortBy'];
 			} else {
-				// Selects by delivery date from grns
-				$sql = "SELECT purchorderdetails.orderno,
-							   purchorderdetails.itemcode,
-							   grns.deliverydate,
-							   purchorders.supplierno,
-							   purchorders.orddate,
-							   purchorderdetails.quantityord as quantityrecd,
-							   grns.qtyrecd as quantityord,
-							   grns.quantityinv as qtyinvoiced,
-							   (grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-							   (grns.qtyrecd * grns.stdcostunit) as extcost,
-							   IF(grns.qtyrecd - grns.quantityinv <> 0,'Open','Completed') as linestatus,
-							   suppliers.suppname,
-							   stockmaster.decimalplaces,
-							   stockmaster.description
-							   FROM grns
-						LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-						LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-						LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-						LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-						WHERE grns.deliverydate >='$FromDate'
-						 AND grns.deliverydate <='$ToDate'
+				// Selects by delivery date from weberp_grns
+				$sql = "SELECT weberp_purchorderdetails.orderno,
+							   weberp_purchorderdetails.itemcode,
+							   weberp_grns.deliverydate,
+							   weberp_purchorders.supplierno,
+							   weberp_purchorders.orddate,
+							   weberp_purchorderdetails.quantityord as quantityrecd,
+							   weberp_grns.qtyrecd as quantityord,
+							   weberp_grns.quantityinv as qtyinvoiced,
+							   (weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+							   (weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+							   IF(weberp_grns.qtyrecd - weberp_grns.quantityinv <> 0,'Open','Completed') as linestatus,
+							   weberp_suppliers.suppname,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description
+							   FROM weberp_grns
+						LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+						LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+						LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+						WHERE weberp_grns.deliverydate >='$FromDate'
+						 AND weberp_grns.deliverydate <='$ToDate'
 						$WherePart
 						$WhereSupplierID
 						$WhereSupplierName
@@ -231,20 +231,20 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 			}
 			if ($_POST['DateType'] == 'Order') {
 				if ($_POST['SummaryType'] == 'extprice' || $_POST['SummaryType'] == 'itemcode') {
-					$sql = "SELECT purchorderdetails.itemcode,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   stockmaster.decimalplaces,
-								   stockmaster.description
-								   FROM purchorderdetails
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.itemcode,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_stockmaster.decimalplaces,
+								   weberp_stockmaster.description
+								   FROM weberp_purchorderdetails
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -252,24 +252,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							',stockmaster.decimalplaces,
-							  stockmaster.description
+							',weberp_stockmaster.decimalplaces,
+							  weberp_stockmaster.description
 							ORDER BY ' . $orderby;
 				} elseif ($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT purchorderdetails.orderno,
-								   purchorders.supplierno,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM purchorderdetails
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.orderno,
+								   weberp_purchorders.supplierno,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_purchorderdetails
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -277,23 +277,23 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							',purchorders.supplierno,
-							  suppliers.suppname
+							',weberp_purchorders.supplierno,
+							  weberp_suppliers.suppname
 							ORDER BY ' . $orderby;
-				} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,suppliers.supplierid') {
-					$sql = "SELECT purchorders.supplierno,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM purchorderdetails
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+				} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,weberp_suppliers.supplierid') {
+					$sql = "SELECT weberp_purchorders.supplierno,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_purchorderdetails
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -301,23 +301,23 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							",purchorders.supplierno,
-							  suppliers.suppname
+							",weberp_purchorders.supplierno,
+							  weberp_suppliers.suppname
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from purchorders.orddate) as month,
-								   CONCAT(MONTHNAME(purchorders.orddate),' ',YEAR(purchorders.orddate)) as monthname,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost
-								   FROM purchorderdetails
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_purchorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_purchorders.orddate),' ',YEAR(weberp_purchorders.orddate)) as monthname,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost
+								   FROM weberp_purchorderdetails
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -328,19 +328,19 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							", monthname
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   stockmaster.categoryid,
-								   stockcategory.categorydescription
-								   FROM purchorderdetails
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription
+								   FROM weberp_purchorderdetails
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -352,22 +352,22 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							ORDER BY " . $orderby;
 				}
 			} else {
-					// Selects by delivery date from grns
+					// Selects by delivery date from weberp_grns
 				if ($_POST['SummaryType'] == 'extprice' || $_POST['SummaryType'] == 'itemcode') {
-					$sql = "SELECT purchorderdetails.itemcode,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   stockmaster.description
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.itemcode,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_stockmaster.description
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -375,24 +375,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							", stockmaster.description
+							", weberp_stockmaster.description
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT purchorderdetails.orderno,
-								   purchorders.supplierno,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.orderno,
+								   weberp_purchorders.supplierno,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -400,24 +400,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							', purchorders.supplierno,
-							   suppliers.suppname
+							', weberp_purchorders.supplierno,
+							   weberp_suppliers.suppname
 							ORDER BY ' . $orderby;
-				} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,suppliers.supplierid') {
-					$sql = "SELECT purchorders.supplierno,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+				} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,weberp_suppliers.supplierid') {
+					$sql = "SELECT weberp_purchorders.supplierno,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -425,24 +425,24 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							', purchorders.supplierno,
-							   suppliers.suppname
+							', weberp_purchorders.supplierno,
+							   weberp_suppliers.suppname
 							ORDER BY ' . $orderby;
 				} elseif ($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from purchorders.orddate) as month,
-								   CONCAT(MONTHNAME(purchorders.orddate),' ',YEAR(purchorders.orddate)) as monthname,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_purchorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_purchorders.orddate),' ',YEAR(weberp_purchorders.orddate)) as monthname,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -453,20 +453,20 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 							',monthname
 							ORDER BY ' . $orderby;
 				} elseif ($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT stockmaster.categoryid,
-								   stockcategory.categorydescription,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							LEFT JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							LEFT JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							LEFT JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							LEFT JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -498,10 +498,10 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 		$Summary_Array['categoryid'] =  _('Stock Category');
 
 		// Create array for sort for detail report to display in header
-		$Detail_Array['purchorderdetails.orderno'] = _('Order Number');
-		$Detail_Array['purchorderdetails.itemcode'] = _('Part Number');
-		$Detail_Array['suppliers.supplierid,purchorderdetails.orderno'] = _('Supplier Number');
-		$Detail_Array['suppliers.suppname,suppliers.supplierid,purchorderdetails.orderno'] = _('Supplier Name');
+		$Detail_Array['weberp_purchorderdetails.orderno'] = _('Order Number');
+		$Detail_Array['weberp_purchorderdetails.itemcode'] = _('Part Number');
+		$Detail_Array['weberp_suppliers.supplierid,weberp_purchorderdetails.orderno'] = _('Supplier Number');
+		$Detail_Array['weberp_suppliers.suppname,weberp_suppliers.supplierid,weberp_purchorderdetails.orderno'] = _('Supplier Name');
 
 		// Display Header info
 		echo '<table class="selection">';
@@ -653,7 +653,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 					}
 					$linectr++;
 				   // Detail for both DateType of Ship
-				   // In sql, had to alias grns.qtyrecd as quantityord so could use same name here
+				   // In sql, had to alias weberp_grns.qtyrecd as quantityord so could use same name here
 					printf('<td>%s</td>
 							<td>%s</td>
 							<td>%s</td>
@@ -722,7 +722,7 @@ function submit(&$db,$PartNumber,$PartNumberOp,$SupplierId,$SupplierIdOp,$Suppli
 			// For SummaryType 'suppname' had to add supplierid to it for the GROUP BY in the sql,
 			// but have to take it away for $myrow[$summarytype] to be valid
 			// Set up description based on the Summary Type
-			if ($summarytype == "suppname,suppliers.supplierid") {
+			if ($summarytype == "suppname,weberp_suppliers.supplierid") {
 				$summarytype = "suppname";
 				$description = 'supplierno';
 				$summaryheader = _('Supplier Name');
@@ -883,7 +883,7 @@ function submitcsv(&$db,
 		$PartNumberOp = '=';
 	}
 	if (mb_strlen($PartNumber) > 0) {
-		$WherePart = " AND purchorderdetails.itemcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
+		$WherePart = " AND weberp_purchorderdetails.itemcode " . $PartNumberOp . " '" . $PartNumber . "'  ";
 	} else {
 		$WherePart=' ';
 	}
@@ -895,7 +895,7 @@ function submitcsv(&$db,
 		$SupplierIdOp = '=';
 	}
 	if (mb_strlen($SupplierId) > 0) {
-		$WhereSupplierID = " AND purchorders.supplierno " . $SupplierIdOp . " '" . $SupplierId . "'  ";
+		$WhereSupplierID = " AND weberp_purchorders.supplierno " . $SupplierIdOp . " '" . $SupplierId . "'  ";
 	} else {
 		$WhereSupplierID=' ';
 	}
@@ -907,13 +907,13 @@ function submitcsv(&$db,
 		$SupplierNameOp = '=';
 	}
 	if (mb_strlen($SupplierName) > 0) {
-		$WhereSupplierName = " AND suppliers.suppname " . $SupplierNameOp . " '" . $SupplierName . "'  ";
+		$WhereSupplierName = " AND weberp_suppliers.suppname " . $SupplierNameOp . " '" . $SupplierName . "'  ";
 	} else {
 		$WhereSupplierName=' ';
 	}
 
 	if (mb_strlen($_POST['OrderNo']) > 0) {
-		$WhereOrderNo = " AND purchorderdetails.orderno = '" . $_POST['OrderNo'] . "'  ";
+		$WhereOrderNo = " AND weberp_purchorderdetails.orderno = '" . $_POST['OrderNo'] . "'  ";
 	} else {
 		$WhereOrderNo=' ';
 	}
@@ -924,10 +924,10 @@ function submitcsv(&$db,
 	# that had used the IF statement to create a field called linestatus
 	if ($_POST['LineStatus'] != 'All') {
 		if ($_POST['DateType'] == 'Order') {
-			$WhereLineStatus = " AND IF(purchorderdetails.quantityord = purchorderdetails.qtyinvoiced ||
-			  purchorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
+			$WhereLineStatus = " AND IF(weberp_purchorderdetails.quantityord = weberp_purchorderdetails.qtyinvoiced ||
+			  weberp_purchorderdetails.completed = 1,'Completed','Open') = '" . $_POST['LineStatus'] . "'";
 		 } else {
-			$WhereLineStatus = " AND IF(grns.qtyrecd - grns.quantityinv <> 0,'Open','Completed') = '"
+			$WhereLineStatus = " AND IF(weberp_grns.qtyrecd - weberp_grns.quantityinv <> 0,'Open','Completed') = '"
 			. $_POST['LineStatus'] . "'";
 		 }
 	}
@@ -935,7 +935,7 @@ function submitcsv(&$db,
 
 	$WhereCategory = ' ';
 	if ($_POST['Category'] != 'All') {
-		$WhereCategory = " AND stockmaster.categoryid = '" . $_POST['Category'] . "'";
+		$WhereCategory = " AND weberp_stockmaster.categoryid = '" . $_POST['Category'] . "'";
 	}
 
 	if ($InputError !=1) {
@@ -943,27 +943,27 @@ function submitcsv(&$db,
 		$ToDate = FormatDateForSQL($_POST['ToDate']);
 		if ($_POST['ReportType'] == 'Detail') {
 			if ($_POST['DateType'] == 'Order') {
-				$sql = "SELECT purchorderdetails.orderno,
-							   purchorderdetails.itemcode,
-							   purchorderdetails.deliverydate,
-							   purchorders.supplierno,
-							   purchorders.orddate,
-							   purchorderdetails.quantityrecd,
-							   purchorderdetails.quantityord,
-							   purchorderdetails.qtyinvoiced,
-							   (purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-							   (purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-							   IF(purchorderdetails.quantityord = purchorderdetails.qtyinvoiced ||
-								  purchorderdetails.completed = 1,'Completed','Open') as linestatus,
-							   suppliers.suppname,
-							   stockmaster.decimalplaces,
-							   stockmaster.description
-							   FROM purchorderdetails
-						INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-						INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-						LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-						WHERE purchorders.orddate >='$FromDate'
-						 AND purchorders.orddate <='$ToDate'
+				$sql = "SELECT weberp_purchorderdetails.orderno,
+							   weberp_purchorderdetails.itemcode,
+							   weberp_purchorderdetails.deliverydate,
+							   weberp_purchorders.supplierno,
+							   weberp_purchorders.orddate,
+							   weberp_purchorderdetails.quantityrecd,
+							   weberp_purchorderdetails.quantityord,
+							   weberp_purchorderdetails.qtyinvoiced,
+							   (weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+							   (weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+							   IF(weberp_purchorderdetails.quantityord = weberp_purchorderdetails.qtyinvoiced ||
+								  weberp_purchorderdetails.completed = 1,'Completed','Open') as linestatus,
+							   weberp_suppliers.suppname,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description
+							   FROM weberp_purchorderdetails
+						INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+						WHERE weberp_purchorders.orddate >='$FromDate'
+						 AND weberp_purchorders.orddate <='$ToDate'
 						$WherePart
 						$WhereSupplierID
 						$WhereSupplierName
@@ -972,28 +972,28 @@ function submitcsv(&$db,
 						$WhereCategory
 						ORDER BY " . $_POST['SortBy'];
 			} else {
-				// Selects by delivery date from grns
-				$sql = "SELECT purchorderdetails.orderno,
-							   purchorderdetails.itemcode,
-							   grns.deliverydate,
-							   purchorders.supplierno,
-							   purchorders.orddate,
-							   purchorderdetails.quantityord as quantityrecd,
-							   grns.qtyrecd as quantityord,
-							   grns.quantityinv as qtyinvoiced,
-							   (grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-							   (grns.qtyrecd * grns.stdcostunit) as extcost,
-							   IF(grns.qtyrecd - grns.quantityinv <> 0,'Open','Completed') as linestatus,
-							   suppliers.suppname,
-							   stockmaster.decimalplaces,
-							   stockmaster.description
-							   FROM grns
-						LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-						INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-						INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-						LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-						WHERE grns.deliverydate >='$FromDate'
-						 AND grns.deliverydate <='$ToDate'
+				// Selects by delivery date from weberp_grns
+				$sql = "SELECT weberp_purchorderdetails.orderno,
+							   weberp_purchorderdetails.itemcode,
+							   weberp_grns.deliverydate,
+							   weberp_purchorders.supplierno,
+							   weberp_purchorders.orddate,
+							   weberp_purchorderdetails.quantityord as quantityrecd,
+							   weberp_grns.qtyrecd as quantityord,
+							   weberp_grns.quantityinv as qtyinvoiced,
+							   (weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+							   (weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+							   IF(weberp_grns.qtyrecd - weberp_grns.quantityinv <> 0,'Open','Completed') as linestatus,
+							   weberp_suppliers.suppname,
+							   weberp_stockmaster.decimalplaces,
+							   weberp_stockmaster.description
+							   FROM weberp_grns
+						LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+						INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+						WHERE weberp_grns.deliverydate >='$FromDate'
+						 AND weberp_grns.deliverydate <='$ToDate'
 						$WherePart
 						$WhereSupplierID
 						$WhereSupplierName
@@ -1014,20 +1014,20 @@ function submitcsv(&$db,
 		  }
 		  if ($_POST['DateType'] == 'Order') {
 				if ($_POST['SummaryType'] == 'extprice' || $_POST['SummaryType'] == 'itemcode') {
-					$sql = "SELECT purchorderdetails.itemcode,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   stockmaster.decimalplaces,
-								   stockmaster.description
-								   FROM purchorderdetails
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.itemcode,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_stockmaster.decimalplaces,
+								   weberp_stockmaster.description
+								   FROM weberp_purchorderdetails
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1035,24 +1035,24 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							",stockmaster.decimalplaces,
-							  stockmaster.description
+							",weberp_stockmaster.decimalplaces,
+							  weberp_stockmaster.description
 							ORDER BY " . $orderby;
 			   } elseif ($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT purchorderdetails.orderno,
-								   purchorders.supplierno,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM purchorderdetails
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.orderno,
+								   weberp_purchorders.supplierno,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_purchorderdetails
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1060,23 +1060,23 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							",purchorders.supplierno,
-							  suppliers.suppname
+							",weberp_purchorders.supplierno,
+							  weberp_suppliers.suppname
 							ORDER BY " . $orderby;
-			} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,suppliers.supplierid') {
-					$sql = "SELECT purchorders.supplierno,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM purchorderdetails
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+			} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,weberp_suppliers.supplierid') {
+					$sql = "SELECT weberp_purchorders.supplierno,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_purchorderdetails
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1084,23 +1084,23 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							",purchorders.supplierno,
-							  suppliers.suppname
+							",weberp_purchorders.supplierno,
+							  weberp_suppliers.suppname
 							ORDER BY " . $orderby;
 			} elseif ($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from purchorders.orddate) as month,
-								   CONCAT(MONTHNAME(purchorders.orddate),' ',YEAR(purchorders.orddate)) as monthname,
-								   SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost
-								   FROM purchorderdetails
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_purchorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_purchorders.orddate),' ',YEAR(weberp_purchorders.orddate)) as monthname,
+								   SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost
+								   FROM weberp_purchorderdetails
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1111,19 +1111,19 @@ function submitcsv(&$db,
 							", monthname
 							ORDER BY " . $orderby;
 			} elseif ($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT SUM(purchorderdetails.quantityord) as quantityord,
-								   SUM(purchorderdetails.qtyinvoiced) as qtyinvoiced,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.unitprice) as extprice,
-								   SUM(purchorderdetails.quantityord * purchorderdetails.stdcostunit) as extcost,
-								   stockmaster.categoryid,
-								   stockcategory.categorydescription
-								   FROM purchorderdetails
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE purchorders.orddate >='$FromDate'
-							 AND purchorders.orddate <='$ToDate'
+					$sql = "SELECT SUM(weberp_purchorderdetails.quantityord) as quantityord,
+								   SUM(weberp_purchorderdetails.qtyinvoiced) as qtyinvoiced,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_purchorderdetails.quantityord * weberp_purchorderdetails.stdcostunit) as extcost,
+								   weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription
+								   FROM weberp_purchorderdetails
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_purchorders.orddate >='$FromDate'
+							 AND weberp_purchorders.orddate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1135,22 +1135,22 @@ function submitcsv(&$db,
 							ORDER BY " . $orderby;
 			}
 		} else {
-					// Selects by delivery date from grns
+					// Selects by delivery date from weberp_grns
 				if ($_POST['SummaryType'] == 'extprice' || $_POST['SummaryType'] == 'itemcode') {
-					$sql = "SELECT purchorderdetails.itemcode,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   stockmaster.description
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							LEFT JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.itemcode,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_stockmaster.description
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							LEFT JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1158,24 +1158,24 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							", stockmaster.description
+							", weberp_stockmaster.description
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'orderno') {
-					$sql = "SELECT purchorderdetails.orderno,
-								   purchorders.supplierno,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_purchorderdetails.orderno,
+								   weberp_purchorders.supplierno,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1183,24 +1183,24 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							", purchorders.supplierno,
-							   suppliers.suppname
+							", weberp_purchorders.supplierno,
+							   weberp_suppliers.suppname
 							ORDER BY " . $orderby;
-			} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,suppliers.supplierid') {
-					$sql = "SELECT purchorders.supplierno,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost,
-								   suppliers.suppname
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+			} elseif ($_POST['SummaryType'] == 'supplierno' || $_POST['SummaryType'] == 'suppname,weberp_suppliers.supplierid') {
+					$sql = "SELECT weberp_purchorders.supplierno,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost,
+								   weberp_suppliers.suppname
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1208,24 +1208,24 @@ function submitcsv(&$db,
 							$WhereLineStatus
 							$WhereCategory
 							GROUP BY " . $_POST['SummaryType'] .
-							", purchorders.supplierno,
-							   suppliers.suppname
+							", weberp_purchorders.supplierno,
+							   weberp_suppliers.suppname
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'month') {
-					$sql = "SELECT EXTRACT(YEAR_MONTH from purchorders.orddate) as month,
-								   CONCAT(MONTHNAME(purchorders.orddate),' ',YEAR(purchorders.orddate)) as monthname,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT EXTRACT(YEAR_MONTH from weberp_purchorders.orddate) as month,
+								   CONCAT(MONTHNAME(weberp_purchorders.orddate),' ',YEAR(weberp_purchorders.orddate)) as monthname,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1236,20 +1236,20 @@ function submitcsv(&$db,
 							",monthname
 							ORDER BY " . $orderby;
 				} elseif ($_POST['SummaryType'] == 'categoryid') {
-					$sql = "SELECT stockmaster.categoryid,
-								   stockcategory.categorydescription,
-								   SUM(grns.qtyrecd) as quantityord,
-								   SUM(grns.quantityinv) as qtyinvoiced,
-								   SUM(grns.qtyrecd * purchorderdetails.unitprice) as extprice,
-								   SUM(grns.qtyrecd * grns.stdcostunit) as extcost
-								   FROM grns
-							LEFT JOIN purchorderdetails ON grns.podetailitem = purchorderdetails.podetailitem
-							INNER JOIN purchorders ON purchorders.orderno=purchorderdetails.orderno
-							INNER JOIN suppliers ON purchorders.supplierno = suppliers.supplierid
-							LEFT JOIN stockmaster ON purchorderdetails.itemcode = stockmaster.stockid
-							INNER JOIN stockcategory ON stockcategory.categoryid = stockmaster.categoryid
-							WHERE grns.deliverydate >='$FromDate'
-							 AND grns.deliverydate <='$ToDate'
+					$sql = "SELECT weberp_stockmaster.categoryid,
+								   weberp_stockcategory.categorydescription,
+								   SUM(weberp_grns.qtyrecd) as quantityord,
+								   SUM(weberp_grns.quantityinv) as qtyinvoiced,
+								   SUM(weberp_grns.qtyrecd * weberp_purchorderdetails.unitprice) as extprice,
+								   SUM(weberp_grns.qtyrecd * weberp_grns.stdcostunit) as extcost
+								   FROM weberp_grns
+							LEFT JOIN weberp_purchorderdetails ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+							INNER JOIN weberp_purchorders ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode = weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+							WHERE weberp_grns.deliverydate >='$FromDate'
+							 AND weberp_grns.deliverydate <='$ToDate'
 							$WherePart
 							$WhereSupplierID
 							$WhereSupplierName
@@ -1282,10 +1282,10 @@ function submitcsv(&$db,
 		$Summary_Array['categoryid'] =  _('Stock Category');
 
 		// Create array for sort for detail report to display in header
-		$Detail_Array['purchorderdetails.orderno'] = _('Order Number');
-		$Detail_Array['purchorderdetails.itemcode'] = _('Part Number');
-		$Detail_Array['suppliers.supplierid,purchorderdetails.orderno'] = _('Supplier Number');
-		$Detail_Array['suppliers.suppname,suppliers.supplierid,purchorderdetails.orderno'] = _('Supplier Name');
+		$Detail_Array['weberp_purchorderdetails.orderno'] = _('Order Number');
+		$Detail_Array['weberp_purchorderdetails.itemcode'] = _('Part Number');
+		$Detail_Array['weberp_suppliers.supplierid,weberp_purchorderdetails.orderno'] = _('Supplier Number');
+		$Detail_Array['weberp_suppliers.suppname,weberp_suppliers.supplierid,weberp_purchorderdetails.orderno'] = _('Supplier Name');
 
 		// Display Header info
 		if ($_POST['ReportType'] == 'Summary') {
@@ -1381,7 +1381,7 @@ function submitcsv(&$db,
 				while ($myrow = DB_fetch_array($result)) {
 					$linectr++;
 				   // Detail for both DateType of Ship
-				   // In sql, had to alias grns.qtyrecd as quantityord so could use same name here
+				   // In sql, had to alias weberp_grns.qtyrecd as quantityord so could use same name here
 					fprintf($FileHandle, '"%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,"%s","%s","%s"'."\n",
 					$myrow['orderno'],
 					$myrow['itemcode'],
@@ -1422,7 +1422,7 @@ function submitcsv(&$db,
 			// For SummaryType 'suppname' had to add supplierid to it for the GROUP BY in the sql,
 			// but have to take it away for $myrow[$summarytype] to be valid
 			// Set up description based on the Summary Type
-			if ($summarytype == 'suppname,suppliers.supplierid') {
+			if ($summarytype == 'suppname,weberp_suppliers.supplierid') {
 				$summarytype = 'suppname';
 				$description = 'supplierno';
 				$summaryheader = _('Supplier Name');
@@ -1606,7 +1606,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 		<tr>
 			<td>' . _('Stock Categories') . ':</td>
 			<td><select name="Category">';
-	$sql="SELECT categoryid, categorydescription FROM stockcategory";
+	$sql="SELECT categoryid, categorydescription FROM weberp_stockcategory";
 	$CategoryResult= DB_query($sql);
 	echo '<option selected="selected" value="All">' . _('All Categories') . '</option>';
 	While ($myrow = DB_fetch_array($CategoryResult)){
@@ -1620,10 +1620,10 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 		<tr>
 			<td>' . _('Sort By') . ':</td>
 			<td><select name="SortBy">
-				<option selected="selected" value="purchorderdetails.orderno">' . _('Order Number') . '</option>
-				<option value="purchorderdetails.itemcode">' . _('Part Number') . '</option>
-				<option value="suppliers.supplierid,purchorderdetails.orderno">' . _('Supplier Number') . '</option>
-				<option value="suppliers.suppname,suppliers.supplierid,purchorderdetails.orderno">' . _('Supplier Name') . '</option>
+				<option selected="selected" value="weberp_purchorderdetails.orderno">' . _('Order Number') . '</option>
+				<option value="weberp_purchorderdetails.itemcode">' . _('Part Number') . '</option>
+				<option value="weberp_suppliers.supplierid,weberp_purchorderdetails.orderno">' . _('Supplier Number') . '</option>
+				<option value="weberp_suppliers.suppname,weberp_suppliers.supplierid,weberp_purchorderdetails.orderno">' . _('Supplier Name') . '</option>
 				</select></td>
 			<td>&nbsp;</td>
 		</tr>

@@ -61,9 +61,9 @@ if (isset($_FILES['CostUpdateFile']) and $_FILES['CostUpdateFile']['name']) { //
 						labourcost,
 						overheadcost,
 						sum(quantity) as totalqoh
-				FROM stockmaster INNER JOIN locstock
-				ON stockmaster.stockid=locstock.stockid
-				WHERE stockmaster.stockid='" . $StockID . "'
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid=weberp_locstock.stockid
+				WHERE weberp_stockmaster.stockid='" . $StockID . "'
 				GROUP BY materialcost,
 						labourcost,
 						overheadcost";
@@ -82,7 +82,7 @@ if (isset($_FILES['CostUpdateFile']) and $_FILES['CostUpdateFile']['name']) { //
 
 			ItemCostUpdateGL($db, $StockID, $NewCost, $OldCost, $QOH);
 
-			$SQL = "UPDATE stockmaster SET	materialcost='" . (double) $myrow[1] . "',
+			$SQL = "UPDATE weberp_stockmaster SET	materialcost='" . (double) $myrow[1] . "',
 											labourcost='" . (double) $myrow[2] . "',
 											overheadcost='" . (double) $myrow[3] . "',
 											lastcost='" . $OldCost . "',

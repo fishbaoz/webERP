@@ -2,7 +2,7 @@
 -- Release date: 2015-02-06.
 --
 
-CREATE TABLE IF NOT EXISTS `locationusers` (
+CREATE TABLE weberp_IF NOT EXISTS `locationusers` (
   `loccode` varchar(5) NOT NULL,
   `userid` varchar(20) NOT NULL,
   `canview` tinyint(4) NOT NULL DEFAULT '0',
@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS `locationusers` (
   KEY `UserId` (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `locationusers` (`loccode`, `userid`, `canview`, `canupd`) SELECT loccode, userid,1,1 FROM locations, www_users;
-INSERT INTO `scripts` (`script`, `pagesecurity`, `description`) VALUES ('LocationUsers.php', '15', 'Allows users that have permission to access a location to be defined');
+INSERT INTO `weberp_locationusers` (`loccode`, `userid`, `canview`, `canupd`) SELECT loccode, userid,1,1 FROM locations, www_users;
+INSERT INTO `weberp_scripts` (`script`, `pagesecurity`, `description`) VALUES ('LocationUsers.php', '15', 'Allows users that have permission to access a location to be defined');
 
 -- Update version number:
 UPDATE config SET confvalue='4.12.2' WHERE confname='VersionNumber';

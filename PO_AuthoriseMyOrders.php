@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PO_AuthoriseMyOrders.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -11,7 +11,7 @@ include('includes/header.inc');
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/transactions.png" title="' . $Title .
 	 '" alt="" />' . ' ' . $Title . '</p>';
 
-$EmailSQL="SELECT email FROM www_users WHERE userid='".$_SESSION['UserID']."'";
+$EmailSQL="SELECT email FROM weberp_www_users WHERE userid='".$_SESSION['UserID']."'";
 $EmailResult=DB_query($EmailSQL);
 $EmailRow=DB_fetch_array($EmailResult);
 
@@ -21,7 +21,7 @@ if (isset($_POST['UpdateAll'])) {
 			$OrderNo=mb_substr($key,6);
 			$Status=$_POST['Status'.$OrderNo];
 			$Comment=date($_SESSION['DefaultDateFormat']).' - '._('Authorised by').' <a href="mailto:' . $EmailRow['email'].'">' . $_SESSION['UserID'] . '</a><br />' . html_entity_decode($_POST['comment'],ENT_QUOTES,'UTF-8');
-			$sql="UPDATE purchorders
+			$sql="UPDATE weberp_purchorders
 					SET status='".$Status."',
 						stat_comment='".$Comment."',
 						allowprint=1
@@ -33,18 +33,18 @@ if (isset($_POST['UpdateAll'])) {
 
 /* Retrieve the purchase order header information
  */
-$sql="SELECT purchorders.*,
-			suppliers.suppname,
-			suppliers.currcode,
-			www_users.realname,
-			www_users.email,
-			currencies.decimalplaces AS currdecimalplaces
-		FROM purchorders INNER JOIN suppliers
-			ON suppliers.supplierid=purchorders.supplierno
-		INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
-		INNER JOIN www_users
-			ON www_users.userid=purchorders.initiator
+$sql="SELECT weberp_purchorders.*,
+			weberp_suppliers.suppname,
+			weberp_suppliers.currcode,
+			weberp_www_users.realname,
+			weberp_www_users.email,
+			weberp_currencies.decimalplaces AS currdecimalplaces
+		FROM weberp_purchorders INNER JOIN weberp_suppliers
+			ON weberp_suppliers.supplierid=weberp_purchorders.supplierno
+		INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
+		INNER JOIN weberp_www_users
+			ON weberp_www_users.userid=weberp_purchorders.initiator
 	WHERE status='Pending'";
 $result=DB_query($sql);
 
@@ -65,7 +65,7 @@ echo '<tr>
 
 while ($myrow=DB_fetch_array($result)) {
 
-	$AuthSQL="SELECT authlevel FROM purchorderauth
+	$AuthSQL="SELECT authlevel FROM weberp_purchorderauth
 				WHERE userid='".$_SESSION['UserID']."'
 				AND currabrev='".$myrow['currcode']."'";
 
@@ -74,7 +74,7 @@ while ($myrow=DB_fetch_array($result)) {
 	$AuthLevel=$myauthrow['authlevel'];
 
 	$OrderValueSQL="SELECT sum(unitprice*quantityord) as ordervalue
-		           	FROM purchorderdetails
+		           	FROM weberp_purchorderdetails
 			        WHERE orderno='".$myrow['orderno'] . "'";
 
 	$OrderValueResult=DB_query($OrderValueSQL);
@@ -96,12 +96,12 @@ while ($myrow=DB_fetch_array($result)) {
 					</select></td>
 			</tr>';
 		echo '<input type="hidden" name="comment" value="' . htmlspecialchars($myrow['stat_comment'], ENT_QUOTES,'UTF-8') . '" />';
-		$LineSQL="SELECT purchorderdetails.*,
-					stockmaster.description,
-					stockmaster.decimalplaces
-				FROM purchorderdetails
-				LEFT JOIN stockmaster
-				ON stockmaster.stockid=purchorderdetails.itemcode
+		$LineSQL="SELECT weberp_purchorderdetails.*,
+					weberp_stockmaster.description,
+					weberp_stockmaster.decimalplaces
+				FROM weberp_purchorderdetails
+				LEFT JOIN weberp_stockmaster
+				ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
 			WHERE orderno='".$myrow['orderno'] . "'";
 		$LineResult=DB_query($LineSQL);
 

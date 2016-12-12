@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: BOMInquiry.php 7093 2015-01-22 20:15:40Z vvs2012 $*/
 
 include('includes/session.inc');
 $Title = _('Costed Bill Of Material');
@@ -53,42 +53,42 @@ if (isset($_POST['Search'])){
 			//insert wildcard characters in spaces
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-			$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units,
-							stockmaster.mbflag,
-							SUM(locstock.quantity) as totalonhand
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid = locstock.stockid
-					WHERE stockmaster.description " . LIKE . "'" . $SearchString . "'
-					AND (stockmaster.mbflag='M'
-						OR stockmaster.mbflag='K'
-						OR stockmaster.mbflag='A'
-						OR stockmaster.mbflag='G')
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units,
-						stockmaster.mbflag
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							SUM(weberp_locstock.quantity) as totalonhand
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid = weberp_locstock.stockid
+					WHERE weberp_stockmaster.description " . LIKE . "'" . $SearchString . "'
+					AND (weberp_stockmaster.mbflag='M'
+						OR weberp_stockmaster.mbflag='K'
+						OR weberp_stockmaster.mbflag='A'
+						OR weberp_stockmaster.mbflag='G')
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag
+					ORDER BY weberp_stockmaster.stockid";
 
 		} elseif (mb_strlen($_POST['StockCode'])>0){
-			$sql = "SELECT stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units,
-							stockmaster.mbflag,
-							sum(locstock.quantity) as totalonhand
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid = locstock.stockid
-					WHERE stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
-					AND (stockmaster.mbflag='M'
-						OR stockmaster.mbflag='K'
-						OR stockmaster.mbflag='G'
-						OR stockmaster.mbflag='A')
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units,
-						stockmaster.mbflag
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description,
+							weberp_stockmaster.units,
+							weberp_stockmaster.mbflag,
+							sum(weberp_locstock.quantity) as totalonhand
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid = weberp_locstock.stockid
+					WHERE weberp_stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
+					AND (weberp_stockmaster.mbflag='M'
+						OR weberp_stockmaster.mbflag='K'
+						OR weberp_stockmaster.mbflag='G'
+						OR weberp_stockmaster.mbflag='A')
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_stockmaster.mbflag
+					ORDER BY weberp_stockmaster.stockid";
 
 		}
 
@@ -156,24 +156,24 @@ if (isset($StockID) and $StockID!=""){
 								units,
 								labourcost,
 								overheadcost
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='" . $StockID  . "'");
 	$myrow = DB_fetch_array($result);
 	$ParentLabourCost = $myrow['labourcost'];
 	$ParentOverheadCost = $myrow['overheadcost'];
 
-	$sql = "SELECT bom.parent,
-					bom.component,
-					stockmaster.description,
-					stockmaster.decimalplaces,
-					stockmaster.materialcost+ stockmaster.labourcost+stockmaster.overheadcost as standardcost,
-					bom.quantity,
-					bom.quantity * (stockmaster.materialcost+ stockmaster.labourcost+ stockmaster.overheadcost) AS componentcost
-			FROM bom INNER JOIN stockmaster
-			ON bom.component = stockmaster.stockid
-			WHERE bom.parent = '" . $StockID . "'
-            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-            AND bom.effectiveto > '" . date('Y-m-d') . "'";
+	$sql = "SELECT weberp_bom.parent,
+					weberp_bom.component,
+					weberp_stockmaster.description,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.materialcost+ weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost as standardcost,
+					weberp_bom.quantity,
+					weberp_bom.quantity * (weberp_stockmaster.materialcost+ weberp_stockmaster.labourcost+ weberp_stockmaster.overheadcost) AS componentcost
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.component = weberp_stockmaster.stockid
+			WHERE weberp_bom.parent = '" . $StockID . "'
+            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+            AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 	$ErrMsg = _('The bill of material could not be retrieved because');
 	$BOMResult = DB_query ($sql,$ErrMsg);

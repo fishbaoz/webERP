@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SuppInvGRNs.php 7604 2016-08-25 21:05:53Z rchacon $*/
 /*The supplier transaction uses the SuppTrans class to hold the information about the invoice
 the SuppTrans class contains an array of GRNs objects - containing details of GRNs for invoicing and also
 an array of GLCodes objects - only used if the AP - GL link is effective */
@@ -172,27 +172,27 @@ echo '</tbody>
 
 $SQL = "SELECT grnbatch,
 				grnno,
-				purchorderdetails.orderno,
-				purchorderdetails.unitprice,
-				grns.itemcode,
-				grns.deliverydate,
-				grns.itemdescription,
-				grns.qtyrecd,
-				grns.quantityinv,
-				grns.stdcostunit,
-				grns.supplierref,
-				purchorderdetails.glcode,
-				purchorderdetails.shiptref,
-				purchorderdetails.jobref,
-				purchorderdetails.podetailitem,
-				purchorderdetails.assetid,
-				stockmaster.decimalplaces
-		FROM grns INNER JOIN purchorderdetails
-			ON  grns.podetailitem=purchorderdetails.podetailitem
-		LEFT JOIN stockmaster ON grns.itemcode=stockmaster.stockid
-		WHERE grns.supplierid ='" . $_SESSION['SuppTrans']->SupplierID . "'
-		AND grns.qtyrecd - grns.quantityinv > 0
-		ORDER BY grns.grnno";
+				weberp_purchorderdetails.orderno,
+				weberp_purchorderdetails.unitprice,
+				weberp_grns.itemcode,
+				weberp_grns.deliverydate,
+				weberp_grns.itemdescription,
+				weberp_grns.qtyrecd,
+				weberp_grns.quantityinv,
+				weberp_grns.stdcostunit,
+				weberp_grns.supplierref,
+				weberp_purchorderdetails.glcode,
+				weberp_purchorderdetails.shiptref,
+				weberp_purchorderdetails.jobref,
+				weberp_purchorderdetails.podetailitem,
+				weberp_purchorderdetails.assetid,
+				weberp_stockmaster.decimalplaces
+		FROM weberp_grns INNER JOIN weberp_purchorderdetails
+			ON  weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+		LEFT JOIN weberp_stockmaster ON weberp_grns.itemcode=weberp_stockmaster.stockid
+		WHERE weberp_grns.supplierid ='" . $_SESSION['SuppTrans']->SupplierID . "'
+		AND weberp_grns.qtyrecd - weberp_grns.quantityinv > 0
+		ORDER BY weberp_grns.grnno";
 $GRNResults = DB_query($SQL);
 
 if (DB_num_rows($GRNResults)==0){

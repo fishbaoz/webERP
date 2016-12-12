@@ -28,16 +28,16 @@ if(isset($_POST['ProcessCopyAuthority'])) {
 		$result = DB_Txn_Begin();
 
 		echo '<br />' . _('Deleting the current authority to view / update the GL Accounts of user') . ' ' .  $_POST['ToUserID'];
-		$sql = "DELETE FROM glaccountusers WHERE userid = '" . $_POST['ToUserID'] . "'";
+		$sql = "DELETE FROM weberp_glaccountusers WHERE userid = '" . $_POST['ToUserID'] . "'";
 		$DbgMsg = _('The SQL statement that failed was');
 		$ErrMsg =_('The SQL to delete the auhority in glaccountusers record failed');
 		$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 		echo ' ... ' . _('completed');
 
 		echo '<br />' . _('Copying the authority to view / update the GL Accounts from user') . ' ' . $_POST['FromUserID'] . ' ' . _('to') . ' ' . $_POST['ToUserID'];
-		$sql = "INSERT INTO glaccountusers (userid, accountcode, canview, canupd)
+		$sql = "INSERT INTO weberp_glaccountusers (userid, accountcode, canview, canupd)
 						SELECT '" . $_POST['ToUserID'] . "', accountcode, canview, canupd
-						FROM glaccountusers
+						FROM weberp_glaccountusers
 						WHERE userid = '" . $_POST['FromUserID'] . "'";
 
 		$DbgMsg = _('The SQL statement that failed was');
@@ -60,7 +60,7 @@ echo ' <tr>
 		<td><select name="FromUserID">';
 $Result = DB_query("SELECT userid,
 							realname
-					FROM www_users
+					FROM weberp_www_users
 					ORDER BY userid");
 
 echo '<option selected value="">' . _('Not Yet Selected') . '</option>';
@@ -75,7 +75,7 @@ echo ' <tr>
 		<td><select name="ToUserID">';
 $Result = DB_query("SELECT userid,
 							realname
-					FROM www_users
+					FROM weberp_www_users
 					ORDER BY userid");
 
 echo '<option selected value="">' . _('Not Yet Selected') . '</option>';

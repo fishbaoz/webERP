@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: CompanyPreferences.php 7644 2016-10-11 15:52:19Z rchacon $ */
 /* Defines the settings applicable for the company, including name, address, tax authority reference, whether GL integration used etc. */
 
 include('includes/session.inc');
@@ -41,7 +41,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1){
 
-		$sql = "UPDATE companies SET coyname='" . $_POST['CoyName'] . "',
+		$sql = "UPDATE weberp_companies SET coyname='" . $_POST['CoyName'] . "',
 									companynumber = '" . $_POST['CompanyNumber'] . "',
 									gstno='" . $_POST['GSTNo'] . "',
 									regoffice1='" . $_POST['RegOffice1'] . "',
@@ -75,13 +75,13 @@ if (isset($_POST['submit'])) {
 			/* Alter the exchange rates in the currencies table */
 
 			/* Get default currency rate */
-			$sql="SELECT rate from currencies WHERE currabrev='" . $_POST['CurrencyDefault'] . "'";
+			$sql="SELECT rate from weberp_currencies WHERE currabrev='" . $_POST['CurrencyDefault'] . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			$NewCurrencyRate=$myrow[0];
 
 			/* Set new rates */
-			$sql="UPDATE currencies SET rate=rate/" . $NewCurrencyRate;
+			$sql="UPDATE weberp_currencies SET rate=rate/" . $NewCurrencyRate;
 			$ErrMsg =  _('Could not update the currency rates');
 			$result = DB_query($sql,$ErrMsg);
 
@@ -131,7 +131,7 @@ if ($InputError != 1) {
 					gllink_creditors,
 					gllink_stock,
 					freightact
-				FROM companies
+				FROM weberp_companies
 				WHERE coycode=1";
 
 	$ErrMsg =  _('The company preferences could not be retrieved because');
@@ -228,7 +228,7 @@ echo '<tr>
 	</tr>';
 
 
-$result=DB_query("SELECT currabrev, currency FROM currencies");
+$result=DB_query("SELECT currabrev, currency FROM weberp_currencies");
 include('includes/CurrenciesArray.php'); // To get the currency name from the currency code.
 
 echo '<tr>
@@ -250,10 +250,10 @@ echo '</select></td>
 
 $result=DB_query("SELECT accountcode,
 						accountname
-					FROM chartmaster INNER JOIN accountgroups
-					ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0
-					ORDER BY chartmaster.accountcode");
+					FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+					ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0
+					ORDER BY weberp_chartmaster.accountcode");
 
 echo '<tr>
 		<td>' . _('Debtors Control GL Account') . ':</td>
@@ -345,10 +345,10 @@ echo '<tr>
 
 $result=DB_query("SELECT accountcode,
 						accountname
-					FROM chartmaster INNER JOIN accountgroups
-					ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=1
-					ORDER BY chartmaster.accountcode");
+					FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+					ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=1
+					ORDER BY weberp_chartmaster.accountcode");
 
 while ($myrow = DB_fetch_row($result)) {
 	if ($_POST['FreightAct']==$myrow[0]){

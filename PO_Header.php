@@ -48,7 +48,7 @@ if (isset($_GET['NewOrder']) AND isset($_SESSION['PO' . $identifier])) {
 
 if (isset($_POST['Select']) AND empty($_POST['SupplierContact'])) {
 	$sql = "SELECT contact
-				FROM suppliercontacts
+				FROM weberp_suppliercontacts
 				WHERE supplierid='" . $_POST['Select'] . "'";
 
 	$SuppCoResult = DB_query($sql);
@@ -68,7 +68,7 @@ if ((isset($_POST['UpdateStatus']) AND $_POST['UpdateStatus'] != '')) {
 	} elseif ($_SESSION['PO' . $identifier]->Status != $_POST['Status']) { //the old status  != new status
 		$OKToUpdateStatus = 1;
 		$AuthSQL = "SELECT authlevel
-					FROM purchorderauth
+					FROM weberp_purchorderauth
 					WHERE userid='" . $_SESSION['UserID'] . "'
 					AND currabrev='" . $_SESSION['PO' . $identifier]->CurrCode . "'";
 
@@ -143,19 +143,19 @@ if ((isset($_POST['UpdateStatus']) AND $_POST['UpdateStatus'] != '')) {
 			else {
 				$AllowPrint = 0;
 			}
-			$SQL = "UPDATE purchorders SET status='" . $_POST['Status'] . "',
+			$SQL = "UPDATE weberp_purchorders SET status='" . $_POST['Status'] . "',
 							stat_comment='" . $_SESSION['PO' . $identifier]->StatusComments . "',
 							allowprint='" . $AllowPrint . "'
-					WHERE purchorders.orderno ='" . $_SESSION['ExistingOrder'] . "'";
+					WHERE weberp_purchorders.orderno ='" . $_SESSION['ExistingOrder'] . "'";
 
 			$ErrMsg = _('The order status could not be updated because');
 			$UpdateResult = DB_query($SQL, $ErrMsg);
 
 			if ($_POST['Status']=='Completed' OR $_POST['Status']=='Cancelled' OR $_POST['Status']=='Rejected') {
-				$SQL = "UPDATE purchorderdetails SET completed=1 WHERE orderno='" . $_SESSION['ExistingOrder'] . "'";
+				$SQL = "UPDATE weberp_purchorderdetails SET completed=1 WHERE orderno='" . $_SESSION['ExistingOrder'] . "'";
 				$UpdateResult =DB_query($SQL,$ErrMsg);
-			} else {//To ensure that the purchorderdetails status is correct when it is recovered from a cancelled orders
-				$SQL = "UPDATE purchorderdetails SET completed=0 WHERE orderno='" . $_SESSION['ExistingOrder'] . "'";
+			} else {//To ensure that the weberp_purchorderdetails status is correct when it is recovered from a cancelled orders
+				$SQL = "UPDATE weberp_purchorderdetails SET completed=0 WHERE orderno='" . $_SESSION['ExistingOrder'] . "'";
 				$UpdateResult = DB_query($SQL,$ErrMsg);
 			}
 		} //$OKToUpdateStatus == 1
@@ -227,9 +227,9 @@ if (isset($_POST['EnterLines']) OR isset($_POST['AllowRePrint'])) {
 	if (isset($_POST['RePrint']) AND $_POST['RePrint'] == 1) {
 		$_SESSION['PO' . $identifier]->AllowPrintPO = 1;
 
-		$sql = "UPDATE purchorders
-				SET purchorders.allowprint='1'
-				WHERE purchorders.orderno='" . $_SESSION['PO' . $identifier]->OrderNo . "'";
+		$sql = "UPDATE weberp_purchorders
+				SET weberp_purchorders.allowprint='1'
+				WHERE weberp_purchorders.orderno='" . $_SESSION['PO' . $identifier]->OrderNo . "'";
 
 		$ErrMsg = _('An error occurred updating the purchase order to allow reprints') . '. ' . _('The error says');
 		$UpdateResult = DB_query($sql, $ErrMsg);
@@ -311,46 +311,46 @@ if (isset($_POST['SearchSuppliers'])) {
 		//insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT suppliers.supplierid,
-							suppliers.suppname,
-							suppliers.address1,
-							suppliers.address2,
-							suppliers.address3,
-							suppliers.address4,
-							suppliers.address5,
-							suppliers.address6,
-							suppliers.currcode
-						FROM suppliers
-						WHERE suppliers.suppname " . LIKE . " '" . $SearchString . "'
-						ORDER BY suppliers.suppname";
+		$SQL = "SELECT weberp_suppliers.supplierid,
+							weberp_suppliers.suppname,
+							weberp_suppliers.address1,
+							weberp_suppliers.address2,
+							weberp_suppliers.address3,
+							weberp_suppliers.address4,
+							weberp_suppliers.address5,
+							weberp_suppliers.address6,
+							weberp_suppliers.currcode
+						FROM weberp_suppliers
+						WHERE weberp_suppliers.suppname " . LIKE . " '" . $SearchString . "'
+						ORDER BY weberp_suppliers.suppname";
 
 	} elseif (mb_strlen($_POST['SuppCode']) > 0) {
 
-		$SQL = "SELECT suppliers.supplierid,
-							suppliers.suppname,
-							suppliers.address1,
-							suppliers.address2,
-							suppliers.address3,
-							suppliers.address4,
-							suppliers.address5,
-							suppliers.address6,
-							suppliers.currcode
-						FROM suppliers
-						WHERE suppliers.supplierid " . LIKE . " '%" . $_POST['SuppCode'] . "%'
-						ORDER BY suppliers.supplierid";
+		$SQL = "SELECT weberp_suppliers.supplierid,
+							weberp_suppliers.suppname,
+							weberp_suppliers.address1,
+							weberp_suppliers.address2,
+							weberp_suppliers.address3,
+							weberp_suppliers.address4,
+							weberp_suppliers.address5,
+							weberp_suppliers.address6,
+							weberp_suppliers.currcode
+						FROM weberp_suppliers
+						WHERE weberp_suppliers.supplierid " . LIKE . " '%" . $_POST['SuppCode'] . "%'
+						ORDER BY weberp_suppliers.supplierid";
 	} else {
 
-		$SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3,
-						suppliers.address4,
-						suppliers.address5,
-						suppliers.address6,
-						suppliers.currcode
-					FROM suppliers
-					ORDER BY suppliers.supplierid";
+		$SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3,
+						weberp_suppliers.address4,
+						weberp_suppliers.address5,
+						weberp_suppliers.address6,
+						weberp_suppliers.currcode
+					FROM weberp_suppliers
+					ORDER BY weberp_suppliers.supplierid";
 	}
 
 	$ErrMsg = _('The searched supplier records requested cannot be retrieved because');
@@ -396,21 +396,21 @@ if (isset($_POST['Select'])) {
 	 * or set because only one supplier record returned from a search
 	 */
 
-	$sql = "SELECT suppliers.suppname,
-					suppliers.currcode,
-					currencies.rate,
-					currencies.decimalplaces,
-					suppliers.paymentterms,
-					suppliers.address1,
-					suppliers.address2,
-					suppliers.address3,
-					suppliers.address4,
-					suppliers.address5,
-					suppliers.address6,
-					suppliers.telephone,
-					suppliers.port
-				FROM suppliers INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
+	$sql = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.rate,
+					weberp_currencies.decimalplaces,
+					weberp_suppliers.paymentterms,
+					weberp_suppliers.address1,
+					weberp_suppliers.address2,
+					weberp_suppliers.address3,
+					weberp_suppliers.address4,
+					weberp_suppliers.address5,
+					weberp_suppliers.address6,
+					weberp_suppliers.telephone,
+					weberp_suppliers.port
+				FROM weberp_suppliers INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
 				WHERE supplierid='" . $_POST['Select'] . "'";
 
 	$ErrMsg = _('The supplier record of the supplier selected') . ': ' . $_POST['Select'] . ' ' . _('cannot be retrieved because');
@@ -420,7 +420,7 @@ if (isset($_POST['Select'])) {
 	// added for suppliers lookup fields
 
 	$AuthSql = "SELECT cancreate
-				FROM purchorderauth
+				FROM weberp_purchorderauth
 				WHERE userid='" . $_SESSION['UserID'] . "'
 				AND currabrev='" . $myrow['currcode'] . "'";
 
@@ -471,20 +471,20 @@ if (isset($_POST['Select'])) {
    */
 else {
 	$_POST['Select'] = $_SESSION['PO' . $identifier]->SupplierID;
-	$sql = "SELECT suppliers.suppname,
-					suppliers.currcode,
-					currencies.decimalplaces,
-					suppliers.paymentterms,
-					suppliers.address1,
-					suppliers.address2,
-					suppliers.address3,
-					suppliers.address4,
-					suppliers.address5,
-					suppliers.address6,
-					suppliers.telephone,
-					suppliers.port
-			FROM suppliers INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
+	$sql = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.decimalplaces,
+					weberp_suppliers.paymentterms,
+					weberp_suppliers.address1,
+					weberp_suppliers.address2,
+					weberp_suppliers.address3,
+					weberp_suppliers.address4,
+					weberp_suppliers.address5,
+					weberp_suppliers.address6,
+					weberp_suppliers.telephone,
+					weberp_suppliers.port
+			FROM weberp_suppliers INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
 			WHERE supplierid='" . $_POST['Select'] . "'";
 
 	$ErrMsg = _('The supplier record of the supplier selected') . ': ' . $_POST['Select'] . ' ' . _('cannot be retrieved because');
@@ -638,23 +638,23 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 			$Qty = 1;
 		}
 
-		$sql = "SELECT stockmaster.controlled,
-						stockmaster.serialised,
-						stockmaster.description,
-						stockmaster.units ,
-						stockmaster.decimalplaces,
-						purchdata.price,
-						purchdata.suppliersuom,
-						purchdata.suppliers_partno,
-						purchdata.conversionfactor,
-						purchdata.leadtime,
-						stockcategory.stockact
-				FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-				LEFT JOIN purchdata
-					ON stockmaster.stockid = purchdata.stockid
-				WHERE stockmaster.stockid='" . $Purch_Item . "'
-				AND purchdata.supplierno ='" . $_GET['SelectedSupplier'] . "'";
+		$sql = "SELECT weberp_stockmaster.controlled,
+						weberp_stockmaster.serialised,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units ,
+						weberp_stockmaster.decimalplaces,
+						weberp_purchdata.price,
+						weberp_purchdata.suppliersuom,
+						weberp_purchdata.suppliers_partno,
+						weberp_purchdata.conversionfactor,
+						weberp_purchdata.leadtime,
+						weberp_stockcategory.stockact
+				FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+				LEFT JOIN weberp_purchdata
+					ON weberp_stockmaster.stockid = weberp_purchdata.stockid
+				WHERE weberp_stockmaster.stockid='" . $Purch_Item . "'
+				AND weberp_purchdata.supplierno ='" . $_GET['SelectedSupplier'] . "'";
 		$result = DB_query($sql);
 		$PurchItemRow = DB_fetch_array($result);
 
@@ -713,7 +713,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 		$_POST['Comments'] = $_SESSION['PO' . $identifier]->Comments;
 		$_POST['DeliveryBy'] = $_SESSION['PO' . $identifier]->DeliveryBy;
 		$_POST['PaymentTerms'] = $_SESSION['PO' . $identifier]->PaymentTerms;
-		$sql = "SELECT realname FROM www_users WHERE userid='" . $_POST['Initiator'] . "'";
+		$sql = "SELECT realname FROM weberp_www_users WHERE userid='" . $_POST['Initiator'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);
 		$_POST['InitiatorName'] = $myrow['realname'];
@@ -795,7 +795,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 	}
 
 	if (isset($_POST['AllowRePrint'])) {
-		$sql = "UPDATE purchorders SET allowprint=1 WHERE orderno='" . $_SESSION['PO' . $identifier]->OrderNo . "'";
+		$sql = "UPDATE weberp_purchorders SET allowprint=1 WHERE orderno='" . $_SESSION['PO' . $identifier]->OrderNo . "'";
 		$result = DB_query($sql);
 	}
 
@@ -893,9 +893,9 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 				<td>' . _('Warehouse') . ':</td>
 				<td><select required="required" name="StkLocation" onchange="ReloadForm(form1.LookupDeliveryAddress)">';
 
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 					locationname
-			FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+			FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 	$LocnResult = DB_query($sql);
 
 	while ($LocnRow = DB_fetch_array($LocnResult)) {
@@ -924,7 +924,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 						deladd6,
 						tel,
 						contact
-					FROM locations
+					FROM weberp_locations
 					WHERE loccode='" . $_POST['StkLocation'] . "'";
 
 		$LocnAddrResult = DB_query($sql);
@@ -966,7 +966,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 						deladd6,
 						tel,
 						contact
-					FROM locations
+					FROM weberp_locations
 					WHERE loccode='" . $_POST['StkLocation'] . "'";
 
 		$LocnAddrResult = DB_query($sql);
@@ -1030,7 +1030,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 			<td>' . _('Delivery By') . ':</td>
 			<td><select name="DeliveryBy">';
 
-	$ShipperResult = DB_query("SELECT shipper_id, shippername FROM shippers");
+	$ShipperResult = DB_query("SELECT shipper_id, shippername FROM weberp_shippers");
 
 	while ($ShipperRow = DB_fetch_array($ShipperResult)) {
 		if (isset($_POST['DeliveryBy']) and ($_POST['DeliveryBy'] == $ShipperRow['shipper_id'])) {
@@ -1052,7 +1052,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 				<td>' . _('Supplier Selection') . ':</td>
 				<td><select name="Keywords" onchange="ReloadForm(form1.SearchSuppliers)">';
 
-	$SuppCoResult = DB_query("SELECT supplierid, suppname FROM suppliers ORDER BY suppname");
+	$SuppCoResult = DB_query("SELECT supplierid, suppname FROM weberp_suppliers ORDER BY suppname");
 
 	while ($SuppCoRow = DB_fetch_array($SuppCoResult)) {
 		if ($SuppCoRow['suppname'] == $_SESSION['PO' . $identifier]->SupplierName) {
@@ -1070,7 +1070,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 				<td>' . _('Supplier Contact') . ':</td>
 				<td><select name="SupplierContact">';
 
-	$sql = "SELECT contact FROM suppliercontacts WHERE supplierid='" . $_POST['Select'] . "'";
+	$sql = "SELECT contact FROM weberp_suppliercontacts WHERE supplierid='" . $_POST['Select'] . "'";
 	$SuppCoResult = DB_query($sql);
 
 	while ($SuppCoRow = DB_fetch_array($SuppCoResult)) {
@@ -1112,7 +1112,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 			<td><input type="tel" name="SuppTel" pattern="[0-9+\-\s()]*" size="31" maxlength="30" value="' . $_SESSION['PO' . $identifier]->SuppTel . '" /></td>
 		</tr>';
 
-	$result = DB_query("SELECT terms, termsindicator FROM paymentterms");
+	$result = DB_query("SELECT terms, termsindicator FROM weberp_paymentterms");
 
 	echo '<tr>
 			<td>' . _('Payment Terms') . ':</td>
@@ -1130,7 +1130,7 @@ if ($_SESSION['RequireSupplierSelection'] == 1 OR !isset($_SESSION['PO' . $ident
 
 	$result = DB_query("SELECT loccode,
 							locationname
-						FROM locations WHERE loccode='" . $_SESSION['PO' . $identifier]->Port . "'");
+						FROM weberp_locations WHERE loccode='" . $_SESSION['PO' . $identifier]->Port . "'");
 	$myrow = DB_fetch_array($result);
 	$_POST['Port'] = $myrow['locationname'];
 

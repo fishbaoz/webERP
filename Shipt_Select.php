@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Shipt_Select.php 7200 2015-03-07 13:57:58Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Search Shipments');
@@ -60,43 +60,43 @@ if (isset($_POST['SearchParts'])) {
 		echo '<br />';
 		prnMsg( _('Stock description keywords have been used in preference to the Stock code extract entered'),'info');
 	}
-	$SQL = "SELECT stockmaster.stockid,
+	$SQL = "SELECT weberp_stockmaster.stockid,
 			description,
 			decimalplaces,
-			SUM(locstock.quantity) AS qoh,
+			SUM(weberp_locstock.quantity) AS qoh,
 			units,
-			SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord
-		FROM stockmaster INNER JOIN locstock
-			ON stockmaster.stockid = locstock.stockid
-		INNER JOIN purchorderdetails
-			ON stockmaster.stockid=purchorderdetails.itemcode";
+			SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord
+		FROM weberp_stockmaster INNER JOIN weberp_locstock
+			ON weberp_stockmaster.stockid = weberp_locstock.stockid
+		INNER JOIN weberp_purchorderdetails
+			ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode";
 
 	If ($_POST['Keywords']) {
 		//insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL .= " WHERE purchorderdetails.shiptref IS NOT NULL
-			AND purchorderdetails.shiptref<>0
-			AND stockmaster.description " . LIKE . " '" . $SearchString . "'
+		$SQL .= " WHERE weberp_purchorderdetails.shiptref IS NOT NULL
+			AND weberp_purchorderdetails.shiptref<>0
+			AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
 			AND categoryid='" . $_POST['StockCat'] . "'";
 
 	 } elseif ($_POST['StockCode']){
 
-		$SQL .= " WHERE purchorderdetails.shiptref IS NOT NULL
-			AND purchorderdetails.shiptref<>0
-			AND stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+		$SQL .= " WHERE weberp_purchorderdetails.shiptref IS NOT NULL
+			AND weberp_purchorderdetails.shiptref<>0
+			AND weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
 			AND categoryid='" . $_POST['StockCat'] ."'";
 
 	 } elseif (!$_POST['StockCode'] AND !$_POST['Keywords']) {
-		$SQL .= " WHERE purchorderdetails.shiptref IS NOT NULL
-			AND purchorderdetails.shiptref<>0
-			AND stockmaster.categoryid='" . $_POST['StockCat'] . "'";
+		$SQL .= " WHERE weberp_purchorderdetails.shiptref IS NOT NULL
+			AND weberp_purchorderdetails.shiptref<>0
+			AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'";
 
 	 }
-	$SQL .= "  GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units";
+	$SQL .= "  GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units";
 
 	$ErrMsg = _('No Stock Items were returned from the database because'). ' - '. DB_error_msg();
 	$StockItemsResult = DB_query($SQL, $ErrMsg);
@@ -107,7 +107,7 @@ if (!isset($ShiptRef) or $ShiptRef==""){
 	echo '<table class="selection"><tr><td>';
 	echo _('Shipment Number'). ': <input type="text" name="ShiptRef" maxlength="10" size="10" /> '.
 		_('Into Stock Location').' :<select name="StockLocation"> ';
-	$sql = "SELECT loccode, locationname FROM locations";
+	$sql = "SELECT loccode, locationname FROM weberp_locations";
 	$resultStkLocs = DB_query($sql);
 	while ($myrow=DB_fetch_array($resultStkLocs)){
 		if (isset($_POST['StockLocation'])){
@@ -145,7 +145,7 @@ if (!isset($ShiptRef) or $ShiptRef==""){
 
 $SQL="SELECT categoryid,
 		categorydescription
-	FROM stockcategory
+	FROM weberp_stockcategory
 	WHERE stocktype<>'D'
 	ORDER BY categorydescription";
 $result1 = DB_query($SQL);
@@ -238,44 +238,44 @@ Code	 Description	On Hand		 Orders Ostdg     Units		 Code	Description 	 On Hand 
 	//figure out the SQL required from the inputs available
 
 	if (isset($ShiptRef) AND $ShiptRef !="") {
-		$SQL = "SELECT shipments.shiptref,
+		$SQL = "SELECT weberp_shipments.shiptref,
 				vessel,
 				voyageref,
-				suppliers.suppname,
-				shipments.eta,
-				shipments.closed
-			FROM shipments INNER JOIN suppliers
-				ON shipments.supplierid = suppliers.supplierid
-			WHERE shipments.shiptref='". $ShiptRef . "'";
+				weberp_suppliers.suppname,
+				weberp_shipments.eta,
+				weberp_shipments.closed
+			FROM weberp_shipments INNER JOIN weberp_suppliers
+				ON weberp_shipments.supplierid = weberp_suppliers.supplierid
+			WHERE weberp_shipments.shiptref='". $ShiptRef . "'";
 	} else {
-		$SQL = "SELECT DISTINCT shipments.shiptref, vessel, voyageref, suppliers.suppname, shipments.eta, shipments.closed
-			FROM shipments INNER JOIN suppliers
-				ON shipments.supplierid = suppliers.supplierid
-			INNER JOIN purchorderdetails
-				ON purchorderdetails.shiptref=shipments.shiptref
-			INNER JOIN purchorders
-				ON purchorderdetails.orderno=purchorders.orderno";
+		$SQL = "SELECT DISTINCT weberp_shipments.shiptref, vessel, voyageref, weberp_suppliers.suppname, weberp_shipments.eta, weberp_shipments.closed
+			FROM weberp_shipments INNER JOIN weberp_suppliers
+				ON weberp_shipments.supplierid = weberp_suppliers.supplierid
+			INNER JOIN weberp_purchorderdetails
+				ON weberp_purchorderdetails.shiptref=weberp_shipments.shiptref
+			INNER JOIN weberp_purchorders
+				ON weberp_purchorderdetails.orderno=weberp_purchorders.orderno";
 
 		if (isset($SelectedSupplier)) {
 
 			if (isset($SelectedStockItem)) {
-					$SQL .= " WHERE purchorderdetails.itemcode='". $SelectedStockItem ."'
-						AND shipments.supplierid='" . $SelectedSupplier ."'
-						AND purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
-						AND shipments.closed='" . $_POST['OpenOrClosed'] . "'";
+					$SQL .= " WHERE weberp_purchorderdetails.itemcode='". $SelectedStockItem ."'
+						AND weberp_shipments.supplierid='" . $SelectedSupplier ."'
+						AND weberp_purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
+						AND weberp_shipments.closed='" . $_POST['OpenOrClosed'] . "'";
 			} else {
-				$SQL .= " WHERE shipments.supplierid='" . $SelectedSupplier ."'
-					AND purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
-					AND shipments.closed='" . $_POST['OpenOrClosed'] ."'";
+				$SQL .= " WHERE weberp_shipments.supplierid='" . $SelectedSupplier ."'
+					AND weberp_purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
+					AND weberp_shipments.closed='" . $_POST['OpenOrClosed'] ."'";
 			}
 		} else { //no supplier selected
 			if (isset($SelectedStockItem)) {
-				$SQL .= " WHERE purchorderdetails.itemcode='". $SelectedStockItem ."'
-					AND purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
-					AND shipments.closed='" . $_POST['OpenOrClosed'] . "'";
+				$SQL .= " WHERE weberp_purchorderdetails.itemcode='". $SelectedStockItem ."'
+					AND weberp_purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
+					AND weberp_shipments.closed='" . $_POST['OpenOrClosed'] . "'";
 			} else {
-				$SQL .= " WHERE purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
-					AND shipments.closed='" . $_POST['OpenOrClosed'] . "'";
+				$SQL .= " WHERE weberp_purchorders.intostocklocation = '". $_POST['StockLocation'] . "'
+					AND weberp_shipments.closed='" . $_POST['OpenOrClosed'] . "'";
 			}
 
 		} //end selected supplier

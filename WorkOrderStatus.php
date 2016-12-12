@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WorkOrderStatus.php 7611 2016-09-04 06:12:47Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Work Order Status Inquiry');
@@ -22,25 +22,25 @@ if (isset($_GET['StockID'])) {
 
 
 $ErrMsg = _('Could not retrieve the details of the selected work order item');
-$WOResult = DB_query("SELECT workorders.loccode,
-							 locations.locationname,
-							 workorders.requiredby,
-							 workorders.startdate,
-							 workorders.closed,
-							 stockmaster.description,
-							 stockmaster.decimalplaces,
-							 stockmaster.units,
-							 woitems.qtyreqd,
-							 woitems.qtyrecd
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						INNER JOIN stockmaster
-						ON woitems.stockid=stockmaster.stockid
-						INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-						WHERE woitems.stockid='" . $StockID . "'
-						AND woitems.wo ='" . $SelectedWO . "'",
+$WOResult = DB_query("SELECT weberp_workorders.loccode,
+							 weberp_locations.locationname,
+							 weberp_workorders.requiredby,
+							 weberp_workorders.startdate,
+							 weberp_workorders.closed,
+							 weberp_stockmaster.description,
+							 weberp_stockmaster.decimalplaces,
+							 weberp_stockmaster.units,
+							 weberp_woitems.qtyreqd,
+							 weberp_woitems.qtyrecd
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						INNER JOIN weberp_stockmaster
+						ON weberp_woitems.stockid=weberp_stockmaster.stockid
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_woitems.stockid='" . $StockID . "'
+						AND weberp_woitems.wo ='" . $SelectedWO . "'",
 						$ErrMsg);
 
 if (DB_num_rows($WOResult)==0){
@@ -99,19 +99,19 @@ echo '<table cellpadding="2" class="selection">
 			<th>' . _('Qty Issued') . '</th>
 		</tr>';
 
-	$RequirmentsResult = DB_query("SELECT worequirements.stockid,
-										stockmaster.description,
-										stockmaster.decimalplaces,
+	$RequirmentsResult = DB_query("SELECT weberp_worequirements.stockid,
+										weberp_stockmaster.description,
+										weberp_stockmaster.decimalplaces,
 										autoissue,
 										qtypu
-									FROM worequirements INNER JOIN stockmaster
-									ON worequirements.stockid=stockmaster.stockid
+									FROM weberp_worequirements INNER JOIN weberp_stockmaster
+									ON weberp_worequirements.stockid=weberp_stockmaster.stockid
 									WHERE wo='" . $SelectedWO . "'
-									AND worequirements.parentstockid='" . $StockID . "'");
+									AND weberp_worequirements.parentstockid='" . $StockID . "'");
 		$IssuedAlreadyResult = DB_query("SELECT stockid,
 						SUM(-qty) AS total
-					FROM stockmoves
-					WHERE stockmoves.type=28
+					FROM weberp_stockmoves
+					WHERE weberp_stockmoves.type=28
 					AND reference='".$SelectedWO."'
 					GROUP BY stockid");
 	while ($IssuedRow = DB_fetch_array($IssuedAlreadyResult)){
@@ -143,7 +143,7 @@ echo '<table cellpadding="2" class="selection">
 		$RequirementsSQL = "SELECT stockid,
 						description,
 							decimalplaces
-				FROM stockmaster WHERE stockid IN ('".$AdditionalStocks."')";
+				FROM weberp_stockmaster WHERE stockid IN ('".$AdditionalStocks."')";
 		$RequirementsResult = DB_query($RequirementsSQL);
 			$AdditionalStocks = array();
 			while($myrow = DB_fetch_array($RequirementsResult)){

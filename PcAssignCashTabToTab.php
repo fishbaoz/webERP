@@ -40,7 +40,7 @@ if (isset($_POST['Process'])) {
 	}
 	//to ensure currency is the same 
 	$CurrSQL = "SELECT currency 
-				FROM pctabs
+				FROM weberp_pctabs
 				WHERE tabcode IN ('" . $SelectedTabs . "','" . $_POST['SelectedTabsTo'] . "')";
 	$CurrResult = DB_query($CurrSQL);
 	if (DB_num_rows($CurrResult)>0) {
@@ -86,7 +86,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	$sqlLimit = "SELECT tablimit,tabcode
-				FROM pctabs
+				FROM weberp_pctabs
 				WHERE tabcode IN ('" . $SelectedTabs . "','" . $_POST['SelectedTabsTo'] . "')";
 
 	$ResultLimit = DB_query($sqlLimit,$db);
@@ -104,7 +104,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1 ) {
 		// Add these 2 new record on submit
-		$sql = "INSERT INTO pcashdetails
+		$sql = "INSERT INTO weberp_pcashdetails
 					(counterindex,
 					tabcode,
 					date,
@@ -160,7 +160,7 @@ if (!isset($SelectedTabs)){
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 	$SQL = "SELECT tabcode
-			FROM pctabs
+			FROM weberp_pctabs
 			WHERE assigner='" . $_SESSION['UserID'] . "'
 			ORDER BY tabcode";
 
@@ -230,14 +230,14 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 
 		/* Retrieve decimal places to display */
 		$SqlDecimalPlaces="SELECT decimalplaces
-					FROM currencies,pctabs
-					WHERE currencies.currabrev = pctabs.currency
+					FROM weberp_currencies,weberp_pctabs
+					WHERE weberp_currencies.currabrev = weberp_pctabs.currency
 						AND tabcode='" . $SelectedTabs . "'";
 		$result = DB_query($SqlDecimalPlaces,$db);
 		$myrow=DB_fetch_array($result);
 		$CurrDecimalPlaces = $myrow['decimalplaces'];
 
-		$sql = "SELECT * FROM pcashdetails
+		$sql = "SELECT * FROM weberp_pcashdetails
 				WHERE tabcode='" . $SelectedTabs . "'
 				AND date >=DATE_SUB(CURDATE(), INTERVAL " . $Days . " DAY)
 				ORDER BY date, counterindex ASC";
@@ -274,7 +274,7 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 		}
 
 		$sqldes="SELECT description
-					FROM pcexpenses
+					FROM weberp_pcexpenses
 					WHERE codeexpense='". $myrow['3'] . "'";
 
 		$ResultDes = DB_query($sqldes,$db);
@@ -307,7 +307,7 @@ if (isset($_POST['Process']) OR isset($SelectedTabs)) {
 
 		$sqlamount="SELECT sum(amount) as amt,
 					tabcode
-					FROM pcashdetails
+					FROM weberp_pcashdetails
 					WHERE tabcode IN ('".$SelectedTabs."','" . $_POST['SelectedTabsTo'] . "')
 					GROUP BY tabcode";
 

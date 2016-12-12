@@ -13,18 +13,18 @@ echo '<p class="page_title_text">
 '" alt="" /><b>' . $Title. '</b>
 	</p>';
 
-$sql = "SELECT stockserialitems.stockid,
-				stockmaster.description,
-				stockserialitems.serialno,
-				stockserialitems.quantity,
-				stockmoves.trandate,
-				stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS cost,
+$sql = "SELECT weberp_stockserialitems.stockid,
+				weberp_stockmaster.description,
+				weberp_stockserialitems.serialno,
+				weberp_stockserialitems.quantity,
+				weberp_stockmoves.trandate,
+				weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS cost,
 				decimalplaces
-			FROM stockserialitems
-			LEFT JOIN stockserialmoves ON stockserialitems.serialno=stockserialmoves.serialno
-			LEFT JOIN stockmoves ON stockserialmoves.stockmoveno=stockmoves.stkmoveno
-			INNER JOIN stockmaster ON stockmaster.stockid = stockserialitems.stockid
-			INNER JOIN locationusers ON locationusers.loccode=stockserialitems.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+			FROM weberp_stockserialitems
+			LEFT JOIN weberp_stockserialmoves ON weberp_stockserialitems.serialno=weberp_stockserialmoves.serialno
+			LEFT JOIN weberp_stockmoves ON weberp_stockserialmoves.stockmoveno=weberp_stockmoves.stkmoveno
+			INNER JOIN weberp_stockmaster ON weberp_stockmaster.stockid = weberp_stockserialitems.stockid
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockserialitems.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			WHERE quantity > 0
 			GROUP BY stockid, serialno
 			ORDER BY trandate";

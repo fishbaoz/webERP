@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: WorkOrderIssue.php 7625 2016-09-18 08:44:07Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Issue Materials To Work Order');
@@ -48,21 +48,21 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 
 	$InputError = false; //ie assume no problems for a start - ever the optomist
 	$ErrMsg = _('Could not retrieve the details of the selected work order item');
-	$WOResult = DB_query("SELECT workorders.loccode,
-								 locations.locationname,
-								 workorders.closed,
-								 stockcategory.wipact,
-								 stockcategory.stockact
-							FROM workorders INNER JOIN locations
-							ON workorders.loccode=locations.loccode
-							INNER JOIN woitems
-							ON workorders.wo=woitems.wo
-							INNER JOIN stockmaster
-							ON woitems.stockid=stockmaster.stockid
-							INNER JOIN stockcategory
-							ON stockmaster.categoryid=stockcategory.categoryid
-							WHERE woitems.stockid='" . $_POST['StockID'] . "'
-							AND woitems.wo='" . $_POST['WO'] . "'",
+	$WOResult = DB_query("SELECT weberp_workorders.loccode,
+								 weberp_locations.locationname,
+								 weberp_workorders.closed,
+								 weberp_stockcategory.wipact,
+								 weberp_stockcategory.stockact
+							FROM weberp_workorders INNER JOIN weberp_locations
+							ON weberp_workorders.loccode=weberp_locations.loccode
+							INNER JOIN weberp_woitems
+							ON weberp_workorders.wo=weberp_woitems.wo
+							INNER JOIN weberp_stockmaster
+							ON weberp_woitems.stockid=weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+							WHERE weberp_woitems.stockid='" . $_POST['StockID'] . "'
+							AND weberp_woitems.wo='" . $_POST['WO'] . "'",
 							$ErrMsg);
 
 	if (DB_num_rows($WOResult)==0){
@@ -82,7 +82,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					serialised,
 					decimalplaces,
 					mbflag
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid='" .$_POST['IssueItem'] . "'";
 	$Result = DB_query($SQL);
 	$IssueItemRow = DB_fetch_array($Result);
@@ -113,7 +113,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					$QuantityIssued += filter_number_format($_POST['Qty'.$i]);
 
 					 if ($_SESSION['ProhibitNegativeStock']==1 AND $_POST['BatchRef'.$i] > "" AND $_POST['Qty' . $i]>0) {
-						$SQL = "SELECT quantity from stockserialitems WHERE (stockid= '" . $_POST['IssueItem'] . "')
+						$SQL = "SELECT quantity from weberp_stockserialitems WHERE (stockid= '" . $_POST['IssueItem'] . "')
 										AND (loccode = '" . $_POST['FromLocation'] . "')
 										AND (serialno = '" . $_POST['BatchRef'.$i] . "')";
 						$Result = DB_query($SQL);
@@ -146,7 +146,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 			AND ($IssueItemRow['mbflag']=='M' OR $IssueItemRow['mbflag']=='B')){
 											//don't need to check labour or dummy items
 
-		$SQL = "SELECT quantity FROM locstock
+		$SQL = "SELECT quantity FROM weberp_locstock
 				WHERE stockid ='" . $_POST['IssueItem'] . "'
 				AND loccode ='" . $_POST['FromLocation'] . "'";
 		$CheckNegResult = DB_query($SQL);
@@ -173,9 +173,9 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 
 		if ($IssueItemRow['mbflag']=='M' OR $IssueItemRow['mbflag']=='B'){
 			/* Need to get the current location quantity will need it later for the stock movement */
-			$SQL="SELECT locstock.quantity
-				FROM locstock
-				WHERE locstock.stockid='" . $_POST['IssueItem'] . "'
+			$SQL="SELECT weberp_locstock.quantity
+				FROM weberp_locstock
+				WHERE weberp_locstock.stockid='" . $_POST['IssueItem'] . "'
 				AND loccode= '" . $_POST['FromLocation'] . "'";
 
 			$Result = DB_query($SQL);
@@ -190,9 +190,9 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 				$NewQtyOnHand = 0;
 			}
 
-			$SQL = "UPDATE locstock
-					SET quantity = locstock.quantity - " . $QuantityIssued . "
-					WHERE locstock.stockid = '" . $_POST['IssueItem'] . "'
+			$SQL = "UPDATE weberp_locstock
+					SET quantity = weberp_locstock.quantity - " . $QuantityIssued . "
+					WHERE weberp_locstock.stockid = '" . $_POST['IssueItem'] . "'
 					AND loccode = '" . $_POST['FromLocation'] . "'";
 
 			$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
@@ -203,7 +203,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 		}
 		/*Insert stock movements - with unit cost */
 
-		$SQL = "INSERT INTO stockmoves (stockid,
+		$SQL = "INSERT INTO weberp_stockmoves (stockid,
 						type,
 						transno,
 						loccode,
@@ -233,7 +233,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 		$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
 		/*Get the ID of the StockMove... */
-		$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+		$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 		/* Do the Controlled Item INSERTS HERE */
 
 		if ($IssueItemRow['controlled'] ==1){
@@ -246,7 +246,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 				//need to test if the serialised item exists first already
 					if (trim($SerialNo) != ""){
 
-						$SQL = "UPDATE stockserialitems set quantity=0
+						$SQL = "UPDATE weberp_stockserialitems set quantity=0
 										WHERE (stockid= '" . $_POST['IssueItem'] . "')
 										AND (loccode = '" . $_POST['FromLocation'] . "')
 										AND (serialno = '" . $SerialNo . "')";
@@ -254,10 +254,10 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 						$DbgMsg =  _('The following SQL to insert the serial stock item records was used');
 						$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-						/** end of handle stockserialitems records */
+						/** end of handle weberp_stockserialitems records */
 
 						/* now insert the serial stock movement */
-						$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+						$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 																stockid,
 																serialno,
 																moveqty)
@@ -278,7 +278,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					//need to test if the batch/lot exists first already
 					if (trim($_POST['BatchRef' .$i]) != ""){
 
-						$SQL = "SELECT COUNT(*) FROM stockserialitems
+						$SQL = "SELECT COUNT(*) FROM weberp_stockserialitems
 								WHERE stockid='" .$_POST['IssueItem'] . "'
 								AND loccode = '" . $_POST['FromLocation'] . "'
 								AND serialno = '" . $_POST['BatchRef' .$i] . "'";
@@ -288,7 +288,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 						$AlreadyExistsRow = DB_fetch_row($Result);
 
 						if ($AlreadyExistsRow[0]>0 AND $_POST['Qty'.$i] != 0){
-							$SQL = "UPDATE stockserialitems SET quantity = CASE
+							$SQL = "UPDATE weberp_stockserialitems SET quantity = CASE
 												WHEN abs(quantity -" . $_POST['Qty' . $i] . ")<" . $VarianceAllowed . "
 												THEN 0 
 												ELSE  quantity - " . $_POST['Qty' . $i] . " 
@@ -297,7 +297,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 										AND loccode = '" . $_POST['FromLocation'] . "'
 										AND serialno = '" . $_POST['BatchRef' .$i] . "'";
 						} elseif ($_POST['Qty'.$i] != 0) {
-							$SQL = "INSERT INTO stockserialitems (stockid,
+							$SQL = "INSERT INTO weberp_stockserialitems (stockid,
 												loccode,
 												serialno,
 												qualitytext,
@@ -313,11 +313,11 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 						$DbgMsg =  _('The following SQL to insert the batch/lot item records was used');
 						$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-						/** end of handle stockserialitems records */
+						/** end of handle weberp_stockserialitems records */
 
 						/** now insert the serial stock movement **/
 						if ($_POST['Qty'.$i]!=0) {
-							$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+							$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 											stockid,
 											serialno,
 											moveqty)
@@ -342,7 +342,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 		  the appropriate account was already retrieved into the $StockGLCode variable as the Processing code is kicked off
 		  it is retrieved from the stock category record of the item by a function in SQL_CommonFunctions.inc*/
 
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 							typeno,
 							trandate,
 							periodno,
@@ -362,7 +362,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 			$Result = DB_query($SQL,$ErrMsg, $DbgMsg, true);
 
 		/*now the credit Stock entry*/
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -387,7 +387,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 		//update the wo with the new qtyrecd
 		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' ._('Could not update the work order cost issued to the work order because');
 		$DbgMsg = _('The following SQL was used to update the work order');
-		$UpdateWOResult =DB_query("UPDATE workorders
+		$UpdateWOResult =DB_query("UPDATE weberp_workorders
 									SET costissued=costissued+" . ($QuantityIssued*$IssueItemRow['cost']) . "
 									WHERE wo='" . $_POST['WO'] . "'",
 									$ErrMsg,
@@ -423,21 +423,21 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 			$No = substr($key,8);
 			$InputError = false; //ie assume no problems for a start - ever the optomist
 			$ErrMsg = _('Could not retrieve the details of the selected work order item');
-			$WOResult = DB_query("SELECT workorders.loccode,
-								 locations.locationname,
-								 workorders.closed,
-								 stockcategory.wipact,
-								 stockcategory.stockact
-							FROM workorders INNER JOIN locations
-							ON workorders.loccode=locations.loccode
-							INNER JOIN woitems
-							ON workorders.wo=woitems.wo
-							INNER JOIN stockmaster
-							ON woitems.stockid=stockmaster.stockid
-							INNER JOIN stockcategory
-							ON stockmaster.categoryid=stockcategory.categoryid
-							WHERE woitems.stockid='" . $_POST['StockID'] . "'
-							AND woitems.wo='" . $_POST['WO'] . "'",
+			$WOResult = DB_query("SELECT weberp_workorders.loccode,
+								 weberp_locations.locationname,
+								 weberp_workorders.closed,
+								 weberp_stockcategory.wipact,
+								 weberp_stockcategory.stockact
+							FROM weberp_workorders INNER JOIN weberp_locations
+							ON weberp_workorders.loccode=weberp_locations.loccode
+							INNER JOIN weberp_woitems
+							ON weberp_workorders.wo=weberp_woitems.wo
+							INNER JOIN weberp_stockmaster
+							ON weberp_woitems.stockid=weberp_stockmaster.stockid
+							INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+							WHERE weberp_woitems.stockid='" . $_POST['StockID'] . "'
+							AND weberp_woitems.wo='" . $_POST['WO'] . "'",
 							$ErrMsg);
 
 			if (DB_num_rows($WOResult)==0){
@@ -456,7 +456,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 									controlled,
 									serialised,
 									mbflag
-								FROM stockmaster
+								FROM weberp_stockmaster
 						WHERE stockid='" .$_POST['Item'.$No] . "'";
 			$Result = DB_query($SQL);
 			$IssueItemRow = DB_fetch_array($Result);
@@ -467,7 +467,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 
 			if ($_SESSION['ProhibitNegativeStock']==1
 				AND ($IssueItemRow['mbflag']=='M' OR $IssueItemRow['mbflag']=='B')){
-					$SQL = "SELECT quantity FROM locstock
+					$SQL = "SELECT quantity FROM weberp_locstock
 						WHERE stockid ='" . $_POST['IssueItem'] . "'
 						AND loccode ='" . $_POST['FromLocation'] . "'";
 					$CheckNegResult = DB_query($SQL);
@@ -495,9 +495,9 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 				$IssueItemRow['cost'] = $itm['cost'];
 				if ($IssueItemRow['mbflag']=='M' OR $IssueItemRow['mbflag']=='B'){
 					/* Need to get the current location quantity will need it later for the stock movement */
-					$SQL="SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $_POST['IssueItem'] . "'
+					$SQL="SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $_POST['IssueItem'] . "'
 						AND loccode= '" . $_POST['FromLocation'] . "'";
 					$Result = DB_query($SQL);
 					if (DB_num_rows($Result)==1){
@@ -508,9 +508,9 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 						$NewQtyOnHand = 0;
 					}
 
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . $QuantityIssued . "
-							WHERE locstock.stockid = '" . $_POST['IssueItem'] . "'
+					$SQL = "UPDATE weberp_locstock
+							SET quantity = weberp_locstock.quantity - " . $QuantityIssued . "
+							WHERE weberp_locstock.stockid = '" . $_POST['IssueItem'] . "'
 							AND loccode = '" . $_POST['FromLocation'] . "'";
 
 					$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
@@ -520,7 +520,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					$NewQtyOnHand =0; //since we can't have stock of labour type items!!
 				}
 				/*Insert stock movements - with unit cost */
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 								type,
 								transno,
 								loccode,
@@ -552,7 +552,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					/*first the debit the WIP of the item being manufactured from the WO
 		  				the appropriate account was already retrieved into the $StockGLCode variable as the Processing code is kicked off
 		  				it is retrieved from the stock category record of the item by a function in SQL_CommonFunctions.inc*/
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -571,7 +571,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 					$DbgMsg = _('The following SQL to insert the work order issue GLTrans record was used');
 					$Result = DB_query($SQL,$ErrMsg, $DbgMsg, true);
 					/*now the credit Stock entry*/
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -595,7 +595,7 @@ if (isset($_POST['Process'])){ //user hit the process the work order issues ente
 			//update the wo with the new qtyrecd
 				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' ._('Could not update the work order cost issued to the work order because');
 				$DbgMsg = _('The following SQL was used to update the work order');
-				$UpdateWOResult =DB_query("UPDATE workorders
+				$UpdateWOResult =DB_query("UPDATE weberp_workorders
 									SET costissued=costissued+" . ($QuantityIssued*$IssueItemRow['cost']) . "
 									WHERE wo='" . $_POST['WO'] . "'",
 									$ErrMsg,
@@ -635,29 +635,29 @@ if (isset($_POST['Search'])){
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster,
-					stockcategory
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.description " . LIKE . " '$SearchString'
-					AND stockmaster.discontinued=0
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster,
+					weberp_stockcategory
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+					AND weberp_stockmaster.discontinued=0
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster, stockcategory
-					WHERE  stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.discontinued=0
-					AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster, weberp_stockcategory
+					WHERE  weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.discontinued=0
+					AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif (mb_strlen($_POST['StockCode'])>0){
@@ -666,51 +666,51 @@ if (isset($_POST['Search'])){
 		$SearchString = '%' . $_POST['StockCode'] . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster, stockcategory
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-					AND stockmaster.discontinued=0
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster, weberp_stockcategory
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+					AND weberp_stockmaster.discontinued=0
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster, stockcategory
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-					AND stockmaster.discontinued=0
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster, weberp_stockcategory
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+					AND weberp_stockmaster.discontinued=0
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		}
 	} else {
 		if ($_POST['StockCat']=='All'){
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster, stockcategory
-					WHERE  stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.discontinued=0
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster, weberp_stockcategory
+					WHERE  weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.discontinued=0
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$SQL = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-					FROM stockmaster, stockcategory
-					WHERE stockmaster.categoryid=stockcategory.categoryid
-					AND (stockcategory.stocktype='F' OR stockcategory.stocktype='L' OR stockcategory.stocktype='M')
-					AND stockmaster.discontinued=0
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+					FROM weberp_stockmaster, weberp_stockcategory
+					WHERE weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					AND (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='L' OR weberp_stockcategory.stocktype='M')
+					AND weberp_stockmaster.discontinued=0
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
 					AND (mbflag='B' OR mbflag='M' OR mbflag='D')
-					ORDER BY stockmaster.stockid";
+					ORDER BY weberp_stockmaster.stockid";
 		  }
 	}
 
@@ -737,24 +737,24 @@ if (isset($_POST['Search'])){
 /* Always display quantities received and recalc balance for all items on the order */
 
 $ErrMsg = _('Could not retrieve the details of the selected work order item');
-$WOResult = DB_query("SELECT workorders.loccode,
-						 locations.locationname,
-						 workorders.requiredby,
-						 workorders.startdate,
-						 workorders.closed,
-						 stockmaster.stockid,
-						 stockmaster.description,
-						 stockmaster.decimalplaces,
-						 stockmaster.units,
-						 woitems.qtyreqd,
-						 woitems.qtyrecd
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						INNER JOIN stockmaster
-						ON woitems.stockid=stockmaster.stockid
-						WHERE woitems.wo ='" . $_POST['WO'] . "'",
+$WOResult = DB_query("SELECT weberp_workorders.loccode,
+						 weberp_locations.locationname,
+						 weberp_workorders.requiredby,
+						 weberp_workorders.startdate,
+						 weberp_workorders.closed,
+						 weberp_stockmaster.stockid,
+						 weberp_stockmaster.description,
+						 weberp_stockmaster.decimalplaces,
+						 weberp_stockmaster.units,
+						 weberp_woitems.qtyreqd,
+						 weberp_woitems.qtyrecd
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						INNER JOIN weberp_stockmaster
+						ON weberp_woitems.stockid=weberp_stockmaster.stockid
+						WHERE weberp_woitems.wo ='" . $_POST['WO'] . "'",
 						$ErrMsg);
 
 if (DB_num_rows($WOResult)==0){
@@ -815,12 +815,12 @@ echo '<tr>
 		<td>';
 
 if (!isset($_POST['IssueItem'])){
-	$LocResult = DB_query("SELECT locations.loccode,locationname
-							FROM locations
-							INNER JOIN locationusers
-								ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-								AND locationusers.canupd=1
-							WHERE locations.usedforwo = 1");
+	$LocResult = DB_query("SELECT weberp_locations.loccode,locationname
+							FROM weberp_locations
+							INNER JOIN weberp_locationusers
+								ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+								AND weberp_locationusers.canupd=1
+							WHERE weberp_locations.usedforwo = 1");
 
 	echo '<select name="FromLocation">';
 
@@ -836,7 +836,7 @@ if (!isset($_POST['IssueItem'])){
 	echo '</select>';
 } else {
 	$LocResult = DB_query("SELECT loccode, locationname
-						FROM locations
+						FROM weberp_locations
 						WHERE loccode='" . $_POST['FromLocation'] . "'");
 	$LocRow = DB_fetch_array($LocResult);
 	echo '<input type="hidden" name="FromLocation" value="' . $_POST['FromLocation'] . '" />';
@@ -861,24 +861,24 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 			<th>' . _('Qty Issue') . '</th>
 		</tr>';
 
-	$RequirmentsResult = DB_query("SELECT worequirements.stockid,
-										stockmaster.description,
-										stockmaster.decimalplaces,
-										stockmaster.controlled,
+	$RequirmentsResult = DB_query("SELECT weberp_worequirements.stockid,
+										weberp_stockmaster.description,
+										weberp_stockmaster.decimalplaces,
+										weberp_stockmaster.controlled,
 										autoissue,
 										SUM(qtypu*qtyreqd) AS quantityrequired
-									FROM worequirements INNER JOIN stockmaster
-									ON worequirements.stockid=stockmaster.stockid
-									INNER JOIN woitems
-									ON worequirements.wo=woitems.wo
-									AND worequirements.parentstockid=woitems.stockid
-									WHERE worequirements.wo='" . $_POST['WO'] . "'
-									GROUP BY worequirements.stockid,
-											stockmaster.description,
-											stockmaster.decimalplaces,
+									FROM weberp_worequirements INNER JOIN weberp_stockmaster
+									ON weberp_worequirements.stockid=weberp_stockmaster.stockid
+									INNER JOIN weberp_woitems
+									ON weberp_worequirements.wo=weberp_woitems.wo
+									AND weberp_worequirements.parentstockid=weberp_woitems.stockid
+									WHERE weberp_worequirements.wo='" . $_POST['WO'] . "'
+									GROUP BY weberp_worequirements.stockid,
+											weberp_stockmaster.description,
+											weberp_stockmaster.decimalplaces,
 											autoissue");
-	$IssuedAlreadyResult = DB_query("SELECT stockid, SUM(-qty) as total FROM stockmoves
-										WHERE stockmoves.type=28
+	$IssuedAlreadyResult = DB_query("SELECT stockid, SUM(-qty) as total FROM weberp_stockmoves
+										WHERE weberp_stockmoves.type=28
 										AND reference='" . $_POST['WO'] . "' GROUP BY stockid");
 	while($myrow = DB_fetch_array($IssuedAlreadyResult)){
 		$IssuedMaterials[$myrow['stockid']] = $myrow['total'];
@@ -920,7 +920,7 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 				description,
 				decimalplaces,
 				controlled
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid in ('" . $IssuedStocks . "')";
 		$ErrMsg = _('Failed to retrieve the item data');
 		$result = DB_query($sql,$ErrMsg);
@@ -952,7 +952,7 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 
 	$SQL="SELECT categoryid,
 			categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE stocktype='F' OR stocktype='D' OR stocktype='L'
 			ORDER BY categorydescription";
 		$result1 = DB_query($SQL);
@@ -1072,7 +1072,7 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 				units,
 				controlled,
 				serialised
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid='" . $_POST['IssueItem'] . "'";
 	$ErrMsg = _('Could not get the detail of the item being issued because');
 	$IssueItemResult = DB_query($sql,$ErrMsg);
@@ -1104,7 +1104,7 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 				</tr>';
 
 			$SerialNoResult = DB_query("SELECT serialno
-										FROM stockserialitems
+										FROM weberp_stockserialitems
 										WHERE stockid='" . $_POST['IssueItem'] . "'
 										AND loccode='" . $_POST['FromLocation'] . "'
 										AND quantity > " . $VarianceAllowed,
@@ -1137,7 +1137,7 @@ if (!isset($_POST['IssueItem'])){ //no item selected to issue yet
 					<th colspan="2">' . _('Batch/Lots Issued') . '</th>
 				</tr>';
 			$LotNoSQL = "SELECT serialno,quantity
-										FROM stockserialitems
+										FROM weberp_stockserialitems
 										WHERE stockid='" . $_POST['IssueItem'] . "'
 										AND loccode='" . $_POST['FromLocation'] . "'
 										AND quantity > " . $VarianceAllowed;

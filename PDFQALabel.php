@@ -30,25 +30,25 @@ if ($GRNNo == 'Preview'){
 	$NoOfGRNs =1;
 } else { //NOT PREVIEW
 
-	$sql="SELECT grns.itemcode,
-				grns.grnno,
-				grns.deliverydate,
-				grns.itemdescription,
-				grns.supplierid,
-				purchorderdetails.orderno
-			FROM grns INNER JOIN purchorderdetails
-			ON grns.podetailitem=purchorderdetails.podetailitem
-			LEFT JOIN stockmaster
-			ON grns.itemcode=stockmaster.stockid
+	$sql="SELECT weberp_grns.itemcode,
+				weberp_grns.grnno,
+				weberp_grns.deliverydate,
+				weberp_grns.itemdescription,
+				weberp_grns.supplierid,
+				weberp_purchorderdetails.orderno
+			FROM weberp_grns INNER JOIN weberp_purchorderdetails
+			ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+			LEFT JOIN weberp_stockmaster
+			ON weberp_grns.itemcode=weberp_stockmaster.stockid
 			WHERE grnbatch='". $GRNNo ."'";
 
 	$GRNResult=DB_query($sql);
 	$NoOfGRNs = DB_num_rows($GRNResult);
 	if($NoOfGRNs>0) { //there are GRNs to print
 
-		$sql = "SELECT suppliers.suppname
-				FROM grns INNER JOIN suppliers
-				ON grns.supplierid=suppliers.supplierid
+		$sql = "SELECT weberp_suppliers.suppname
+				FROM weberp_grns INNER JOIN weberp_suppliers
+				ON weberp_grns.supplierid=weberp_suppliers.supplierid
 				WHERE grnbatch='". $GRNNo ."'";
 		$SuppResult = DB_query($sql,_('Could not get the supplier of the selected GRN'));
 		$SuppRow = DB_fetch_array($SuppResult);
@@ -61,18 +61,18 @@ if ($NoOfGRNs >0){
 			$myrow = DB_fetch_array($GRNResult);
 		}
 		$DeliveryDate = ConvertSQLDate($myrow['deliverydate']);				
-		$SQL = "SELECT stockmaster.controlled
-			    FROM stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
+		$SQL = "SELECT weberp_stockmaster.controlled
+			    FROM weberp_stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
 		$CheckControlledResult = DB_query($SQL,'<br />' . _('Could not determine if the item was controlled or not because') . ' ');
 		$ControlledRow = DB_fetch_row($CheckControlledResult);
 		
 		if ($ControlledRow[0]==1) { /*Then its a controlled item */
-			$SQL = "SELECT stockserialmoves.serialno
-					FROM stockmoves INNER JOIN stockserialmoves
-					ON stockmoves.stkmoveno= stockserialmoves.stockmoveno
-					WHERE stockmoves.stockid='" . $myrow['itemcode'] . "'
-					AND stockmoves.type =25
-					AND stockmoves.transno='" . $GRNNo . "'";
+			$SQL = "SELECT weberp_stockserialmoves.serialno
+					FROM weberp_stockmoves INNER JOIN weberp_stockserialmoves
+					ON weberp_stockmoves.stkmoveno= weberp_stockserialmoves.stockmoveno
+					WHERE weberp_stockmoves.stockid='" . $myrow['itemcode'] . "'
+					AND weberp_stockmoves.type =25
+					AND weberp_stockmoves.transno='" . $GRNNo . "'";
 			$GetStockMoveResult = DB_query($SQL,_('Could not retrieve the stock movement reference number which is required in order to retrieve details of the serial items that came in with this GRN'));
 			while ($SerialStockMoves = DB_fetch_array($GetStockMoveResult)){
 				if ($PageNumber>1){

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: TopItems.php 7003 2014-11-24 02:12:27Z tehonu $*/
 
 /* Session started in session.inc for password checking and authorisation level check
 config.php is in turn included in session.inc*/
@@ -24,10 +24,10 @@ if (!(isset($_POST['Search']))) {
 			<td style="width:150px">' . _('Select Location') . '  </td>
 			<td>:</td>
 			<td><select name="Location">';
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 					locationname
-			FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1 ORDER BY locations.locationname";
+			FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1 ORDER BY weberp_locations.locationname";
 	$result = DB_query($sql);
 	echo '<option value="All">' . _('All') . '</option>';
 	while ($myrow = DB_fetch_array($result)) {
@@ -43,7 +43,7 @@ if (!(isset($_POST['Search']))) {
 
 	$sql = "SELECT typename,
 					typeid
-			FROM debtortype
+			FROM weberp_debtortype
 			ORDER BY typename";
 	$result = DB_query($sql);
 	echo '<option value="All">' . _('All') . '</option>';
@@ -56,7 +56,7 @@ if (!(isset($_POST['Search']))) {
 	// stock category selection
 	$SQL="SELECT categoryid,
 					categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 
@@ -123,37 +123,37 @@ if (!(isset($_POST['Search']))) {
 	// everything below here to view NumberOfTopItems items sale on selected location
 	$FromDate = FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']),'d', -filter_number_format($_POST['NumberOfDays'])));
 
-	$SQL = "SELECT 	salesorderdetails.stkcode,
-					SUM(salesorderdetails.qtyinvoiced) AS totalinvoiced,
-					SUM(salesorderdetails.qtyinvoiced * salesorderdetails.unitprice/currencies.rate ) AS valuesales,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.mbflag,
-					currencies.rate,
-					debtorsmaster.currcode,
+	$SQL = "SELECT 	weberp_salesorderdetails.stkcode,
+					SUM(weberp_salesorderdetails.qtyinvoiced) AS totalinvoiced,
+					SUM(weberp_salesorderdetails.qtyinvoiced * weberp_salesorderdetails.unitprice/weberp_currencies.rate ) AS valuesales,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.mbflag,
+					weberp_currencies.rate,
+					weberp_debtorsmaster.currcode,
 					fromstkloc,
-					stockmaster.decimalplaces
-			FROM 	salesorderdetails, salesorders INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1,
-			debtorsmaster,stockmaster, currencies
-			WHERE 	salesorderdetails.orderno = salesorders.orderno
-					AND salesorderdetails.stkcode = stockmaster.stockid
-					AND salesorders.debtorno = debtorsmaster.debtorno
-					AND debtorsmaster.currcode = currencies.currabrev
-					AND salesorderdetails.actualdispatchdate >= '" . $FromDate . "'";
+					weberp_stockmaster.decimalplaces
+			FROM 	weberp_salesorderdetails, weberp_salesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1,
+			weberp_debtorsmaster,weberp_stockmaster, weberp_currencies
+			WHERE 	weberp_salesorderdetails.orderno = weberp_salesorders.orderno
+					AND weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+					AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+					AND weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+					AND weberp_salesorderdetails.actualdispatchdate >= '" . $FromDate . "'";
 
 	if ($_POST['Location'] != 'All') {
-		$SQL = $SQL . "	AND salesorders.fromstkloc = '" . $_POST['Location'] . "'";
+		$SQL = $SQL . "	AND weberp_salesorders.fromstkloc = '" . $_POST['Location'] . "'";
 	}
 
 	if ($_POST['Customers'] != 'All') {
-		$SQL = $SQL . "	AND debtorsmaster.typeid = '" . $_POST['Customers'] . "'";
+		$SQL = $SQL . "	AND weberp_debtorsmaster.typeid = '" . $_POST['Customers'] . "'";
 	}
 
 	if ($_POST['StockCat'] != 'All') {
-		$SQL = $SQL . "	AND stockmaster.categoryid = '" . $_POST['StockCat'] . "'";
+		$SQL = $SQL . "	AND weberp_stockmaster.categoryid = '" . $_POST['StockCat'] . "'";
 	}
 
-	$SQL = $SQL . "	GROUP BY salesorderdetails.stkcode
+	$SQL = $SQL . "	GROUP BY weberp_salesorderdetails.stkcode
 					ORDER BY `" . $_POST['Sequence'] . "` DESC
 					LIMIT " . filter_number_format($_POST['NumberOfTopItems']);
 
@@ -196,8 +196,8 @@ if (!(isset($_POST['Search']))) {
 			case 'M':
 			case 'B':
 				$QOHResult = DB_query("SELECT sum(quantity)
-								FROM locstock
-								INNER JOIN locationusers ON locationusers.loccode=locstock.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+								FROM weberp_locstock
+								INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 								WHERE stockid = '" . DB_escape_string($myrow['stkcode']) . "'", $db);
 				$QOHRow = DB_fetch_row($QOHResult);
 				$QOH = $QOHRow[0];

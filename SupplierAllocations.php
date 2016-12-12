@@ -1,5 +1,5 @@
 <?php
-/*	$Id$*/
+/*	$Id: SupplierAllocations.php 7595 2016-08-18 08:50:28Z exsonqu $*/
 
 /*	This page can be called with...
 
@@ -111,7 +111,7 @@ if (isset($_POST['UpdateDatabase'])){
 			  /*Orignial allocation was not 0 and it has now changed
 			    need to delete the old allocation record */
 
-				$SQL = "DELETE FROM suppallocs WHERE id = '" . $AllocnItem->PrevAllocRecordID . "'";
+				$SQL = "DELETE FROM weberp_suppallocs WHERE id = '" . $AllocnItem->PrevAllocRecordID . "'";
 
 				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The existing allocation for') . ' ' . $AllocnItem->TransType .' ' . $AllocnItem->TypeNo . ' ' . _('could not be deleted because');
 				$DbgMsg = _('The following SQL to delete the allocation record was used');
@@ -126,7 +126,7 @@ if (isset($_POST['UpdateDatabase'])){
 			 the transaction with the new alloc amount and diff on exch */
 
 				     if ($AllocnItem->AllocAmt > 0){
-					     $SQL = "INSERT INTO suppallocs (datealloc,
+					     $SQL = "INSERT INTO weberp_suppallocs (datealloc,
 														amt,
 														transid_allocfrom,
 														transid_allocto)
@@ -148,7 +148,7 @@ if (isset($_POST['UpdateDatabase'])){
 					     $Settled = 0;
 				     }
 
-				     $SQL = "UPDATE supptrans SET diffonexch='" . $AllocnItem->DiffOnExch . "',
+				     $SQL = "UPDATE weberp_supptrans SET diffonexch='" . $AllocnItem->DiffOnExch . "',
 												alloc = '" .  $NewAllocTotal . "',
 												settled = '" . $Settled . "'
 							WHERE id = '" . $AllocnItem->ID . "'";
@@ -172,7 +172,7 @@ if (isset($_POST['UpdateDatabase'])){
 		   $Settled = 0;
 		}
 
-		$SQL = "UPDATE supptrans SET alloc = '" .  -$TotalAllocated . "',
+		$SQL = "UPDATE weberp_supptrans SET alloc = '" .  -$TotalAllocated . "',
 					diffonexch = '" . -$TotalDiffOnExch . "',
 					settled='" . $Settled . "'
 				WHERE id = '" . $_SESSION['AllocTrans'] . "'";
@@ -196,7 +196,7 @@ if (isset($_POST['UpdateDatabase'])){
 
 		      $_SESSION['Alloc']->TransDate = FormatDateForSQL($_SESSION['Alloc']->TransDate);
 
-		      $SQL = "INSERT INTO gltrans (type,
+		      $SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -217,7 +217,7 @@ if (isset($_POST['UpdateDatabase'])){
 		      $Result = DB_query($SQL, $ErrMsg, $DbgMsg, True);
 
 
-		      $SQL = "INSERT INTO gltrans (type,
+		      $SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -295,24 +295,24 @@ If (isset($_GET['AllocTrans'])){
 	$_POST['AllocTrans'] = $_GET['AllocTrans'];
 
 
-	$SQL= "SELECT systypes.typename,
-				supptrans.type,
-				supptrans.transno,
-				supptrans.trandate,
-				supptrans.supplierno,
-				suppliers.suppname,
-				supptrans.rate,
-				(supptrans.ovamount+supptrans.ovgst) AS total,
-				supptrans.diffonexch,
-				supptrans.alloc,
-				currencies.decimalplaces
-		    FROM supptrans INNER JOIN systypes
-			ON supptrans.type = systypes.typeid
-			INNER JOIN suppliers
-			ON supptrans.supplierno = suppliers.supplierid
-			INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
-		    WHERE supptrans.id='" . $_SESSION['AllocTrans'] . "'";
+	$SQL= "SELECT weberp_systypes.typename,
+				weberp_supptrans.type,
+				weberp_supptrans.transno,
+				weberp_supptrans.trandate,
+				weberp_supptrans.supplierno,
+				weberp_suppliers.suppname,
+				weberp_supptrans.rate,
+				(weberp_supptrans.ovamount+weberp_supptrans.ovgst) AS total,
+				weberp_supptrans.diffonexch,
+				weberp_supptrans.alloc,
+				weberp_currencies.decimalplaces
+		    FROM weberp_supptrans INNER JOIN weberp_systypes
+			ON weberp_supptrans.type = weberp_systypes.typeid
+			INNER JOIN weberp_suppliers
+			ON weberp_supptrans.supplierno = weberp_suppliers.supplierid
+			INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
+		    WHERE weberp_supptrans.id='" . $_SESSION['AllocTrans'] . "'";
 
 	$Result = DB_query($SQL);
 	if (DB_num_rows($Result) != 1){
@@ -340,7 +340,7 @@ If (isset($_GET['AllocTrans'])){
 	/* Now populate the array of possible (and previous actual) allocations for this supplier */
 	/*First get the transactions that have outstanding balances ie Total-Alloc >0 */
 
-	$SQL= "SELECT supptrans.id,
+	$SQL= "SELECT weberp_supptrans.id,
 				typename,
 				transno,
 				trandate,
@@ -349,9 +349,9 @@ If (isset($_GET['AllocTrans'])){
 				ovamount+ovgst AS total,
 				diffonexch,
 				alloc
-			FROM supptrans INNER JOIN systypes
-			ON supptrans.type = systypes.typeid
-			WHERE supptrans.settled=0
+			FROM weberp_supptrans INNER JOIN weberp_systypes
+			ON weberp_supptrans.type = weberp_systypes.typeid
+			WHERE weberp_supptrans.settled=0
 			AND abs(ovamount+ovgst-alloc)>0.009
 			AND supplierno='" . $_SESSION['Alloc']->SupplierID . "'";
 
@@ -380,7 +380,7 @@ If (isset($_GET['AllocTrans'])){
 	NB existing entries where still some of the trans outstanding entered from
 	above logic will be overwritten with the prev alloc detail below */
 
-	$SQL = "SELECT supptrans.id,
+	$SQL = "SELECT weberp_supptrans.id,
 					typename,
 					transno,
 					trandate,
@@ -388,14 +388,14 @@ If (isset($_GET['AllocTrans'])){
 					rate,
 					ovamount+ovgst AS total,
 					diffonexch,
-					supptrans.alloc-suppallocs.amt AS prevallocs,
+					weberp_supptrans.alloc-weberp_suppallocs.amt AS prevallocs,
 					amt,
-					suppallocs.id AS allocid
-			FROM supptrans INNER JOIN systypes
-			ON supptrans.type = systypes.typeid
-			INNER JOIN suppallocs
-			ON supptrans.id=suppallocs.transid_allocto
-			WHERE suppallocs.transid_allocfrom='" . $_SESSION['AllocTrans'] .
+					weberp_suppallocs.id AS allocid
+			FROM weberp_supptrans INNER JOIN weberp_systypes
+			ON weberp_supptrans.type = weberp_systypes.typeid
+			INNER JOIN weberp_suppallocs
+			ON weberp_supptrans.id=weberp_suppallocs.transid_allocto
+			WHERE weberp_suppallocs.transid_allocfrom='" . $_SESSION['AllocTrans'] .
 			"' AND supplierno='" . $_SESSION['Alloc']->SupplierID . "'";
 
 	$ErrMsg = _('There was a problem retrieving the previously allocated transactions for modification');
@@ -535,22 +535,22 @@ if (isset($_POST['AllocTrans'])){
 		  		transno,
 				typename,
 				type,
-				suppliers.supplierid,
+				weberp_suppliers.supplierid,
 				suppname,
 				trandate,
 		  		suppreference,
-				supptrans.rate,
+				weberp_supptrans.rate,
 				ovamount+ovgst AS total,
 				alloc,
 				decimalplaces AS currdecimalplaces
-		  	FROM supptrans INNER JOIN suppliers
-		  	ON supptrans.supplierno=suppliers.supplierid
-		  	INNER JOIN systypes
-		  	ON supptrans.type=systypes.typeid
-		  	INNER JOIN currencies
-		  	ON suppliers.currcode=currencies.currabrev
-		  	WHERE suppliers.supplierid='" . $_GET['SupplierID'] ."'
-			AND (supptrans.type=21 OR supptrans.type=22)
+		  	FROM weberp_supptrans INNER JOIN weberp_suppliers
+		  	ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+		  	INNER JOIN weberp_systypes
+		  	ON weberp_supptrans.type=weberp_systypes.typeid
+		  	INNER JOIN weberp_currencies
+		  	ON weberp_suppliers.currcode=weberp_currencies.currabrev
+		  	WHERE weberp_suppliers.supplierid='" . $_GET['SupplierID'] ."'
+			AND (weberp_supptrans.type=21 OR weberp_supptrans.type=22)
 			AND settled=0
 			ORDER BY id";
 
@@ -616,21 +616,21 @@ if (isset($_POST['AllocTrans'])){
 		  		transno,
 				typename,
 				type,
-				suppliers.supplierid,
+				weberp_suppliers.supplierid,
 				suppname,
 				trandate,
 		  		suppreference,
-				supptrans.rate,
+				weberp_supptrans.rate,
 				ovamount+ovgst AS total,
 				alloc,
 				decimalplaces AS currdecimalplaces
-		  	FROM supptrans INNER JOIN suppliers
-			ON supptrans.supplierno=suppliers.supplierid
-			INNER JOIN systypes
-			ON supptrans.type=systypes.typeid
-			INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
-			WHERE (supptrans.type=21 OR supptrans.type=22)
+		  	FROM weberp_supptrans INNER JOIN weberp_suppliers
+			ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+			INNER JOIN weberp_systypes
+			ON weberp_supptrans.type=weberp_systypes.typeid
+			INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
+			WHERE (weberp_supptrans.type=21 OR weberp_supptrans.type=22)
 			AND settled=0
 			ORDER BY id";
 

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SalesTypes.php 6998 2014-11-22 02:28:56Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Sales Types') . ' / ' . _('Price List Maintenance');
@@ -59,7 +59,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedType) AND $InputError !=1) {
 
-		$sql = "UPDATE salestypes
+		$sql = "UPDATE weberp_salestypes
 			SET sales_type = '" . $_POST['Sales_Type'] . "'
 			WHERE typeabbrev = '".$SelectedType."'";
 
@@ -69,7 +69,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-			     FROM salestypes
+			     FROM weberp_salestypes
 			     WHERE typeabbrev = '" . $_POST['TypeAbbrev'] . "'";
 
 		$CheckResult = DB_query($checkSql);
@@ -82,14 +82,14 @@ if (isset($_POST['submit'])) {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO salestypes (typeabbrev,
+			$sql = "INSERT INTO weberp_salestypes (typeabbrev,
 											sales_type)
 							VALUES ('" . str_replace(' ', '', $_POST['TypeAbbrev']) . "',
 									'" . $_POST['Sales_Type'] . "')";
 
 			$msg = _('Customer/sales/pricelist type') . ' ' . $_POST['Sales_Type'] .  ' ' . _('has been created');
 			$checkSql = "SELECT count(typeabbrev)
-						FROM salestypes";
+						FROM weberp_salestypes";
 			$result = DB_query($checkSql);
 			$row = DB_fetch_row($result);
 
@@ -102,14 +102,14 @@ if (isset($_POST['submit'])) {
 
 	// Check the default price list exists
 		$checkSql = "SELECT count(*)
-			     FROM salestypes
+			     FROM weberp_salestypes
 			     WHERE typeabbrev = '" . $_SESSION['DefaultPriceList'] . "'";
 		$CheckResult = DB_query($checkSql);
 		$CheckRow = DB_fetch_row($CheckResult);
 
 	// If it doesnt then update config with newly created one.
 		if ($CheckRow[0] == 0) {
-			$sql = "UPDATE config
+			$sql = "UPDATE weberp_config
 					SET confvalue='".$_POST['TypeAbbrev']."'
 					WHERE confname='DefaultPriceList'";
 			$result = DB_query($sql);
@@ -129,8 +129,8 @@ if (isset($_POST['submit'])) {
 	// Prevent delete if saletype exist in customer transactions
 
 	$sql= "SELECT COUNT(*)
-	       FROM debtortrans
-	       WHERE debtortrans.tpe='".$SelectedType."'";
+	       FROM weberp_debtortrans
+	       WHERE weberp_debtortrans.tpe='".$SelectedType."'";
 
 	$ErrMsg = _('The number of transactions using this customer/sales/pricelist type could not be retrieved');
 	$result = DB_query($sql,$ErrMsg);
@@ -141,7 +141,7 @@ if (isset($_POST['submit'])) {
 
 	} else {
 
-		$sql = "SELECT COUNT(*) FROM debtorsmaster WHERE salestype='".$SelectedType."'";
+		$sql = "SELECT COUNT(*) FROM weberp_debtorsmaster WHERE salestype='".$SelectedType."'";
 
 		$ErrMsg = _('The number of transactions using this Sales Type record could not be retrieved because');
 		$result = DB_query($sql,$ErrMsg);
@@ -150,12 +150,12 @@ if (isset($_POST['submit'])) {
 			prnMsg (_('Cannot delete this sale type because customers are currently set up to use this sales type') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('customers with this sales type code'));
 		} else {
 
-			$sql="DELETE FROM salestypes WHERE typeabbrev='" . $SelectedType . "'";
+			$sql="DELETE FROM weberp_salestypes WHERE typeabbrev='" . $SelectedType . "'";
 			$ErrMsg = _('The Sales Type record could not be deleted because');
 			$result = DB_query($sql,$ErrMsg);
 			prnMsg(_('Sales type') . ' / ' . _('price list') . ' ' . $SelectedType  . ' ' . _('has been deleted') ,'success');
 
-			$sql ="DELETE FROM prices WHERE prices.typeabbrev='" . $SelectedType . "'";
+			$sql ="DELETE FROM weberp_prices WHERE weberp_prices.typeabbrev='" . $SelectedType . "'";
 			$ErrMsg =  _('The Sales Type prices could not be deleted because');
 			$result = DB_query($sql,$ErrMsg);
 
@@ -181,7 +181,7 @@ then none of the above are true and the list of sales types will be displayed wi
 links to delete or edit each. These will call the same page again and allow update/input
 or deletion of the records*/
 
-	$sql = "SELECT typeabbrev,sales_type FROM salestypes ORDER BY typeabbrev";
+	$sql = "SELECT typeabbrev,sales_type FROM weberp_salestypes ORDER BY typeabbrev";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">
@@ -236,7 +236,7 @@ if (! isset($_GET['delete'])) {
 
 		$sql = "SELECT typeabbrev,
 			       sales_type
-		        FROM salestypes
+		        FROM weberp_salestypes
 		        WHERE typeabbrev='" . $SelectedType . "'";
 
 		$result = DB_query($sql);

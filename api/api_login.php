@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_login.php 6946 2014-10-27 07:30:11Z daintree $*/
 //  Validates user and sets up $_SESSION environment for API users.
 function  LoginAPI($databasename, $user, $password) {
 	global  $PathPrefix;		// For included files
@@ -117,7 +117,7 @@ function DoSetup()
 			    DB_Maintenance();
 			    //purge the audit trail if necessary
 			    if (isset($_SESSION['MonthsAuditTrail'])){
-				     $sql = "DELETE FROM audittrail
+				     $sql = "DELETE FROM weberp_audittrail
 						    WHERE  transactiondate <= '" . Date('Y-m-d', mktime(0,0,0, Date('m')-$_SESSION['MonthsAuditTrail'])) . "'";
 				    $ErrMsg = _('There was a problem deleting expired audit-trail history');
 				    $result = DB_query($sql);
@@ -136,16 +136,16 @@ function DoSetup()
 
 			    $CurrencyRates = GetECBCurrencyRates(); // gets rates from ECB see includes/MiscFunctions.php
 			    /*Loop around the defined currencies and get the rate from ECB */
-			    $CurrenciesResult = DB_query('SELECT currabrev FROM currencies');
+			    $CurrenciesResult = DB_query('SELECT currabrev FROM weberp_currencies');
 			    while ($CurrencyRow = DB_fetch_row($CurrenciesResult)){
 				    if ($CurrencyRow[0]!=$_SESSION['CompanyRecord']['currencydefault']){
-					    $UpdateCurrRateResult = DB_query("UPDATE currencies SET
+					    $UpdateCurrRateResult = DB_query("UPDATE weberp_currencies SET
 											    rate='" . GetCurrencyRate ($CurrencyRow[0],$CurrencyRates) . "'
 											    WHERE currabrev='" . $CurrencyRow[0] . "'");
 				    }
 			    }
 			    $_SESSION['UpdateCurrencyRatesDaily'] = Date('Y-m-d');
-			    $UpdateConfigResult = DB_query("UPDATE config SET confvalue = '" . Date('Y-m-d') . "' WHERE confname='UpdateCurrencyRatesDaily'");
+			    $UpdateConfigResult = DB_query("UPDATE weberp_config SET confvalue = '" . Date('Y-m-d') . "' WHERE confname='UpdateCurrencyRatesDaily'");
 		    }
 	    }
     }

@@ -53,11 +53,11 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Deb
 	if (!is_numeric(filter_number_format($_POST['ConversionFactor']))) {
 		$InputError = 1;
 		unset($_POST['ConversionFactor']);
-		prnMsg(_('The conversion factor entered was not numeric') . ' (' . _('a number is expected') . '). ' . _('The conversion factor is the number which the price must be divided by to get the unit price in our unit of measure') . '. <br />' . _('E.g.') . ' ' . _('The customer sells an item by the tonne and we hold stock by the kg') . '. ' . _('The debtorsmaster.price must be divided by 1000 to get to our cost per kg') . '. ' . _('The conversion factor to enter is 1000') . '. <br /><br />' . _('No changes will be made to the database'), 'error');
+		prnMsg(_('The conversion factor entered was not numeric') . ' (' . _('a number is expected') . '). ' . _('The conversion factor is the number which the price must be divided by to get the unit price in our unit of measure') . '. <br />' . _('E.g.') . ' ' . _('The customer sells an item by the tonne and we hold stock by the kg') . '. ' . _('The weberp_debtorsmaster.price must be divided by 1000 to get to our cost per kg') . '. ' . _('The conversion factor to enter is 1000') . '. <br /><br />' . _('No changes will be made to the database'), 'error');
 	}
 
     if ($InputError == 0 AND isset($_POST['AddRecord'])) {
-        $sql = "INSERT INTO custitem (debtorno,
+        $sql = "INSERT INTO weberp_custitem (debtorno,
 										stockid,
 										customersuom,
 										conversionfactor,
@@ -76,12 +76,12 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Deb
 		unset($debtorsmasterResult);
     }
     if ($InputError == 0 AND isset($_POST['UpdateRecord'])) {
-        $sql = "UPDATE custitem SET customersuom='" . $_POST['customersUOM'] . "',
+        $sql = "UPDATE weberp_custitem SET customersuom='" . $_POST['customersUOM'] . "',
 										conversionfactor='" . filter_number_format($_POST['ConversionFactor']) . "',
 										cust_description='" . $_POST['cust_description'] . "',
-										custitem.cust_part='" . $_POST['cust_part'] . "'
-							WHERE custitem.stockid='" . $StockID . "'
-							AND custitem.debtorno='" . $DebtorNo . "'";
+										weberp_custitem.cust_part='" . $_POST['cust_part'] . "'
+							WHERE weberp_custitem.stockid='" . $StockID . "'
+							AND weberp_custitem.debtorno='" . $DebtorNo . "'";
         $ErrMsg = _('The customer details could not be updated because');
         $DbgMsg = _('The SQL that failed was');
         $UpdResult = DB_query($sql, $ErrMsg, $DbgMsg);
@@ -103,9 +103,9 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Deb
 }
 
 if (isset($_GET['Delete'])) {
-    $sql = "DELETE FROM custitem
-	   				WHERE custitem.debtorno='" . $DebtorNo . "'
-	   				AND custitem.stockid='" . $StockID . "'";
+    $sql = "DELETE FROM weberp_custitem
+	   				WHERE weberp_custitem.debtorno='" . $DebtorNo . "'
+	   				AND weberp_custitem.stockid='" . $StockID . "'";
     $ErrMsg = _('The customer details could not be deleted because');
     $DelResult = DB_query($sql, $ErrMsg);
     prnMsg(_('This customer data record has been successfully deleted'), 'success');
@@ -115,23 +115,23 @@ if (isset($_GET['Delete'])) {
 
 if ($Edit == false) {
 
-	$ItemResult = DB_query("SELECT description FROM stockmaster WHERE stockid='" . $StockID . "'");
+	$ItemResult = DB_query("SELECT description FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 	$DescriptionRow = DB_fetch_array($ItemResult);
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . ' ' . _('For Stock Code') . ' - ' . $StockID . ' - ' . $DescriptionRow['description'] . '</p><br />';
 
-    $sql = "SELECT custitem.debtorno,
-				debtorsmaster.name,
-				debtorsmaster.currcode,
-				custitem.customersUOM,
-				custitem.conversionfactor,
-				custitem.cust_description,
-				custitem.cust_part,
-				currencies.decimalplaces AS currdecimalplaces
-			FROM custitem INNER JOIN debtorsmaster
-				ON custitem.debtorno=debtorsmaster.DebtorNo
-			INNER JOIN currencies
-				ON debtorsmaster.currcode=currencies.currabrev
-			WHERE custitem.stockid = '" . $StockID . "'";
+    $sql = "SELECT weberp_custitem.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtorsmaster.currcode,
+				weberp_custitem.customersUOM,
+				weberp_custitem.conversionfactor,
+				weberp_custitem.cust_description,
+				weberp_custitem.cust_part,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_custitem INNER JOIN weberp_debtorsmaster
+				ON weberp_custitem.debtorno=weberp_debtorsmaster.DebtorNo
+			INNER JOIN weberp_currencies
+				ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_custitem.stockid = '" . $StockID . "'";
     $ErrMsg = _('The customer details for the selected part could not be retrieved because');
     $custitemResult = DB_query($sql, $ErrMsg);
     if (DB_num_rows($custitemResult) == 0 and $StockID != '') {
@@ -186,12 +186,12 @@ if ($Edit == false) {
 if (isset($DebtorNo) AND $DebtorNo != '' AND !isset($_POST['Searchcustomer'])) {
 	/*NOT EDITING AN EXISTING BUT customer selected OR ENTERED*/
 
-    $sql = "SELECT debtorsmaster.name,
-					debtorsmaster.currcode,
-					currencies.decimalplaces AS currdecimalplaces
-			FROM debtorsmaster
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
+    $sql = "SELECT weberp_debtorsmaster.name,
+					weberp_debtorsmaster.currcode,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_debtorsmaster
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 			WHERE DebtorNo='".$DebtorNo."'";
     $ErrMsg = _('The customer details for the selected customer could not be retrieved because');
     $DbgMsg = _('The SQL that failed was');
@@ -233,7 +233,7 @@ if (isset($DebtorNo) AND $DebtorNo != '' AND !isset($_POST['Searchcustomer'])) {
 }
 
 if ($Edit == true) {
-	$ItemResult = DB_query("SELECT description FROM stockmaster WHERE stockid='" . $StockID . "'");
+	$ItemResult = DB_query("SELECT description FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 	$DescriptionRow = DB_fetch_array($ItemResult);
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . ' ' . _('For Stock Code') . ' - ' . $StockID . ' - ' . $DescriptionRow['description'] . '</p><br />';
 }
@@ -250,24 +250,24 @@ if (isset($_POST['Searchcustomer'])) {
         //insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT debtorsmaster.DebtorNo,
-						debtorsmaster.name,
-						debtorsmaster.currcode,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3
-				FROM debtorsmaster
-				WHERE debtorsmaster.name " . LIKE  . " '".$SearchString."'";
+		$SQL = "SELECT weberp_debtorsmaster.DebtorNo,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.currcode,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3
+				FROM weberp_debtorsmaster
+				WHERE weberp_debtorsmaster.name " . LIKE  . " '".$SearchString."'";
 
     } elseif (mb_strlen($_POST['cust_no']) > 0) {
-        $SQL = "SELECT debtorsmaster.DebtorNo,
-						debtorsmaster.name,
-						debtorsmaster.currcode,
-						debtorsmaster.address1,
-						debtorsmaster.address2,
-						debtorsmaster.address3
-				FROM debtorsmaster
-				WHERE debtorsmaster.DebtorNo " . LIKE . " '%" . $_POST['cust_no'] . "%'";
+        $SQL = "SELECT weberp_debtorsmaster.DebtorNo,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.currcode,
+						weberp_debtorsmaster.address1,
+						weberp_debtorsmaster.address2,
+						weberp_debtorsmaster.address3
+				FROM weberp_debtorsmaster
+				WHERE weberp_debtorsmaster.DebtorNo " . LIKE . " '%" . $_POST['cust_no'] . "%'";
 
     } //one of keywords or cust_part was more than a zero length string
     $ErrMsg = _('The cuswtomer matching the criteria entered could not be retrieved because');
@@ -276,11 +276,11 @@ if (isset($_POST['Searchcustomer'])) {
 } //end of if search
 if (isset($debtorsmasterResult) AND DB_num_rows($debtorsmasterResult) > 0) {
 	if (isset($StockID)) {
-        $result = DB_query("SELECT stockmaster.description,
-								stockmaster.units,
-								stockmaster.mbflag
-						FROM stockmaster
-						WHERE stockmaster.stockid='".$StockID."'");
+        $result = DB_query("SELECT weberp_stockmaster.description,
+								weberp_stockmaster.units,
+								weberp_stockmaster.mbflag
+						FROM weberp_stockmaster
+						WHERE weberp_stockmaster.stockid='".$StockID."'");
 		$myrow = DB_fetch_row($result);
 		$StockUOM = $myrow[1];
 		if (DB_num_rows($result) <> 1) {
@@ -340,23 +340,23 @@ if (isset($debtorsmasterResult) AND DB_num_rows($debtorsmasterResult) > 0) {
 if (!isset($debtorsmasterResult)) {
 	if ($Edit == true OR isset($_GET['Copy'])) {
 
-		 $sql = "SELECT custitem.debtorno,
-						debtorsmaster.name,
-						debtorsmaster.currcode,
-						custitem.customersUOM,
-						custitem.cust_description,
-						custitem.conversionfactor,
-						custitem.cust_part,
-						stockmaster.units,
-						currencies.decimalplaces AS currdecimalplaces
-				FROM custitem INNER JOIN debtorsmaster
-					ON custitem.debtorno=debtorsmaster.DebtorNo
-				INNER JOIN stockmaster
-					ON custitem.stockid=stockmaster.stockid
-				INNER JOIN currencies
-					ON debtorsmaster.currcode = currencies.currabrev
-				WHERE custitem.debtorno='" . $DebtorNo . "'
-				AND custitem.stockid='" . $StockID . "'";
+		 $sql = "SELECT weberp_custitem.debtorno,
+						weberp_debtorsmaster.name,
+						weberp_debtorsmaster.currcode,
+						weberp_custitem.customersUOM,
+						weberp_custitem.cust_description,
+						weberp_custitem.conversionfactor,
+						weberp_custitem.cust_part,
+						weberp_stockmaster.units,
+						weberp_currencies.decimalplaces AS currdecimalplaces
+				FROM weberp_custitem INNER JOIN weberp_debtorsmaster
+					ON weberp_custitem.debtorno=weberp_debtorsmaster.DebtorNo
+				INNER JOIN weberp_stockmaster
+					ON weberp_custitem.stockid=weberp_stockmaster.stockid
+				INNER JOIN weberp_currencies
+					ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+				WHERE weberp_custitem.debtorno='" . $DebtorNo . "'
+				AND weberp_custitem.stockid='" . $StockID . "'";
 
 		$ErrMsg = _('The customer purchasing details for the selected customer and item could not be retrieved because');
 		$EditResult = DB_query($sql, $ErrMsg);

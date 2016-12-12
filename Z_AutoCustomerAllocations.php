@@ -20,29 +20,29 @@ include('includes/SQL_CommonFunctions.inc');
 if (isset($_GET['DebtorNo'])) {
 	// Page called with customer code
 
-	$SQL = "SELECT debtortrans.id,
-				debtortrans.transno,
-				systypes.typename,
-				debtortrans.type,
-				debtortrans.debtorno,
-				debtorsmaster.name,
-				debtortrans.trandate,
-				debtortrans.reference,
-				debtortrans.rate,
-				debtortrans.ovamount+debtortrans.ovgst+debtortrans.ovdiscount+debtortrans.ovfreight as total,
-				debtortrans.alloc,
-				currencies.decimalplaces AS currdecimalplaces,
-				debtorsmaster.currcode
-			FROM debtortrans INNER JOIN debtorsmaster
-			ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN systypes
-			ON debtortrans.type=systypes.typeid
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtortrans.debtorno='" . $_GET['DebtorNo'] . "'
-			AND ( (debtortrans.type=12 AND debtortrans.ovamount<0) OR debtortrans.type=11)
-			AND debtortrans.settled=0
-			ORDER BY debtortrans.id";
+	$SQL = "SELECT weberp_debtortrans.id,
+				weberp_debtortrans.transno,
+				weberp_systypes.typename,
+				weberp_debtortrans.type,
+				weberp_debtortrans.debtorno,
+				weberp_debtorsmaster.name,
+				weberp_debtortrans.trandate,
+				weberp_debtortrans.reference,
+				weberp_debtortrans.rate,
+				weberp_debtortrans.ovamount+weberp_debtortrans.ovgst+weberp_debtortrans.ovdiscount+weberp_debtortrans.ovfreight as total,
+				weberp_debtortrans.alloc,
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_debtorsmaster.currcode
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_systypes
+			ON weberp_debtortrans.type=weberp_systypes.typeid
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtortrans.debtorno='" . $_GET['DebtorNo'] . "'
+			AND ( (weberp_debtortrans.type=12 AND weberp_debtortrans.ovamount<0) OR weberp_debtortrans.type=11)
+			AND weberp_debtortrans.settled=0
+			ORDER BY weberp_debtortrans.id";
 
 	$result = DB_query($SQL);
 
@@ -71,7 +71,7 @@ if (isset($_GET['DebtorNo'])) {
 		$_SESSION['Alloc']->CurrDecimalPlaces = $myrow['decimalplaces'];
 
 		// Now get invoices or neg receipts that have outstanding balances
-		$SQL = "SELECT debtortrans.id,
+		$SQL = "SELECT weberp_debtortrans.id,
 					typename,
 					transno,
 					trandate,
@@ -79,12 +79,12 @@ if (isset($_GET['DebtorNo'])) {
 					ovamount+ovgst+ovfreight+ovdiscount as total,
 					diffonexch,
 					alloc
-				FROM debtortrans INNER JOIN systypes
-				ON debtortrans.type = systypes.typeid
-				WHERE debtortrans.settled=0
-				AND (systypes.typeid=10 OR (systypes.typeid=12 AND ovamount>0))
+				FROM weberp_debtortrans INNER JOIN weberp_systypes
+				ON weberp_debtortrans.type = weberp_systypes.typeid
+				WHERE weberp_debtortrans.settled=0
+				AND (weberp_systypes.typeid=10 OR (weberp_systypes.typeid=12 AND ovamount>0))
 				AND debtorno='" . $_SESSION['Alloc']->DebtorNo . "'
-				ORDER BY debtortrans.id DESC";
+				ORDER BY weberp_debtortrans.id DESC";
 		$TransResult = DB_query($SQL);
 		$BalToAllocate = $_SESSION['Alloc']->TransAmt - $myrow['alloc'];
 		while ($myalloc=DB_fetch_array($TransResult) AND $BalToAllocate < 0) {
@@ -129,7 +129,7 @@ function ProcessAllocation() {
 
 			if ($AllocnItem->AllocAmt > 0) {
 				$SQL = "INSERT INTO
-							custallocns (
+							weberp_custallocns (
 							datealloc,
 							amt,
 							transid_allocfrom,
@@ -149,7 +149,7 @@ function ProcessAllocation() {
 			$Settled = (abs($NewAllocTotal-$AllocnItem->TransAmount) < 0.005) ? 1 : 0;
 			$TotalDiffOnExch += $AllocnItem->DiffOnExch;
 
-			$SQL = "UPDATE debtortrans
+			$SQL = "UPDATE weberp_debtortrans
 					SET diffonexch='" . $AllocnItem->DiffOnExch . "',
 					alloc = '" . $NewAllocTotal . "',
 					settled = '" . $Settled . "'
@@ -164,7 +164,7 @@ function ProcessAllocation() {
 			$Settled = 0;
 		}
 		// Update the receipt or credit note
-		$SQL = "UPDATE debtortrans
+		$SQL = "UPDATE weberp_debtortrans
 				SET alloc = '" .  -$AllAllocations . "',
 				diffonexch = '" . -$TotalDiffOnExch . "',
 				settled='" . $Settled . "'
@@ -182,7 +182,7 @@ function ProcessAllocation() {
 				$PeriodNo = GetPeriod($_SESSION['Alloc']->TransDate);
 				$_SESSION['Alloc']->TransDate = FormatDateForSQL($_SESSION['Alloc']->TransDate);
 
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 								type,
 								typeno,
 								trandate,
@@ -203,7 +203,7 @@ function ProcessAllocation() {
 					$Error = _('Could not update exchange difference in General Ledger');
 				}
 
-		  		$SQL = "INSERT INTO gltrans (
+		  		$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,

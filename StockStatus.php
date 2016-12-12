@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: StockStatus.php 7633 2016-09-24 22:52:11Z waynemcdougall $*/
 $PricesSecurity = 12;//don't show pricing info unless security token 12 available to user
 include('includes/session.inc');
 
@@ -20,7 +20,7 @@ if (isset($_GET['StockID'])){
 if (isset($_POST['UpdateBinLocations'])){
 	foreach ($_POST as $PostVariableName => $Bin) {
 		if (mb_substr($PostVariableName,0,11) == 'BinLocation') {
-			$sql = "UPDATE locstock SET bin='" . strtoupper($Bin) . "' WHERE loccode='" . mb_substr($PostVariableName,11) . "' AND stockid='" . $StockID . "'";
+			$sql = "UPDATE weberp_locstock SET bin='" . strtoupper($Bin) . "' WHERE loccode='" . mb_substr($PostVariableName,11) . "' AND stockid='" . $StockID . "'";
 			$result = DB_query($sql);
 		}
 	}
@@ -31,7 +31,7 @@ $result = DB_query("SELECT description,
 						   decimalplaces,
 						   serialised,
 						   controlled
-					FROM stockmaster
+					FROM weberp_stockmaster
 					WHERE stockid='".$StockID."'",
 					_('Could not retrieve the requested item'),
 					_('The SQL used to retrieve the items was'));
@@ -63,18 +63,18 @@ echo _('Stock Code') . ':<input type="text" data-type="no-illegal-chars" title =
 
 echo ' <input type="submit" name="ShowStatus" value="' . _('Show Stock Status') . '" />';
 
-$sql = "SELECT locstock.loccode,
-				locations.locationname,
-				locstock.quantity,
-				locstock.reorderlevel,
-				locstock.bin,
-				locations.managed,
+$sql = "SELECT weberp_locstock.loccode,
+				weberp_locations.locationname,
+				weberp_locstock.quantity,
+				weberp_locstock.reorderlevel,
+				weberp_locstock.bin,
+				weberp_locations.managed,
 				canupd
-		FROM locstock INNER JOIN locations
-		ON locstock.loccode=locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE locstock.stockid = '" . $StockID . "'
-		ORDER BY locations.locationname";
+		FROM weberp_locstock INNER JOIN weberp_locations
+		ON weberp_locstock.loccode=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_locstock.stockid = '" . $StockID . "'
+		ORDER BY weberp_locations.locationname";
 
 $ErrMsg = _('The stock held at each location cannot be retrieved because');
 $DbgMsg = _('The SQL that was used to update the stock item and failed was');
@@ -114,13 +114,13 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 		$k=1;
 	}
 
-	$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-			FROM salesorderdetails INNER JOIN salesorders
-			ON salesorders.orderno = salesorderdetails.orderno
-			WHERE salesorders.fromstkloc='" . $myrow['loccode'] . "'
-			AND salesorderdetails.completed=0
-			AND salesorders.quotation=0
-			AND salesorderdetails.stkcode='" . $StockID . "'";
+	$sql = "SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+			FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+			ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			WHERE weberp_salesorders.fromstkloc='" . $myrow['loccode'] . "'
+			AND weberp_salesorderdetails.completed=0
+			AND weberp_salesorders.quotation=0
+			AND weberp_salesorderdetails.stkcode='" . $StockID . "'";
 
 	$ErrMsg = _('The demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 	$DemandResult = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -133,18 +133,18 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 	}
 
 	//Also need to add in the demand as a component of an assembly items if this items has any assembly parents.
-	$sql = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-			FROM salesorderdetails INNER JOIN salesorders
-			ON salesorders.orderno = salesorderdetails.orderno
-			INNER JOIN bom
-			ON salesorderdetails.stkcode=bom.parent
-			INNER JOIN stockmaster
-			ON stockmaster.stockid=bom.parent
-			WHERE salesorders.fromstkloc='" . $myrow['loccode'] . "'
-			AND salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-			AND bom.component='" . $StockID . "'
-			AND stockmaster.mbflag='A'
-			AND salesorders.quotation=0";
+	$sql = "SELECT SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+			FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+			ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			INNER JOIN weberp_bom
+			ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+			INNER JOIN weberp_stockmaster
+			ON weberp_stockmaster.stockid=weberp_bom.parent
+			WHERE weberp_salesorders.fromstkloc='" . $myrow['loccode'] . "'
+			AND weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+			AND weberp_bom.component='" . $StockID . "'
+			AND weberp_stockmaster.mbflag='A'
+			AND weberp_salesorders.quotation=0";
 
 	$ErrMsg = _('The demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 	$DemandResult = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -156,15 +156,15 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 
 	//Also the demand for the item as a component of works orders
 
-	$sql = "SELECT SUM(qtypu*(woitems.qtyreqd - woitems.qtyrecd)) AS woqtydemo
-			FROM woitems INNER JOIN worequirements
-			ON woitems.stockid=worequirements.parentstockid
-			INNER JOIN workorders
-			ON woitems.wo=workorders.wo
-			AND woitems.wo=worequirements.wo
-			WHERE workorders.loccode='" . $myrow['loccode'] . "'
-			AND worequirements.stockid='" . $StockID . "'
-			AND workorders.closed=0";
+	$sql = "SELECT SUM(qtypu*(weberp_woitems.qtyreqd - weberp_woitems.qtyrecd)) AS woqtydemo
+			FROM weberp_woitems INNER JOIN weberp_worequirements
+			ON weberp_woitems.stockid=weberp_worequirements.parentstockid
+			INNER JOIN weberp_workorders
+			ON weberp_woitems.wo=weberp_workorders.wo
+			AND weberp_woitems.wo=weberp_worequirements.wo
+			WHERE weberp_workorders.loccode='" . $myrow['loccode'] . "'
+			AND weberp_worequirements.stockid='" . $StockID . "'
+			AND weberp_workorders.closed=0";
 
 	$ErrMsg = _('The workorder component demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 	$DemandResult = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -181,7 +181,7 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 		$QOO += GetQuantityOnOrderDueToWorkOrders($StockID, $myrow['loccode']);
 
 		$InTransitSQL="SELECT SUM(shipqty-recqty) as intransit
-						FROM loctransfers
+						FROM weberp_loctransfers
 						WHERE stockid='" . $StockID . "'
 							AND shiploc='".$myrow['loccode']."'";
 		$InTransitResult=DB_query($InTransitSQL);
@@ -193,7 +193,7 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 		}
 
 		$InTransitSQL="SELECT SUM(-shipqty+recqty) as intransit
-						FROM loctransfers
+						FROM weberp_loctransfers
 						WHERE stockid='" . $StockID . "'
 							AND recloc='".$myrow['loccode']."'";
 		$InTransitResult=DB_query($InTransitSQL);
@@ -268,16 +268,16 @@ if (isset($_GET['DebtorNo'])){
 
 if ($DebtorNo) { /* display recent pricing history for this debtor and this stock item */
 
-	$sql = "SELECT stockmoves.trandate,
-				stockmoves.qty,
-				stockmoves.price,
-				stockmoves.discountpercent
-			FROM stockmoves
-			WHERE stockmoves.debtorno='" . $DebtorNo . "'
-				AND stockmoves.type=10
-				AND stockmoves.stockid = '" . $StockID . "'
-				AND stockmoves.hidemovt=0
-			ORDER BY stockmoves.trandate DESC";
+	$sql = "SELECT weberp_stockmoves.trandate,
+				weberp_stockmoves.qty,
+				weberp_stockmoves.price,
+				weberp_stockmoves.discountpercent
+			FROM weberp_stockmoves
+			WHERE weberp_stockmoves.debtorno='" . $DebtorNo . "'
+				AND weberp_stockmoves.type=10
+				AND weberp_stockmoves.stockid = '" . $StockID . "'
+				AND weberp_stockmoves.hidemovt=0
+			ORDER BY weberp_stockmoves.trandate DESC";
 
 	/* only show pricing history for sales invoices - type=10 */
 

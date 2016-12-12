@@ -8,9 +8,9 @@ include('includes/header.inc');
 
 echo '<br /><br />' . _('This script rebuilds sales analysis records. NB: all sales budget figures will be lost!');
 
-$result = DB_query("TRUNCATE TABLE salesanalysis");
+$result = DB_query("TRUNCATE TABLE weberp_salesanalysis");
 
-$sql = "INSERT INTO salesanalysis (typeabbrev,
+$sql = "INSERT INTO weberp_salesanalysis (typeabbrev,
 									periodno,
 									amt,
 									cost,
@@ -24,26 +24,26 @@ $sql = "INSERT INTO salesanalysis (typeabbrev,
 									salesperson,
 									stkcategory)
 		SELECT salestype,
-		(SELECT periodno FROM periods WHERE MONTH(lastdate_in_period)=MONTH(trandate) AND YEAR(lastdate_in_period)=YEAR(trandate)) as prd,
+		(SELECT periodno FROM weberp_periods WHERE MONTH(lastdate_in_period)=MONTH(trandate) AND YEAR(lastdate_in_period)=YEAR(trandate)) as prd,
 				SUM(price*-qty) as salesvalue,
 				SUM(standardcost*-qty) as cost,
-				stockmoves.debtorno,
-				stockmoves.branchcode,
+				weberp_stockmoves.debtorno,
+				weberp_stockmoves.branchcode,
 				SUM(-qty),
 				SUM(-qty*price*discountpercent) AS discountvalue,
-				stockmoves.stockid,
-				custbranch.area,
+				weberp_stockmoves.stockid,
+				weberp_custbranch.area,
 				1,
-				custbranch.salesman,
-				stockmaster.categoryid
-		FROM stockmoves
-		INNER JOIN debtorsmaster
-		ON stockmoves.debtorno=debtorsmaster.debtorno
-		INNER JOIN custbranch
-		ON stockmoves.debtorno=custbranch.debtorno
-		AND stockmoves.branchcode=custbranch.branchcode
-		INNER JOIN stockmaster
-		ON stockmoves.stockid=stockmaster.stockid
+				weberp_custbranch.salesman,
+				weberp_stockmaster.categoryid
+		FROM weberp_stockmoves
+		INNER JOIN weberp_debtorsmaster
+		ON weberp_stockmoves.debtorno=weberp_debtorsmaster.debtorno
+		INNER JOIN weberp_custbranch
+		ON weberp_stockmoves.debtorno=weberp_custbranch.debtorno
+		AND weberp_stockmoves.branchcode=weberp_custbranch.branchcode
+		INNER JOIN weberp_stockmaster
+		ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
         WHERE show_on_inv_crds=1
 		GROUP BY salestype,
 				debtorno,

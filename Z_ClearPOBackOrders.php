@@ -6,7 +6,7 @@ $Title = _('UTILITY PAGE To Clear purchase orders with quantity on back order');
 include('includes/header.inc');
 
 if (isset($_POST['ClearSupplierBackOrders'])) {
-	$SQL = "UPDATE purchorderdetails INNER JOIN purchorders ON purchorderdetails.orderno=purchorders.orderno SET purchorderdetails.quantityord=purchorderdetails.quantityrecd, purchorderdetails.completed=1 WHERE quantityrecd >0 AND supplierno>= '" . $_POST['FromSupplierNo'] . "' AND supplierno <= '" . $_POST['ToSupplierNo'] . "'";
+	$SQL = "UPDATE weberp_purchorderdetails INNER JOIN weberp_purchorders ON weberp_purchorderdetails.orderno=weberp_purchorders.orderno SET weberp_purchorderdetails.quantityord=weberp_purchorderdetails.quantityrecd, weberp_purchorderdetails.completed=1 WHERE quantityrecd >0 AND supplierno>= '" . $_POST['FromSupplierNo'] . "' AND supplierno <= '" . $_POST['ToSupplierNo'] . "'";
 	echo $SQL;
 	$result = DB_query($SQL);
 	

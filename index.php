@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: index.php 7341 2015-08-16 05:08:07Z daintree $*/
 
 $PageSecurity=0;
 
@@ -188,7 +188,7 @@ be generated, one for standard reports and the other for custom reports.
 				defaultreport,
 				groupname,
 				reportname
-			FROM reports
+			FROM weberp_reports
 			ORDER BY groupname,
 					reportname";
 	$Result=DB_query($sql,'','',false,true);

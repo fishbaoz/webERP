@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_customers.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Verify that the debtor number is valid, and doesn't already
    exist.*/
@@ -8,7 +8,7 @@
 			$Errors[$i] = IncorrectDebtorNumberLength;
 		}
 		$Searchsql = "SELECT count(debtorno)
-  				     FROM debtorsmaster
+  				     FROM weberp_debtorsmaster
 				     WHERE debtorno='".$DebtorNumber."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -21,7 +21,7 @@
 /* Check that the debtor number exists*/
 	function VerifyDebtorExists($DebtorNumber, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(debtorno)
-				     FROM debtorsmaster
+				     FROM weberp_debtorsmaster
 				     WHERE debtorno='".$DebtorNumber."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -50,7 +50,7 @@
 /* Check that the currency code is set up in the weberp database */
 	function VerifyCurrencyCode($CurrCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(currabrev)
-					  FROM currencies
+					  FROM weberp_currencies
 					  WHERE currabrev='".$CurrCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -63,7 +63,7 @@
 /* Check that the sales type is set up in the weberp database */
 	function VerifySalesType($SalesType, $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(typeabbrev)
-					 FROM salestypes
+					 FROM weberp_salestypes
 					  WHERE typeabbrev='".$SalesType."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -84,7 +84,7 @@
 /* Check that the hold reason is set up in the weberp database */
 	function VerifyHoldReason($HoldReason , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(reasoncode)
-					 FROM holdreasons
+					 FROM weberp_holdreasons
 					  WHERE reasoncode='".$HoldReason."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -97,7 +97,7 @@
 /* Check that the payment terms are set up in the weberp database */
 	function VerifyPaymentTerms($PaymentTerms , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(termsindicator)
-					 FROM paymentterms
+					 FROM weberp_paymentterms
 					  WHERE termsindicator='".$PaymentTerms."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -229,10 +229,10 @@
 	}
 
 /* Check that the customer type is set up in the weberp database */
-	function VerifyCustomerType($debtortype , $i, $Errors, $db) {
+	function VerifyCustomerType($weberp_debtortype , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(typeid)
-					 FROM debtortype
-					  WHERE typeid='".$debtortype."'";
+					 FROM weberp_debtortype
+					  WHERE typeid='".$weberp_debtortype."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
 		if ($answer[0] == 0) {
@@ -243,7 +243,7 @@
 
 /* Insert a new customer in the webERP database. This function takes an
    associative array called $CustomerDetails, where the keys are the
-   names of the fields in the debtorsmaster table, and the values are the
+   names of the fields in the weberp_debtorsmaster table, and the values are the
    values to insert. The only mandatory fields are the debtorno, name,
    currency code, sales type, payment terms, and reason code
    fields. If the other fields aren't set, then the database defaults
@@ -261,7 +261,7 @@
 		foreach ($CustomerDetails as $key => $value) {
 			$CustomerDetails[$key] = DB_escape_string($value);
 		}
-		$autonumbersql="SELECT confvalue FROM config
+		$autonumbersql="SELECT confvalue FROM weberp_config
 						 WHERE confname='AutoDebtorNo'";
 		$autonumberresult=DB_query($autonumbersql);
 		$autonumber=DB_fetch_row($autonumberresult);
@@ -358,7 +358,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = 'INSERT INTO debtorsmaster ('.mb_substr($FieldNames,0,-2).') '.
+		$sql = 'INSERT INTO weberp_debtorsmaster ('.mb_substr($FieldNames,0,-2).') '.
 		  'VALUES ('.mb_substr($FieldValues,0,-2).') ';
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -373,7 +373,7 @@
 
 /* Modifies a customer record in the webERP database. This function takes an
    associative array called $CustomerDetails, where the keys are the
-   names of the fields in the debtorsmaster table, and the values are the
+   names of the fields in the weberp_debtorsmaster table, and the values are the
    values to update. The debtorno is mandatory and only fields that need
    updating should be included. The function returns an array called $Errors.
    The database is only updated if the $Errors is empty, else the function
@@ -481,7 +481,7 @@
 		if (isset($CustomerDetails['typeid'])){
 			$Errors=VerifyCustomerType($CustomerDetails['typeid'], sizeof($Errors), $Errors, $db);
 		}
-		$sql='UPDATE debtorsmaster SET ';
+		$sql='UPDATE weberp_debtorsmaster SET ';
 		foreach ($CustomerDetails as $key => $value) {
 			$sql .= $key.'="'.$value.'", ';
 		}
@@ -512,7 +512,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM debtorsmaster WHERE debtorno='".$DebtorNumber."'";
+		$sql="SELECT * FROM weberp_debtorsmaster WHERE debtorno='".$DebtorNumber."'";
 		$result = DB_Query($sql, $db);
 		$Errors[0] = 0; // None found.
 		$Errors[1] = DB_fetch_array($result);
@@ -531,7 +531,7 @@
 			return $Errors;
 		}
 		$sql='SELECT debtorno
-			FROM debtorsmaster
+			FROM weberp_debtorsmaster
 			WHERE '.$Field." LIKE '%".$Criteria."%'";
 		$result = DB_Query($sql, $db);
 		$DebtorList = array(0);	    // First element: no errors

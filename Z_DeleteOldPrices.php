@@ -7,14 +7,14 @@ include('includes/header.inc');
 
 if (isset($_POST['DeleteOldPrices'])){
 	DB_Txn_Begin();
-	$result=DB_query("DELETE FROM prices WHERE enddate<'" . Date('Y-m-d') . "' AND enddate <>'0000-00-00'",'','',true);
+	$result=DB_query("DELETE FROM weberp_prices WHERE enddate<'" . Date('Y-m-d') . "' AND enddate <>'0000-00-00'",'','',true);
 	$result=DB_query("SELECT stockid,
 							typeabbrev,
 							currabrev,
 							debtorno,
 							branchcode,
 							MAX(startdate) as lateststart
-					FROM prices
+					FROM weberp_prices
 					WHERE startdate<='" . Date('Y-m-d') . "'
 					AND enddate ='0000-00-00'
 					GROUP BY stockid,
@@ -24,7 +24,7 @@ if (isset($_POST['DeleteOldPrices'])){
 							branchcode");
 
 	while ($myrow = DB_fetch_array($result)){
-		$DelResult = DB_query("DELETE FROM prices WHERE stockid='" . $myrow['stockid'] . "'
+		$DelResult = DB_query("DELETE FROM weberp_prices WHERE stockid='" . $myrow['stockid'] . "'
 													AND debtorno='" . $myrow['debtorno'] . "'
 													AND branchcode='" . $myrow['branchcode'] . "'
 													AND currabrev='" . $myrow['currabrev'] . "'

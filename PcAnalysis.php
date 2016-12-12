@@ -20,13 +20,13 @@ function submit(&$db, $TabToShow) {
 
 	if ($InputError == 0){
 		// Creation of beginning of SQL query
-		$SQL = "SELECT pcexpenses.codeexpense,";
+		$SQL = "SELECT weberp_pcexpenses.codeexpense,";
 		
 		// Creation of periods SQL query
 		$period_today=GetPeriod(Date($_SESSION['DefaultDateFormat']), $db);
 		$sqlPeriods = "SELECT periodno,
 						lastdate_in_period
-				FROM periods
+				FROM weberp_periods
 				WHERE periodno <= ". $period_today ."
 				ORDER BY periodno DESC
 				LIMIT 24";
@@ -37,19 +37,19 @@ function submit(&$db, $TabToShow) {
 		
 			$numPeriod++;
 			$LabelsArray[$numPeriod] = MonthAndYearFromSQLDate($myrow['lastdate_in_period']);
-			$SQL = $SQL . "(SELECT SUM(pcashdetails.amount)
-							FROM pcashdetails
-							WHERE pcashdetails.codeexpense = pcexpenses.codeexpense";
+			$SQL = $SQL . "(SELECT SUM(weberp_pcashdetails.amount)
+							FROM weberp_pcashdetails
+							WHERE weberp_pcashdetails.codeexpense = weberp_pcexpenses.codeexpense";
 			if ($TabToShow!='All'){
-				$SQL = $SQL." 	AND pcashdetails.tabcode = '". $TabToShow ."'";
+				$SQL = $SQL." 	AND weberp_pcashdetails.tabcode = '". $TabToShow ."'";
 			}
 			$SQL = $SQL . "		AND date >= '" . beginning_of_month($myrow['lastdate_in_period']). "'
 								AND date <= '" . $myrow['lastdate_in_period'] . "') AS expense_period".$numPeriod.", ";
 		}
 		// Creation of final part of SQL
-		$SQL = $SQL." pcexpenses.description
-				FROM  pcexpenses
-				ORDER BY pcexpenses.codeexpense";
+		$SQL = $SQL." weberp_pcexpenses.description
+				FROM  weberp_pcexpenses
+				ORDER BY weberp_pcexpenses.codeexpense";
 
 		$result = DB_query($SQL);
 		if (DB_num_rows($result) != 0){
@@ -208,7 +208,7 @@ function display(&$db)  //####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_##
 		<td><select name="Tabs">';
 
 	$sql = "SELECT tabcode
-			FROM pctabs 
+			FROM weberp_pctabs 
 			ORDER BY tabcode";
 	$CatResult=DB_query($sql);
 

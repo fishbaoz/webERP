@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_salesareas.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Check that the area code is set up in the weberp database */
 	function VerifyAreaCodeDoesntExist($AreaCode , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(areacode)
-					 FROM areas
+					 FROM weberp_areas
 					  WHERE areacode='".$AreaCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -25,7 +25,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT areacode FROM areas';
+		$sql = 'SELECT areacode FROM weberp_areas';
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -47,7 +47,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT * FROM areas WHERE areacode="'.$area.'"';
+		$sql = 'SELECT * FROM weberp_areas WHERE areacode="'.$area.'"';
 		$result = DB_query($sql);
 		if (DB_num_rows($result)==0) {
 			$Errors[0]=NoSuchArea;
@@ -80,7 +80,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = 'INSERT INTO areas ('.mb_substr($FieldNames,0,-2) . ")
+		$sql = 'INSERT INTO weberp_areas ('.mb_substr($FieldNames,0,-2) . ")
 				VALUES ('" .mb_substr($FieldValues,0,-2) . "') ";
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -105,7 +105,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM areas WHERE areadescription='" . $AreaName . "'";
+		$sql = "SELECT * FROM weberp_areas WHERE areadescription='" . $AreaName . "'";
 		$result = DB_query($sql);
 		if (DB_num_rows($result)==0) {
 			$Errors[0]=NoSuchArea;

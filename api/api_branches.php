@@ -1,10 +1,10 @@
 <?php
-/* $Id$*/
+/* $Id: api_branches.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* Check that the debtor number exists*/
 	function VerifyBranchDebtorExists($DebtorNumber, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(debtorno)
-				FROM debtorsmaster
+				FROM weberp_debtorsmaster
 				WHERE debtorno='".$DebtorNumber."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -21,7 +21,7 @@
 			$Errors[$i] = IncorrectBranchNumberLength;
 		}
 		$Searchsql = "SELECT count(debtorno)
-				     FROM custbranch
+				     FROM weberp_custbranch
            			 WHERE debtorno='".$DebtorNumber."' AND
 				           branchcode='".$BranchNumber."'";
 		$SearchResult=api_DB_query($Searchsql);
@@ -38,7 +38,7 @@
 			$Errors[$i] = IncorrectBranchNumberLength;
 		}
 		$Searchsql = "SELECT count(debtorno)
-				     FROM custbranch
+				     FROM weberp_custbranch
 				     WHERE debtorno='".$DebtorNumber."'
                      AND branchcode='".$BranchNumber."'";
 		$SearchResult=api_DB_query($Searchsql);
@@ -93,7 +93,7 @@
 /* Check that the area code is set up in the weberp database */
 	function VerifyAreaCode($AreaCode , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(areacode)
-					  FROM areas
+					  FROM weberp_areas
 					  WHERE areacode='".$AreaCode."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -106,7 +106,7 @@
 /* Check that the salesman is set up in the weberp database */
 	function VerifySalesmanCode($SalesmanCode , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(salesmancode)
-					  FROM salesman
+					  FROM weberp_salesman
 					  WHERE salesmancode='".$SalesmanCode."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -167,7 +167,7 @@
 /* Check that the default location is set up in the weberp database */
 	function VerifyDefaultLocation($DefaultLocation , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(loccode)
-					  FROM locations
+					  FROM weberp_locations
 					  WHERE loccode='".$DefaultLocation."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -180,7 +180,7 @@
 /* Check that the tax group id is set up in the weberp database */
 	function VerifyTaxGroupId($TaxGroupId , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(taxgroupid)
-					  FROM taxgroups
+					  FROM weberp_taxgroups
 					  WHERE taxgroupid='".$TaxGroupId."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -193,7 +193,7 @@
 /* Check that the default shipper is set up in the weberp database */
 	function VerifyDefaultShipVia($DefaultShipVia , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(shipper_id)
-					 FROM shippers
+					 FROM weberp_shippers
 					  WHERE shipper_id='".$DefaultShipVia."'";
 		$SearchResult=api_DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -345,7 +345,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = 'INSERT INTO custbranch ('.mb_substr($FieldNames,0,-2).') '.
+		$sql = 'INSERT INTO weberp_custbranch ('.mb_substr($FieldNames,0,-2).') '.
 		  'VALUES ('.mb_substr($FieldValues,0,-2).') ';
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -464,7 +464,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql='UPDATE custbranch SET ';
+		$sql='UPDATE weberp_custbranch SET ';
 		foreach ($BranchDetails as $key => $value) {
 			$sql .= $key.'="'.$value.'", ';
 		}
@@ -495,7 +495,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT branchcode FROM custbranch
+		$sql = "SELECT branchcode FROM weberp_custbranch
                 WHERE debtorno = '" . $DebtorNumber . "'";
 		$result = api_DB_query($sql);
 		if (DB_error_no() != 0)
@@ -524,7 +524,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM custbranch
+		$sql="SELECT * FROM weberp_custbranch
                      WHERE debtorno='".$DebtorNumber."'
                      AND branchcode='".$BranchCode."'";
 		$result = api_DB_Query($sql, $db);

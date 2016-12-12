@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: CustLoginSetup.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Customer Login Configuration');
@@ -21,7 +21,7 @@ if (!isset($_SESSION['CustomerID'])){
 echo '<a href="' . $RootPath . '/SelectCustomer.php">' . _('Back to Customers') . '</a><br />';
 
 $sql="SELECT name
-		FROM debtorsmaster
+		FROM weberp_debtorsmaster
 		WHERE debtorno='".$_SESSION['CustomerID']."'";
 
 $result=DB_query($sql);
@@ -65,7 +65,7 @@ if (isset($_POST['submit'])) {
 	if ((mb_strlen($_POST['BranchCode'])>0) AND ($InputError !=1)) {
 		// check that the entered branch is valid for the customer code
 		$sql = "SELECT defaultlocation
-				FROM custbranch
+				FROM weberp_custbranch
 				WHERE debtorno='" . $_SESSION['CustomerID'] . "'
 				AND branchcode='" . $_POST['BranchCode'] . "'";
 
@@ -83,7 +83,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1) {
 
-		$sql = "INSERT INTO www_users (userid,
+		$sql = "INSERT INTO weberp_www_users (userid,
 										realname,
 										customerid,
 										branchcode,
@@ -167,7 +167,7 @@ echo '<tr>
 			' . _('Branch Code') . ':</td>
 			<td><select name="BranchCode">';
 
-$sql = "SELECT branchcode FROM custbranch WHERE debtorno = '" . $_SESSION['CustomerID'] . "'";
+$sql = "SELECT branchcode FROM weberp_custbranch WHERE debtorno = '" . $_SESSION['CustomerID'] . "'";
 $result = DB_query($sql);
 
 while ($myrow=DB_fetch_array($result)){

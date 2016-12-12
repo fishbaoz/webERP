@@ -18,7 +18,7 @@ if (isset($_POST['Submit'])) {
 	if (!is_numeric(filter_number_format($_POST['FrequencyDays'])) OR filter_number_format($_POST['FrequencyDays']) < 0){
 		prnMsg(_('The days before a task falls due is expected to be a postive'),'error');
 	} else {
-		$sql="INSERT INTO fixedassettasks (assetid,
+		$sql="INSERT INTO weberp_fixedassettasks (assetid,
 											taskdescription,
 											frequencydays,
 											userresponsible,
@@ -44,7 +44,7 @@ if (isset($_POST['Update'])) {
 	if (!is_numeric(filter_number_format($_POST['FrequencyDays'])) OR filter_number_format($_POST['FrequencyDays']) < 0){
 		prnMsg(_('The days before a task falls due is expected to be a postive'),'error');
 	} else {
-		$sql="UPDATE fixedassettasks SET
+		$sql="UPDATE weberp_fixedassettasks SET
 				assetid = '" . $_POST['AssetID'] . "',
 				taskdescription='".$_POST['TaskDescription'] ."',
 				frequencydays='" . filter_number_format($_POST['FrequencyDays'])."',
@@ -63,7 +63,7 @@ if (isset($_POST['Update'])) {
 }
 
 if (isset($_GET['Delete'])) {
-	$sql="DELETE FROM fixedassettasks
+	$sql="DELETE FROM weberp_fixedassettasks
 		WHERE taskid='".$_GET['TaskID']."'";
 
 	$ErrMsg = _('The maintenance task cannot be deleted because');
@@ -71,7 +71,7 @@ if (isset($_GET['Delete'])) {
 }
 
 $sql="SELECT taskid,
-				fixedassettasks.assetid,
+				weberp_fixedassettasks.assetid,
 				description,
 				taskdescription,
 				frequencydays,
@@ -79,11 +79,11 @@ $sql="SELECT taskid,
 				userresponsible,
 				realname,
 				manager
-		FROM fixedassettasks
-		INNER JOIN fixedassets
-		ON fixedassettasks.assetid=fixedassets.assetid
-		INNER JOIN www_users
-		ON fixedassettasks.userresponsible=www_users.userid";
+		FROM weberp_fixedassettasks
+		INNER JOIN weberp_fixedassets
+		ON weberp_fixedassettasks.assetid=weberp_fixedassets.assetid
+		INNER JOIN weberp_www_users
+		ON weberp_fixedassettasks.userresponsible=weberp_www_users.userid";
 
 $ErrMsg = _('The maintenance task details cannot be retrieved because');
 $Result=DB_query($sql,$ErrMsg);
@@ -101,7 +101,7 @@ echo '<table class="selection">
 while ($myrow=DB_fetch_array($Result)) {
 
 	if ($myrow['manager']!=''){
-		$ManagerResult = DB_query("SELECT realname FROM www_users WHERE userid='" . $myrow['manager'] . "'");
+		$ManagerResult = DB_query("SELECT realname FROM weberp_www_users WHERE userid='" . $myrow['manager'] . "'");
 		$ManagerRow = DB_fetch_array($ManagerResult);
 		$ManagerName = $ManagerRow['realname'];
 	} else {
@@ -140,7 +140,7 @@ if (isset($_GET['Edit'])) {
 				lastcompleted,
 				userresponsible,
 				manager
-			FROM fixedassettasks
+			FROM weberp_fixedassettasks
 			WHERE taskid='".$_GET['TaskID']."'";
 	$ErrMsg = _('The maintenance task details cannot be retrieved because');
 	$result=DB_query($sql,$ErrMsg);
@@ -171,7 +171,7 @@ if (!isset($_POST['AssetID'])){
 echo '<tr>
 		<td>' . _('Asset to Maintain').':</td>
 		<td><select required="required" name="AssetID">';
-$AssetSQL="SELECT assetid, description FROM fixedassets";
+$AssetSQL="SELECT assetid, description FROM weberp_fixedassets";
 $AssetResult=DB_query($AssetSQL);
 while ($myrow=DB_fetch_array($AssetResult)) {
 	if ($myrow['assetid']==$_POST['AssetID']) {
@@ -196,7 +196,7 @@ echo '<tr>
 echo '<tr>
 		<td>' . _('Responsible') . ':</td>
 		<td><select required="required" name="UserResponsible">';
-$UserSQL="SELECT userid FROM www_users";
+$UserSQL="SELECT userid FROM weberp_www_users";
 $UserResult=DB_query($UserSQL);
 while ($myrow=DB_fetch_array($UserResult)) {
 	if ($myrow['userid']==$_POST['UserResponsible']) {
@@ -216,7 +216,7 @@ if ($_POST['Manager']==''){
 } else {
 	echo '<option value="">' . _('No Manager') . '</option>';
 }
-$ManagerSQL="SELECT userid FROM www_users";
+$ManagerSQL="SELECT userid FROM weberp_www_users";
 $ManagerResult=DB_query($UserSQL);
 while ($myrow=DB_fetch_array($ManagerResult)) {
 	if ($myrow['userid']==$_POST['Manager']) {

@@ -32,7 +32,7 @@ if (isset($_POST['AssetCode'])) {
 // Always show the search facilities
 $SQL = "SELECT categoryid,
 				categorydescription
-			FROM fixedassetcategories
+			FROM weberp_fixedassetcategories
 			ORDER BY categorydescription";
 $result = DB_query($SQL);
 if (DB_num_rows($result) == 0) {
@@ -89,7 +89,7 @@ if ($_POST['AssetLocation']=='ALL'){
 } else {
 	echo '<option value="ALL">' . _('Any asset location') . '</option>';
 }
-$result = DB_query("SELECT locationid, locationdescription FROM fixedassetlocations");
+$result = DB_query("SELECT locationid, locationdescription FROM weberp_fixedassetlocations");
 
 while ($myrow = DB_fetch_array($result)) {
 	if ($myrow['locationid'] == $_POST['AssetLocation']) {
@@ -133,9 +133,9 @@ if (isset($_POST['Search']) OR isset($_POST['Go']) OR isset($_POST['Next']) OR i
 	$SQL = "SELECT assetid,
 					description,
 					datepurchased,
-					fixedassetlocations.locationdescription
-			FROM fixedassets INNER JOIN fixedassetlocations
-			ON fixedassets.assetlocation=fixedassetlocations.locationid ";
+					weberp_fixedassetlocations.locationdescription
+			FROM weberp_fixedassets INNER JOIN weberp_fixedassetlocations
+			ON weberp_fixedassets.assetlocation=weberp_fixedassetlocations.locationid ";
 
 	if ($_POST['Keywords']) {
 		//insert wildcard characters in spaces
@@ -144,62 +144,62 @@ if (isset($_POST['Search']) OR isset($_POST['Go']) OR isset($_POST['Next']) OR i
 		if ($_POST['AssetCategory'] == 'ALL') {
 			if ($_POST['AssetLocation']=='ALL'){
 				$SQL .= "WHERE description " . LIKE .  "'" . $SearchString . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
 						AND description " . LIKE .  "'" . $SearchString . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
 			if ($_POST['AssetLocation']=='ALL'){
 				$SQL .= "WHERE description " . LIKE .  "'" . $SearchString . "'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
 						AND description " . LIKE .  "'" . $SearchString . "'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
 	} elseif (isset($_POST['AssetCode'])) {
 		if ($_POST['AssetCategory'] == 'ALL') {
 			if ($_POST['AssetLocation']=='ALL'){
-				$SQL .= "WHERE fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
 			if ($_POST['AssetLocation']=='ALL'){
-				$SQL .= "WHERE fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+				$SQL .= "WHERE weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
 	} elseif (!isset($_POST['AssetCode']) AND !isset($_POST['Keywords'])) {
 		if ($_POST['AssetCategory'] == 'All') {
 			if ($_POST['AssetLocation']=='ALL'){
-				$SQL .= 'ORDER BY fixedassets.assetid';
+				$SQL .= 'ORDER BY weberp_fixedassets.assetid';
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
 			if ($_POST['AssetLocation']=='ALL'){
 				$SQL .= "WHERE assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
 				$SQL .= "WHERE assetcategoryid='" . $_POST['AssetCategory'] . "'
-						AND fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						ORDER BY fixedassets.assetid";
+						AND weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
 	}

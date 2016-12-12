@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CheckGLTransBalance.php 7564 2016-07-03 06:58:29Z daintree $*/
 
 include('includes/session.inc');
 $Title=_('Check Period Sales Ledger Control Account');
@@ -16,21 +16,21 @@ $Header = '<tr>
 
 echo $Header;
 
-$sql = "SELECT gltrans.type,
-			systypes.typename,
-			gltrans.typeno,
+$sql = "SELECT weberp_gltrans.type,
+			weberp_systypes.typename,
+			weberp_gltrans.typeno,
 			periodno,
 			SUM(amount) AS nettot
-		FROM gltrans
-			INNER JOIN chartmaster ON
-			gltrans.account=chartmaster.accountcode
-			INNER JOIN systypes ON gltrans.type = systypes.typeid
-		GROUP BY gltrans.type,
-			systypes.typename,
+		FROM weberp_gltrans
+			INNER JOIN weberp_chartmaster ON
+			weberp_gltrans.account=weberp_chartmaster.accountcode
+			INNER JOIN weberp_systypes ON weberp_gltrans.type = weberp_systypes.typeid
+		GROUP BY weberp_gltrans.type,
+			weberp_systypes.typename,
 			typeno,
 			periodno
 		HAVING ABS(SUM(amount))>= " . 1/pow(10,$_SESSION['CompanyRecord']['decimalplaces']) . "
-		ORDER BY gltrans.counterindex";
+		ORDER BY weberp_gltrans.counterindex";
 
 $OutOfWackResult = DB_query($sql);
 

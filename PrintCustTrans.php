@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: PrintCustTrans.php 7238 2015-03-27 13:56:35Z exsonqu $ */
 
 include('includes/session.inc');
 
@@ -80,134 +80,134 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 	nobble the invoice reprints */
 
 		if ($InvOrCredit=='Invoice') {
-			$sql = "SELECT debtortrans.trandate,
-							debtortrans.ovamount,
-							debtortrans.ovdiscount,
-							debtortrans.ovfreight,
-							debtortrans.ovgst,
-							debtortrans.rate,
-							debtortrans.invtext,
-							debtortrans.packages,
-							debtortrans.consignment,
-							debtorsmaster.name,
-							debtorsmaster.address1,
-							debtorsmaster.address2,
-							debtorsmaster.address3,
-							debtorsmaster.address4,
-							debtorsmaster.address5,
-							debtorsmaster.address6,
-							debtorsmaster.currcode,
-							debtorsmaster.invaddrbranch,
-							debtorsmaster.taxref,
-							debtorsmaster.language_id,
-							paymentterms.terms,
-							salesorders.deliverto,
-							salesorders.deladd1,
-							salesorders.deladd2,
-							salesorders.deladd3,
-							salesorders.deladd4,
-							salesorders.deladd5,
-							salesorders.deladd6,
-							salesorders.customerref,
-							salesorders.orderno,
-							salesorders.orddate,
-							locations.locationname,
-							shippers.shippername,
-							custbranch.brname,
-							custbranch.braddress1,
-							custbranch.braddress2,
-							custbranch.braddress3,
-							custbranch.braddress4,
-							custbranch.braddress5,
-							custbranch.braddress6,
-							custbranch.brpostaddr1,
-							custbranch.brpostaddr2,
-							custbranch.brpostaddr3,
-							custbranch.brpostaddr4,
-							custbranch.brpostaddr5,
-							custbranch.brpostaddr6,
-							salesman.salesmanname,
-							debtortrans.debtorno,
-							debtortrans.branchcode,
-							currencies.decimalplaces
-						FROM debtortrans INNER JOIN debtorsmaster
-						ON debtortrans.debtorno=debtorsmaster.debtorno
-						INNER JOIN custbranch
-						ON debtortrans.debtorno=custbranch.debtorno
-						AND debtortrans.branchcode=custbranch.branchcode
-						INNER JOIN salesorders
-						ON debtortrans.order_ = salesorders.orderno
-						INNER JOIN shippers
-						ON debtortrans.shipvia=shippers.shipper_id
-						INNER JOIN salesman
-						ON custbranch.salesman=salesman.salesmancode
-						INNER JOIN locations
-						ON salesorders.fromstkloc=locations.loccode
-						INNER JOIN locationusers
-						ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-						INNER JOIN paymentterms
-						ON debtorsmaster.paymentterms=paymentterms.termsindicator
-						INNER JOIN currencies
-						ON debtorsmaster.currcode=currencies.currabrev
-						WHERE debtortrans.type=10
-						AND debtortrans.transno='" . $FromTransNo . "'";
+			$sql = "SELECT weberp_debtortrans.trandate,
+							weberp_debtortrans.ovamount,
+							weberp_debtortrans.ovdiscount,
+							weberp_debtortrans.ovfreight,
+							weberp_debtortrans.ovgst,
+							weberp_debtortrans.rate,
+							weberp_debtortrans.invtext,
+							weberp_debtortrans.packages,
+							weberp_debtortrans.consignment,
+							weberp_debtorsmaster.name,
+							weberp_debtorsmaster.address1,
+							weberp_debtorsmaster.address2,
+							weberp_debtorsmaster.address3,
+							weberp_debtorsmaster.address4,
+							weberp_debtorsmaster.address5,
+							weberp_debtorsmaster.address6,
+							weberp_debtorsmaster.currcode,
+							weberp_debtorsmaster.invaddrbranch,
+							weberp_debtorsmaster.taxref,
+							weberp_debtorsmaster.language_id,
+							weberp_paymentterms.terms,
+							weberp_salesorders.deliverto,
+							weberp_salesorders.deladd1,
+							weberp_salesorders.deladd2,
+							weberp_salesorders.deladd3,
+							weberp_salesorders.deladd4,
+							weberp_salesorders.deladd5,
+							weberp_salesorders.deladd6,
+							weberp_salesorders.customerref,
+							weberp_salesorders.orderno,
+							weberp_salesorders.orddate,
+							weberp_locations.locationname,
+							weberp_shippers.shippername,
+							weberp_custbranch.brname,
+							weberp_custbranch.braddress1,
+							weberp_custbranch.braddress2,
+							weberp_custbranch.braddress3,
+							weberp_custbranch.braddress4,
+							weberp_custbranch.braddress5,
+							weberp_custbranch.braddress6,
+							weberp_custbranch.brpostaddr1,
+							weberp_custbranch.brpostaddr2,
+							weberp_custbranch.brpostaddr3,
+							weberp_custbranch.brpostaddr4,
+							weberp_custbranch.brpostaddr5,
+							weberp_custbranch.brpostaddr6,
+							weberp_salesman.salesmanname,
+							weberp_debtortrans.debtorno,
+							weberp_debtortrans.branchcode,
+							weberp_currencies.decimalplaces
+						FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+						ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_custbranch
+						ON weberp_debtortrans.debtorno=weberp_custbranch.debtorno
+						AND weberp_debtortrans.branchcode=weberp_custbranch.branchcode
+						INNER JOIN weberp_salesorders
+						ON weberp_debtortrans.order_ = weberp_salesorders.orderno
+						INNER JOIN weberp_shippers
+						ON weberp_debtortrans.shipvia=weberp_shippers.shipper_id
+						INNER JOIN weberp_salesman
+						ON weberp_custbranch.salesman=weberp_salesman.salesmancode
+						INNER JOIN weberp_locations
+						ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+						INNER JOIN weberp_locationusers
+						ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						INNER JOIN weberp_paymentterms
+						ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+						WHERE weberp_debtortrans.type=10
+						AND weberp_debtortrans.transno='" . $FromTransNo . "'";
 
 			if (isset($_POST['PrintEDI']) AND $_POST['PrintEDI']=='No') {
-				$sql = $sql . " AND debtorsmaster.ediinvoices=0";
+				$sql = $sql . " AND weberp_debtorsmaster.ediinvoices=0";
 			}
 		} else {
-			$sql = "SELECT debtortrans.trandate,
-							debtortrans.ovamount,
-							debtortrans.ovdiscount,
-							debtortrans.ovfreight,
-							debtortrans.ovgst,
-							debtortrans.rate,
-							debtortrans.invtext,
-							debtorsmaster.invaddrbranch,
-							debtorsmaster.name,
-							debtorsmaster.address1,
-							debtorsmaster.address2,
-							debtorsmaster.address3,
-							debtorsmaster.address4,
-							debtorsmaster.address5,
-							debtorsmaster.address6,
-							debtorsmaster.currcode,
-							debtorsmaster.taxref,
-							debtorsmaster.language_id,
-							custbranch.brname,
-							custbranch.braddress1,
-							custbranch.braddress2,
-							custbranch.braddress3,
-							custbranch.braddress4,
-							custbranch.braddress5,
-							custbranch.braddress6,
-							custbranch.brpostaddr1,
-							custbranch.brpostaddr2,
-							custbranch.brpostaddr3,
-							custbranch.brpostaddr4,
-							custbranch.brpostaddr5,
-							custbranch.brpostaddr6,
-							salesman.salesmanname,
-							debtortrans.debtorno,
-							debtortrans.branchcode,
-							paymentterms.terms,
-							currencies.decimalplaces
-						FROM debtortrans INNER JOIN debtorsmaster
-						ON debtortrans.debtorno=debtorsmaster.debtorno
-						INNER JOIN custbranch
-						ON debtortrans.debtorno=custbranch.debtorno
-						AND debtortrans.branchcode=custbranch.branchcode
-						INNER JOIN salesman
-						ON custbranch.salesman=salesman.salesmancode
-						INNER JOIN paymentterms
-						ON debtorsmaster.paymentterms=paymentterms.termsindicator
-						INNER JOIN currencies
-						ON debtorsmaster.currcode=currencies.currabrev
-						WHERE debtortrans.type=11
-						AND debtortrans.transno='" . $FromTransNo . "'";
+			$sql = "SELECT weberp_debtortrans.trandate,
+							weberp_debtortrans.ovamount,
+							weberp_debtortrans.ovdiscount,
+							weberp_debtortrans.ovfreight,
+							weberp_debtortrans.ovgst,
+							weberp_debtortrans.rate,
+							weberp_debtortrans.invtext,
+							weberp_debtorsmaster.invaddrbranch,
+							weberp_debtorsmaster.name,
+							weberp_debtorsmaster.address1,
+							weberp_debtorsmaster.address2,
+							weberp_debtorsmaster.address3,
+							weberp_debtorsmaster.address4,
+							weberp_debtorsmaster.address5,
+							weberp_debtorsmaster.address6,
+							weberp_debtorsmaster.currcode,
+							weberp_debtorsmaster.taxref,
+							weberp_debtorsmaster.language_id,
+							weberp_custbranch.brname,
+							weberp_custbranch.braddress1,
+							weberp_custbranch.braddress2,
+							weberp_custbranch.braddress3,
+							weberp_custbranch.braddress4,
+							weberp_custbranch.braddress5,
+							weberp_custbranch.braddress6,
+							weberp_custbranch.brpostaddr1,
+							weberp_custbranch.brpostaddr2,
+							weberp_custbranch.brpostaddr3,
+							weberp_custbranch.brpostaddr4,
+							weberp_custbranch.brpostaddr5,
+							weberp_custbranch.brpostaddr6,
+							weberp_salesman.salesmanname,
+							weberp_debtortrans.debtorno,
+							weberp_debtortrans.branchcode,
+							weberp_paymentterms.terms,
+							weberp_currencies.decimalplaces
+						FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+						ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_custbranch
+						ON weberp_debtortrans.debtorno=weberp_custbranch.debtorno
+						AND weberp_debtortrans.branchcode=weberp_custbranch.branchcode
+						INNER JOIN weberp_salesman
+						ON weberp_custbranch.salesman=weberp_salesman.salesmancode
+						INNER JOIN weberp_paymentterms
+						ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+						WHERE weberp_debtortrans.type=11
+						AND weberp_debtortrans.transno='" . $FromTransNo . "'";
 
 			if (isset($_POST['PrintEDI']) AND $_POST['PrintEDI']=='No')	{
-				$sql = $sql . " AND debtorsmaster.ediinvoices=0";
+				$sql = $sql . " AND weberp_debtorsmaster.ediinvoices=0";
 			}
 		} // end else
 
@@ -234,36 +234,36 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 
 			if ($InvOrCredit=='Invoice') {
 
-				$sql = "SELECT stockmoves.stockid,
-								stockmaster.description,
-								-stockmoves.qty as quantity,
-								stockmoves.discountpercent,
-								((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
-								(stockmoves.price * " . $ExchRate . ") AS fxprice,
-								stockmoves.narrative,
-								stockmaster.units,
-								stockmaster.decimalplaces
-							FROM stockmoves INNER JOIN stockmaster
-							ON stockmoves.stockid = stockmaster.stockid
-							WHERE stockmoves.type=10
-							AND stockmoves.transno=" . $FromTransNo . "
-							AND stockmoves.show_on_inv_crds=1";
+				$sql = "SELECT weberp_stockmoves.stockid,
+								weberp_stockmaster.description,
+								-weberp_stockmoves.qty as quantity,
+								weberp_stockmoves.discountpercent,
+								((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . "* -weberp_stockmoves.qty) AS fxnet,
+								(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+								weberp_stockmoves.narrative,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces
+							FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+							ON weberp_stockmoves.stockid = weberp_stockmaster.stockid
+							WHERE weberp_stockmoves.type=10
+							AND weberp_stockmoves.transno=" . $FromTransNo . "
+							AND weberp_stockmoves.show_on_inv_crds=1";
 			} else {
 		/* only credit notes to be retrieved */
-				$sql = "SELECT stockmoves.stockid,
-								stockmaster.description,
-								stockmoves.qty as quantity,
-								stockmoves.discountpercent,
-								((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
-								(stockmoves.price * " . $ExchRate . ") AS fxprice,
-								stockmoves.narrative,
-								stockmaster.units,
-								stockmaster.decimalplaces
-							FROM stockmoves INNER JOIN stockmaster
-							ON stockmoves.stockid = stockmaster.stockid
-							WHERE stockmoves.type=11
-							AND stockmoves.transno=" . $FromTransNo . "
-							AND stockmoves.show_on_inv_crds=1";
+				$sql = "SELECT weberp_stockmoves.stockid,
+								weberp_stockmaster.description,
+								weberp_stockmoves.qty as quantity,
+								weberp_stockmoves.discountpercent,
+								((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . " * weberp_stockmoves.qty) AS fxnet,
+								(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+								weberp_stockmoves.narrative,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces
+							FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+							ON weberp_stockmoves.stockid = weberp_stockmaster.stockid
+							WHERE weberp_stockmoves.type=11
+							AND weberp_stockmoves.transno=" . $FromTransNo . "
+							AND weberp_stockmoves.show_on_inv_crds=1";
 			} // end else
 
 			$result=DB_query($sql);
@@ -299,7 +299,7 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 					$LeftOvers = $pdf->addTextWrap($Left_Margin+3,$YPos,95,$FontSize,$myrow2['stockid']);
 					//Get translation if it exists
 					$TranslationResult = DB_query("SELECT descriptiontranslation
-													FROM stockdescriptiontranslations
+													FROM weberp_stockdescriptiontranslations
 													WHERE stockid='" . $myrow2['stockid'] . "'
 													AND language_id='" . $myrow['language_id'] ."'");
 
@@ -439,7 +439,7 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 				$BankResult = DB_query("SELECT bankaddress,
 												bankaccountnumber,
 												bankaccountcode
-										FROM bankaccounts
+										FROM weberp_bankaccounts
 										WHERE invoice=2
 										AND currcode='" . $myrow['currcode'] . "'");
 				if (DB_num_rows($BankResult)==0){
@@ -447,7 +447,7 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 					$BankResult = DB_query("SELECT bankaddress,
 												bankaccountnumber,
 												bankaccountcode
-											FROM bankaccounts
+											FROM weberp_bankaccounts
 											WHERE invoice=1");
 					if (DB_num_rows($BankResult)==0){
 						$PrintBankDetails = false;
@@ -565,14 +565,14 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
         echo '</div>
               </form>';
 
-		$sql = "SELECT typeno FROM systypes WHERE typeid=10";
+		$sql = "SELECT typeno FROM weberp_systypes WHERE typeid=10";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 
 		echo '<div class="page_help_text"><b>' . _('The last invoice created was number') . ' ' . $myrow[0] . '</b><br />' . _('If only a single invoice is required') . ', ' . _('enter the invoice number to print in the Start transaction number to print field and leave the End transaction number to print field blank') . '. ' . _('Only use the end invoice to print field if you wish to print a sequential range of invoices') . '';
 
-		$sql = "SELECT typeno FROM systypes WHERE typeid=11";
+		$sql = "SELECT typeno FROM weberp_systypes WHERE typeid=11";
 
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -591,104 +591,104 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 
 			if ($InvOrCredit=='Invoice') {
 
-				$sql = "SELECT debtortrans.trandate,
-								debtortrans.ovamount,
-								debtortrans.ovdiscount,
-								debtortrans.ovfreight,
-								debtortrans.ovgst,
-								debtortrans.rate,
-								debtortrans.invtext,
-								debtortrans.consignment,
-								debtorsmaster.name,
-								debtorsmaster.address1,
-								debtorsmaster.address2,
-								debtorsmaster.address3,
-								debtorsmaster.address4,
-								debtorsmaster.address5,
-								debtorsmaster.address6,
-								debtorsmaster.currcode,
-								salesorders.deliverto,
-								salesorders.deladd1,
-								salesorders.deladd2,
-								salesorders.deladd3,
-								salesorders.deladd4,
-								salesorders.deladd5,
-								salesorders.deladd6,
-								salesorders.customerref,
-								salesorders.orderno,
-								salesorders.orddate,
-								shippers.shippername,
-								custbranch.brname,
-								custbranch.braddress1,
-								custbranch.braddress2,
-								custbranch.braddress3,
-								custbranch.braddress4,
-								custbranch.braddress5,
-								custbranch.braddress6,
-								salesman.salesmanname,
-								debtortrans.debtorno,
-								currencies.decimalplaces
-							FROM debtortrans INNER JOIN debtorsmaster
-							ON debtortrans.debtorno=debtorsmaster.debtorno
-							INNER JOIN custbranch
-							ON debtortrans.debtorno=custbranch.debtorno
-							AND debtortrans.branchcode=custbranch.branchcode
-							INNER JOIN salesorders
-							ON debtortrans.order_ = salesorders.orderno
-							INNER JOIN shippers
-							ON debtortrans.shipvia=shippers.shipper_id
-							INNER JOIN salesman
-							ON custbranch.salesman=salesman.salesmancode
-							INNER JOIN locations
-							ON salesorders.fromstkloc=locations.loccode
-							INNER JOIN locationusers
-							ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-							INNER JOIN paymentterms
-							ON debtorsmaster.paymentterms=paymentterms.termsindicator
-							INNER JOIN currencies
-							ON debtorsmaster.currcode=currencies.currabrev
-							WHERE debtortrans.type=10
-							AND debtortrans.transno='" . $FromTransNo . "'";
+				$sql = "SELECT weberp_debtortrans.trandate,
+								weberp_debtortrans.ovamount,
+								weberp_debtortrans.ovdiscount,
+								weberp_debtortrans.ovfreight,
+								weberp_debtortrans.ovgst,
+								weberp_debtortrans.rate,
+								weberp_debtortrans.invtext,
+								weberp_debtortrans.consignment,
+								weberp_debtorsmaster.name,
+								weberp_debtorsmaster.address1,
+								weberp_debtorsmaster.address2,
+								weberp_debtorsmaster.address3,
+								weberp_debtorsmaster.address4,
+								weberp_debtorsmaster.address5,
+								weberp_debtorsmaster.address6,
+								weberp_debtorsmaster.currcode,
+								weberp_salesorders.deliverto,
+								weberp_salesorders.deladd1,
+								weberp_salesorders.deladd2,
+								weberp_salesorders.deladd3,
+								weberp_salesorders.deladd4,
+								weberp_salesorders.deladd5,
+								weberp_salesorders.deladd6,
+								weberp_salesorders.customerref,
+								weberp_salesorders.orderno,
+								weberp_salesorders.orddate,
+								weberp_shippers.shippername,
+								weberp_custbranch.brname,
+								weberp_custbranch.braddress1,
+								weberp_custbranch.braddress2,
+								weberp_custbranch.braddress3,
+								weberp_custbranch.braddress4,
+								weberp_custbranch.braddress5,
+								weberp_custbranch.braddress6,
+								weberp_salesman.salesmanname,
+								weberp_debtortrans.debtorno,
+								weberp_currencies.decimalplaces
+							FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+							ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+							INNER JOIN weberp_custbranch
+							ON weberp_debtortrans.debtorno=weberp_custbranch.debtorno
+							AND weberp_debtortrans.branchcode=weberp_custbranch.branchcode
+							INNER JOIN weberp_salesorders
+							ON weberp_debtortrans.order_ = weberp_salesorders.orderno
+							INNER JOIN weberp_shippers
+							ON weberp_debtortrans.shipvia=weberp_shippers.shipper_id
+							INNER JOIN weberp_salesman
+							ON weberp_custbranch.salesman=weberp_salesman.salesmancode
+							INNER JOIN weberp_locations
+							ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+							INNER JOIN weberp_locationusers
+							ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							INNER JOIN weberp_paymentterms
+							ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+							WHERE weberp_debtortrans.type=10
+							AND weberp_debtortrans.transno='" . $FromTransNo . "'";
 			} else {
 
-				$sql = "SELECT debtortrans.trandate,
-								debtortrans.ovamount,
-								debtortrans.ovdiscount,
-								debtortrans.ovfreight,
-								debtortrans.ovgst,
-								debtortrans.rate,
-								debtortrans.invtext,
-								debtorsmaster.name,
-								debtorsmaster.address1,
-								debtorsmaster.address2,
-								debtorsmaster.address3,
-								debtorsmaster.address4,
-								debtorsmaster.address5,
-								debtorsmaster.address6,
-								debtorsmaster.currcode,
-								custbranch.brname,
-								custbranch.braddress1,
-								custbranch.braddress2,
-								custbranch.braddress3,
-								custbranch.braddress4,
-								custbranch.braddress5,
-								custbranch.braddress6,
-								salesman.salesmanname,
-								debtortrans.debtorno,
-								currencies.decimalplaces
-							FROM debtortrans INNER JOIN debtorsmaster
-							ON debtortrans.debtorno=debtorsmaster.debtorno
-							INNER JOIN custbranch
-							ON debtortrans.debtorno=custbranch.debtorno
-							AND debtortrans.branchcode=custbranch.branchcode
-							INNER JOIN salesman
-							ON custbranch.salesman=salesman.salesmancode
-							INNER JOIN paymentterms
-							ON debtorsmaster.paymentterms=paymentterms.termsindicator
-							INNER JOIN currencies
-							ON debtorsmaster.currcode=currencies.currabrev
-							WHERE debtortrans.type=11
-							AND debtortrans.transno='" . $FromTransNo . "'";
+				$sql = "SELECT weberp_debtortrans.trandate,
+								weberp_debtortrans.ovamount,
+								weberp_debtortrans.ovdiscount,
+								weberp_debtortrans.ovfreight,
+								weberp_debtortrans.ovgst,
+								weberp_debtortrans.rate,
+								weberp_debtortrans.invtext,
+								weberp_debtorsmaster.name,
+								weberp_debtorsmaster.address1,
+								weberp_debtorsmaster.address2,
+								weberp_debtorsmaster.address3,
+								weberp_debtorsmaster.address4,
+								weberp_debtorsmaster.address5,
+								weberp_debtorsmaster.address6,
+								weberp_debtorsmaster.currcode,
+								weberp_custbranch.brname,
+								weberp_custbranch.braddress1,
+								weberp_custbranch.braddress2,
+								weberp_custbranch.braddress3,
+								weberp_custbranch.braddress4,
+								weberp_custbranch.braddress5,
+								weberp_custbranch.braddress6,
+								weberp_salesman.salesmanname,
+								weberp_debtortrans.debtorno,
+								weberp_currencies.decimalplaces
+							FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+							ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+							INNER JOIN weberp_custbranch
+							ON weberp_debtortrans.debtorno=weberp_custbranch.debtorno
+							AND weberp_debtortrans.branchcode=weberp_custbranch.branchcode
+							INNER JOIN weberp_salesman
+							ON weberp_custbranch.salesman=weberp_salesman.salesmancode
+							INNER JOIN weberp_paymentterms
+							ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+							WHERE weberp_debtortrans.type=11
+							AND weberp_debtortrans.transno='" . $FromTransNo . "'";
 			}
 
 			$result=DB_query($sql);
@@ -800,21 +800,21 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 							<td>' . $myrow['consignment'] . '</td>
 						</tr></table>';
 
-				   $sql ="SELECT stockmoves.stockid,
-						   		stockmaster.description,
-								-stockmoves.qty as quantity,
-								stockmoves.discountpercent,
-								((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
-								(stockmoves.price * " . $ExchRate . ") AS fxprice,
-								stockmoves.narrative,
-								stockmaster.units,
-								stockmaster.decimalplaces
-							FROM stockmoves,
-								stockmaster
-							WHERE stockmoves.stockid = stockmaster.stockid
-							AND stockmoves.type=10
-							AND stockmoves.transno='" . $FromTransNo . "'
-							AND stockmoves.show_on_inv_crds=1";
+				   $sql ="SELECT weberp_stockmoves.stockid,
+						   		weberp_stockmaster.description,
+								-weberp_stockmoves.qty as quantity,
+								weberp_stockmoves.discountpercent,
+								((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . "* -weberp_stockmoves.qty) AS fxnet,
+								(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+								weberp_stockmoves.narrative,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces
+							FROM weberp_stockmoves,
+								weberp_stockmaster
+							WHERE weberp_stockmoves.stockid = weberp_stockmaster.stockid
+							AND weberp_stockmoves.type=10
+							AND weberp_stockmoves.transno='" . $FromTransNo . "'
+							AND weberp_stockmoves.show_on_inv_crds=1";
 
 				} else { /* then its a credit note */
 
@@ -827,20 +827,20 @@ if (isset($PrintPDF) AND isset($FromTransNo) AND isset($InvOrCredit)){
 						<td>' . $myrow['salesmanname'] . '</td>
 					</tr></table>';
 
-				   $sql ="SELECT stockmoves.stockid,
-						   		stockmaster.description,
-								stockmoves.qty as quantity,
-								stockmoves.discountpercent, ((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
-								(stockmoves.price * " . $ExchRate . ") AS fxprice,
-								stockmoves.narrative,
-								stockmaster.units,
-								stockmaster.decimalplaces
-							FROM stockmoves,
-								stockmaster
-							WHERE stockmoves.stockid = stockmaster.stockid
-							AND stockmoves.type=11
-							AND stockmoves.transno='" . $FromTransNo . "'
-							AND stockmoves.show_on_inv_crds=1";
+				   $sql ="SELECT weberp_stockmoves.stockid,
+						   		weberp_stockmaster.description,
+								weberp_stockmoves.qty as quantity,
+								weberp_stockmoves.discountpercent, ((1 - weberp_stockmoves.discountpercent) * weberp_stockmoves.price * " . $ExchRate . " * weberp_stockmoves.qty) AS fxnet,
+								(weberp_stockmoves.price * " . $ExchRate . ") AS fxprice,
+								weberp_stockmoves.narrative,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces
+							FROM weberp_stockmoves,
+								weberp_stockmaster
+							WHERE weberp_stockmoves.stockid = weberp_stockmaster.stockid
+							AND weberp_stockmoves.type=11
+							AND weberp_stockmoves.transno='" . $FromTransNo . "'
+							AND weberp_stockmoves.show_on_inv_crds=1";
 				}
 
 				$result=DB_query($sql);

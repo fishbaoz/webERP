@@ -34,11 +34,11 @@ echo '<table>
 	        <tr>
 	         <td>' . _('Selected Accounts') . ':</td>
 	         <td><select name="Account[]" size="12" multiple="multiple">';
-$sql = "SELECT chartmaster.accountcode, 
-			   chartmaster.accountname
-		FROM chartmaster 
-		INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-		ORDER BY chartmaster.accountcode";
+$sql = "SELECT weberp_chartmaster.accountcode, 
+			   weberp_chartmaster.accountname
+		FROM weberp_chartmaster 
+		INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		ORDER BY weberp_chartmaster.accountcode";
 $AccountsResult = DB_query($sql);
 $i=0;
 while ($myrow=DB_fetch_array($AccountsResult,$db)){
@@ -53,7 +53,7 @@ echo '</select></td>';
 
 echo '<td>' . _('For Period range').':</td>
 		<td><select name="Period[]" size="12" multiple="multiple">';
-$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 $Periods = DB_query($sql);
 $id=0;
 
@@ -72,7 +72,7 @@ echo '<tr><td>' . _('Select Tag') . ':</td><td><select name="tag">';
 
 $SQL = "SELECT tagref,
 	       tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result=DB_query($SQL);
@@ -123,11 +123,11 @@ if (isset($_POST['MakeCSV'])){
 
 	foreach ($_POST['Account'] as $SelectedAccount){
 		/*Is the account a balance sheet or a profit and loss account */
-		$SQL = "SELECT chartmaster.accountname,
-								accountgroups.pandl
-							    FROM accountgroups
-							    INNER JOIN chartmaster ON accountgroups.groupname=chartmaster.group_
-							    WHERE chartmaster.accountcode='" . $SelectedAccount . "'";
+		$SQL = "SELECT weberp_chartmaster.accountname,
+								weberp_accountgroups.pandl
+							    FROM weberp_accountgroups
+							    INNER JOIN weberp_chartmaster ON weberp_accountgroups.groupname=weberp_chartmaster.group_
+							    WHERE weberp_chartmaster.accountcode='" . $SelectedAccount . "'";
 		$result = DB_query($SQL);
 		$AccountDetailRow = DB_fetch_row($result);
 		$AccountName = $AccountDetailRow[1];
@@ -143,37 +143,37 @@ if (isset($_POST['MakeCSV'])){
 		if ($_POST['tag']==0) {
 	 		$sql= "SELECT type,
 				      typename,
-				      gltrans.typeno,
-				      gltrans.trandate,
-				      gltrans.narrative,
-          			      gltrans.amount,
-				      gltrans.periodno,
-				      gltrans.tag
-				FROM gltrans, systypes
-				WHERE gltrans.account = '" . $SelectedAccount . "'
-				AND systypes.typeid=gltrans.type
+				      weberp_gltrans.typeno,
+				      weberp_gltrans.trandate,
+				      weberp_gltrans.narrative,
+          			      weberp_gltrans.amount,
+				      weberp_gltrans.periodno,
+				      weberp_gltrans.tag
+				FROM weberp_gltrans, weberp_systypes
+				WHERE weberp_gltrans.account = '" . $SelectedAccount . "'
+				AND weberp_systypes.typeid=weberp_gltrans.type
 				AND posted=1
 				AND periodno>='" . $FirstPeriodSelected . "'
 				AND periodno<='" . $LastPeriodSelected . "'
-				ORDER BY periodno, gltrans.trandate, counterindex";
+				ORDER BY periodno, weberp_gltrans.trandate, counterindex";
 
 		} else {
-	 		$sql= "SELECT gltrans.type,
-						gltrans.typename,
-						gltrans.typeno,
-						gltrans.trandate,
-						gltrans.narrative,
-						gltrans.amount,
-						gltrans.periodno,
-						gltrans.tag
-					FROM gltrans, systypes
-					WHERE gltrans.account = '" . $SelectedAccount . "'
-					AND systypes.typeid=gltrans.type
+	 		$sql= "SELECT weberp_gltrans.type,
+						weberp_gltrans.typename,
+						weberp_gltrans.typeno,
+						weberp_gltrans.trandate,
+						weberp_gltrans.narrative,
+						weberp_gltrans.amount,
+						weberp_gltrans.periodno,
+						weberp_gltrans.tag
+					FROM weberp_gltrans, weberp_systypes
+					WHERE weberp_gltrans.account = '" . $SelectedAccount . "'
+					AND weberp_systypes.typeid=weberp_gltrans.type
 					AND posted=1
 					AND periodno>='" . $FirstPeriodSelected . "'
 					AND periodno<='" . $LastPeriodSelected . "'
 					AND tag='".$_POST['tag']."'
-					ORDER BY periodno, gltrans.trandate, counterindex";
+					ORDER BY periodno, weberp_gltrans.trandate, counterindex";
 		}
 
 		$ErrMsg = _('The transactions for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved because') ;
@@ -186,9 +186,9 @@ if (isset($_POST['MakeCSV'])){
 			$sql = "SELECT bfwd,
 					actual,
 					period
-				FROM chartdetails
-				WHERE chartdetails.accountcode= '" . $SelectedAccount . "'
-				AND chartdetails.period='" . $FirstPeriodSelected . "'";
+				FROM weberp_chartdetails
+				WHERE weberp_chartdetails.accountcode= '" . $SelectedAccount . "'
+				AND weberp_chartdetails.period='" . $FirstPeriodSelected . "'";
 
 			$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
 			$ChartDetailsResult = DB_query($sql,$ErrMsg);
@@ -215,9 +215,9 @@ if (isset($_POST['MakeCSV'])){
 					$sql = "SELECT bfwd,
 									actual,
 									period
-							FROM chartdetails
-							WHERE chartdetails.accountcode= '" . $SelectedAccount . "'
-							AND chartdetails.period='" . $PeriodNo . "'";
+							FROM weberp_chartdetails
+							WHERE weberp_chartdetails.accountcode= '" . $SelectedAccount . "'
+							AND weberp_chartdetails.period='" . $PeriodNo . "'";
 
 					$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
 					$ChartDetailsResult = DB_query($sql,$ErrMsg);
@@ -237,7 +237,7 @@ if (isset($_POST['MakeCSV'])){
 
 			$FormatedTranDate = ConvertSQLDate($myrow['trandate']);
 
-			$tagsql="SELECT tagdescription FROM tags WHERE tagref='".$myrow['tag'] . "'";
+			$tagsql="SELECT tagdescription FROM weberp_tags WHERE tagref='".$myrow['tag'] . "'";
 			$tagresult=DB_query($tagsql);
 			$tagrow = DB_fetch_array($tagresult);
 			if ($myrow['amount']<0){

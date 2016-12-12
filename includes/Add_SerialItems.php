@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Add_SerialItems.php 6941 2014-10-26 23:18:08Z daintree $*/
 /*ProcessSerialItems.php takes the posted variables and adds to the SerialItems array
  in either the cartclass->LineItems->SerialItems or the POClass->LineItems->SerialItems */
 
@@ -152,7 +152,7 @@ if ( isset($_POST['AddSequence']) AND $_POST['AddSequence']!='') {
 	if ($BeginNo > $EndNo){
 		prnMsg( _('To Add Items Sequentially, the Begin Number must be less than the End Number'), 'error');
 	} else {
-		$sql = "SELECT serialno FROM stockserialitems
+		$sql = "SELECT serialno FROM weberp_stockserialitems
 			WHERE serialno BETWEEN '". $BeginNo . "' AND '". $EndNo . "'
 			AND stockid = '". $StockID."' AND loccode='". $LocationOut . "'";
 		$Qty = ($InOutModifier>0?1:0);

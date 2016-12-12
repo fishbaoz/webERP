@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_DeleteCreditNote.php 6980 2014-11-14 11:36:18Z exsonqu $*/
 
 /* Script to delete a credit note - it expects and credit note number to delete
 not included on any menu for obvious reasons
@@ -23,7 +23,7 @@ if (!isset($_GET['CreditNoteNo'])){
 /*get the order number that was credited */
 
 $SQL = "SELECT order_, id
-		FROM debtortrans
+		FROM weberp_debtortrans
 		WHERE transno='" . $_GET['CreditNoteNo'] . "' AND type='11'";
 $Result = DB_query($SQL);
 
@@ -39,7 +39,7 @@ $SQL = "SELECT stockid,
 				branchcode,
 				prd,
 				qty
-			FROM stockmoves
+			FROM weberp_stockmoves
 			WHERE transno ='" .$_GET['CreditNoteNo'] . "' AND type='11'";
 $Result = DB_query($SQL);
 
@@ -55,29 +55,29 @@ prnMsg(_('The number of stock movements to be deleted is') . ': ' . DB_num_rows(
 
 $Result = DB_Txn_Begin(); /* commence a database transaction */
 
-/*Now delete the custallocns */
+/*Now delete the weberp_custallocns */
 
-$SQL = "DELETE FROM custallocns
+$SQL = "DELETE FROM weberp_custallocns
         WHERE transid_allocfrom ='" . $IDDebtorTrans . "'";
 
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('The custallocns record could not be deleted') . ' - ' . _('the sql server returned the following error');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-prnMsg(_('The custallocns record has been deleted'),'info');
+prnMsg(_('The weberp_custallocns record has been deleted'),'info');
 
-/*Now delete the debtortranstaxes */
+/*Now delete the weberp_debtortranstaxes */
 
-$SQL = "DELETE debtortranstaxes FROM debtortranstaxes
+$SQL = "DELETE weberp_debtortranstaxes FROM weberp_debtortranstaxes
                WHERE debtortransid ='" . $IDDebtorTrans . "'";
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('The debtortranstaxes record could not be deleted') . ' - ' . _('the sql server returned the following error');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-prnMsg(_('The debtortranstaxes record has been deleted'),'info');
+prnMsg(_('The weberp_debtortranstaxes record has been deleted'),'info');
 
 /*Now delete the DebtorTrans */
-$SQL = "DELETE FROM debtortrans
+$SQL = "DELETE FROM weberp_debtortrans
                WHERE transno ='" . $_GET['CreditNoteNo'] . "' AND Type=11";
 $DbgMsg = _('The SQL that failed was');
 $ErrMsg = _('A problem was encountered trying to delete the Debtor transaction record');
@@ -87,7 +87,7 @@ $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 foreach ($StockMovement as $CreditLine) {
 
-	$SQL = "UPDATE salesorderdetails SET qtyinvoiced = qtyinvoiced - " . $CreditLine['qty'] . "
+	$SQL = "UPDATE weberp_salesorderdetails SET qtyinvoiced = qtyinvoiced - " . $CreditLine['qty'] . "
                        WHERE orderno = '" . $OrderNo . "'
                        AND stkcode = '" . $CreditLine['stockid'] . "'";
 
@@ -96,8 +96,8 @@ foreach ($StockMovement as $CreditLine) {
 
 /*reverse the update to LocStock */
 
-	$SQL = "UPDATE locstock SET locstock.quantity = locstock.quantity + " . $CreditLine['qty'] . "
-			             WHERE  locstock.stockid = '" . $CreditLine['stockid'] . "'
+	$SQL = "UPDATE weberp_locstock SET weberp_locstock.quantity = weberp_locstock.quantity + " . $CreditLine['qty'] . "
+			             WHERE  weberp_locstock.stockid = '" . $CreditLine['stockid'] . "'
 			             AND loccode = '" . $CreditLine['loccode'] . "'";
 
 	$ErrMsg = _('SQL to reverse update to the location stock records failed with the error');
@@ -105,8 +105,8 @@ foreach ($StockMovement as $CreditLine) {
 	$Result = DB_query($SQL,$ErrMsg,$DbgMsg, true);
 
 /*Delete Sales Analysis records
- * This is unreliable as the salesanalysis record contains totals for the item cust custbranch periodno */
-	$SQL = "DELETE FROM salesanalysis
+ * This is unreliable as the weberp_salesanalysis record contains totals for the item cust custbranch periodno */
+	$SQL = "DELETE FROM weberp_salesanalysis
                        WHERE periodno = '" . $CreditLine['prd'] . "'
                        AND cust='" . $CreditLine['debtorno'] . "'
                        AND custbranch = '" . $CreditLine['branchcode'] . "'
@@ -119,9 +119,9 @@ foreach ($StockMovement as $CreditLine) {
 }
 
 /* Delete the stock movements  */
-$SQL = "DELETE stockmovestaxes.* FROM stockmovestaxes INNER JOIN stockmoves
-			ON stockmovestaxes.stkmoveno=stockmoves.stkmoveno
-               WHERE stockmoves.type=11 AND stockmoves.transno = '" . $_GET['CreditNoteNo'] . "'";
+$SQL = "DELETE weberp_stockmovestaxes.* FROM weberp_stockmovestaxes INNER JOIN weberp_stockmoves
+			ON weberp_stockmovestaxes.stkmoveno=weberp_stockmoves.stkmoveno
+               WHERE weberp_stockmoves.type=11 AND weberp_stockmoves.transno = '" . $_GET['CreditNoteNo'] . "'";
 
 $ErrMsg = _('SQL to delete the stock movement tax records failed with the message');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
@@ -129,7 +129,7 @@ prnMsg(_('Deleted the credit note stock move taxes').'info');
 echo '<br /><br />';
 
 
-$SQL = "DELETE FROM stockmoves
+$SQL = "DELETE FROM weberp_stockmoves
                WHERE type=11 AND transno = '" . $_GET['CreditNoteNo'] . "'";
 
 $ErrMsg = _('SQL to delete the stock movement record failed with the message');
@@ -140,7 +140,7 @@ echo '<br /><br />';
 
 
 
-$SQL = "DELETE FROM gltrans WHERE type=11 AND typeno= '" . $_GET['CreditNoteNo'] . "'";
+$SQL = "DELETE FROM weberp_gltrans WHERE type=11 AND typeno= '" . $_GET['CreditNoteNo'] . "'";
 $ErrMsg = _('SQL to delete the gl transaction records failed with the message');
 $Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 prnMsg(_('Deleted the credit note general ledger transactions').'info');

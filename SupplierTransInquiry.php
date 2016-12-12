@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SupplierTransInquiry.php 7423 2015-12-24 10:12:57Z exsonqu $*/
 
 include('includes/session.inc');
 $Title = _('Supplier Transactions Inquiry');
@@ -22,7 +22,7 @@ echo '<table class="selection">
 
 $sql = "SELECT typeid,
 				typename
-		FROM systypes
+		FROM weberp_systypes
 		WHERE typeid >= 20
 		AND typeid <= 23";
 
@@ -79,17 +79,17 @@ if (isset($_POST['ShowResults']) && $_POST['TransType'] != ''){
 				suppname,
 				suppreference,
 				transtext,
-				supptrans.rate,
+				weberp_supptrans.rate,
 				diffonexch,
 				alloc,
 				ovamount+ovgst as totalamt,
 				currcode,
 				typename,
 				decimalplaces AS currdecimalplaces
-			FROM supptrans
-			INNER JOIN suppliers ON supptrans.supplierno=suppliers.supplierid
-			INNER JOIN systypes ON supptrans.type = systypes.typeid
-			INNER JOIN currencies ON suppliers.currcode=currencies.currabrev
+			FROM weberp_supptrans
+			INNER JOIN weberp_suppliers ON weberp_supptrans.supplierno=weberp_suppliers.supplierid
+			INNER JOIN weberp_systypes ON weberp_supptrans.type = weberp_systypes.typeid
+			INNER JOIN weberp_currencies ON weberp_suppliers.currcode=weberp_currencies.currabrev
 			WHERE ";
 
    $sql = $sql . "trandate >='" . $SQL_FromDate . "' AND trandate <= '" . $SQL_ToDate . "'";
@@ -158,8 +158,8 @@ if (isset($_POST['ShowResults']) && $_POST['TransType'] != ''){
 										accountname,
 										narrative,
 										amount
-									FROM gltrans INNER JOIN chartmaster
-									ON gltrans.account=chartmaster.accountcode
+									FROM weberp_gltrans INNER JOIN weberp_chartmaster
+									ON weberp_gltrans.account=weberp_chartmaster.accountcode
 									WHERE type='" . $myrow['type'] . "'
 									AND typeno='" . $myrow['transno'] . "'",
 									_('Could not retrieve the GL transactions for this AP transaction'));

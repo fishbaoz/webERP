@@ -1,5 +1,5 @@
 <?php
-/*	$Id$*/
+/*	$Id: PDFQuotation.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*	Please note that addTextWrap prints a font-size-height further down than
 	addText and other functions.*/
@@ -36,42 +36,42 @@ If (!isset($_GET['QuotationNo']) || $_GET['QuotationNo']==""){
 /*retrieve the order details from the database to print */
 $ErrMsg = _('There was a problem retrieving the quotation header details for Order Number') . ' ' . $_GET['QuotationNo'] . ' ' . _('from the database');
 
-$sql = "SELECT salesorders.customerref,
-				salesorders.comments,
-				salesorders.orddate,
-				salesorders.deliverto,
-				salesorders.deladd1,
-				salesorders.deladd2,
-				salesorders.deladd3,
-				salesorders.deladd4,
-				salesorders.deladd5,
-				salesorders.deladd6,
-				debtorsmaster.name,
-				debtorsmaster.currcode,
-				debtorsmaster.address1,
-				debtorsmaster.address2,
-				debtorsmaster.address3,
-				debtorsmaster.address4,
-				debtorsmaster.address5,
-				debtorsmaster.address6,
-				shippers.shippername,
-				salesorders.printedpackingslip,
-				salesorders.datepackingslipprinted,
-				salesorders.quotedate,
-				salesorders.branchcode,
-				locations.taxprovinceid,
-				locations.locationname,
-				currencies.decimalplaces AS currdecimalplaces
-			FROM salesorders INNER JOIN debtorsmaster
-			ON salesorders.debtorno=debtorsmaster.debtorno
-			INNER JOIN shippers
-			ON salesorders.shipvia=shippers.shipper_id
-			INNER JOIN locations
-			ON salesorders.fromstkloc=locations.loccode
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE salesorders.quotation=1
-			AND salesorders.orderno='" . $_GET['QuotationNo'] ."'";
+$sql = "SELECT weberp_salesorders.customerref,
+				weberp_salesorders.comments,
+				weberp_salesorders.orddate,
+				weberp_salesorders.deliverto,
+				weberp_salesorders.deladd1,
+				weberp_salesorders.deladd2,
+				weberp_salesorders.deladd3,
+				weberp_salesorders.deladd4,
+				weberp_salesorders.deladd5,
+				weberp_salesorders.deladd6,
+				weberp_debtorsmaster.name,
+				weberp_debtorsmaster.currcode,
+				weberp_debtorsmaster.address1,
+				weberp_debtorsmaster.address2,
+				weberp_debtorsmaster.address3,
+				weberp_debtorsmaster.address4,
+				weberp_debtorsmaster.address5,
+				weberp_debtorsmaster.address6,
+				weberp_shippers.shippername,
+				weberp_salesorders.printedpackingslip,
+				weberp_salesorders.datepackingslipprinted,
+				weberp_salesorders.quotedate,
+				weberp_salesorders.branchcode,
+				weberp_locations.taxprovinceid,
+				weberp_locations.locationname,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_salesorders INNER JOIN weberp_debtorsmaster
+			ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_shippers
+			ON weberp_salesorders.shipvia=weberp_shippers.shipper_id
+			INNER JOIN weberp_locations
+			ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_salesorders.quotation=1
+			AND weberp_salesorders.orderno='" . $_GET['QuotationNo'] ."'";
 
 $result=DB_query($sql, $ErrMsg);
 
@@ -122,18 +122,18 @@ $line_height = 12;// Recommended: $line_height = $x * $FontSize.
 $ErrMsg = _('There was a problem retrieving the quotation line details for quotation Number') . ' ' .
 	$_GET['QuotationNo'] . ' ' . _('from the database');
 
-$sql = "SELECT salesorderdetails.stkcode,
-		stockmaster.description,
-		salesorderdetails.quantity,
-		salesorderdetails.qtyinvoiced,
-		salesorderdetails.unitprice,
-		salesorderdetails.discountpercent,
-		stockmaster.taxcatid,
-		salesorderdetails.narrative,
-		stockmaster.decimalplaces
-	FROM salesorderdetails INNER JOIN stockmaster
-		ON salesorderdetails.stkcode=stockmaster.stockid
-	WHERE salesorderdetails.orderno='" . $_GET['QuotationNo'] . "'";
+$sql = "SELECT weberp_salesorderdetails.stkcode,
+		weberp_stockmaster.description,
+		weberp_salesorderdetails.quantity,
+		weberp_salesorderdetails.qtyinvoiced,
+		weberp_salesorderdetails.unitprice,
+		weberp_salesorderdetails.discountpercent,
+		weberp_stockmaster.taxcatid,
+		weberp_salesorderdetails.narrative,
+		weberp_stockmaster.decimalplaces
+	FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+		ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+	WHERE weberp_salesorderdetails.orderno='" . $_GET['QuotationNo'] . "'";
 
 $result=DB_query($sql, $ErrMsg);
 
@@ -168,16 +168,16 @@ if (DB_num_rows($result)>0){
 		$TaxProv = $myrow['taxprovinceid'];
 		$TaxCat = $myrow2['taxcatid'];
 		$Branch = $myrow['branchcode'];
-		$sql3 = "SELECT taxgrouptaxes.taxauthid
-					FROM taxgrouptaxes INNER JOIN custbranch
-					ON taxgrouptaxes.taxgroupid=custbranch.taxgroupid
-					WHERE custbranch.branchcode='" .$Branch ."'";
+		$sql3 = "SELECT weberp_taxgrouptaxes.taxauthid
+					FROM weberp_taxgrouptaxes INNER JOIN weberp_custbranch
+					ON weberp_taxgrouptaxes.taxgroupid=weberp_custbranch.taxgroupid
+					WHERE weberp_custbranch.branchcode='" .$Branch ."'";
 		$result3=DB_query($sql3, $ErrMsg);
 		while ($myrow3=DB_fetch_array($result3)){
 			$TaxAuth = $myrow3['taxauthid'];
 		}
 
-		$sql4 = "SELECT * FROM taxauthrates
+		$sql4 = "SELECT * FROM weberp_taxauthrates
 					WHERE dispatchtaxprovince='" .$TaxProv ."'
 					AND taxcatid='" .$TaxCat ."'
 					AND taxauthority='" .$TaxAuth ."'";
@@ -206,9 +206,9 @@ if (DB_num_rows($result)>0){
 		$LeftOvers = $pdf->addTextWrap(650, $YPos,85,$FontSize,$DisplayTaxAmount,'right');
 		$LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-90, $YPos, 90, $FontSize, $DisplayTotal,'right');
 
-		// Prints salesorderdetails.narrative:
-		$FontSize2 = $FontSize*0.8;// Font size to print salesorderdetails.narrative.
-		$Width2 = $Page_Width-$Right_Margin-145;// Width to print salesorderdetails.narrative.
+		// Prints weberp_salesorderdetails.narrative:
+		$FontSize2 = $FontSize*0.8;// Font size to print weberp_salesorderdetails.narrative.
+		$Width2 = $Page_Width-$Right_Margin-145;// Width to print weberp_salesorderdetails.narrative.
 		$LeftOvers = trim($myrow2['narrative']);
 		//**********
 		$LeftOvers = str_replace('\n', ' ', $LeftOvers);// Replaces line feed character.
@@ -247,10 +247,10 @@ if (DB_num_rows($result)>0){
 	$LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-90-655, $YPos, 655, $FontSize, _('Quotation Including Tax'),'right');
 	$LeftOvers = $pdf->addTextWrap($Page_Width-$Right_Margin-90, $YPos, 90, $FontSize, locale_number_format($QuotationTotal,$myrow['currdecimalplaces']), 'right');
 
-	// Print salesorders.comments:
+	// Print weberp_salesorders.comments:
 	$YPos -= $FontSize*2;
 	$pdf->addText($XPos, $YPos+$FontSize, $FontSize, _('Notes').':');
-	$Width2 = $Page_Width-$Right_Margin-120;// Width to print salesorders.comments.
+	$Width2 = $Page_Width-$Right_Margin-120;// Width to print weberp_salesorders.comments.
 	$LeftOvers = trim($myrow['comments']);
 	//**********
 	$LeftOvers = str_replace('\n', ' ', $LeftOvers);// Replaces line feed character.

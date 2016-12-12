@@ -41,7 +41,7 @@ if (isset($_POST['Submit'])) {
 
 		/*SelectedDepartmentID could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 		// Check the name does not clash
-		$sql = "SELECT count(*) FROM departments
+		$sql = "SELECT count(*) FROM weberp_departments
 				WHERE departmentid <> '" . $SelectedDepartmentID ."'
 				AND description " . LIKE . " '" . $_POST['DepartmentName'] . "'";
 		$result = DB_query($sql);
@@ -53,7 +53,7 @@ if (isset($_POST['Submit'])) {
 			// Get the old name and check that the record still exist neet to be very careful here
 
 			$sql = "SELECT description
-					FROM departments
+					FROM weberp_departments
 					WHERE departmentid = '" . $SelectedDepartmentID . "'";
 			$result = DB_query($sql);
 			if ( DB_num_rows($result) != 0 ) {
@@ -61,7 +61,7 @@ if (isset($_POST['Submit'])) {
 				$myrow = DB_fetch_array($result);
 				$OldDepartmentName = $myrow['description'];
 				$sql = array();
-				$sql[] = "UPDATE departments
+				$sql[] = "UPDATE weberp_departments
 							SET description='" . $_POST['DepartmentName'] . "',
 								authoriser='" . $_POST['Authoriser'] . "'
 							WHERE description " . LIKE . " '" . $OldDepartmentName . "'";
@@ -73,7 +73,7 @@ if (isset($_POST['Submit'])) {
 		$msg = _('The department has been modified');
 	} elseif ($InputError !=1) {
 		/*SelectedDepartmentID is null cos no item selected on first time round so must be adding a record*/
-		$sql = "SELECT count(*) FROM departments
+		$sql = "SELECT count(*) FROM weberp_departments
 				WHERE description " . LIKE . " '" . $_POST['DepartmentName'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -81,7 +81,7 @@ if (isset($_POST['Submit'])) {
 			$InputError = 1;
 			prnMsg( _('There is already a department with the specified name.'),'error');
 		} else {
-			$sql = "INSERT INTO departments (description,
+			$sql = "INSERT INTO weberp_departments (description,
 											 authoriser )
 					VALUES ('" . $_POST['DepartmentName'] . "',
 							'" . $_POST['Authoriser'] . "')";
@@ -122,7 +122,7 @@ if (isset($_POST['Submit'])) {
 
 
 	$sql = "SELECT description
-			FROM departments
+			FROM weberp_departments
 			WHERE departmentid = '" . $SelectedDepartmentID . "'";
 	$result = DB_query($sql);
 	if ( DB_num_rows($result) == 0 ) {
@@ -131,8 +131,8 @@ if (isset($_POST['Submit'])) {
 		$myrow = DB_fetch_row($result);
 		$OldDepartmentName = $myrow[0];
 		$sql= "SELECT COUNT(*)
-				FROM stockrequest INNER JOIN departments
-				ON stockrequest.departmentid=departments.departmentid
+				FROM weberp_stockrequest INNER JOIN weberp_departments
+				ON weberp_stockrequest.departmentid=weberp_departments.departmentid
 				WHERE description " . LIKE . " '" . $OldDepartmentName . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -140,7 +140,7 @@ if (isset($_POST['Submit'])) {
 			prnMsg( _('You cannot delete this Department'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('There are items related to this department');
 		} else {
-			$sql="DELETE FROM departments WHERE description " . LIKE . "'" . $OldDepartmentName . "'";
+			$sql="DELETE FROM weberp_departments WHERE description " . LIKE . "'" . $OldDepartmentName . "'";
 			$result = DB_query($sql);
 			prnMsg( $OldDepartmentName . ' ' . _('The department has been removed') . '!','success');
 		}
@@ -158,7 +158,7 @@ if (isset($_POST['Submit'])) {
 	$sql = "SELECT departmentid,
 					description,
 					authoriser
-			FROM departments
+			FROM weberp_departments
 			ORDER BY description";
 
 	$ErrMsg = _('There are no departments created');
@@ -212,7 +212,7 @@ if (! isset($_GET['delete'])) {
 		$sql = "SELECT departmentid,
 						description,
 						authoriser
-				FROM departments
+				FROM weberp_departments
 				WHERE departmentid='" . $SelectedDepartmentID . "'";
 
 		$result = DB_query($sql);
@@ -241,7 +241,7 @@ if (! isset($_GET['delete'])) {
 		<tr>
 			<td>' . _('Authoriser') . '</td>
 			<td><select name="Authoriser">';
-	$usersql="SELECT userid FROM www_users";
+	$usersql="SELECT userid FROM weberp_www_users";
 	$userresult=DB_query($usersql);
 	while ($myrow=DB_fetch_array($userresult)) {
 		if ($myrow['userid']==$AuthoriserID) {

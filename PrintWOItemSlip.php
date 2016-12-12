@@ -25,15 +25,15 @@ if (isset($_GET['Location'])) {
 
 if (isset($WO) AND isset($StockId) AND $WO!=''){
 
-	$sql = "SELECT woitems.qtyreqd,
-					woitems.qtyrecd,
-					stockmaster.description,
-					stockmaster.decimalplaces,
-					stockmaster.units
-			FROM woitems, stockmaster
-			WHERE stockmaster.stockid = woitems.stockid 
-				AND woitems.wo = '" . $WO . "' 
-				AND woitems.stockid = '" . $StockId . "' ";
+	$sql = "SELECT weberp_woitems.qtyreqd,
+					weberp_woitems.qtyrecd,
+					weberp_stockmaster.description,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.units
+			FROM weberp_woitems, weberp_stockmaster
+			WHERE weberp_stockmaster.stockid = weberp_woitems.stockid 
+				AND weberp_woitems.wo = '" . $WO . "' 
+				AND weberp_woitems.stockid = '" . $StockId . "' ";
 
 	$ErrMsg = _('The SQL to find the details of the item to produce failed');
 	$resultItems = DB_query($sql,$ErrMsg);
@@ -59,21 +59,21 @@ if (isset($WO) AND isset($StockId) AND $WO!=''){
 
 			$PartCounter = 0;
 
-			$sqlBOM = "SELECT bom.parent,
-						bom.component,
-						bom.quantity AS bomqty,
-						stockmaster.decimalplaces,
-						stockmaster.units,
-						stockmaster.description,
-						stockmaster.shrinkfactor,
-						locstock.quantity AS qoh
-					FROM bom, stockmaster, locstock
-					WHERE bom.component = stockmaster.stockid
-						AND bom.component = locstock.stockid
-						AND locstock.loccode = '". $Location ."'
-						AND bom.parent = '" . $StockId . "'
-                        AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                        AND bom.effectiveto > '" . date('Y-m-d') . "'";
+			$sqlBOM = "SELECT weberp_bom.parent,
+						weberp_bom.component,
+						weberp_bom.quantity AS bomqty,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units,
+						weberp_stockmaster.description,
+						weberp_stockmaster.shrinkfactor,
+						weberp_locstock.quantity AS qoh
+					FROM weberp_bom, weberp_stockmaster, weberp_locstock
+					WHERE weberp_bom.component = weberp_stockmaster.stockid
+						AND weberp_bom.component = weberp_locstock.stockid
+						AND weberp_locstock.loccode = '". $Location ."'
+						AND weberp_bom.parent = '" . $StockId . "'
+                        AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                        AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 					 
 			$ErrMsg = _('The bill of material could not be retrieved because');
 			$BOMResult = DB_query ($sqlBOM,$ErrMsg);

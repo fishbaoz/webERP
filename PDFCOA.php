@@ -53,8 +53,8 @@ If ((!isset($SelectedCOA) || $SelectedCOA=='') AND (!isset($QASampleID) OR $QASa
 							lotkey,
 							prodspeckey,
 							description
-						FROM qasamples LEFT OUTER JOIN stockmaster
-						ON stockmaster.stockid=qasamples.prodspeckey
+						FROM weberp_qasamples LEFT OUTER JOIN weberp_stockmaster
+						ON weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 						WHERE cert='1'
 						ORDER BY lotkey";
 
@@ -84,40 +84,40 @@ if (isset($SelectedCOA)) {
 					description,
 					name,
 					method,
-					qatests.units,
+					weberp_qatests.units,
 					type,
 					testvalue,
 					sampledate,
 					groupby
-				FROM qasamples INNER JOIN sampleresults
-				ON sampleresults.sampleid=qasamples.sampleid
-				INNER JOIN qatests
-				ON qatests.testid=sampleresults.testid
-				LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
-				WHERE qasamples.lotkey='" .$SelectedCOA."'
-				AND qasamples.prodspeckey='" .$SelectedSpec."'
-				AND qasamples.cert='1'
-				AND sampleresults.showoncert='1'
-				ORDER by groupby, sampleresults.testid";
+				FROM weberp_qasamples INNER JOIN weberp_sampleresults
+				ON weberp_sampleresults.sampleid=weberp_qasamples.sampleid
+				INNER JOIN weberp_qatests
+				ON weberp_qatests.testid=weberp_sampleresults.testid
+				LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
+				WHERE weberp_qasamples.lotkey='" .$SelectedCOA."'
+				AND weberp_qasamples.prodspeckey='" .$SelectedSpec."'
+				AND weberp_qasamples.cert='1'
+				AND weberp_sampleresults.showoncert='1'
+				ORDER by groupby, weberp_sampleresults.testid";
 } else {
 	$sql = "SELECT lotkey,
 					description,
 					name,
 					method,
-					qatests.units,
+					weberp_qatests.units,
 					type,
 					testvalue,
 					sampledate,
 					groupby
-				FROM qasamples INNER JOIN sampleresults
-				ON sampleresults.sampleid=qasamples.sampleid
-				INNER JOIN qatests
-				ON qatests.testid=sampleresults.testid
-				LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
-				WHERE qasamples.sampleid='" .$QASampleID."'
-				AND qasamples.cert='1'
-				AND sampleresults.showoncert='1'
-				ORDER by groupby, sampleresults.testid";
+				FROM weberp_qasamples INNER JOIN weberp_sampleresults
+				ON weberp_sampleresults.sampleid=weberp_qasamples.sampleid
+				INNER JOIN weberp_qatests
+				ON weberp_qatests.testid=weberp_sampleresults.testid
+				LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
+				WHERE weberp_qasamples.sampleid='" .$QASampleID."'
+				AND weberp_qasamples.cert='1'
+				AND weberp_sampleresults.showoncert='1'
+				ORDER by groupby, weberp_sampleresults.testid";
 }
 $result=DB_query($sql,$ErrMsg);
 
@@ -303,7 +303,7 @@ $line_height=$FontSize*1.25;
 $YPos -= $line_height;
 $YPos -= $line_height;
 $sql = "SELECT confvalue
-			FROM config
+			FROM weberp_config
 			WHERE confname='QualityCOAText'";
 
 $result=DB_query($sql, $ErrMsg);

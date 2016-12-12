@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineSuppTransClass.php 7373 2015-10-30 12:12:52Z exsonqu $*/
 /* Definition of the Supplier Transactions class to hold all the information for an accounts payable invoice or credit note
 */
 
@@ -55,20 +55,20 @@ Class SuppTrans {
 		/*Gets the Taxes and rates applicable to the tax group of the supplier
 		and SESSION['DefaultTaxCategory'] and the taxprovince of the location that the user is setup to use*/
 
-		$SQL = "SELECT taxgrouptaxes.calculationorder,
-					taxauthorities.description,
-					taxgrouptaxes.taxauthid,
-					taxauthorities.purchtaxglaccount,
-					taxgrouptaxes.taxontax,
-					taxauthrates.taxrate
-			FROM taxauthrates INNER JOIN taxgrouptaxes ON
-				taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-				INNER JOIN taxauthorities ON
-				taxauthrates.taxauthority=taxauthorities.taxid
-			WHERE taxgrouptaxes.taxgroupid=" . $this->TaxGroup . "
-			AND taxauthrates.dispatchtaxprovince=" . $this->LocalTaxProvince . "
-			AND taxauthrates.taxcatid = " . $_SESSION['DefaultTaxCategory'] . "
-			ORDER BY taxgrouptaxes.calculationorder";
+		$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+					weberp_taxauthorities.description,
+					weberp_taxgrouptaxes.taxauthid,
+					weberp_taxauthorities.purchtaxglaccount,
+					weberp_taxgrouptaxes.taxontax,
+					weberp_taxauthrates.taxrate
+			FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+				weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+				INNER JOIN weberp_taxauthorities ON
+				weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+			WHERE weberp_taxgrouptaxes.taxgroupid=" . $this->TaxGroup . "
+			AND weberp_taxauthrates.dispatchtaxprovince=" . $this->LocalTaxProvince . "
+			AND weberp_taxauthrates.taxcatid = " . $_SESSION['DefaultTaxCategory'] . "
+			ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 		$ErrMsg = _('The taxes and rates for this item could not be retrieved because');
 		$GetTaxRatesResult = DB_query($SQL,$ErrMsg);
@@ -435,7 +435,7 @@ Class GLCodes {
 		$this->Narrative = $Narrative;
 		$this->Tag = $Tag;
 
-		$TagResult=DB_query("SELECT tagdescription from tags where tagref='" . $Tag . "'");
+		$TagResult=DB_query("SELECT tagdescription from weberp_tags where tagref='" . $Tag . "'");
 		$TagMyrow=DB_fetch_array($TagResult);
 		if ($Tag==0) {
 			$this->TagName=_('None');
@@ -472,10 +472,10 @@ Class Asset {
 		$this->AssetID = $AssetID;
 		$this->Amount = $Amount;
 
-		$result = DB_query("SELECT fixedassets.description,
-									fixedassetcategories.costact
-							FROM fixedassets INNER JOIN fixedassetcategories
-							ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
+		$result = DB_query("SELECT weberp_fixedassets.description,
+									weberp_fixedassetcategories.costact
+							FROM weberp_fixedassets INNER JOIN weberp_fixedassetcategories
+							ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
 							WHERE assetid='" . $AssetID . "'");
 		$AssetRow = DB_fetch_array($result);
 		$this->Description = $AssetRow['description'];

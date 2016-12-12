@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Z_ReverseSuppPaymentRun.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* Script to delete all supplier payments entered or created from a payment run on a specified day
  */
@@ -21,8 +21,8 @@ if (isset($_POST['RevPayts']) AND Is_Date($_POST['PaytDate'])==1){
 			ovamount,
 			suppreference,
 			rate
-		FROM supptrans
-		WHERE supptrans.type = 22
+		FROM weberp_supptrans
+		WHERE weberp_supptrans.type = 22
 		AND trandate = '" . $SQLTranDate . "'";
 
 	$Result = DB_query($SQL);
@@ -31,20 +31,20 @@ if (isset($_POST['RevPayts']) AND Is_Date($_POST['PaytDate'])==1){
 	while ($Payment = DB_fetch_array($Result)){
 		prnMsg(_('Deleting payment number') . ' ' . $Payment['transno'] . ' ' . _('to supplier code') . ' ' . $Payment['supplierno'] . ' ' . _('for an amount of') . ' ' . $Payment['ovamount'],'info');
 
-		$SQL = "SELECT supptrans.transno,
-				supptrans.type,
-				suppallocs.amt
-			FROM supptrans INNER JOIN suppallocs
-			ON supptrans.id=suppallocs.transid_allocto
-			WHERE suppallocs.transid_allocfrom = " .  $Payment['id'];
+		$SQL = "SELECT weberp_supptrans.transno,
+				weberp_supptrans.type,
+				weberp_suppallocs.amt
+			FROM weberp_supptrans INNER JOIN weberp_suppallocs
+			ON weberp_supptrans.id=weberp_suppallocs.transid_allocto
+			WHERE weberp_suppallocs.transid_allocfrom = " .  $Payment['id'];
 
 		$AllocsResult = DB_query($SQL);
 		while ($Alloc = DB_fetch_array($AllocsResult)){
 
-			$SQL= "UPDATE supptrans SET settled=0,
+			$SQL= "UPDATE weberp_supptrans SET settled=0,
 										alloc=alloc-" . $Alloc['amt'] . ",
 										diffonexch = diffonexch - ((" . $Alloc['amt'] . "/rate ) - " . $Alloc['amt']/$Payment['rate'] . ")
-					WHERE supptrans.type='" . $Alloc['type'] . "'
+					WHERE weberp_supptrans.type='" . $Alloc['type'] . "'
 					AND transno='" . $Alloc['transno'] . "'";
 
 			$ErrMsg =_('The update to the suppliers charges that were settled by the payment failed because');
@@ -53,11 +53,11 @@ if (isset($_POST['RevPayts']) AND Is_Date($_POST['PaytDate'])==1){
 		}
 
 		prnMsg(' ... ' . _('reversed the allocations'),'info');
-		$SQL= "DELETE FROM suppallocs WHERE transid_allocfrom='" . $Payment['id'] . "'";
+		$SQL= "DELETE FROM weberp_suppallocs WHERE transid_allocfrom='" . $Payment['id'] . "'";
 		$DelResult = DB_query($SQL);
 		prnMsg(' ... ' . _('deleted the SuppAllocs records'),'info');
 
-		$SQL = "DELETE FROM supptrans
+		$SQL = "DELETE FROM weberp_supptrans
 			WHERE type=22
 			AND transno='" . $Payment['transno'] . "'
 			AND trandate='" . $SQLTranDate . "'";
@@ -66,11 +66,11 @@ if (isset($_POST['RevPayts']) AND Is_Date($_POST['PaytDate'])==1){
 		prnMsg(_('Deleted the SuppTran record'),'success');
 
 
-		$SQL= "DELETE FROM gltrans WHERE typeno='" . $Payment['transno'] . "' AND type=22";
+		$SQL= "DELETE FROM weberp_gltrans WHERE typeno='" . $Payment['transno'] . "' AND type=22";
 		$DelResult = DB_query($SQL);
 		prnMsg(' .... ' . _('the GLTrans records (if any)'),'info');
 
-		$SQL= "DELETE FROM banktrans
+		$SQL= "DELETE FROM weberp_banktrans
 				WHERE ref='" . $Payment['suppreference'] . ' ' . $Payment['supplierno'] . "'
 				AND amount=" . $Payment['ovamount'] . "
 				AND transdate = '" . $SQLTranDate . "'";

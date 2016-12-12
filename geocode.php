@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: geocode.php 7682 2016-11-24 14:10:25Z rchacon $*/
 //$PageSecurity = 3;
 $Title = _('Geocode Generate');
 
@@ -8,7 +8,7 @@ include ('includes/session.inc');
 include ('includes/header.inc');
 //include ('includes/SQL_CommonFunctions.inc');
 
-$sql = "SELECT * FROM geocode_param WHERE 1";
+$sql = "SELECT * FROM weberp_geocode_param WHERE 1";
 $ErrMsg = _('An error occurred in retrieving the information');
 $resultgeo = DB_query($sql, $ErrMsg);
 $row = DB_fetch_array($resultgeo);
@@ -26,12 +26,12 @@ define("KEY", $api_key);
 echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/maintenance.png" title="' . _('Geocode Setup') . '" alt="" />' . ' ' . _('Geocoding of Customers and Suppliers')  . '</p>';
 
 // select all the customer branches
-$sql = "SELECT * FROM custbranch WHERE 1";
+$sql = "SELECT * FROM weberp_custbranch WHERE 1";
 $ErrMsg = _('An error occurred in retrieving the information');
 $result = DB_query($sql, $ErrMsg);
 
 // select all the suppliers
-$sql = "SELECT * FROM suppliers WHERE 1";
+$sql = "SELECT * FROM weberp_suppliers WHERE 1";
 $ErrMsg = _('An error occurred in retrieving the information');
 $result2 = DB_query($sql, $ErrMsg);
 
@@ -68,7 +68,7 @@ while ($row = DB_fetch_array($result)) {
       $lat = $xml->result->geometry->location->lat;
       $lng = $xml->result->geometry->location->lng;
 
-      $query = sprintf("UPDATE custbranch " .
+      $query = sprintf("UPDATE weberp_custbranch " .
              " SET lat = '%s', lng = '%s' " .
              " WHERE branchcode = '%s' " .
  	     " AND debtorno = '%s' LIMIT 1;",
@@ -120,7 +120,7 @@ while ($row2 = DB_fetch_array($result2)) {
       $lng = $xml->result->geometry->location->lng;
 
 
-      $query = sprintf("UPDATE suppliers " .
+      $query = sprintf("UPDATE weberp_suppliers " .
              " SET lat = '%s', lng = '%s' " .
              " WHERE supplierid = '%s' LIMIT 1;",
              ($lat),

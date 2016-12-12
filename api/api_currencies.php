@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_currencies.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /* This function returns a list of the currency abbreviations
  * currently setup on webERP
@@ -12,7 +12,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT currabrev FROM currencies';
+		$sql = 'SELECT currabrev FROM weberp_currencies';
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -34,7 +34,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM currencies WHERE currabrev='".$currency."'";
+		$sql = "SELECT * FROM weberp_currencies WHERE currabrev='".$currency."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}

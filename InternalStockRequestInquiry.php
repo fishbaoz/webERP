@@ -34,12 +34,12 @@ if (!isset($StockID) AND !isset($_POST['Search'])) {//The scripts is just opened
 				<td><input type="text" name="RequestNo" maxlength="8" size="9" /></td>
 				<td>' . _('From Stock Location') . ':</td>
 				<td><select name="StockLocation">';
-		$sql = "SELECT locations.loccode, locationname, canview FROM locations
-			INNER JOIN locationusers 
-				ON locationusers.loccode=locations.loccode 
-				AND locationusers.userid='" . $_SESSION['UserID'] . "'
-				AND locationusers.canview=1 
-				AND locations.internalrequest=1";
+		$sql = "SELECT weberp_locations.loccode, locationname, canview FROM weberp_locations
+			INNER JOIN weberp_locationusers 
+				ON weberp_locationusers.loccode=weberp_locations.loccode 
+				AND weberp_locationusers.userid='" . $_SESSION['UserID'] . "'
+				AND weberp_locationusers.canview=1 
+				AND weberp_locations.internalrequest=1";
 		$LocResult = DB_query($sql);
 		$LocationCounter = DB_num_rows($LocResult);
 		$locallctr = 0;//location all counter
@@ -65,8 +65,8 @@ if (!isset($StockID) AND !isset($_POST['Search'])) {//The scripts is just opened
 			echo '<select></td>';
 		} else {//there are possiblity that the user is the authorization person,lets figure things out
 
-			$sql = "SELECT stockrequest.loccode,locations.locationname FROM stockrequest INNER JOIN locations ON stockrequest.loccode=locations.loccode
-				INNER JOIN department ON stockrequest.departmentid=department.departmentid WHERE department.authoriser='" . $_SESSION['UserID'] . "'";
+			$sql = "SELECT weberp_stockrequest.loccode,weberp_locations.locationname FROM weberp_stockrequest INNER JOIN weberp_locations ON weberp_stockrequest.loccode=weberp_locations.loccode
+				INNER JOIN weberp_departments ON weberp_stockrequest.departmentid=weberp_departments.departmentid WHERE weberp_departments.authoriser='" . $_SESSION['UserID'] . "'";
 			$authresult = DB_query($sql);
 			$LocationCounter = DB_num_rows($authresult);
 			if ($LocationCounter>0) {
@@ -122,13 +122,13 @@ if (!isset($StockID) AND !isset($_POST['Search'])) {//The scripts is just opened
 	echo '<td>' . _('Department') . '</td>
 		<td><select name="Department">';
 	//now lets retrieve those deparment available for this user;
-	$sql = "SELECT departments.departmentid, 
-			departments.description
-			FROM departments LEFT JOIN stockrequest 
-				ON departments.departmentid = stockrequest.departmentid
-				AND (departments.authoriser = '" . $_SESSION['UserID'] . "' OR stockrequest.initiator = '" . $_SESSION['UserID'] . "') 
-			WHERE stockrequest.dispatchid IS NOT NULL 
-			GROUP BY stockrequest.departmentid";//if a full request is need, the users must have all of those departments' authority 
+	$sql = "SELECT weberp_departments.departmentid, 
+			weberp_departments.description
+			FROM weberp_departments LEFT JOIN weberp_stockrequest 
+				ON weberp_departments.departmentid = weberp_stockrequest.departmentid
+				AND (weberp_departments.authoriser = '" . $_SESSION['UserID'] . "' OR weberp_stockrequest.initiator = '" . $_SESSION['UserID'] . "') 
+			WHERE weberp_stockrequest.dispatchid IS NOT NULL 
+			GROUP BY weberp_stockrequest.departmentid";//if a full request is need, the users must have all of those departments' authority 
 	$depresult = DB_query($sql);
 	if (DB_num_rows($depresult)>0) {
 		$Departments = array(); 
@@ -178,15 +178,15 @@ if (!isset($StockID) AND !isset($_POST['Search'])) {//The scripts is just opened
 	if (isset($Authorizer)) { 
 		$WhereAuthorizer = '';
 	} else {
-		$WhereAuthorizer = " AND internalstockcatrole.secroleid = '" . $_SESSION['AccessLevel'] . "' ";
+		$WhereAuthorizer = " AND weberp_internalstockcatrole.secroleid = '" . $_SESSION['AccessLevel'] . "' ";
 	}
 
-	$SQL = "SELECT stockcategory.categoryid,
-				stockcategory.categorydescription
-			FROM stockcategory, internalstockcatrole
-			WHERE stockcategory.categoryid = internalstockcatrole.categoryid
+	$SQL = "SELECT weberp_stockcategory.categoryid,
+				weberp_stockcategory.categorydescription
+			FROM weberp_stockcategory, weberp_internalstockcatrole
+			WHERE weberp_stockcategory.categoryid = weberp_internalstockcatrole.categoryid
 				" . $WhereAuthorizer . "
-			ORDER BY stockcategory.categorydescription";
+			ORDER BY weberp_stockcategory.categorydescription";
 	$result1 = DB_query($SQL);
 	//first lets check that the category id is not zero
 	$Cats = DB_num_rows($result1);
@@ -305,53 +305,53 @@ if(isset($StockItemsResult)){
 	}
 
 	if (isset($_POST['ShowDetails']) OR isset($StockID)) {
-		$SQL = "SELECT stockrequest.dispatchid, 
-				stockrequest.loccode,
-				stockrequest.departmentid,
-				departments.description,
-				locations.locationname,
+		$SQL = "SELECT weberp_stockrequest.dispatchid, 
+				weberp_stockrequest.loccode,
+				weberp_stockrequest.departmentid,
+				weberp_departments.description,
+				weberp_locations.locationname,
 				despatchdate,
 				authorised,
 				closed,
 				narrative,
 				initiator,
-			stockrequestitems.stockid,
-			stockmaster.description as stkdescription,
+			weberp_stockrequestitems.stockid,
+			weberp_stockmaster.description as stkdescription,
 			quantity,
-			stockrequestitems.decimalplaces,
+			weberp_stockrequestitems.decimalplaces,
 			uom,
 			completed
-			FROM stockrequest INNER JOIN stockrequestitems ON stockrequest.dispatchid=stockrequestitems.dispatchid 
-			INNER JOIN departments ON stockrequest.departmentid=departments.departmentid 
-			INNER JOIN locations ON locations.loccode=stockrequest.loccode 
-			INNER JOIN stockmaster ON stockrequestitems.stockid=stockmaster.stockid
+			FROM weberp_stockrequest INNER JOIN weberp_stockrequestitems ON weberp_stockrequest.dispatchid=weberp_stockrequestitems.dispatchid 
+			INNER JOIN weberp_departments ON weberp_stockrequest.departmentid=weberp_departments.departmentid 
+			INNER JOIN weberp_locations ON weberp_locations.loccode=weberp_stockrequest.loccode 
+			INNER JOIN weberp_stockmaster ON weberp_stockrequestitems.stockid=weberp_stockmaster.stockid
 			"; 
 	} else {
-		$SQL = "SELECT stockrequest.dispatchid,
-					stockrequest.loccode,
-					stockrequest.departmentid,
-					departments.description,
-					locations.locationname,
+		$SQL = "SELECT weberp_stockrequest.dispatchid,
+					weberp_stockrequest.loccode,
+					weberp_stockrequest.departmentid,
+					weberp_departments.description,
+					weberp_locations.locationname,
 					despatchdate,
 					authorised,
 					closed,
 					narrative,
 					initiator
-					FROM stockrequest INNER JOIN departments ON stockrequest.departmentid=departments.departmentid
-				        INNER JOIN locations ON locations.loccode=stockrequest.loccode	";
+					FROM weberp_stockrequest INNER JOIN weberp_departments ON weberp_stockrequest.departmentid=weberp_departments.departmentid
+				        INNER JOIN weberp_locations ON weberp_locations.loccode=weberp_stockrequest.loccode	";
 	}
 	//lets add the condition selected by users
 	if (isset($_POST['RequestNo']) AND $_POST['RequestNo'] !== '') {
-		$SQL .= "WHERE stockrequest.dispatchid = '" . $_POST['RequestNo'] . "'";
+		$SQL .= "WHERE weberp_stockrequest.dispatchid = '" . $_POST['RequestNo'] . "'";
 	} else {
 		//first the constraint of locations;
 		if ($_POST['StockLocation'] != 'All') {//retrieve the location data from current code
-			$SQL .= "WHERE stockrequest.loccode='" . $_POST['StockLocation'] . "'";
+			$SQL .= "WHERE weberp_stockrequest.loccode='" . $_POST['StockLocation'] . "'";
 		} else {//retrieve the location data from serialzed data
 			if (!in_array(19,$_SESSION['AllowedPageSecurityTokens'])) {
 				$Locations = unserialize($_POST['Locations']);
 				$Locations = implode("','",$Locations);
-				$SQL .= "WHERE stockrequest.loccode in ('" . $Locations . "')";
+				$SQL .= "WHERE weberp_stockrequest.loccode in ('" . $Locations . "')";
 			} else {
 			 	$SQL .= "WHERE 1 ";
 			}
@@ -367,13 +367,13 @@ if(isset($StockItemsResult)){
 				if (isset($_POST['Departments'])) {
 					$Departments = unserialize(base64_decode($_POST['Departments']));
 					$Departments = implode("','", $Departments);
-					$SQL .= " AND stockrequest.departmentid IN ('" . $Departments . "')";
+					$SQL .= " AND weberp_stockrequest.departmentid IN ('" . $Departments . "')";
 					
 				} //IF there are no departments set,so forgot it
 				
 			}
 		} else {
-			$SQL .= " AND stockrequest.departmentid='" . $_POST['Department'] . "'";
+			$SQL .= " AND weberp_stockrequest.departmentid='" . $_POST['Department'] . "'";
 		}
 		//Date from
 		if (isset($_POST['FromDate']) AND is_date($_POST['FromDate'])) {
@@ -384,7 +384,7 @@ if(isset($StockItemsResult)){
 		}
 		//item selected 
 		if (isset($StockID)) {
-			$SQL .= " AND stockrequestitems.stockid='" . $StockID . "'";
+			$SQL .= " AND weberp_stockrequestitems.stockid='" . $StockID . "'";
 		}
 	}//end of no request no selected
 		//the user or authority contraint
@@ -509,43 +509,43 @@ function GetSearchItems ($SQLConstraint='') {
 	if ($_POST['Keywords'] AND $_POST['StockCode']) {
 		 echo _('Stock description keywords have been used in preference to the Stock code extract entered');
 	}
-	$SQL =  "SELECT stockmaster.stockid,
-				   stockmaster.description,
-				   stockmaster.decimalplaces,
-				   SUM(stockrequestitems.quantity) AS qoh,
-				   stockmaster.units
-			FROM stockrequestitems INNER JOIN stockrequest ON stockrequestitems.dispatchid=stockrequest.dispatchid
-			INNER JOIN departments ON stockrequest.departmentid = departments.departmentid
+	$SQL =  "SELECT weberp_stockmaster.stockid,
+				   weberp_stockmaster.description,
+				   weberp_stockmaster.decimalplaces,
+				   SUM(weberp_stockrequestitems.quantity) AS qoh,
+				   weberp_stockmaster.units
+			FROM weberp_stockrequestitems INNER JOIN weberp_stockrequest ON weberp_stockrequestitems.dispatchid=weberp_stockrequest.dispatchid
+			INNER JOIN weberp_departments ON weberp_stockrequest.departmentid = weberp_departments.departmentid
 
-				INNER JOIN stockmaster ON stockrequestitems.stockid = stockmaster.stockid";
+				INNER JOIN weberp_stockmaster ON weberp_stockrequestitems.stockid = weberp_stockmaster.stockid";
 	if (isset($_POST['StockCat']) 
 		AND ((trim($_POST['StockCat']) == '') OR $_POST['StockCat'] == 'All')){
 		 $WhereStockCat = '';
 	} else {
-		 $WhereStockCat = " AND stockmaster.categoryid='" . $_POST['StockCat'] . "' ";
+		 $WhereStockCat = " AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "' ";
 	}
 	if ($_POST['Keywords']) {
 		 //insert wildcard characters in spaces
 		 $SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		 $SQL .= " WHERE stockmaster.description " . LIKE . " '" . $SearchString . "'
+		 $SQL .= " WHERE weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
 			  " . $WhereStockCat ;
 
 
 	 } elseif (isset($_POST['StockCode'])){
-		 $SQL .= " WHERE stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'" . $WhereStockCat;
+		 $SQL .= " WHERE weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'" . $WhereStockCat;
 
 	 } elseif (!isset($_POST['StockCode']) AND !isset($_POST['Keywords'])) {
-		 $SQL .= " WHERE stockmaster.categoryid='" . $_POST['StockCat'] ."'";
+		 $SQL .= " WHERE weberp_stockmaster.categoryid='" . $_POST['StockCat'] ."'";
 
 	 }
-	$SQL .= ' AND (departments.authoriser="' . $_SESSION['UserID'] . '" OR initiator="' . $_SESSION['UserID'] . '") ';
+	$SQL .= ' AND (weberp_departments.authoriser="' . $_SESSION['UserID'] . '" OR initiator="' . $_SESSION['UserID'] . '") ';
 	$SQL .= $SQLConstraint;
-	$SQL .= " GROUP BY stockmaster.stockid,
-					    stockmaster.description,
-					    stockmaster.decimalplaces,
-					    stockmaster.units
-					    ORDER BY stockmaster.stockid";
+	$SQL .= " GROUP BY weberp_stockmaster.stockid,
+					    weberp_stockmaster.description,
+					    weberp_stockmaster.decimalplaces,
+					    weberp_stockmaster.units
+					    ORDER BY weberp_stockmaster.stockid";
 	$ErrMsg =  _('No stock items were returned by the SQL because');
 	$DbgMsg = _('The SQL used to retrieve the searched parts was');
 	$StockItemsResult = DB_query($SQL,$ErrMsg,$DbgMsg);

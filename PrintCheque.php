@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PrintCheque.php 5768 2012-12-20 08:38:22Z daintree $*/
 
 /*Hard coded for currencies with 2 decimal places */
 
@@ -24,7 +24,7 @@ $line_height=12;
 $result = DB_query("SELECT hundredsname,
                            decimalplaces,
                            currency
-                    FROM currencies
+                    FROM weberp_currencies
                     WHERE currabrev='" . $_SESSION['PaymentDetail' . $identifier]->Currency . "'",$db);
 
 If (DB_num_rows($result) == 0){

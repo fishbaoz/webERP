@@ -1,8 +1,8 @@
 <?php
 
-/* $Id$*/
+/* $Id: MRPDemands.php 6941 2014-10-26 23:18:08Z daintree $*/
 
-// Add, Edit, Delete, and List MRP demand records. Table is mrpdemands.
+// Add, Edit, Delete, and List MRP demand records. Table is weberp_mrpdemands.
 // Have separate functions for each routine. Use pass-by-reference - (&$db,&$StockID) -
 // to pass values of $db and $StockID to functions. - when just used $db as variable,
 // got error: Catchable fatal error: Object of class mysqli could not be converted to string
@@ -62,18 +62,18 @@ function search(&$db,&$StockID) { //####SEARCH_SEARCH_SEARCH_SEARCH_SEARCH_SEARC
 			//insert wildcard characters in spaces
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description
-					FROM stockmaster
-					WHERE  stockmaster.description " . LIKE . " '" . $SearchString ."'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description
+					FROM weberp_stockmaster
+					WHERE  weberp_stockmaster.description " . LIKE . " '" . $SearchString ."'
+					ORDER BY weberp_stockmaster.stockid";
 
 		} elseif (mb_strlen($_POST['StockCode'])>0){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description
-					FROM stockmaster
-					WHERE  stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description
+					FROM weberp_stockmaster
+					WHERE  weberp_stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
+					ORDER BY weberp_stockmaster.stockid";
 
 		}
 
@@ -150,7 +150,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 		$InputError = 1;
 		prnMsg(_('Invalid due date'),'error');
 	}
-	$sql = "SELECT * FROM mrpdemandtypes
+	$sql = "SELECT * FROM weberp_mrpdemandtypes
 			WHERE mrpdemandtype='" . $_POST['MRPDemandtype'] . "'";
 	$result = DB_query($sql);
 
@@ -160,7 +160,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 	}
 // Check if valid part number - Had done a Select Count(*), but that returned a 1 in DB_num_rows
 // even if there was no record.
-	$sql = "SELECT * FROM stockmaster
+	$sql = "SELECT * FROM weberp_stockmaster
 			WHERE stockid='" . $StockID . "'";
 	$result = DB_query($sql);
 
@@ -171,7 +171,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 			unset($StockID);
 	}
 // Check if part number/demand type/due date combination already exists
-	$sql = "SELECT * FROM mrpdemands
+	$sql = "SELECT * FROM weberp_mrpdemands
 			WHERE stockid='" . $StockID . "'
 			AND mrpdemandtype='" . $_POST['MRPDemandtype'] . "'
 			AND duedate='" . $FormatedDuedate . "'
@@ -184,7 +184,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 	}
 
 	if ($InputError !=1){
-		$sql = "SELECT COUNT(*) FROM mrpdemands
+		$sql = "SELECT COUNT(*) FROM weberp_mrpdemands
 				   WHERE demandid='" . $DemandID . "'
 				   GROUP BY demandid";
 		$result = DB_query($sql);
@@ -192,7 +192,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 
 		if ($myrow[0]>0) {
 			//If $myrow[0] > 0, it means this is an edit, so do an update
-			$sql = "UPDATE mrpdemands SET quantity = '" . filter_number_format($_POST['Quantity']) . "',
+			$sql = "UPDATE weberp_mrpdemands SET quantity = '" . filter_number_format($_POST['Quantity']) . "',
 							mrpdemandtype = '" . trim(mb_strtoupper($_POST['MRPDemandtype'])) . "',
 							duedate = '" . $FormatedDuedate . "'
 					WHERE demandid = '" . $DemandID . "'";
@@ -200,7 +200,7 @@ function submit(&$db,&$StockID,&$DemandID)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SU
 		} else {
 
 	// If $myrow[0] from SELECT count(*) is zero, this is an entry of a new record
-			$sql = "INSERT INTO mrpdemands (stockid,
+			$sql = "INSERT INTO weberp_mrpdemands (stockid,
 							mrpdemandtype,
 							quantity,
 							duedate)
@@ -243,7 +243,7 @@ function delete(&$db,$DemandID,$DemandType,$StockID) { //####DELETE_DELETE_DELET
 	if ($DemandID) {
 		$where = " WHERE demandid ='"  .  $DemandID . "'";
 	}
-	$sql="DELETE FROM mrpdemands
+	$sql="DELETE FROM weberp_mrpdemands
 		   $where";
 	$result = DB_query($sql);
 	if ($DemandID) {
@@ -260,7 +260,7 @@ function delete(&$db,$DemandID,$DemandType,$StockID) { //####DELETE_DELETE_DELET
 
 function listall(&$db,$part,$DemandType)  {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_####
 
-// List all mrpdemands records, with anchors to Edit or Delete records if hit List All anchor
+// List all weberp_mrpdemands records, with anchors to Edit or Delete records if hit List All anchor
 // Lists some in hit List Selection submit button, and uses part number if it is entered or
 // demandtype
 
@@ -272,19 +272,19 @@ function listall(&$db,$part,$DemandType)  {//####LISTALL_LISTALL_LISTALL_LISTALL
 		$where = " WHERE mrpdemandtype ='"  .  $DemandType . "'";
 	}
 	if ($part) {
-		$where = " WHERE mrpdemands.stockid ='"  .  $part . "'";
+		$where = " WHERE weberp_mrpdemands.stockid ='"  .  $part . "'";
 	}
 	// If part is entered, it overrides demandtype
-	$sql = "SELECT mrpdemands.demandid,
-				   mrpdemands.stockid,
-				   mrpdemands.mrpdemandtype,
-				   mrpdemands.quantity,
-				   mrpdemands.duedate,
-				   stockmaster.description,
-				   stockmaster.decimalplaces
-			FROM mrpdemands
-			LEFT JOIN stockmaster on mrpdemands.stockid = stockmaster.stockid" .
-			 $where	. " ORDER BY mrpdemands.stockid, mrpdemands.duedate";
+	$sql = "SELECT weberp_mrpdemands.demandid,
+				   weberp_mrpdemands.stockid,
+				   weberp_mrpdemands.mrpdemandtype,
+				   weberp_mrpdemands.quantity,
+				   weberp_mrpdemands.duedate,
+				   weberp_stockmaster.description,
+				   weberp_stockmaster.decimalplaces
+			FROM weberp_mrpdemands
+			LEFT JOIN weberp_stockmaster on weberp_mrpdemands.stockid = weberp_stockmaster.stockid" .
+			 $where	. " ORDER BY weberp_mrpdemands.stockid, weberp_mrpdemands.duedate";
 
 	$ErrMsg = _('The SQL to find the parts selected failed with the message');
 	$result = DB_query($sql,$ErrMsg);
@@ -351,7 +351,7 @@ function display(&$db,&$StockID,&$DemandID) { //####DISPLAY_DISPLAY_DISPLAY_DISP
 					mrpdemandtype,
 					quantity,
 					duedate
-				FROM mrpdemands
+				FROM weberp_mrpdemands
 				WHERE demandid='" . $DemandID . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_array($result);
@@ -406,7 +406,7 @@ function display(&$db,&$StockID,&$DemandID) { //####DISPLAY_DISPLAY_DISPLAY_DISP
 
 		$sql = "SELECT mrpdemandtype,
 						description
-				FROM mrpdemandtypes";
+				FROM weberp_mrpdemandtypes";
 		$result = DB_query($sql);
 		while ($myrow = DB_fetch_array($result)) {
 			if (isset($_POST['MRPDemandtype']) and $myrow['mrpdemandtype']==$_POST['MRPDemandtype']) {

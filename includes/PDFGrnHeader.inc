@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFGrnHeader.inc 7373 2015-10-30 12:12:52Z exsonqu $*/
 /*PDF page header for price list report */
 if ($PageNumber>1){
 	$pdf->newPage();

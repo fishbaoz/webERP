@@ -10,11 +10,11 @@ $sql="SELECT 	description,
 				ADDDATE(lastcompleted,frequencydays) AS duedate,
 				userresponsible,
 				email
-		FROM fixedassettasks
-		INNER JOIN fixedassets
-		ON fixedassettasks.assetid=fixedassets.assetid
-		INNER JOIN www_users
-		ON fixedassettasks.userresponsible=www_users.userid
+		FROM weberp_fixedassettasks
+		INNER JOIN weberp_fixedassets
+		ON weberp_fixedassettasks.assetid=weberp_fixedassets.assetid
+		INNER JOIN weberp_www_users
+		ON weberp_fixedassettasks.userresponsible=weberp_www_users.userid
 		WHERE ADDDATE(lastcompleted,frequencydays-10)> CURDATE()
 		ORDER BY userresponsible";
 
@@ -51,11 +51,11 @@ $sql="SELECT 	description,
 				ADDDATE(lastcompleted,frequencydays) AS duedate,
 				realname,
 				manager
-		FROM fixedassettasks
-		INNER JOIN fixedassets
-		ON fixedassettasks.assetid=fixedassets.assetid
-		INNER JOIN www_users
-		ON fixedassettasks.userresponsible=www_users.userid
+		FROM weberp_fixedassettasks
+		INNER JOIN weberp_fixedassets
+		ON weberp_fixedassettasks.assetid=weberp_fixedassets.assetid
+		INNER JOIN weberp_www_users
+		ON weberp_fixedassettasks.userresponsible=weberp_www_users.userid
 		WHERE ADDDATE(lastcompleted,frequencydays)> CURDATE()
 		ORDER BY manager";
 

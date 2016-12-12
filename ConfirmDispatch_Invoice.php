@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: ConfirmDispatch_Invoice.php 7652 2016-10-23 19:27:31Z rchacon $*/
 /* Creates sales invoices from entered sales orders based on the quantities dispatched that can be modified */
 
 /* Session started in session.inc for password checking and authorisation level check */
@@ -45,49 +45,49 @@ if(!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 
 /*read in all the guff from the selected order into the Items cart */
 
-	$OrderHeaderSQL = "SELECT salesorders.orderno,
-								salesorders.debtorno,
-								debtorsmaster.name,
-								salesorders.branchcode,
-								salesorders.customerref,
-								salesorders.comments,
-								salesorders.orddate,
-								salesorders.ordertype,
-								salesorders.shipvia,
-								salesorders.deliverto,
-								salesorders.deladd1,
-								salesorders.deladd2,
-								salesorders.deladd3,
-								salesorders.deladd4,
-								salesorders.deladd5,
-								salesorders.deladd6,
-								salesorders.contactphone,
-								salesorders.contactemail,
-								salesorders.salesperson,
-								salesorders.freightcost,
-								salesorders.deliverydate,
-								debtorsmaster.currcode,
-								salesorders.fromstkloc,
-								locations.taxprovinceid,
-								custbranch.taxgroupid,
-								currencies.rate as currency_rate,
-								currencies.decimalplaces,
-								custbranch.defaultshipvia,
-								custbranch.specialinstructions
-						FROM salesorders INNER JOIN debtorsmaster
-						ON salesorders.debtorno = debtorsmaster.debtorno
-						INNER JOIN custbranch
-						ON salesorders.branchcode = custbranch.branchcode
-						AND salesorders.debtorno = custbranch.debtorno
-						INNER JOIN currencies
-						ON debtorsmaster.currcode = currencies.currabrev
-						INNER JOIN locations
-						ON locations.loccode=salesorders.fromstkloc
-						INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" . $_SESSION['UserID'] . "' AND locationusers.canupd=1
-						WHERE salesorders.orderno = '" . $_GET['OrderNumber']."'";
+	$OrderHeaderSQL = "SELECT weberp_salesorders.orderno,
+								weberp_salesorders.debtorno,
+								weberp_debtorsmaster.name,
+								weberp_salesorders.branchcode,
+								weberp_salesorders.customerref,
+								weberp_salesorders.comments,
+								weberp_salesorders.orddate,
+								weberp_salesorders.ordertype,
+								weberp_salesorders.shipvia,
+								weberp_salesorders.deliverto,
+								weberp_salesorders.deladd1,
+								weberp_salesorders.deladd2,
+								weberp_salesorders.deladd3,
+								weberp_salesorders.deladd4,
+								weberp_salesorders.deladd5,
+								weberp_salesorders.deladd6,
+								weberp_salesorders.contactphone,
+								weberp_salesorders.contactemail,
+								weberp_salesorders.salesperson,
+								weberp_salesorders.freightcost,
+								weberp_salesorders.deliverydate,
+								weberp_debtorsmaster.currcode,
+								weberp_salesorders.fromstkloc,
+								weberp_locations.taxprovinceid,
+								weberp_custbranch.taxgroupid,
+								weberp_currencies.rate as currency_rate,
+								weberp_currencies.decimalplaces,
+								weberp_custbranch.defaultshipvia,
+								weberp_custbranch.specialinstructions
+						FROM weberp_salesorders INNER JOIN weberp_debtorsmaster
+						ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_custbranch
+						ON weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						AND weberp_salesorders.debtorno = weberp_custbranch.debtorno
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+						INNER JOIN weberp_locations
+						ON weberp_locations.loccode=weberp_salesorders.fromstkloc
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" . $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+						WHERE weberp_salesorders.orderno = '" . $_GET['OrderNumber']."'";
 
 	if($_SESSION['SalesmanLogin'] != '') {
-		$OrderHeaderSQL .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$OrderHeaderSQL .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 
 	$ErrMsg = _('The order cannot be retrieved because');
@@ -141,32 +141,32 @@ if(!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 /*now populate the line items array with the sales order details records */
 
 		$LineItemsSQL = "SELECT stkcode,
-								stockmaster.description,
-								stockmaster.longdescription,
-								stockmaster.controlled,
-								stockmaster.serialised,
-								stockmaster.volume,
-								stockmaster.grossweight,
-								stockmaster.units,
-								stockmaster.decimalplaces,
-								stockmaster.mbflag,
-								stockmaster.taxcatid,
-								stockmaster.discountcategory,
-								salesorderdetails.unitprice,
-								salesorderdetails.quantity,
-								salesorderdetails.discountpercent,
-								salesorderdetails.actualdispatchdate,
-								salesorderdetails.qtyinvoiced,
-								salesorderdetails.narrative,
-								salesorderdetails.orderlineno,
-								salesorderdetails.poline,
-								salesorderdetails.itemdue,
-								stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS standardcost
-							FROM salesorderdetails INNER JOIN stockmaster
-							 	ON salesorderdetails.stkcode = stockmaster.stockid
-							WHERE salesorderdetails.orderno ='" . $_GET['OrderNumber'] . "'
-							AND salesorderdetails.quantity - salesorderdetails.qtyinvoiced >0
-							ORDER BY salesorderdetails.orderlineno";
+								weberp_stockmaster.description,
+								weberp_stockmaster.longdescription,
+								weberp_stockmaster.controlled,
+								weberp_stockmaster.serialised,
+								weberp_stockmaster.volume,
+								weberp_stockmaster.grossweight,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces,
+								weberp_stockmaster.mbflag,
+								weberp_stockmaster.taxcatid,
+								weberp_stockmaster.discountcategory,
+								weberp_salesorderdetails.unitprice,
+								weberp_salesorderdetails.quantity,
+								weberp_salesorderdetails.discountpercent,
+								weberp_salesorderdetails.actualdispatchdate,
+								weberp_salesorderdetails.qtyinvoiced,
+								weberp_salesorderdetails.narrative,
+								weberp_salesorderdetails.orderlineno,
+								weberp_salesorderdetails.poline,
+								weberp_salesorderdetails.itemdue,
+								weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS standardcost
+							FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+							 	ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+							WHERE weberp_salesorderdetails.orderno ='" . $_GET['OrderNumber'] . "'
+							AND weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced >0
+							ORDER BY weberp_salesorderdetails.orderlineno";
 
 		$ErrMsg = _('The line items of the order cannot be retrieved because');
 		$DbgMsg = _('The SQL that failed was');
@@ -462,13 +462,13 @@ if(!isset($_SESSION['Items'.$identifier]->FreightCost)) {
 		$FreightCost =0;
 	}
 	if(!is_numeric($BestShipper)) {
- 		$SQL = "SELECT shipper_id FROM shippers WHERE shipper_id='" . $_SESSION['Default_Shipper'] . "'";
+ 		$SQL = "SELECT shipper_id FROM weberp_shippers WHERE shipper_id='" . $_SESSION['Default_Shipper'] . "'";
 		$ErrMsg = _('There was a problem testing for a default shipper because');
 		$TestShipperExists = DB_query($SQL, $ErrMsg);
 		if(DB_num_rows($TestShipperExists)==1) {
 			$BestShipper = $_SESSION['Default_Shipper'];
 		} else {
-			$SQL = "SELECT shipper_id FROM shippers";
+			$SQL = "SELECT shipper_id FROM weberp_shippers";
 			$ErrMsg = _('There was a problem testing for a default shipper');
 			$TestShipperExists = DB_query($SQL, $ErrMsg);
 			if(DB_num_rows($TestShipperExists)>=1) {
@@ -604,14 +604,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	//sadly this check does not combine quantities occuring twice on and order and each line is considered individually :-(
 		$NegativesFound = false;
 		foreach ($_SESSION['Items'.$identifier]->LineItems as $OrderLine) {
-			$SQL = "SELECT stockmaster.description,
-							locstock.quantity,
-					 		stockmaster.mbflag
-		 			FROM locstock
-		 			INNER JOIN stockmaster
-					ON stockmaster.stockid=locstock.stockid
-					WHERE stockmaster.stockid='" . $OrderLine->StockID . "'
-					AND locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'";
+			$SQL = "SELECT weberp_stockmaster.description,
+							weberp_locstock.quantity,
+					 		weberp_stockmaster.mbflag
+		 			FROM weberp_locstock
+		 			INNER JOIN weberp_stockmaster
+					ON weberp_stockmaster.stockid=weberp_locstock.stockid
+					WHERE weberp_stockmaster.stockid='" . $OrderLine->StockID . "'
+					AND weberp_locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'";
 
 			$ErrMsg = _('Could not retrieve the quantity left at the location once this order is invoiced (for the purposes of checking that stock will not go negative because)');
 			$Result = DB_query($SQL,$ErrMsg);
@@ -624,18 +624,18 @@ invoices can have a zero amount but there must be a quantity to invoice */
 			} elseif($CheckNegRow['mbflag']=='A') {
 
 				/*Now look for assembly components that would go negative */
-				$SQL = "SELECT bom.component,
-							stockmaster.description,
-							locstock.quantity-(" . $OrderLine->QtyDispatched . "*bom.quantity) AS qtyleft
-						FROM bom
-						INNER JOIN locstock
-						ON bom.component=locstock.stockid
-						INNER JOIN stockmaster
-						ON stockmaster.stockid=bom.component
-						WHERE bom.parent='" . $OrderLine->StockID . "'
-						AND locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'
-						AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-						AND bom.effectiveto > '" . date('Y-m-d') . "'";
+				$SQL = "SELECT weberp_bom.component,
+							weberp_stockmaster.description,
+							weberp_locstock.quantity-(" . $OrderLine->QtyDispatched . "*weberp_bom.quantity) AS qtyleft
+						FROM weberp_bom
+						INNER JOIN weberp_locstock
+						ON weberp_bom.component=weberp_locstock.stockid
+						INNER JOIN weberp_stockmaster
+						ON weberp_stockmaster.stockid=weberp_bom.component
+						WHERE weberp_bom.parent='" . $OrderLine->StockID . "'
+						AND weberp_locstock.loccode='" . $_SESSION['Items'.$identifier]->Location . "'
+						AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+						AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 				$ErrMsg = _('Could not retrieve the component quantity left at the location once the assembly item on this order is invoiced (for the purposes of checking that stock will not go negative because)');
 				$Result = DB_query($SQL,$ErrMsg);
@@ -665,9 +665,9 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 	$SQL = "SELECT area,
 					defaultshipvia
-			FROM custbranch
-			WHERE custbranch.debtorno ='". $_SESSION['Items'.$identifier]->DebtorNo . "'
-			AND custbranch.branchcode = '" . $_SESSION['Items'.$identifier]->Branch . "'";
+			FROM weberp_custbranch
+			WHERE weberp_custbranch.debtorno ='". $_SESSION['Items'.$identifier]->DebtorNo . "'
+			AND weberp_custbranch.branchcode = '" . $_SESSION['Items'.$identifier]->Branch . "'";
 
 	$ErrMsg = _('We were unable to load Area where the Sale is to from the BRANCHES table') . '. ' . _('Please remedy this');
 	$Result = DB_query($SQL, $ErrMsg);
@@ -691,7 +691,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					quantity,
 					qtyinvoiced,
 					orderlineno
-				FROM salesorderdetails
+				FROM weberp_salesorderdetails
 				WHERE completed=0 AND quantity-qtyinvoiced > 0
 				AND orderno = '" . $_SESSION['ProcessingOrder']."'";
 
@@ -755,7 +755,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	DB_Txn_Begin();
 
 	if($DefaultShipVia != $_SESSION['Items'.$identifier]->ShipVia) {
-		$SQL = "UPDATE custbranch
+		$SQL = "UPDATE weberp_custbranch
 				SET defaultshipvia ='" . $_SESSION['Items'.$identifier]->ShipVia . "'
 				WHERE debtorno='" . $_SESSION['Items'.$identifier]->DebtorNo . "'
 				AND branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'";
@@ -767,7 +767,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	$DefaultDispatchDate = FormatDateForSQL($DefaultDispatchDate);
 
 /*Update order header for invoice charged on */
-	$SQL = "UPDATE salesorders
+	$SQL = "UPDATE weberp_salesorders
 			SET comments = CONCAT(comments,' Inv ','" . $InvoiceNo . "')
 			WHERE orderno= '" . $_SESSION['ProcessingOrder']."'";
 
@@ -777,7 +777,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 /*Now insert the DebtorTrans */
 
-	$SQL = "INSERT INTO debtortrans (transno,
+	$SQL = "INSERT INTO weberp_debtortrans (transno,
 									type,
 									debtorno,
 									branchcode,
@@ -821,12 +821,12 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	$DbgMsg = _('The following SQL to insert the debtor transaction record was used');
  	$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-	$DebtorTransID = DB_Last_Insert_ID($db,'debtortrans','id');
+	$DebtorTransID = DB_Last_Insert_ID($db,'weberp_debtortrans','id');
 
 /* Insert the tax totals for each tax authority where tax was charged on the invoice */
 	foreach ($TaxTotals AS $TaxAuthID => $TaxAmount) {
 
-		$SQL = "INSERT INTO debtortranstaxes (debtortransid,
+		$SQL = "INSERT INTO weberp_debtortranstaxes (debtortransid,
 											taxauthid,
 											taxamount)
 								VALUES ('" . $DebtorTransID . "',
@@ -860,7 +860,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 		if($_POST['BOPolicy']=='CAN') {
 
-			$SQL = "UPDATE salesorderdetails
+			$SQL = "UPDATE weberp_salesorderdetails
 					SET quantity = quantity - " . ($OrderLine->Quantity - $OrderLine->QtyDispatched - $OrderLine->QtyInv) . "
 					WHERE orderno = '" . $_SESSION['ProcessingOrder'] . " '
 						AND orderlineno = '" . $OrderLine->LineNumber . "'";
@@ -872,7 +872,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 			if(($OrderLine->Quantity - $OrderLine->QtyDispatched)>0) {
 
-				$SQL = "INSERT INTO orderdeliverydifferenceslog (orderno,
+				$SQL = "INSERT INTO weberp_orderdeliverydifferenceslog (orderno,
 															invoiceno,
 															stockid,
 															quantitydiff,
@@ -898,7 +898,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 		/*The order is being short delivered after the due date - need to insert a delivery differnce log */
 
-			$SQL = "INSERT INTO orderdeliverydifferenceslog (orderno,
+			$SQL = "INSERT INTO weberp_orderdeliverydifferenceslog (orderno,
 															invoiceno,
 															stockid,
 															quantitydiff,
@@ -927,14 +927,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 			// Test above to see if the line is completed or not
 			if($OrderLine->QtyDispatched>=($OrderLine->Quantity - $OrderLine->QtyInv) OR $_POST['BOPolicy']=='CAN') {
-				$SQL = "UPDATE salesorderdetails
+				$SQL = "UPDATE weberp_salesorderdetails
 							SET qtyinvoiced = qtyinvoiced + " . $OrderLine->QtyDispatched . ",
 								actualdispatchdate = '" . $DefaultDispatchDate . "',
 								completed=1
 							WHERE orderno = '" . $_SESSION['ProcessingOrder'] . "'
 							AND orderlineno = '" . $OrderLine->LineNumber . "'";
 			} else {
-				$SQL = "UPDATE salesorderdetails
+				$SQL = "UPDATE weberp_salesorderdetails
 							SET qtyinvoiced = qtyinvoiced + " . $OrderLine->QtyDispatched . ",
 								actualdispatchdate = '" . $DefaultDispatchDate . "'
 							WHERE orderno = '" . $_SESSION['ProcessingOrder'] . "'
@@ -949,7 +949,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 			 /* Update location stock records if not a dummy stock item
 			 need the MBFlag later too so save it to $MBFlag */
 			$Result = DB_query("SELECT mbflag
-								FROM stockmaster
+								FROM weberp_stockmaster
 								WHERE stockid = '" . $OrderLine->StockID . "'",
 								 _('Cannot retrieve the mbflag'));
 
@@ -961,9 +961,9 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 				/* Need to get the current location quantity
 				will need it later for the stock movement */
-				$SQL="SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $OrderLine->StockID . "'
+				$SQL="SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $OrderLine->StockID . "'
 						AND loccode= '" . $_SESSION['Items'.$identifier]->Location . "'";
 				$ErrMsg = _('WARNING') . ': ' . _('Could not retrieve current location stock');
 				$Result = DB_query($SQL, $ErrMsg);
@@ -976,9 +976,9 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "UPDATE locstock
-						SET quantity = locstock.quantity - " . $OrderLine->QtyDispatched . "
-						WHERE locstock.stockid = '" . $OrderLine->StockID . "'
+				$SQL = "UPDATE weberp_locstock
+						SET quantity = weberp_locstock.quantity - " . $OrderLine->QtyDispatched . "
+						WHERE weberp_locstock.stockid = '" . $OrderLine->StockID . "'
 						AND loccode = '" . $_SESSION['Items'.$identifier]->Location . "'";
 
 				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated because');
@@ -990,14 +990,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 				stock moves for the components then update the Location stock balances */
 				$Assembly=True;
 				$StandardCost =0; /*To start with - accumulate the cost of the comoponents for use in journals later on */
-				$SQL = "SELECT bom.component,
-								bom.quantity,
-								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
-							FROM bom INNER JOIN stockmaster
-							ON bom.component=stockmaster.stockid
-							WHERE bom.parent='" . $OrderLine->StockID . "'
-							AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-							AND bom.effectiveto > '" . date('Y-m-d') . "'";
+				$SQL = "SELECT weberp_bom.component,
+								weberp_bom.quantity,
+								weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standard
+							FROM weberp_bom INNER JOIN weberp_stockmaster
+							ON weberp_bom.component=weberp_stockmaster.stockid
+							WHERE weberp_bom.parent='" . $OrderLine->StockID . "'
+							AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+							AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
 				$DbgMsg = _('The SQL that failed was');
@@ -1008,9 +1008,9 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					$StandardCost += ($AssParts['standard'] * $AssParts['quantity']) ;
 					/* Need to get the current location quantity
 					will need it later for the stock movement */
-					$SQL="SELECT locstock.quantity
-							FROM locstock
-							WHERE locstock.stockid='" . $AssParts['component'] . "'
+					$SQL="SELECT weberp_locstock.quantity
+							FROM weberp_locstock
+							WHERE weberp_locstock.stockid='" . $AssParts['component'] . "'
 							AND loccode= '" . $_SESSION['Items'.$identifier]->Location . "'";
 
 					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Can not retrieve assembly components location stock quantities because ');
@@ -1026,7 +1026,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					if(empty($AssParts['standard'])) {
 						$AssParts['standard']=0;
 					}
-					$SQL = "INSERT INTO stockmoves (stockid,
+					$SQL = "INSERT INTO weberp_stockmoves (stockid,
 													type,
 													transno,
 													loccode,
@@ -1060,9 +1060,9 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . ($AssParts['quantity'] * $OrderLine->QtyDispatched) . "
-							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+					$SQL = "UPDATE weberp_locstock
+							SET quantity = weberp_locstock.quantity - " . ($AssParts['quantity'] * $OrderLine->QtyDispatched) . "
+							WHERE weberp_locstock.stockid = '" . $AssParts['component'] . "'
 							AND loccode = '" . $_SESSION['Items'.$identifier]->Location . "'";
 
 					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
@@ -1076,14 +1076,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 			} /* end of its an assembly */
 
 			// Insert stock movements - with unit cost
-			//$LocalCurrencyPrice = round(($OrderLine->Price / $_SESSION['CurrencyRate']),$_SESSION['CompanyRecord']['decimalplaces']); change decimalplaces to 5 to avoid price or lines total variance on invoice. And the decimal places should not be over 5 since the stockmoves table defined it as decimal(21,5) now.
+			//$LocalCurrencyPrice = round(($OrderLine->Price / $_SESSION['CurrencyRate']),$_SESSION['CompanyRecord']['decimalplaces']); change decimalplaces to 5 to avoid price or lines total variance on invoice. And the decimal places should not be over 5 since the weberp_stockmoves table defined it as decimal(21,5) now.
 			$LocalCurrencyPrice = round(($OrderLine->Price / $_SESSION['CurrencyRate']),5);
 
 			if(empty($OrderLine->StandardCost)) {
 				$OrderLine->StandardCost=0;
 			}
 			if($MBFlag=='B' OR $MBFlag=='M') {
-						$SQL = "INSERT INTO stockmoves (stockid,
+						$SQL = "INSERT INTO weberp_stockmoves (stockid,
 														type,
 														transno,
 														loccode,
@@ -1120,7 +1120,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 				if(empty($OrderLine->StandardCost)) {
 					$OrderLine->StandardCost=0;
 				}
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -1158,12 +1158,12 @@ invoices can have a zero amount but there must be a quantity to invoice */
 			$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 /*Get the ID of the StockMove... */
-			$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+			$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 /*Insert the taxes that applied to this line */
 			foreach ($OrderLine->Taxes as $Tax) {
 
-				$SQL = "INSERT INTO stockmovestaxes (stkmoveno,
+				$SQL = "INSERT INTO weberp_stockmovestaxes (stkmoveno,
 													taxauthid,
 													taxrate,
 													taxcalculationorder,
@@ -1186,7 +1186,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 				foreach($OrderLine->SerialItems as $Item) {
 					/*We need to add the StockSerialItem record and the StockSerialMoves as well */
 
-					$SQL = "UPDATE stockserialitems	SET quantity= quantity - " . $Item->BundleQty . "
+					$SQL = "UPDATE weberp_stockserialitems	SET quantity= quantity - " . $Item->BundleQty . "
 							WHERE stockid='" . $OrderLine->StockID . "'
 							AND loccode='" . $_SESSION['Items'.$identifier]->Location . "'
 							AND serialno='" . $Item->BundleRef . "'";
@@ -1197,7 +1197,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 					/* now insert the serial stock movement */
 
-					$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+					$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 														stockid,
 														serialno,
 														moveqty)
@@ -1220,36 +1220,36 @@ invoices can have a zero amount but there must be a quantity to invoice */
 			}
 
 			$SQL="SELECT COUNT(*),
-						salesanalysis.stockid,
-						salesanalysis.stkcategory,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.area,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.salesperson
-					FROM salesanalysis INNER JOIN custbranch
-						ON salesanalysis.cust=custbranch.debtorno
-						AND salesanalysis.custbranch=custbranch.branchcode
-						AND salesanalysis.area=custbranch.area
-					INNER JOIN stockmaster
-					ON salesanalysis.stkcategory=stockmaster.categoryid
-					WHERE salesanalysis.salesperson='" . $_SESSION['Items'.$identifier]->SalesPerson . "'
-					AND salesanalysis.typeabbrev ='" . $_SESSION['Items'.$identifier]->DefaultSalesType . "'
-					AND salesanalysis.periodno='" . $PeriodNo . "'
-					AND salesanalysis.cust='" . $_SESSION['Items'.$identifier]->DebtorNo . "'
-					AND salesanalysis.custbranch='" . $_SESSION['Items'.$identifier]->Branch . "'
-					AND salesanalysis.stockid='" . $OrderLine->StockID . "'
-					AND salesanalysis.budgetoractual=1
-					GROUP BY salesanalysis.stockid,
-						salesanalysis.stkcategory,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.area,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.salesperson,
-						salesanalysis.budgetoractual";
+						weberp_salesanalysis.stockid,
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.salesperson
+					FROM weberp_salesanalysis INNER JOIN weberp_custbranch
+						ON weberp_salesanalysis.cust=weberp_custbranch.debtorno
+						AND weberp_salesanalysis.custbranch=weberp_custbranch.branchcode
+						AND weberp_salesanalysis.area=weberp_custbranch.area
+					INNER JOIN weberp_stockmaster
+					ON weberp_salesanalysis.stkcategory=weberp_stockmaster.categoryid
+					WHERE weberp_salesanalysis.salesperson='" . $_SESSION['Items'.$identifier]->SalesPerson . "'
+					AND weberp_salesanalysis.typeabbrev ='" . $_SESSION['Items'.$identifier]->DefaultSalesType . "'
+					AND weberp_salesanalysis.periodno='" . $PeriodNo . "'
+					AND weberp_salesanalysis.cust='" . $_SESSION['Items'.$identifier]->DebtorNo . "'
+					AND weberp_salesanalysis.custbranch='" . $_SESSION['Items'.$identifier]->Branch . "'
+					AND weberp_salesanalysis.stockid='" . $OrderLine->StockID . "'
+					AND weberp_salesanalysis.budgetoractual=1
+					GROUP BY weberp_salesanalysis.stockid,
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.salesperson,
+						weberp_salesanalysis.budgetoractual";
 
 			$ErrMsg = _('The count of existing Sales analysis records could not run because');
 			$DbgMsg = '<br />' . _('SQL to count the no of sales analysis records');
@@ -1259,23 +1259,23 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 			if($myrow[0]>0) { /*Update the existing record that already exists */
 
-				$SQL = "UPDATE salesanalysis SET amt=amt+" . round(($SalesValue),$_SESSION['CompanyRecord']['decimalplaces']) . ",
+				$SQL = "UPDATE weberp_salesanalysis SET amt=amt+" . round(($SalesValue),$_SESSION['CompanyRecord']['decimalplaces']) . ",
 												cost=cost+" . round(($OrderLine->StandardCost * $OrderLine->QtyDispatched),$_SESSION['CompanyRecord']['decimalplaces']) . ",
 												qty=qty +" . $OrderLine->QtyDispatched . ",
 												disc=disc+" . round(($OrderLine->DiscountPercent * $SalesValue),$_SESSION['CompanyRecord']['decimalplaces']) . "
-								WHERE salesanalysis.area='" . $myrow[5] . "'
-								AND salesanalysis.salesperson='" . $myrow[8] . "'
+								WHERE weberp_salesanalysis.area='" . $myrow[5] . "'
+								AND weberp_salesanalysis.salesperson='" . $myrow[8] . "'
 								AND typeabbrev ='" . $_SESSION['Items'.$identifier]->DefaultSalesType . "'
 								AND periodno = '" . $PeriodNo . "'
 								AND cust " . LIKE . " '" . $_SESSION['Items'.$identifier]->DebtorNo . "'
 								AND custbranch " . LIKE . " '" . $_SESSION['Items'.$identifier]->Branch . "'
 								AND stockid " . LIKE . " '" . $OrderLine->StockID . "'
-								AND salesanalysis.stkcategory ='" . $myrow[2] . "'
+								AND weberp_salesanalysis.stkcategory ='" . $myrow[2] . "'
 								AND budgetoractual=1";
 
 			} else { /* insert a new sales analysis record */
 
-				$SQL = "INSERT INTO salesanalysis (typeabbrev,
+				$SQL = "INSERT INTO weberp_salesanalysis (typeabbrev,
 												periodno,
 												amt,
 												cost,
@@ -1297,14 +1297,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 										'" . ($OrderLine->QtyDispatched) . "',
 										'" . round(($OrderLine->DiscountPercent * $SalesValue),$_SESSION['CompanyRecord']['decimalplaces']) . "',
 										'" . $OrderLine->StockID . "',
-										custbranch.area,
+										weberp_custbranch.area,
 										1,
 										'" . $_SESSION['Items'.$identifier]->SalesPerson . "',
-										stockmaster.categoryid
-								FROM stockmaster, custbranch
-								WHERE stockmaster.stockid = '" . $OrderLine->StockID . "'
-								AND custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'
-								AND custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'";
+										weberp_stockmaster.categoryid
+								FROM weberp_stockmaster, weberp_custbranch
+								WHERE weberp_stockmaster.stockid = '" . $OrderLine->StockID . "'
+								AND weberp_custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'
+								AND weberp_custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'";
 			}
 
 			$ErrMsg = _('Sales analysis record could not be added or updated because');
@@ -1317,7 +1317,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 /*first the cost of sales entry - GL accounts are retrieved using the function GetCOGSGLAccount from includes/GetSalesTransGLCodes.inc */
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1340,7 +1340,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 /*now the stock entry - this is set to the cost act in the case of a fixed asset disposal */
 				$StockGLCode = GetStockGLCode($OrderLine->StockID,$db);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1367,7 +1367,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					//Post sales transaction to GL credit sales
 					$SalesGLAccounts = GetSalesGLAccount($Area, $OrderLine->StockID, $_SESSION['Items'.$identifier]->DefaultSalesType, $db);
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1389,7 +1389,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 					if($OrderLine->DiscountPercent !=0) {
 
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 													typeno,
 													trandate,
 													periodno,
@@ -1419,8 +1419,8 @@ invoices can have a zero amount but there must be a quantity to invoice */
 									costact,
 									accumdepnact,
 									disposalact
-						FROM fixedassetcategories INNER JOIN fixedassets
-						ON fixedassetcategories.categoryid = fixedassets.assetcategoryid
+						FROM weberp_fixedassetcategories INNER JOIN weberp_fixedassets
+						ON weberp_fixedassetcategories.categoryid = weberp_fixedassets.assetcategoryid
 						WHERE assetid ='" . $AssetNumber . "'";
 					$ErrMsg = _('The asset disposal GL posting details could not be retrieved because');
 					$DbgMsg = _('The following SQL was used to get the asset posting details');
@@ -1435,7 +1435,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 					// 1.) Debit the accumulated depreciation account:
 					if($DisposalRow['accumdepn']!=0) {
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 													typeno,
 													trandate,
 													periodno,
@@ -1457,7 +1457,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					}
 					// 2.) Credit the cost account:
 					if($DisposalRow['cost']!=0) {
-						$SQL = "INSERT INTO gltrans (
+						$SQL = "INSERT INTO weberp_gltrans (
 									type,
 									typeno,
 									trandate,
@@ -1479,7 +1479,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					}
 					// 3.) Debit the disposal account with the NBV:
 					if($DisposalRow['cost']-$DisposalRow['accumdepn']!=0) {
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 													typeno,
 													trandate,
 													periodno,
@@ -1500,7 +1500,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 						$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 					}
 					//4. Credit the disposal account with the proceeds
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1525,10 +1525,10 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 			if($IsAsset) {
 				/* then the item being sold is an asset disposal
-					* need to create fixedassettrans
+					* need to create weberp_fixedassettrans
 					* set disposal date and proceeds
 				 */
-				$SQL = "INSERT INTO fixedassettrans (assetid,
+				$SQL = "INSERT INTO weberp_fixedassettrans (assetid,
 													transtype,
 													transno,
 													periodno,
@@ -1548,7 +1548,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 				$DbgMsg = '<br />' ._('The following SQL to insert the fixed asset transaction record was used');
 				$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-				$SQL = "UPDATE fixedassets
+				$SQL = "UPDATE weberp_fixedassets
 						SET disposalproceeds ='" . round(($OrderLine->Price * $OrderLine->QtyDispatched* (1 - $OrderLine->DiscountPercent)/$_SESSION['CurrencyRate']),$_SESSION['CompanyRecord']['decimalplaces']) . "',
 							disposaldate ='" . $DefaultDispatchDate . "'
 						WHERE assetid ='" . $AssetNumber . "'";
@@ -1566,7 +1566,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 
 /*Post debtors transaction to GL debit debtors, credit freight re-charged and credit sales */
 		if(($_SESSION['Items'.$identifier]->total + $_SESSION['Items'.$identifier]->FreightCost + $TaxTotal) !=0) {
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -1590,7 +1590,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 		/*Could do with setting up a more flexible freight posting schema that looks at the sales type and area of the customer branch to determine where to post the freight recovery */
 
 		if($_SESSION['Items'.$identifier]->FreightCost !=0) {
-			$SQL = "INSERT INTO gltrans (
+			$SQL = "INSERT INTO weberp_gltrans (
 						type,
 						typeno,
 						trandate,
@@ -1613,7 +1613,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 		}
 		foreach ( $TaxTotals as $TaxAuthID => $TaxAmount) {
 			if($TaxAmount !=0 ) {
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,

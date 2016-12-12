@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_ChangeBranchCode.php 7050 2014-12-28 20:48:56Z rchacon $*/
 /* This script is an utility to change a customer branch code. */
 
 include ('includes/session.inc');
@@ -17,7 +17,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 /*First check the customer code exists */
 	$result=DB_query("SELECT debtorno,
 							branchcode
-						FROM custbranch
+						FROM weberp_custbranch
 						WHERE debtorno='" . $_POST['DebtorNo'] . "'
 						AND branchcode='" . $_POST['OldBranchCode'] . "'");
 	if (DB_num_rows($result)==0){
@@ -39,7 +39,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 
 /*Now check that the new code doesn't already exist */
-	$result=DB_query("SELECT debtorno FROM custbranch WHERE debtorno='" . $_POST['DebtorNo'] . "' AND branchcode ='" . $_POST['NewBranchCode'] . "'");
+	$result=DB_query("SELECT debtorno FROM weberp_custbranch WHERE debtorno='" . $_POST['DebtorNo'] . "' AND branchcode ='" . $_POST['NewBranchCode'] . "'");
 	if (DB_num_rows($result)!=0){
 		prnMsg(_('The replacement customer branch code') . ': ' . $_POST['NewBranchCode'] . ' ' . _('already exists as a branch code for the same customer') . ' - ' . _('a unique branch code must be entered for the new code'),'error');
 		include('includes/footer.inc');
@@ -50,7 +50,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 	$result = DB_Txn_Begin();
 
 	prnMsg(_('Inserting the new customer branches master record'),'info');
-	$sql = "INSERT INTO custbranch (`branchcode`,
+	$sql = "INSERT INTO weberp_custbranch (`branchcode`,
 					`debtorno`,
 					`brname`,
 					`braddress1`,
@@ -106,7 +106,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 					`brpostaddr6`,
 					`defaultshipvia`,
 					`custbranchcode`
-			FROM custbranch
+			FROM weberp_custbranch
 			WHERE debtorno='" . $_POST['DebtorNo'] . "'
 			AND branchcode='" . $_POST['OldBranchCode'] . "'";
 	$DbgMsg = _('The SQL that failed was');
@@ -114,7 +114,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 	$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 
 	prnMsg (_('Changing customer transaction records'),'info');
-	$sql = "UPDATE debtortrans SET
+	$sql = "UPDATE weberp_debtortrans SET
 					branchcode='" . $_POST['NewBranchCode'] . "'
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";
@@ -123,7 +123,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 	$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 
 	prnMsg(_('Changing sales analysis records'),'info');
-	$sql = "UPDATE salesanalysis
+	$sql = "UPDATE weberp_salesanalysis
 					SET custbranch='" . $_POST['NewBranchCode'] . "'
 					WHERE cust='" . $_POST['DebtorNo'] . "'
 					AND custbranch='" . $_POST['OldBranchCode'] . "'";
@@ -133,7 +133,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 
 	prnMsg(_('Changing order delivery differences records'),'info');
-	$sql = "UPDATE orderdeliverydifferenceslog
+	$sql = "UPDATE weberp_orderdeliverydifferenceslog
 					SET branch='" . $_POST['NewBranchCode'] . "'
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branch='" . $_POST['OldBranchCode'] . "'";
@@ -143,7 +143,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 
 	prnMsg (_('Changing pricing records'),'info');
-	$sql = "UPDATE prices
+	$sql = "UPDATE weberp_prices
 				SET branchcode='" . $_POST['NewBranchCode'] . "'
 				WHERE debtorno='" . $_POST['DebtorNo'] . "'
 				AND branchcode='" . $_POST['OldBranchCode'] . "'";
@@ -152,7 +152,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 
 	prnMsg(_('Changing sales orders records'),'info');
-	$sql = "UPDATE salesorders
+	$sql = "UPDATE weberp_salesorders
 					SET branchcode='" . $_POST['NewBranchCode'] . "'
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";
@@ -161,7 +161,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 
 	prnMsg(_('Changing stock movement records'),'info');
-	$sql = "UPDATE stockmoves
+	$sql = "UPDATE weberp_stockmoves
 					SET branchcode='" . $_POST['NewBranchCode'] . "'
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";
@@ -169,7 +169,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 	$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 
 	prnMsg(_('Changing user default customer records'),'info');
-	$sql = "UPDATE www_users
+	$sql = "UPDATE weberp_www_users
 					SET branchcode='" . $_POST['NewBranchCode'] . "'
 					WHERE customerid='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";;
@@ -178,7 +178,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 	$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
 
 	prnMsg(_('Changing the customer branch code in contract header records'),'info');
-	$sql = "UPDATE contracts
+	$sql = "UPDATE weberp_contracts
 					SET branchcode='" . $_POST['NewBranchCode'] . "'
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";
@@ -189,7 +189,7 @@ if (isset($_POST['ProcessCustomerChange'])){
 
 	$result = DB_IgnoreForeignKeys();
 	prnMsg(_('Deleting the old customer branch record'),'info');
-	$sql = "DELETE FROM custbranch
+	$sql = "DELETE FROM weberp_custbranch
 					WHERE debtorno='" . $_POST['DebtorNo'] . "'
 					AND branchcode='" . $_POST['OldBranchCode'] . "'";
 

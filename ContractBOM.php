@@ -56,30 +56,30 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					and stockmaster.discontinued!=1
-					AND stockmaster.description " . LIKE . " '$SearchString'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					and weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					and stockmaster.discontinued!=1
-					AND stockmaster.description " . LIKE . " '$SearchString'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					and weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.description " . LIKE . " '$SearchString'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} elseif ($_POST['StockCode']){
@@ -87,56 +87,56 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 		$_POST['StockCode'] = '%' . $_POST['StockCode'] . '%';
 
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.stockid " . LIKE . " '" . $_POST['StockCode'] . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 
 	} else {
 		if ($_POST['StockCat']=='All'){
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					ORDER BY weberp_stockmaster.stockid";
 		} else {
-			$sql = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units
-					FROM stockmaster INNER JOIN stockcategory
-					ON stockmaster.categoryid=stockcategory.categoryid
-					WHERE stockmaster.mbflag!='D'
-					AND stockmaster.mbflag!='A'
-					AND stockmaster.mbflag!='K'
-					AND stockmaster.discontinued!=1
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+					ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+					WHERE weberp_stockmaster.mbflag!='D'
+					AND weberp_stockmaster.mbflag!='A'
+					AND weberp_stockmaster.mbflag!='K'
+					AND weberp_stockmaster.discontinued!=1
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 		}
 	}
 
@@ -183,13 +183,13 @@ if (isset($_POST['NewItem'])){ /* NewItem is set from the part selection list as
 
 			if ($AlreadyOnThisBOM!=1){
 
-				$sql = "SELECT stockmaster.description,
-								stockmaster.stockid,
-								stockmaster.units,
-								stockmaster.decimalplaces,
-								stockmaster.materialcost+labourcost+overheadcost AS unitcost
-							FROM stockmaster
-							WHERE stockmaster.stockid = '". trim($_POST['StockID'.$i]) . "'";
+				$sql = "SELECT weberp_stockmaster.description,
+								weberp_stockmaster.stockid,
+								weberp_stockmaster.units,
+								weberp_stockmaster.decimalplaces,
+								weberp_stockmaster.materialcost+labourcost+overheadcost AS unitcost
+							FROM weberp_stockmaster
+							WHERE weberp_stockmaster.stockid = '". trim($_POST['StockID'.$i]) . "'";
 
 				$ErrMsg = _('The item details could not be retrieved');
 				$DbgMsg = _('The SQL used to retrieve the item details but failed was');
@@ -287,7 +287,7 @@ if (count($_SESSION['Contract'.$identifier]->ContractBOM)>0){
 if (!isset($_GET['Edit'])) {
 	$sql="SELECT categoryid,
 				categorydescription
-			FROM stockcategory
+			FROM weberp_stockcategory
 			WHERE stocktype<>'L'
 			AND stocktype<>'D'
 			ORDER BY categorydescription";

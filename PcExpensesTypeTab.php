@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: PcExpensesTypeTab.php 7682 2016-11-24 14:10:25Z rchacon $ */
 
 include('includes/session.inc');
 $Title = _('Maintenance Of Petty Cash Expenses For a Type Tab');
@@ -58,7 +58,7 @@ if (isset($_POST['submit'])) {
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-			     FROM pctabexpenses
+			     FROM weberp_pctabexpenses
 			     WHERE typetabcode= '" .  $_POST['SelectedTab'] . "'
 				 AND codeexpense = '" .  $_POST['SelectedExpense'] . "'";
 
@@ -70,14 +70,14 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('The Expense') . ' ' . $_POST['codeexpense'] . ' ' ._('already exists in this Type of Tab'),'error');
 		} else {
 			// Add new record on submit
-			$sql = "INSERT INTO pctabexpenses (typetabcode,
+			$sql = "INSERT INTO weberp_pctabexpenses (typetabcode,
 												codeexpense)
 										VALUES ('" . $_POST['SelectedTab'] . "',
 												'" . $_POST['SelectedExpense'] . "')";
 
 			$msg = _('Expense code') . ': ' . $_POST['SelectedExpense'].' '._('for Type of Tab:') .' '. $_POST['SelectedTab'] .  ' ' . _('has been created');
 			$checkSql = "SELECT count(typetabcode)
-							FROM pctypetabs";
+							FROM weberp_pctypetabs";
 			$result = DB_query($checkSql);
 			$row = DB_fetch_row($result);
 		}
@@ -91,7 +91,7 @@ if (isset($_POST['submit'])) {
 	}
 
 } elseif ( isset($_GET['delete']) ) {
-	$sql="DELETE FROM pctabexpenses
+	$sql="DELETE FROM weberp_pctabexpenses
 		WHERE typetabcode='".$SelectedTab."'
 		AND codeexpense='".$SelectedType."'";
 
@@ -116,7 +116,7 @@ or deletion of the records*/
 
 	$SQL = "SELECT typetabcode,
 					typetabdescription
-			FROM pctypetabs";
+			FROM weberp_pctypetabs";
 
 	$result = DB_query($SQL);
 	echo '<option value="">' . _('Not Yet Selected') . '</option>';
@@ -153,12 +153,12 @@ if (isset($_POST['process'])OR isset($SelectedTab)) {
 
 	echo '<input type="hidden" name="SelectedTab" value="' . $SelectedTab . '" />';
 
-	$sql = "SELECT pctabexpenses.codeexpense,
-					pcexpenses.description
-			FROM pctabexpenses INNER JOIN pcexpenses
-			ON pctabexpenses.codeexpense=pcexpenses.codeexpense
-			WHERE pctabexpenses.typetabcode='".$SelectedTab."'
-			ORDER BY pctabexpenses.codeexpense ASC";
+	$sql = "SELECT weberp_pctabexpenses.codeexpense,
+					weberp_pcexpenses.description
+			FROM weberp_pctabexpenses INNER JOIN weberp_pcexpenses
+			ON weberp_pctabexpenses.codeexpense=weberp_pcexpenses.codeexpense
+			WHERE weberp_pctabexpenses.typetabcode='".$SelectedTab."'
+			ORDER BY weberp_pctabexpenses.codeexpense ASC";
 
 	$result = DB_query($sql);
 
@@ -204,7 +204,7 @@ while ($myrow = DB_fetch_array($result)) {
 
 		$SQL = "SELECT codeexpense,
 						description
-				FROM pcexpenses";
+				FROM weberp_pcexpenses";
 
 		$result = DB_query($SQL);
 		if (!isset($_POST['SelectedExpense'])){

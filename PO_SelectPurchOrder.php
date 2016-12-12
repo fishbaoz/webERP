@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PO_SelectPurchOrder.php 7217 2015-03-12 00:55:44Z exsonqu $*/
 
 include ('includes/session.inc');
 $Title = _('Search Purchase Orders');
@@ -50,57 +50,57 @@ if (isset($_POST['SearchParts'])) {
 	if ($_POST['Keywords']) {
 		//insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
-		$SQL = "SELECT stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				SUM(locstock.quantity) as qoh,
-				stockmaster.units,
-				SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord
-			FROM stockmaster INNER JOIN locstock
-			ON stockmaster.stockid = locstock.stockid INNER JOIN purchorderdetails
-			ON stockmaster.stockid=purchorderdetails.itemcode
-			WHERE purchorderdetails.completed=1
-			AND stockmaster.description " . LIKE  . " '" . $SearchString ."'
-			AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-			GROUP BY stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				stockmaster.units
-			ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				SUM(weberp_locstock.quantity) as qoh,
+				weberp_stockmaster.units,
+				SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord
+			FROM weberp_stockmaster INNER JOIN weberp_locstock
+			ON weberp_stockmaster.stockid = weberp_locstock.stockid INNER JOIN weberp_purchorderdetails
+			ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+			WHERE weberp_purchorderdetails.completed=1
+			AND weberp_stockmaster.description " . LIKE  . " '" . $SearchString ."'
+			AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			GROUP BY weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmaster.units
+			ORDER BY weberp_stockmaster.stockid";
 	} elseif ($_POST['StockCode']) {
-		$SQL = "SELECT stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				SUM(locstock.quantity) AS qoh,
-				SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord,
-				stockmaster.units
-			FROM stockmaster INNER JOIN locstock
-				ON stockmaster.stockid = locstock.stockid
-				INNER JOIN purchorderdetails ON stockmaster.stockid=purchorderdetails.itemcode
-			WHERE purchorderdetails.completed=1
-			AND stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
-			AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-			GROUP BY stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				stockmaster.units
-			ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				SUM(weberp_locstock.quantity) AS qoh,
+				SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord,
+				weberp_stockmaster.units
+			FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				INNER JOIN weberp_purchorderdetails ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+			WHERE weberp_purchorderdetails.completed=1
+			AND weberp_stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
+			AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			GROUP BY weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmaster.units
+			ORDER BY weberp_stockmaster.stockid";
 	} elseif (!$_POST['StockCode'] AND !$_POST['Keywords']) {
-		$SQL = "SELECT stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				SUM(locstock.quantity) AS qoh,
-				stockmaster.units,
-				SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord
-			FROM stockmaster INNER JOIN locstock ON stockmaster.stockid = locstock.stockid
-				INNER JOIN purchorderdetails ON stockmaster.stockid=purchorderdetails.itemcode
-			WHERE purchorderdetails.completed=1
-			AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-			GROUP BY stockmaster.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				stockmaster.units
-			ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				SUM(weberp_locstock.quantity) AS qoh,
+				weberp_stockmaster.units,
+				SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord
+			FROM weberp_stockmaster INNER JOIN weberp_locstock ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				INNER JOIN weberp_purchorderdetails ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+			WHERE weberp_purchorderdetails.completed=1
+			AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+			GROUP BY weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmaster.units
+			ORDER BY weberp_stockmaster.stockid";
 	}
 	$ErrMsg = _('No stock items were returned by the SQL because');
 	$DbgMsg = _('The SQL used to retrieve the searched parts was');
@@ -116,7 +116,7 @@ if (!isset($OrderNumber) or $OrderNumber == "") {
 		echo _('For the part') . ':<b>' . $SelectedStockItem . '</b> ' . _('and') . ' <input type="hidden" name="SelectedStockItem" value="' . $SelectedStockItem . '" />';
 	}
 	echo _('Order Number') . ': <input class="integer" name="OrderNumber" autofocus="autofocus" maxlength="8" size="9" /> ' . _('Into Stock Location') . ':<select name="StockLocation"> ';
-	$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+	$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$resultStkLocs = DB_query($sql);
 	while ($myrow = DB_fetch_array($resultStkLocs)) {
 		if (isset($_POST['StockLocation'])) {
@@ -168,7 +168,7 @@ if (!isset($OrderNumber) or $OrderNumber == "") {
 }
 $SQL = "SELECT categoryid,
 			categorydescription
-		FROM stockcategory
+		FROM weberp_stockcategory
 		ORDER BY categorydescription";
 $result1 = DB_query($SQL);
 echo '<br />
@@ -249,47 +249,47 @@ else {
 	//figure out the SQL required from the inputs available
 
 	if (!isset($_POST['Status']) OR $_POST['Status']=='Pending_Authorised_Completed'){
-		$StatusCriteria = " AND (purchorders.status='Pending' OR purchorders.status='Authorised' OR purchorders.status='Printed' OR purchorders.status='Completed') ";
+		$StatusCriteria = " AND (weberp_purchorders.status='Pending' OR weberp_purchorders.status='Authorised' OR weberp_purchorders.status='Printed' OR weberp_purchorders.status='Completed') ";
 	}elseif ($_POST['Status']=='Authorised'){
-		$StatusCriteria = " AND (purchorders.status='Authorised' OR purchorders.status='Printed')";
+		$StatusCriteria = " AND (weberp_purchorders.status='Authorised' OR weberp_purchorders.status='Printed')";
 	}elseif ($_POST['Status']=='Pending'){
-		$StatusCriteria = " AND purchorders.status='Pending' ";
+		$StatusCriteria = " AND weberp_purchorders.status='Pending' ";
 	}elseif ($_POST['Status']=='Rejected'){
-		$StatusCriteria = " AND purchorders.status='Rejected' ";
+		$StatusCriteria = " AND weberp_purchorders.status='Rejected' ";
 	}elseif ($_POST['Status']=='Cancelled'){
-		$StatusCriteria = " AND purchorders.status='Cancelled' ";
+		$StatusCriteria = " AND weberp_purchorders.status='Cancelled' ";
 	} elseif($_POST['Status']=='Completed'){
-		$StatusCriteria = " AND purchorders.status='Completed' ";
+		$StatusCriteria = " AND weberp_purchorders.status='Completed' ";
 	}
 	if (isset($OrderNumber) AND $OrderNumber != '') {
-		$SQL = "SELECT purchorders.orderno,
-						suppliers.suppname,
-						purchorders.orddate,
-						purchorders.deliverydate,
-						purchorders.initiator,
-						purchorders.requisitionno,
-						purchorders.allowprint,
-						purchorders.status,
-						suppliers.currcode,
-						currencies.decimalplaces AS currdecimalplaces,
-						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-					FROM purchorders
-					INNER JOIN purchorderdetails
-					ON purchorders.orderno = purchorderdetails.orderno
-					INNER JOIN suppliers
-					ON purchorders.supplierno = suppliers.supplierid
-					INNER JOIN currencies
-					ON suppliers.currcode=currencies.currabrev
-					WHERE purchorders.orderno='" . filter_number_format($OrderNumber) . "'
-					GROUP BY purchorders.orderno,
-						suppliers.suppname,
-						purchorders.orddate,
-						purchorders.initiator,
-						purchorders.requisitionno,
-						purchorders.allowprint,
-						purchorders.status,
-						suppliers.currcode,
-						currencies.decimalplaces";
+		$SQL = "SELECT weberp_purchorders.orderno,
+						weberp_suppliers.suppname,
+						weberp_purchorders.orddate,
+						weberp_purchorders.deliverydate,
+						weberp_purchorders.initiator,
+						weberp_purchorders.requisitionno,
+						weberp_purchorders.allowprint,
+						weberp_purchorders.status,
+						weberp_suppliers.currcode,
+						weberp_currencies.decimalplaces AS currdecimalplaces,
+						SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+					FROM weberp_purchorders
+					INNER JOIN weberp_purchorderdetails
+					ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+					INNER JOIN weberp_suppliers
+					ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+					INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode=weberp_currencies.currabrev
+					WHERE weberp_purchorders.orderno='" . filter_number_format($OrderNumber) . "'
+					GROUP BY weberp_purchorders.orderno,
+						weberp_suppliers.suppname,
+						weberp_purchorders.orddate,
+						weberp_purchorders.initiator,
+						weberp_purchorders.requisitionno,
+						weberp_purchorders.allowprint,
+						weberp_purchorders.status,
+						weberp_suppliers.currcode,
+						weberp_currencies.decimalplaces";
 	} else {
 		/* $DateAfterCriteria = FormatDateforSQL($OrdersAfterDate); */
 		if (empty($_POST['StockLocation'])) {
@@ -297,127 +297,127 @@ else {
 		}
 		if (isset($SelectedSupplier)) {
 			if (isset($SelectedStockItem)) {
-				$SQL = "SELECT purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.deliverydate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								purchorders.status,
-								suppliers.currcode,
-								currencies.decimalplaces AS currdecimalplaces,
-								SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-							FROM purchorders
-							INNER JOIN purchorderdetails
-							ON purchorders.orderno = purchorderdetails.orderno
-							INNER JOIN suppliers
-							ON purchorders.supplierno = suppliers.supplierid
-							INNER JOIN currencies
-							ON suppliers.currcode=currencies.currabrev
-							WHERE  purchorderdetails.itemcode='" . $SelectedStockItem . "'
-							AND purchorders.supplierno='" . $SelectedSupplier . "'
-							AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
+				$SQL = "SELECT weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.deliverydate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_purchorders.status,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+							FROM weberp_purchorders
+							INNER JOIN weberp_purchorderdetails
+							ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers
+							ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							INNER JOIN weberp_currencies
+							ON weberp_suppliers.currcode=weberp_currencies.currabrev
+							WHERE  weberp_purchorderdetails.itemcode='" . $SelectedStockItem . "'
+							AND weberp_purchorders.supplierno='" . $SelectedSupplier . "'
+							AND weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
 							" . $StatusCriteria . "
-							GROUP BY purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								suppliers.currcode,
-								currencies.decimalplaces";
+							GROUP BY weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces";
 			} else {
-				$SQL = "SELECT purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.deliverydate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								purchorders.status,
-								suppliers.currcode,
-								currencies.decimalplaces AS currdecimalplaces,
-								SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-							FROM purchorders
-							INNER JOIN purchorderdetails
-							ON purchorders.orderno = purchorderdetails.orderno
-							INNER JOIN suppliers
-							ON purchorders.supplierno = suppliers.supplierid
-							INNER JOIN currencies
-							ON suppliers.currcode=currencies.currabrev
-							WHERE purchorders.supplierno='" . $SelectedSupplier . "'
-							AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
+				$SQL = "SELECT weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.deliverydate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_purchorders.status,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+							FROM weberp_purchorders
+							INNER JOIN weberp_purchorderdetails
+							ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers
+							ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							INNER JOIN weberp_currencies
+							ON weberp_suppliers.currcode=weberp_currencies.currabrev
+							WHERE weberp_purchorders.supplierno='" . $SelectedSupplier . "'
+							AND weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
 							" . $StatusCriteria . "
-							GROUP BY purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								suppliers.currcode,
-								currencies.decimalplaces";
+							GROUP BY weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces";
 			}
 		} else { //no supplier selected
 			if (isset($SelectedStockItem)) {
-				$SQL = "SELECT purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.deliverydate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								purchorders.status,
-								suppliers.currcode,
-								currencies.decimalplaces AS currdecimalplaces,
-								SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-							FROM purchorders
-							INNER JOIN purchorderdetails
-							ON purchorders.orderno = purchorderdetails.orderno
-							INNER JOIN suppliers
-							ON purchorders.supplierno = suppliers.supplierid
-							INNER JOIN currencies
-							ON suppliers.currcode=currencies.currabrev
-							WHERE purchorderdetails.itemcode='" . $SelectedStockItem . "'
-							AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
+				$SQL = "SELECT weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.deliverydate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_purchorders.status,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+							FROM weberp_purchorders
+							INNER JOIN weberp_purchorderdetails
+							ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers
+							ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							INNER JOIN weberp_currencies
+							ON weberp_suppliers.currcode=weberp_currencies.currabrev
+							WHERE weberp_purchorderdetails.itemcode='" . $SelectedStockItem . "'
+							AND weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
 							" . $StatusCriteria . "
-							GROUP BY purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								suppliers.currcode,
-								currencies.decimalplaces";
+							GROUP BY weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces";
 			} else {
-				$SQL = "SELECT purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.deliverydate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								purchorders.status,
-								suppliers.currcode,
-								currencies.decimalplaces AS currdecimalplaces,
-								SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-							FROM purchorders
-							INNER JOIN purchorderdetails
-							ON purchorders.orderno = purchorderdetails.orderno
-							INNER JOIN suppliers
-							ON purchorders.supplierno = suppliers.supplierid
-							INNER JOIN currencies
-							ON suppliers.currcode=currencies.currabrev
-							WHERE purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
+				$SQL = "SELECT weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.deliverydate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_purchorders.status,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces AS currdecimalplaces,
+								SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+							FROM weberp_purchorders
+							INNER JOIN weberp_purchorderdetails
+							ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+							INNER JOIN weberp_suppliers
+							ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+							INNER JOIN weberp_currencies
+							ON weberp_suppliers.currcode=weberp_currencies.currabrev
+							WHERE weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
 							" . $StatusCriteria . "
-							GROUP BY purchorders.orderno,
-								suppliers.suppname,
-								purchorders.orddate,
-								purchorders.initiator,
-								purchorders.requisitionno,
-								purchorders.allowprint,
-								suppliers.currcode,
-								currencies.decimalplaces";
+							GROUP BY weberp_purchorders.orderno,
+								weberp_suppliers.suppname,
+								weberp_purchorders.orddate,
+								weberp_purchorders.initiator,
+								weberp_purchorders.requisitionno,
+								weberp_purchorders.allowprint,
+								weberp_suppliers.currcode,
+								weberp_currencies.decimalplaces";
 			}
 		} //end selected supplier
 

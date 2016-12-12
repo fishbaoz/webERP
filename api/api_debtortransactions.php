@@ -1,11 +1,11 @@
 <?php
-/* $Id$*/
+/* $Id: api_debtortransactions.php 7093 2015-01-22 20:15:40Z vvs2012 $*/
 
 /* Check that the transaction number is unique
  * for this type of transaction*/
 	function VerifyTransNo($TransNo, $Type, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(transno)
-				FROM debtortrans
+				FROM weberp_debtortrans
 				WHERE type='".$Type."' and transno='".$TransNo . "'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -49,7 +49,7 @@ function ConvertToSQLDate($DateEntry) {
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifyTransactionDate($TranDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='" . DefaultDateFormat ."'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='" . DefaultDateFormat ."'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -85,7 +85,7 @@ function ConvertToSQLDate($DateEntry) {
 /* Why use this function over GetPeriod we already have this function included in DateFunctions.inc
  * This function doesn't create periods if required so there is the danger of not being able to insert transactions*/
 	function GetPeriodFromTransactionDate($TranDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -116,7 +116,7 @@ function ConvertToSQLDate($DateEntry) {
 		$Month=$DateArray[1];
 		$Year=$DateArray[0];
 		$Date=$Year.'-'.$Month.'-'.$Day;
-		$sql="SELECT MAX(periodno) FROM periods WHERE lastdate_in_period<='" . $Date . "'";
+		$sql="SELECT MAX(periodno) FROM weberp_periods WHERE lastdate_in_period<='" . $Date . "'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		return $myrow[0];
@@ -249,7 +249,7 @@ function ConvertToSQLDate($DateEntry) {
  * and not limited to stk='any'!!
  *
 	function GetSalesGLCode($salesarea, $partnumber, $db) {
-		$sql="SELECT salesglcode FROM salesglpostings
+		$sql="SELECT salesglcode FROM weberp_salesglpostings
 			WHERE stkcat='any'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
@@ -259,7 +259,7 @@ function ConvertToSQLDate($DateEntry) {
 
 /* Retrieves the default debtors code for webERP */
 	function GetDebtorsGLCode($db) {
-		$sql="SELECT debtorsact FROM companies";
+		$sql="SELECT debtorsact FROM weberp_companies";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		return $myrow[0];
@@ -292,7 +292,7 @@ function ConvertToSQLDate($DateEntry) {
 		$ReadCoyResult = api_DB_query("SELECT debtorsact,
 											pytdiscountact,
 											gllink_debtors
-										FROM companies
+										FROM weberp_companies
 										WHERE coycode=1");
 
 		$CompanyRecord = DB_fetch_array($ReadCoyResult);
@@ -302,9 +302,9 @@ function ConvertToSQLDate($DateEntry) {
 
 		$CustCurrencySQL = "SELECT 	currcode,
 									rate
-							FROM debtorsmaster
-							INNER JOIN currencies
-							ON debtorsmaster.currcode=currencies.currabrev
+							FROM weberp_debtorsmaster
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 							WHERE debtorno = '" . $Receipt['debtorno'] . "'";
 
 		$CurrResult = api_DB_query($CustCurrencySQL);
@@ -317,8 +317,8 @@ function ConvertToSQLDate($DateEntry) {
 		/*Get the currency and rate of the bank account receiving  into*/
 		$SQL = "SELECT currcode,
 						rate
-					FROM bankaccounts INNER JOIN currencies
-					ON bankaccounts.currcode = currencies.currabrev
+					FROM weberp_bankaccounts INNER JOIN weberp_currencies
+					ON weberp_bankaccounts.currcode = weberp_currencies.currabrev
 					WHERE accountcode='" . $Receipt['bankaccount'] ."'";
 		$BankActResult = api_DB_query($SQL);
 		if (DB_error_no() != 0) {
@@ -348,7 +348,7 @@ function ConvertToSQLDate($DateEntry) {
 		$PeriodNo = GetCurrentPeriod($db);
 /*now enter the BankTrans entry */
 
-		$SQL="INSERT INTO banktrans (type,
+		$SQL="INSERT INTO weberp_banktrans (type,
 									transno,
 									bankact,
 									ref,
@@ -374,7 +374,7 @@ function ConvertToSQLDate($DateEntry) {
 
 		if ($CompanyRecord['gllink_debtors']==1) {
 		/* Now Credit Debtors account with receipts */
-			$SQL="INSERT INTO gltrans ( type,
+			$SQL="INSERT INTO weberp_gltrans ( type,
 										typeno,
 										trandate,
 										periodno,
@@ -392,7 +392,7 @@ function ConvertToSQLDate($DateEntry) {
 			$result = api_DB_query($SQL,'','',true);
 
 			if($Receipt['discountfx']!=0){
-				$SQL="INSERT INTO gltrans ( type,
+				$SQL="INSERT INTO weberp_gltrans ( type,
 										typeno,
 										trandate,
 										periodno,
@@ -410,7 +410,7 @@ function ConvertToSQLDate($DateEntry) {
 				$result = api_DB_query($SQL,'','',true);
 			}
 		/*and debit bank account with the receipt */
-			$SQL="INSERT INTO gltrans ( type,
+			$SQL="INSERT INTO weberp_gltrans ( type,
 										typeno,
 										trandate,
 										periodno,
@@ -430,7 +430,7 @@ function ConvertToSQLDate($DateEntry) {
 
 		} /* end if GL linked to debtors */
 
-		$SQL = "INSERT INTO debtortrans (transno,
+		$SQL = "INSERT INTO weberp_debtortrans (transno,
 										type,
 										debtorno,
 										trandate,
@@ -455,9 +455,9 @@ function ConvertToSQLDate($DateEntry) {
 
 		$result = api_DB_query($SQL,'','',true);
 
-		$SQL = "UPDATE debtorsmaster SET lastpaiddate = '" . $Receipt['trandate'] . "',
+		$SQL = "UPDATE weberp_debtorsmaster SET lastpaiddate = '" . $Receipt['trandate'] . "',
 						lastpaid='" . $Receipt['amountfx'] ."'
-					WHERE debtorsmaster.debtorno='" . $Receipt['debtorno'] . "'";
+					WHERE weberp_debtorsmaster.debtorno='" . $Receipt['debtorno'] . "'";
 
 		$result = api_DB_query($SQL,'','',true);
 
@@ -511,7 +511,7 @@ function ConvertToSQLDate($DateEntry) {
 												freightact,
 												gllink_debtors,
 												gllink_stock
-										FROM companies
+										FROM weberp_companies
 										WHERE coycode=1");
 
 		$CompanyRecord = DB_fetch_array($ReadCoyResult);
@@ -519,18 +519,18 @@ function ConvertToSQLDate($DateEntry) {
 			$Errors[] = NoCompanyRecord;
 		}
 
-		$HeaderSQL = "SELECT custbranch.area,
-							 custbranch.taxgroupid,
-							 debtorsmaster.currcode,
+		$HeaderSQL = "SELECT weberp_custbranch.area,
+							 weberp_custbranch.taxgroupid,
+							 weberp_debtorsmaster.currcode,
 							 rate,
 							 salesman
-							FROM debtorsmaster
-							INNER JOIN custbranch
-							ON debtorsmaster.debtorno = custbranch.debtorno
-							INNER JOIN currencies
-							ON debtorsmaster.currcode=currencies.currabrev
-							WHERE custbranch.debtorno = '" . $Header['debtorno'] . "'
-							AND custbranch.branchcode='" . $Header['branchcode'] . "'";
+							FROM weberp_debtorsmaster
+							INNER JOIN weberp_custbranch
+							ON weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+							INNER JOIN weberp_currencies
+							ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+							WHERE weberp_custbranch.debtorno = '" . $Header['debtorno'] . "'
+							AND weberp_custbranch.branchcode='" . $Header['branchcode'] . "'";
 
 		$HeaderResult = api_DB_query($HeaderSQL);
 		if (DB_error_no() != 0) {
@@ -539,7 +539,7 @@ function ConvertToSQLDate($DateEntry) {
 
 		$CN_Header = DB_fetch_array($HeaderResult);
 
-		$TaxProvResult = api_DB_query("SELECT taxprovinceid FROM locations WHERE loccode='" . $Header['fromstkloc'] ."'");
+		$TaxProvResult = api_DB_query("SELECT taxprovinceid FROM weberp_locations WHERE loccode='" . $Header['fromstkloc'] ."'");
 		if (DB_error_no() != 0) {
 			$Errors[] = NoTaxProvince;
 		}
@@ -563,7 +563,7 @@ function ConvertToSQLDate($DateEntry) {
 			$LineSQL = "SELECT taxcatid,
 								mbflag,
 								materialcost+labourcost+overheadcost AS standardcost
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid ='" . $CN_Line['stockid'] . "'";
 
 			$LineResult = api_DB_query($LineSQL);
@@ -580,20 +580,20 @@ function ConvertToSQLDate($DateEntry) {
 			/*Gets the Taxes and rates applicable to this line from the TaxGroup of the branch and TaxCategory of the item
 			and the taxprovince of the dispatch location */
 
-			$SQL = "SELECT taxgrouptaxes.calculationorder,
-							taxauthorities.description,
-							taxgrouptaxes.taxauthid,
-							taxauthorities.taxglcode,
-							taxgrouptaxes.taxontax,
-							taxauthrates.taxrate
-					FROM taxauthrates INNER JOIN taxgrouptaxes ON
-						taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-						INNER JOIN taxauthorities ON
-						taxauthrates.taxauthority=taxauthorities.taxid
-					WHERE taxgrouptaxes.taxgroupid='" . $CN_Header['taxgroupid'] . "'
-					AND taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
-					AND taxauthrates.taxcatid = '" . $LineRow['taxcatid'] . "'
-					ORDER BY taxgrouptaxes.calculationorder";
+			$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+							weberp_taxauthorities.description,
+							weberp_taxgrouptaxes.taxauthid,
+							weberp_taxauthorities.taxglcode,
+							weberp_taxgrouptaxes.taxontax,
+							weberp_taxauthrates.taxrate
+					FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+						weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+						INNER JOIN weberp_taxauthorities ON
+						weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+					WHERE weberp_taxgrouptaxes.taxgroupid='" . $CN_Header['taxgroupid'] . "'
+					AND weberp_taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
+					AND weberp_taxauthrates.taxcatid = '" . $LineRow['taxcatid'] . "'
+					ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 			$GetTaxRatesResult = api_DB_query($SQL);
 
@@ -640,9 +640,9 @@ function ConvertToSQLDate($DateEntry) {
 
 				/* Need to get the current location quantity
 				will need it later for the stock movement */
-               	$SQL="SELECT locstock.quantity
-						FROM locstock
-						WHERE locstock.stockid='" . $CN_Line['stockid'] . "'
+               	$SQL="SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+						WHERE weberp_locstock.stockid='" . $CN_Line['stockid'] . "'
 						AND loccode= '" . $Header['fromstkloc'] . "'";
 				$Result = api_DB_query($SQL);
 
@@ -654,14 +654,14 @@ function ConvertToSQLDate($DateEntry) {
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "UPDATE locstock
-						SET quantity = locstock.quantity - " . $CN_Line['qty'] . "
-						WHERE locstock.stockid = '" . $CN_Line['stockid'] . "'
+				$SQL = "UPDATE weberp_locstock
+						SET quantity = weberp_locstock.quantity - " . $CN_Line['qty'] . "
+						WHERE weberp_locstock.stockid = '" . $CN_Line['stockid'] . "'
 						AND loccode = '" . $Header['fromstkloc'] . "'";
 
 				$Result = api_DB_query($SQL,'','',true);
 
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -697,14 +697,14 @@ function ConvertToSQLDate($DateEntry) {
 				stock moves for the components then update the Location stock balances */
 				$Assembly=True;
 				$StandardCost =0; /*To start with - accumulate the cost of the comoponents for use in journals later on */
-				$SQL = "SELECT bom.component,
-								bom.quantity,
-								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
-							FROM bom INNER JOIN stockmaster
-							ON bom.component=stockmaster.stockid
-							WHERE bom.parent='" . $CN_Line['stockid'] . "'
-                            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-							AND bom.effectiveto > '" . date('Y-m-d') . "'";
+				$SQL = "SELECT weberp_bom.component,
+								weberp_bom.quantity,
+								weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standard
+							FROM weberp_bom INNER JOIN weberp_stockmaster
+							ON weberp_bom.component=weberp_stockmaster.stockid
+							WHERE weberp_bom.parent='" . $CN_Line['stockid'] . "'
+                            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+							AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 				$AssResult = api_DB_query($SQL);
 
@@ -713,9 +713,9 @@ function ConvertToSQLDate($DateEntry) {
 					$StandardCost += ($AssParts['standard'] * $AssParts['quantity']) ;
 					/* Need to get the current location quantity
 					will need it later for the stock movement */
-					$SQL="SELECT locstock.quantity
-							FROM locstock
-							WHERE locstock.stockid='" . $AssParts['component'] . "'
+					$SQL="SELECT weberp_locstock.quantity
+							FROM weberp_locstock
+							WHERE weberp_locstock.stockid='" . $AssParts['component'] . "'
 							AND loccode= '" . $Header['fromstkloc'] . "'";
 
 					$Result = api_DB_query($SQL);
@@ -729,7 +729,7 @@ function ConvertToSQLDate($DateEntry) {
 					if (empty($AssParts['standard'])) {
 						$AssParts['standard']=0;
 					}
-					$SQL = "INSERT INTO stockmoves (stockid,
+					$SQL = "INSERT INTO weberp_stockmoves (stockid,
 													type,
 													transno,
 													loccode,
@@ -758,9 +758,9 @@ function ConvertToSQLDate($DateEntry) {
 
 					$Result = DB_query($SQL,'','',true);
 
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . ($AssParts['quantity'] * $CN_Line['qty']) . "
-							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+					$SQL = "UPDATE weberp_locstock
+							SET quantity = weberp_locstock.quantity - " . ($AssParts['quantity'] * $CN_Line['qty']) . "
+							WHERE weberp_locstock.stockid = '" . $AssParts['component'] . "'
 							AND loccode = '" . $Header['fromlocstk'] . "'";
 
 					$Result = DB_query($SQL,'','',true);
@@ -771,7 +771,7 @@ function ConvertToSQLDate($DateEntry) {
 			if ($LineRow['mbflag']=='A' OR $LineRow['mbflag']=='D'){
 				/*it's a Dummy/Service item or an Assembly item - still need stock movement record
 				 * but quantites on hand are always nil */
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 												type,
 												transno,
 												loccode,
@@ -803,11 +803,11 @@ function ConvertToSQLDate($DateEntry) {
 				$Result = api_DB_query($SQL,'','',true);
 			}
 			/*Get the ID of the StockMove... */
-			$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+			$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 			/*Insert the taxes that applied to this line */
 			foreach ($LineTaxes[$LineCounter] as $Tax) {
 
-				$SQL = "INSERT INTO stockmovestaxes (stkmoveno,
+				$SQL = "INSERT INTO weberp_stockmovestaxes (stkmoveno,
 									taxauthid,
 									taxrate,
 									taxcalculationorder,
@@ -824,37 +824,37 @@ function ConvertToSQLDate($DateEntry) {
 			/*Insert Sales Analysis records */
 
 			$SQL="SELECT COUNT(*),
-						salesanalysis.stkcategory,
-						salesanalysis.area,
-						salesanalysis.salesperson,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.stockid
-					FROM salesanalysis,
-						custbranch,
-						stockmaster
-					WHERE salesanalysis.stkcategory=stockmaster.categoryid
-					AND salesanalysis.stockid=stockmaster.stockid
-					AND salesanalysis.cust=custbranch.debtorno
-					AND salesanalysis.custbranch=custbranch.branchcode
-					AND salesanalysis.area=custbranch.area
-					AND salesanalysis.salesperson=custbranch.salesman
-					AND salesanalysis.typeabbrev ='" . $Header['tpe'] . "'
-					AND salesanalysis.periodno='" . $PeriodNo . "'
-					AND salesanalysis.cust " . LIKE . "  '" . $Header['debtorno'] . "'
-					AND salesanalysis.custbranch  " . LIKE . " '" . $Header['branchcode'] . "'
-					AND salesanalysis.stockid  " . LIKE . " '" . $CN_Line['stockid'] . "'
-					AND salesanalysis.budgetoractual='1'
-					GROUP BY salesanalysis.stockid,
-						salesanalysis.stkcategory,
-						salesanalysis.cust,
-						salesanalysis.custbranch,
-						salesanalysis.area,
-						salesanalysis.periodno,
-						salesanalysis.typeabbrev,
-						salesanalysis.salesperson";
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.salesperson,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.stockid
+					FROM weberp_salesanalysis,
+						weberp_custbranch,
+						weberp_stockmaster
+					WHERE weberp_salesanalysis.stkcategory=weberp_stockmaster.categoryid
+					AND weberp_salesanalysis.stockid=weberp_stockmaster.stockid
+					AND weberp_salesanalysis.cust=weberp_custbranch.debtorno
+					AND weberp_salesanalysis.custbranch=weberp_custbranch.branchcode
+					AND weberp_salesanalysis.area=weberp_custbranch.area
+					AND weberp_salesanalysis.salesperson=weberp_custbranch.salesman
+					AND weberp_salesanalysis.typeabbrev ='" . $Header['tpe'] . "'
+					AND weberp_salesanalysis.periodno='" . $PeriodNo . "'
+					AND weberp_salesanalysis.cust " . LIKE . "  '" . $Header['debtorno'] . "'
+					AND weberp_salesanalysis.custbranch  " . LIKE . " '" . $Header['branchcode'] . "'
+					AND weberp_salesanalysis.stockid  " . LIKE . " '" . $CN_Line['stockid'] . "'
+					AND weberp_salesanalysis.budgetoractual='1'
+					GROUP BY weberp_salesanalysis.stockid,
+						weberp_salesanalysis.stkcategory,
+						weberp_salesanalysis.cust,
+						weberp_salesanalysis.custbranch,
+						weberp_salesanalysis.area,
+						weberp_salesanalysis.periodno,
+						weberp_salesanalysis.typeabbrev,
+						weberp_salesanalysis.salesperson";
 
 			$Result = api_DB_query($SQL,'','',true);
 
@@ -862,23 +862,23 @@ function ConvertToSQLDate($DateEntry) {
 
 			if ($myrow[0]>0){  /*Update the existing record that already exists */
 
-				$SQL = "UPDATE salesanalysis
+				$SQL = "UPDATE weberp_salesanalysis
 						SET amt=amt+" . ($CN_Line['price'] * $CN_Line['qty'] / $CN_Header['rate']) . ",
 						qty=qty +" . $CN_Line['qty'] . ",
 						disc=disc+" . ($CN_Line['discountpercent'] * $CN_Line['price'] * $CN_Line['qty'] / $CN_Header['rate']) . "
-						WHERE salesanalysis.area='" . $myrow[2] . "'
-						AND salesanalysis.salesperson='" . $myrow[3] . "'
+						WHERE weberp_salesanalysis.area='" . $myrow[2] . "'
+						AND weberp_salesanalysis.salesperson='" . $myrow[3] . "'
 						AND typeabbrev ='" . $Header['tpe'] . "'
 						AND periodno = '" . $PeriodNo . "'
 						AND cust  " . LIKE . " '" . $Header['debtorno'] . "'
 						AND custbranch  " . LIKE . "  '" . $Header['branchcode'] . "'
 						AND stockid  " . LIKE . " '" . $CN_Line['stockid'] . "'
-						AND salesanalysis.stkcategory ='" . $myrow[1] . "'
+						AND weberp_salesanalysis.stkcategory ='" . $myrow[1] . "'
 						AND budgetoractual='1'";
 
 			} else { /* insert a new sales analysis record */
 
-				$SQL = "INSERT INTO salesanalysis (	typeabbrev,
+				$SQL = "INSERT INTO weberp_salesanalysis (	typeabbrev,
 													periodno,
 													amt,
 													cost,
@@ -900,14 +900,14 @@ function ConvertToSQLDate($DateEntry) {
 									'" . $CN_Line['qty'] . "',
 									'" . ($CN_Line['discountpercent'] * $CN_Line['price'] * $CN_Line['qty'] / $CN_Header['rate']) . "',
 									'" . $CN_Line['stockid'] . "',
-									custbranch.area,
+									weberp_custbranch.area,
 									1,
-									custbranch.salesman,
-									stockmaster.categoryid
-								FROM stockmaster, custbranch
-								WHERE stockmaster.stockid = '" . $CN_Line['stockid'] . "'
-								AND custbranch.debtorno = '" . $Header['debtorno'] . "'
-								AND custbranch.branchcode='" . $Header['branchcode'] . "'";
+									weberp_custbranch.salesman,
+									weberp_stockmaster.categoryid
+								FROM weberp_stockmaster, weberp_custbranch
+								WHERE weberp_stockmaster.stockid = '" . $CN_Line['stockid'] . "'
+								AND weberp_custbranch.debtorno = '" . $Header['debtorno'] . "'
+								AND weberp_custbranch.branchcode='" . $Header['branchcode'] . "'";
 
 			}
 
@@ -917,7 +917,7 @@ function ConvertToSQLDate($DateEntry) {
 
 /*first the cost of sales entry - GL accounts are retrieved using the function GetCOGSGLAccount from includes/GetSalesTransGLCodes.inc  */
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -937,7 +937,7 @@ function ConvertToSQLDate($DateEntry) {
 /*now the stock entry - this is set to the cost act in the case of a fixed asset disposal */
 				$StockGLCode = GetStockGLCode($CN_Line['stockid'],$db);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -961,7 +961,7 @@ function ConvertToSQLDate($DateEntry) {
 				//Post sales transaction to GL credit sales
 				$SalesGLAccounts = GetSalesGLAccount($CN_Header['area'], $CN_Line['stockid'], $Header['tpe'], $db);
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -980,7 +980,7 @@ function ConvertToSQLDate($DateEntry) {
 
 				if ($CN_Line['discountpercent'] !=0){
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1012,7 +1012,7 @@ function ConvertToSQLDate($DateEntry) {
 
 				/*Loop through the tax authorities array to post each total to the taxauth glcode */
 				foreach ($TaxTotals as $Tax){
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 												typeno,
 												trandate,
 												periodno,
@@ -1033,7 +1033,7 @@ function ConvertToSQLDate($DateEntry) {
 
 			/*Post debtors transaction to GL credit debtors, and debit sales */
 			if (($TotalCreditLocalCurr) !=0) {
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -1056,7 +1056,7 @@ function ConvertToSQLDate($DateEntry) {
 
 	/*Now insert the DebtorTrans */
 
-		$SQL = "INSERT INTO debtortrans (transno,
+		$SQL = "INSERT INTO weberp_debtortrans (transno,
 										type,
 										debtorno,
 										branchcode,
@@ -1088,12 +1088,12 @@ function ConvertToSQLDate($DateEntry) {
 
 		$Result = api_DB_query($SQL,'','',true);
 
-		$DebtorTransID = DB_Last_Insert_ID($db,'debtortrans','id');
+		$DebtorTransID = DB_Last_Insert_ID($db,'weberp_debtortrans','id');
 
-		/*for each Tax - need to insert into debtortranstaxes */
+		/*for each Tax - need to insert into weberp_debtortranstaxes */
 		foreach ($TaxTotals AS $TaxAuthID => $Tax) {
 
-			$SQL = "INSERT INTO debtortranstaxes (debtortransid,
+			$SQL = "INSERT INTO weberp_debtortranstaxes (debtortransid,
 												taxauthid,
 												taxamount)
 								VALUES ('" . $DebtorTransID . "',
@@ -1107,7 +1107,7 @@ function ConvertToSQLDate($DateEntry) {
 		$SQL = "SELECT id,
 					ovamount+ovgst AS total,
 					alloc
-				FROM debtortrans
+				FROM weberp_debtortrans
 				WHERE customerref='" . $Header['customerref'] . "'
 				AND type=10
 				AND settled=0";
@@ -1126,7 +1126,7 @@ function ConvertToSQLDate($DateEntry) {
 					$AllocateAmount = 0;
 				}
 				if ($AllocateAmount > 0) {
-					$SQL = "INSERT INTO	custallocns (datealloc,
+					$SQL = "INSERT INTO	weberp_custallocns (datealloc,
 													 amt,
 													 transid_allocfrom,
 													 transid_allocto)
@@ -1141,7 +1141,7 @@ function ConvertToSQLDate($DateEntry) {
 				} else {
 					$Settled =0;
 				}
-				$SQL = "UPDATE debtortrans SET alloc = alloc + " . $AllocateAmount . ",
+				$SQL = "UPDATE weberp_debtortrans SET alloc = alloc + " . $AllocateAmount . ",
 												settled = '" . $Settled . "'
 						WHERE id = '" . $InvoiceRow['id'] ."'";
 				$UpdateAllocResult = api_DB_query($SQL,'','',true);
@@ -1153,7 +1153,7 @@ function ConvertToSQLDate($DateEntry) {
 			} else {
 				$Settled =0;
 			}
-			$SQL = "UPDATE debtortrans SET alloc = alloc + " . $Allocated . ",
+			$SQL = "UPDATE weberp_debtortrans SET alloc = alloc + " . $Allocated . ",
 												settled = '" . $Settled . "'
 					WHERE id = '" . $DebtorTransID  ."'";
 			$UpdateAllocResult = api_DB_query($SQL,'','',true);
@@ -1254,14 +1254,14 @@ function ConvertToSQLDate($DateEntry) {
 		}
 		if (sizeof($Errors)==0) {
 			$result = DB_Txn_Begin();
-			$sql = "INSERT INTO debtortrans (" . mb_substr($FieldNames,0,-2) .")
+			$sql = "INSERT INTO weberp_debtortrans (" . mb_substr($FieldNames,0,-2) .")
 									VALUES ('" . mb_substr($FieldValues,0,-2) ."') ";
 			$result = DB_query($sql);
-			$sql = "UPDATE systypes SET typeno='" . GetNextTransactionNo(10, $db) . "' WHERE typeid=10";
+			$sql = "UPDATE weberp_systypes SET typeno='" . GetNextTransactionNo(10, $db) . "' WHERE typeid=10";
 			$result = DB_query($sql);
 			$SalesGLCode=GetSalesGLCode($SalesArea, $PartCode, $db);
 			$DebtorsGLCode=GetDebtorsGLCode($db);
-			$sql="INSERT INTO gltrans VALUES(null,
+			$sql="INSERT INTO weberp_gltrans VALUES(null,
 											10,
 											'" . GetNextTransactionNo(10, $db) . "',
 											0,
@@ -1274,7 +1274,7 @@ function ConvertToSQLDate($DateEntry) {
 											'" . $InvoiceDetails['jobref'] . "',
 											1)";
 			$result = api_DB_query($sql);
-			$sql="INSERT INTO gltrans VALUES(null,
+			$sql="INSERT INTO weberp_gltrans VALUES(null,
 											10,
 											'" . GetNextTransactionNo(10, $db) . "',
 											0,
@@ -1328,7 +1328,7 @@ function ConvertToSQLDate($DateEntry) {
 		$SQL = "SELECT id,
 					rate,
 					ovamount+ovgst+ovdiscount-alloc AS lefttoalloc
-				FROM debtortrans
+				FROM weberp_debtortrans
 				WHERE debtorno='" . $AllocDetails['debtorno'] . "'
 				AND type='" . $AllocDetails['type'] . "'
 				AND transno='" . $AllocDetails['transno'] . "'";
@@ -1344,7 +1344,7 @@ function ConvertToSQLDate($DateEntry) {
 			$SQL = "SELECT id,
 						rate,
 						ovamount+ovgst+ovdiscount-alloc AS outstanding
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE debtorno='" . $AllocDetails['debtorno'] . "'
 					AND type=10
 					AND reference='" . $AllocDetails['customerref'] . "'
@@ -1371,7 +1371,7 @@ function ConvertToSQLDate($DateEntry) {
 
 				DB_Txn_Begin();
 				/*Now insert the allocation records */
-				$SQL = "INSERT INTO custallocns (amt,
+				$SQL = "INSERT INTO weberp_custallocns (amt,
 												datealloc,
 												transid_allocfrom,
 												transid_allocto)
@@ -1380,11 +1380,11 @@ function ConvertToSQLDate($DateEntry) {
 										'" . $LeftToAllocRow['id'] . "',
 										'" . $OSInvRow['id'] . "')";
 				$Result = api_DB_query($SQL,'','',true);
-				/*Now update the allocated amounts in the debtortrans for both transactions */
-				$SQL = "UPDATE debtortrans SET alloc=alloc-" . $AllocateAmount . "
+				/*Now update the allocated amounts in the weberp_debtortrans for both transactions */
+				$SQL = "UPDATE weberp_debtortrans SET alloc=alloc-" . $AllocateAmount . "
 						WHERE id = '" . $LeftToAllocRow['id'] . "'";
 				$Result = api_DB_query($SQL,'','',true);
-				$SQL = "UPDATE debtortrans SET alloc=alloc+" . $AllocateAmount . "
+				$SQL = "UPDATE weberp_debtortrans SET alloc=alloc+" . $AllocateAmount . "
 						WHERE id = '" . $OSInvRow['id'] . "'";
 				$Result = api_DB_query($SQL,'','',true);
 			} /*end if the exchange rates are the same so no diff on exchange */
@@ -1395,7 +1395,7 @@ function ConvertToSQLDate($DateEntry) {
 			$SQL = "SELECT id,
 						rate,
 						ovamount+ovgst+ovdiscount-alloc AS outstanding
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE debtorno='" . $AllocDetails['debtorno'] . "'
 					AND type=11
 					AND reference='" . $AllocDetails['customerref'] . "'
@@ -1406,7 +1406,7 @@ function ConvertToSQLDate($DateEntry) {
 				 $SQL = "SELECT id,
 						rate,
 						ovamount+ovgst+ovdiscount-alloc AS outstanding
-					FROM debtortrans
+					FROM weberp_debtortrans
 					WHERE debtorno='" . $AllocDetails['debtorno'] . "'
 					AND type=12
 					AND reference='" . $AllocDetails['customerref'] . "'
@@ -1436,7 +1436,7 @@ function ConvertToSQLDate($DateEntry) {
 					}
 
 					/*Now insert the allocation records */
-					$SQL = "INSERT INTO custallocns (amt,
+					$SQL = "INSERT INTO weberp_custallocns (amt,
 													datealloc,
 													transid_allocfrom,
 													transid_allocto)
@@ -1445,11 +1445,11 @@ function ConvertToSQLDate($DateEntry) {
 											'" . $OSCreditRow['id'] . "',
 											'" . $LeftToAllocRow['id'] . "')";
 					$Result = api_DB_query($SQL,'','',true);
-					/*Now update the allocated amounts in the debtortrans for both transactions */
-					$SQL = "UPDATE debtortrans SET alloc=alloc+" . $AllocateAmount . "
+					/*Now update the allocated amounts in the weberp_debtortrans for both transactions */
+					$SQL = "UPDATE weberp_debtortrans SET alloc=alloc+" . $AllocateAmount . "
 							WHERE id = '" . $LeftToAllocRow['id'] . "'";
 					$Result = api_DB_query($SQL,'','',true);
-					$SQL = "UPDATE debtortrans SET alloc=alloc-" . $AllocateAmount . "
+					$SQL = "UPDATE weberp_debtortrans SET alloc=alloc-" . $AllocateAmount . "
 							WHERE id = '" . $OSCreditRow['id'] . "'";
 					$Result = api_DB_query($SQL,'','',true);
 
@@ -1552,14 +1552,14 @@ function ConvertToSQLDate($DateEntry) {
 		}
 		if (sizeof($Errors)==0) {
 			$result = DB_Txn_Begin();
-			$sql = "INSERT INTO debtortrans (" . mb_substr($FieldNames,0,-2) . ")
+			$sql = "INSERT INTO weberp_debtortrans (" . mb_substr($FieldNames,0,-2) . ")
 						VALUES ('".mb_substr($FieldValues,0,-2) ."') ";
 			$result = DB_query($sql);
-			$sql = "UPDATE systypes SET typeno='" . GetNextTransactionNo(11, $db) ."' WHERE typeid=10";
+			$sql = "UPDATE weberp_systypes SET typeno='" . GetNextTransactionNo(11, $db) ."' WHERE typeid=10";
 			$result = DB_query($sql);
 			$SalesGLCode=GetSalesGLCode($SalesArea, $PartCode, $db);
 			$DebtorsGLCode=GetDebtorsGLCode($db);
-			$sql="INSERT INTO gltrans VALUES(null,
+			$sql="INSERT INTO weberp_gltrans VALUES(null,
 											10,
 											'" . GetNextTransactionNo(11, $db). "',
 											0,
@@ -1571,7 +1571,7 @@ function ConvertToSQLDate($DateEntry) {
 											0,
 											'" . $CreditDetails['jobref'] ."')";
 			$result = DB_query($sql);
-			$sql="INSERT INTO gltrans VALUES(null,
+			$sql="INSERT INTO weberp_gltrans VALUES(null,
 											10,
 											'" . GetNextTransactionNo(11, $db) . "',
 											0,

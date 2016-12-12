@@ -61,57 +61,57 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 			if ($_POST['Keywords']) {
 				//insert wildcard characters in spaces
 				$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
-				$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						SUM(locstock.quantity) as qoh,
-						stockmaster.units,
-					FROM stockmaster INNER JOIN locstock
-					ON stockmaster.stockid = locstock.stockid 
-					INNER JOIN locationusers ON locationusers.loccode = locstock.loccode
-							AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-							AND locationusers.canview=1
-					WHERE stockmaster.description " . LIKE  . " '" . $SearchString ."'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+				$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						SUM(weberp_locstock.quantity) as qoh,
+						weberp_stockmaster.units,
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid = weberp_locstock.stockid 
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode = weberp_locstock.loccode
+							AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+							AND weberp_locationusers.canview=1
+					WHERE weberp_stockmaster.description " . LIKE  . " '" . $SearchString ."'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 			} elseif ($_POST['StockCode']) {
-				$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units
-					FROM stockmaster INNER JOIN locstock
-						ON stockmaster.stockid = locstock.stockid
-					INNER JOIN locationusers ON locationusers.loccode = locstock.loccode
-							AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-							AND locationusers.canview=1
-					WHERE stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+				$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_locstock
+						ON weberp_stockmaster.stockid = weberp_locstock.stockid
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode = weberp_locstock.loccode
+							AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+							AND weberp_locationusers.canview=1
+					WHERE weberp_stockmaster.stockid " . LIKE  . " '%" . $_POST['StockCode'] . "%'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 			} elseif (!$_POST['StockCode'] AND !$_POST['Keywords']) {
-				$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units
-					FROM stockmaster INNER JOIN locstock ON stockmaster.stockid = locstock.stockid
-					INNER JOIN locationusers ON locationusers.loccode = locstock.loccode
-							AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-							AND locationusers.canview =1
-					WHERE stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units
-					ORDER BY stockmaster.stockid";
+				$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						SUM(weberp_locstock.quantity) AS qoh,
+						weberp_stockmaster.units
+					FROM weberp_stockmaster INNER JOIN weberp_locstock ON weberp_stockmaster.stockid = weberp_locstock.stockid
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode = weberp_locstock.loccode
+							AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+							AND weberp_locationusers.canview =1
+					WHERE weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					GROUP BY weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units
+					ORDER BY weberp_stockmaster.stockid";
 			}
 			
 			$ErrMsg = _('No stock items were returned by the SQL because');
@@ -132,7 +132,7 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 		}
 		$SQL = "SELECT categoryid,
 					categorydescription
-				FROM stockcategory
+				FROM weberp_stockcategory
 				ORDER BY categorydescription";
 		$result1 = DB_query($SQL, $db);
 		echo '
@@ -218,8 +218,8 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 								createdby,
 								sampledate,
 								cert
-							FROM qasamples
-							LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
+							FROM weberp_qasamples
+							LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 							WHERE lotkey='" . filter_number_format($LotNumber) . "'
 							AND sampleid<>'" . $SelectedSampleID . "'";
 			} elseif (isset($SampleID) AND $SampleID != '') {
@@ -231,8 +231,8 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 								createdby,
 								sampledate,
 								cert
-							FROM qasamples
-							LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
+							FROM weberp_qasamples
+							LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 							WHERE sampleid='" . filter_number_format($SampleID) . "'
 							AND sampleid<>'" . $SelectedSampleID . "'";
 			} else {
@@ -245,8 +245,8 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 								createdby,
 								sampledate,
 								cert
-							FROM qasamples
-							INNER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
+							FROM weberp_qasamples
+							INNER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 							WHERE stockid='" . $SelectedStockItem . "'
 							AND sampledate>='$FromDate'
 							AND sampledate <='$ToDate'
@@ -261,8 +261,8 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 								sampledate,
 								comments,
 								cert
-							FROM qasamples
-							LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
+							FROM weberp_qasamples
+							LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 							WHERE sampledate>='$FromDate'
 							AND sampledate <='$ToDate'
 							AND sampleid<>'" . $SelectedSampleID . "'";
@@ -333,31 +333,31 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 		include('includes/footer.inc');
 		exit;
 	} else {
-		$sql = "SELECT sampleresults.testid,
-						sampleresults.defaultvalue,
-						sampleresults.targetvalue,
-						sampleresults.rangemin,
-						sampleresults.rangemax,
-						sampleresults.testvalue,
-						sampleresults.testdate,
-						sampleresults.testedby,
-						sampleresults.comments,
-						sampleresults.isinspec,
-						sampleresults.showoncert,
-						sampleresults.showontestplan,
+		$sql = "SELECT weberp_sampleresults.testid,
+						weberp_sampleresults.defaultvalue,
+						weberp_sampleresults.targetvalue,
+						weberp_sampleresults.rangemin,
+						weberp_sampleresults.rangemax,
+						weberp_sampleresults.testvalue,
+						weberp_sampleresults.testdate,
+						weberp_sampleresults.testedby,
+						weberp_sampleresults.comments,
+						weberp_sampleresults.isinspec,
+						weberp_sampleresults.showoncert,
+						weberp_sampleresults.showontestplan,
 						prodspeckey,
 						type
-					FROM sampleresults 
-					INNER JOIN qasamples ON qasamples.sampleid=sampleresults.sampleid 
-					INNER JOIN qatests ON qatests.testid=sampleresults.testid
-					WHERE sampleresults.sampleid='" .$SelectedSampleID. "'";
+					FROM weberp_sampleresults 
+					INNER JOIN weberp_qasamples ON weberp_qasamples.sampleid=weberp_sampleresults.sampleid 
+					INNER JOIN weberp_qatests ON weberp_qatests.testid=weberp_sampleresults.testid
+					WHERE weberp_sampleresults.sampleid='" .$SelectedSampleID. "'";
 		$msg = _('Test Results have been copied to sample') . ' ' . $_POST['CopyToSampleID']  . ' from sample' . ' ' . $SelectedSampleID ;
 		$ErrMsg = _('The insert of the test results failed because');
 		$DbgMsg = _('The SQL that was used and failed was');
 		$result = DB_query($sql,$db,$ErrMsg, $DbgMsg);
 
 		while ($myrow = DB_fetch_array($result)) {
-			$result2 = DB_query("SELECT count(testid) FROM prodspecs
+			$result2 = DB_query("SELECT count(testid) FROM weberp_prodspecs
 						WHERE testid = '".$myrow['testid']."'
 						AND keyval='".$myrow['prodspeckey']."'",	$db);
 			$myrow2 = DB_fetch_row($result2);;
@@ -366,7 +366,7 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 			} else {
 				$ManuallyAdded=1;
 			}
-			$result2 = DB_query("SELECT resultid, targetvalue,rangemin, rangemax FROM sampleresults
+			$result2 = DB_query("SELECT resultid, targetvalue,rangemin, rangemax FROM weberp_sampleresults
 						WHERE testid = '".$myrow['testid']."'
 						AND sampleid='".$_POST['CopyToSampleID']."'",	$db);
 			$myrow2 = DB_fetch_array($result2);;
@@ -423,7 +423,7 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 			if($myrow2[0]>'') {
 				//test already exists on CopyToSample
 				if ($_POST['OverRide']=='on') {
-					$updsql = "UPDATE sampleresults
+					$updsql = "UPDATE weberp_sampleresults
 								SET	testvalue='" .$myrow['testvalue']. "',
 									testdate='" .$myrow['testdate']. "',
 									testedby='" .$myrow['testedby']. "',
@@ -441,7 +441,7 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 				}
 			} else {
 				//Need to insert the test and results
-				$inssql = "INSERT INTO sampleresults 
+				$inssql = "INSERT INTO weberp_sampleresults 
 							(sampleid,
 							testid,
 							defaultvalue,
@@ -485,19 +485,19 @@ if (isset($_GET['CopyResults']) OR isset($_POST['CopyResults'])) {
 } //CopySpec
 
 if (isset($_GET['ListTests'])) {
-	$sql = "SELECT qatests.testid,
+	$sql = "SELECT weberp_qatests.testid,
 				name,
 				method,
 				units,
 				type,
 				numericvalue,
-				qatests.defaultvalue
-			FROM qatests
-			LEFT JOIN sampleresults 
-			ON sampleresults.testid=qatests.testid
-			AND sampleresults.sampleid='".$SelectedSampleID."'
-			WHERE qatests.active='1'
-			AND sampleresults.sampleid IS NULL";
+				weberp_qatests.defaultvalue
+			FROM weberp_qatests
+			LEFT JOIN weberp_sampleresults 
+			ON weberp_sampleresults.testid=weberp_qatests.testid
+			AND weberp_sampleresults.sampleid='".$SelectedSampleID."'
+			WHERE weberp_qatests.active='1'
+			AND weberp_sampleresults.sampleid IS NULL";
 	$result = DB_query($sql,$db);
 	echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
     echo '<div>';
@@ -597,7 +597,7 @@ if (isset($_POST['AddTests'])) {
 			} else {
 				$AddRangeMax="'" . $_POST['AddRangeMax' .$i] . "'";
 			}
-			$sql = "INSERT INTO sampleresults 
+			$sql = "INSERT INTO weberp_sampleresults 
 							(sampleid,
 							testid,
 							defaultvalue,
@@ -616,7 +616,7 @@ if (isset($_POST['AddTests'])) {
 								showoncert, 
 								'1',
 								'1'
-						FROM qatests WHERE testid='" .$_POST['AddTestID' .$i]. "'";
+						FROM weberp_qatests WHERE testid='" .$_POST['AddTestID' .$i]. "'";
 			$msg = _('A Sample Result record has been added for Test ID') . ' ' . $_POST['AddTestID' .$i]  . ' for ' . ' ' . $KeyValue ;
 			$ErrMsg = _('The insert of the Sample Result failed because');
 			$DbgMsg = _('The SQL that was used and failed was');
@@ -663,7 +663,7 @@ if (isset($_POST['submit'])) {
 				}
 			}
 		}
-		$sql = "UPDATE sampleresults SET testedby='".  $_POST['TestedBy' .$i] . "',
+		$sql = "UPDATE weberp_sampleresults SET testedby='".  $_POST['TestedBy' .$i] . "',
 										testdate='". FormatDateForSQL($_POST['TestDate' .$i]) . "',
 										testvalue='".  $_POST['TestValue' .$i] . "',
 										showoncert='".  $_POST['ShowOnCert' .$i] . "',
@@ -677,13 +677,13 @@ if (isset($_POST['submit'])) {
 		prnMsg($msg , 'success');
 	} //for
 	//check to see all values are in spec or at least entered
-	$result = DB_query("SELECT count(sampleid) FROM sampleresults
+	$result = DB_query("SELECT count(sampleid) FROM weberp_sampleresults
 						WHERE sampleid = '".$SelectedSampleID."'
 						AND showoncert='1'
 						AND testvalue=''",	$db);
 	$myrow = DB_fetch_row($result);;
 	if($myrow[0]>0) {
-		$sql = "UPDATE qasamples SET identifier='" . $_POST['Identifier'] . "',
+		$sql = "UPDATE weberp_qasamples SET identifier='" . $_POST['Identifier'] . "',
 									comments='" . $_POST['Comments'] . "',
 									cert='0'
 				WHERE sampleid = '".$SelectedSampleID."'";
@@ -695,14 +695,14 @@ if (isset($_POST['submit'])) {
 	}
 }
 if (isset($_GET['Delete'])) {
-	$sql= "SELECT COUNT(*) FROM sampleresults WHERE sampleresults.resultid='".$_GET['ResultID']."'
-											AND sampleresults.manuallyadded='1'";
+	$sql= "SELECT COUNT(*) FROM weberp_sampleresults WHERE weberp_sampleresults.resultid='".$_GET['ResultID']."'
+											AND weberp_sampleresults.manuallyadded='1'";
 	$result = DB_query($sql,$db);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]==0) {
 		prnMsg(_('Cannot delete this Result ID because it is a part of the Product Specification'),'error');
 	} else {
-		$sql="DELETE FROM sampleresults WHERE resultid='". $_GET['ResultID']."'";
+		$sql="DELETE FROM weberp_sampleresults WHERE resultid='". $_GET['ResultID']."'";
 		$ErrMsg = _('The sample results could not be deleted because');
 		$result = DB_query($sql,$db,$ErrMsg);
 		
@@ -736,8 +736,8 @@ $sql = "SELECT prodspeckey,
 				sampledate,
 				comments,
 				cert
-		FROM qasamples 
-		LEFT OUTER JOIN stockmaster on stockmaster.stockid=qasamples.prodspeckey
+		FROM weberp_qasamples 
+		LEFT OUTER JOIN weberp_stockmaster on weberp_stockmaster.stockid=weberp_qasamples.prodspeckey
 		WHERE sampleid='".$SelectedSampleID."'";
 
 $result = DB_query($sql, $db);
@@ -774,26 +774,26 @@ $ProdSpec=$myrow['prodspeckey'];
 $CanCert=$myrow['cert'];
 $sql = "SELECT sampleid,
 				resultid,
-				sampleresults.testid,
-				qatests.name,
-				qatests.method,
-				qatests.units,
-				qatests.type,
-				qatests.numericvalue,
-				sampleresults.defaultvalue,
-				sampleresults.targetvalue,
-				sampleresults.rangemin,
-				sampleresults.rangemax,
-				sampleresults.testvalue,
-				sampleresults.testdate,
-				sampleresults.testedby,
-				sampleresults.showoncert,
+				weberp_sampleresults.testid,
+				weberp_qatests.name,
+				weberp_qatests.method,
+				weberp_qatests.units,
+				weberp_qatests.type,
+				weberp_qatests.numericvalue,
+				weberp_sampleresults.defaultvalue,
+				weberp_sampleresults.targetvalue,
+				weberp_sampleresults.rangemin,
+				weberp_sampleresults.rangemax,
+				weberp_sampleresults.testvalue,
+				weberp_sampleresults.testdate,
+				weberp_sampleresults.testedby,
+				weberp_sampleresults.showoncert,
 				isinspec,
-				sampleresults.manuallyadded
-		FROM sampleresults 
-		INNER JOIN qatests ON qatests.testid=sampleresults.testid
-		WHERE sampleresults.sampleid='".$SelectedSampleID."'
-		AND sampleresults.showontestplan='1'
+				weberp_sampleresults.manuallyadded
+		FROM weberp_sampleresults 
+		INNER JOIN weberp_qatests ON weberp_qatests.testid=weberp_sampleresults.testid
+		WHERE weberp_sampleresults.sampleid='".$SelectedSampleID."'
+		AND weberp_sampleresults.showontestplan='1'
 		ORDER BY groupby, name";
 
 $result = DB_query($sql, $db);
@@ -814,9 +814,9 @@ $x = 0;
 $k = 0; //row colour counter
 $techsql = "SELECT userid,
 						realname
-					FROM www_users
-					INNER JOIN securityroles ON securityroles.secroleid=www_users.fullaccess
-					INNER JOIN securitygroups on securitygroups.secroleid=securityroles.secroleid
+					FROM weberp_www_users
+					INNER JOIN weberp_securityroles ON weberp_securityroles.secroleid=weberp_www_users.fullaccess
+					INNER JOIN weberp_securitygroups on weberp_securitygroups.secroleid=weberp_securityroles.secroleid
 					WHERE blocked='0'
 					AND tokenid='16'";
 

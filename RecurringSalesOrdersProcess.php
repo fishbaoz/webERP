@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: RecurringSalesOrdersProcess.php 7021 2014-12-14 02:04:44Z tehonu $*/
 
 /*need to allow this script to run from Cron or windows scheduler */
 $AllowAnyone = true;
@@ -29,50 +29,50 @@ include('includes/SQL_CommonFunctions.inc');
 include('includes/GetSalesTransGLCodes.inc');
 include('includes/htmlMimeMail.php');
 
-$sql = "SELECT recurringsalesorders.recurrorderno,
-			recurringsalesorders.debtorno,
-	  		recurringsalesorders.branchcode,
-	  		recurringsalesorders.customerref,
-	  		recurringsalesorders.buyername,
-	  		recurringsalesorders.comments,
-	  		recurringsalesorders.orddate,
-	  		recurringsalesorders.ordertype,
-	  		recurringsalesorders.shipvia,
-	  		recurringsalesorders.deladd1,
-	  		recurringsalesorders.deladd2,
-	  		recurringsalesorders.deladd3,
-	  		recurringsalesorders.deladd4,
-	  		recurringsalesorders.deladd5,
-	  		recurringsalesorders.deladd6,
-	  		recurringsalesorders.contactphone,
-	  		recurringsalesorders.contactemail,
-	  		recurringsalesorders.deliverto,
-	  		recurringsalesorders.freightcost,
-	  		recurringsalesorders.fromstkloc,
-	  		recurringsalesorders.lastrecurrence,
-	  		recurringsalesorders.stopdate,
-	  		recurringsalesorders.frequency,
-	  		recurringsalesorders.autoinvoice,
-			debtorsmaster.name,
-			debtorsmaster.currcode,
-			salestypes.sales_type,
-			custbranch.area,
-			custbranch.taxgroupid,
-			locations.contact,
-			locations.email
-		FROM recurringsalesorders INNER JOIN locationusers ON locationusers.loccode=recurringsalesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1,
-			debtorsmaster,
-			custbranch,
-			salestypes,
-			locations
-		WHERE recurringsalesorders.ordertype=salestypes.typeabbrev
-		AND recurringsalesorders.debtorno = debtorsmaster.debtorno
-		AND recurringsalesorders.debtorno = custbranch.debtorno
-		AND recurringsalesorders.branchcode = custbranch.branchcode
-		AND recurringsalesorders.fromstkloc=locations.loccode
-		AND recurringsalesorders.ordertype=salestypes.typeabbrev
-		AND (TO_DAYS(NOW()) - TO_DAYS(recurringsalesorders.lastrecurrence)) > (365/recurringsalesorders.frequency)
-		AND DATE_ADD(recurringsalesorders.lastrecurrence, " . INTERVAL ('365/recurringsalesorders.frequency', 'DAY') . ") <= recurringsalesorders.stopdate";
+$sql = "SELECT weberp_recurringsalesorders.recurrorderno,
+			weberp_recurringsalesorders.debtorno,
+	  		weberp_recurringsalesorders.branchcode,
+	  		weberp_recurringsalesorders.customerref,
+	  		weberp_recurringsalesorders.buyername,
+	  		weberp_recurringsalesorders.comments,
+	  		weberp_recurringsalesorders.orddate,
+	  		weberp_recurringsalesorders.ordertype,
+	  		weberp_recurringsalesorders.shipvia,
+	  		weberp_recurringsalesorders.deladd1,
+	  		weberp_recurringsalesorders.deladd2,
+	  		weberp_recurringsalesorders.deladd3,
+	  		weberp_recurringsalesorders.deladd4,
+	  		weberp_recurringsalesorders.deladd5,
+	  		weberp_recurringsalesorders.deladd6,
+	  		weberp_recurringsalesorders.contactphone,
+	  		weberp_recurringsalesorders.contactemail,
+	  		weberp_recurringsalesorders.deliverto,
+	  		weberp_recurringsalesorders.freightcost,
+	  		weberp_recurringsalesorders.fromstkloc,
+	  		weberp_recurringsalesorders.lastrecurrence,
+	  		weberp_recurringsalesorders.stopdate,
+	  		weberp_recurringsalesorders.frequency,
+	  		weberp_recurringsalesorders.autoinvoice,
+			weberp_debtorsmaster.name,
+			weberp_debtorsmaster.currcode,
+			weberp_salestypes.sales_type,
+			weberp_custbranch.area,
+			weberp_custbranch.taxgroupid,
+			weberp_locations.contact,
+			weberp_locations.email
+		FROM weberp_recurringsalesorders INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_recurringsalesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1,
+			weberp_debtorsmaster,
+			weberp_custbranch,
+			weberp_salestypes,
+			weberp_locations
+		WHERE weberp_recurringsalesorders.ordertype=weberp_salestypes.typeabbrev
+		AND weberp_recurringsalesorders.debtorno = weberp_debtorsmaster.debtorno
+		AND weberp_recurringsalesorders.debtorno = weberp_custbranch.debtorno
+		AND weberp_recurringsalesorders.branchcode = weberp_custbranch.branchcode
+		AND weberp_recurringsalesorders.fromstkloc=weberp_locations.loccode
+		AND weberp_recurringsalesorders.ordertype=weberp_salestypes.typeabbrev
+		AND (TO_DAYS(NOW()) - TO_DAYS(weberp_recurringsalesorders.lastrecurrence)) > (365/weberp_recurringsalesorders.frequency)
+		AND DATE_ADD(weberp_recurringsalesorders.lastrecurrence, " . INTERVAL ('365/weberp_recurringsalesorders.frequency', 'DAY') . ") <= weberp_recurringsalesorders.stopdate";
 
 $RecurrOrdersDueResult = DB_query($sql,_('There was a problem retrieving the recurring sales order templates. The database reported:'));
 
@@ -100,7 +100,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 	echo '<br />' . _('Date calculated for the next recurrence was') .': ' . $DelDate;
 	$OrderNo = GetNextTransNo(30, $db);
 
-	$HeaderSQL = "INSERT INTO salesorders (
+	$HeaderSQL = "INSERT INTO weberp_salesorders (
 							orderno,
 							debtorno,
 							branchcode,
@@ -149,15 +149,15 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 	$EmailText = _('A new order has been created from a recurring order template for customer') .' ' .  $RecurrOrderRow['debtorno'] . ' ' . $RecurrOrderRow['branchcode'] . "\n" . _('The order number is:') . ' ' . $OrderNo;
 
 	/*need to look up RecurringOrder from the template and populate the line RecurringOrder array with the sales order details records */
-	$LineItemsSQL = "SELECT recurrsalesorderdetails.stkcode,
-							recurrsalesorderdetails.unitprice,
-							recurrsalesorderdetails.quantity,
-							recurrsalesorderdetails.discountpercent,
-							recurrsalesorderdetails.narrative,
-							stockmaster.taxcatid
-						FROM recurrsalesorderdetails INNER JOIN stockmaster
-							ON recurrsalesorderdetails.stkcode = stockmaster.stockid
-						WHERE recurrsalesorderdetails.recurrorderno ='" . $RecurrOrderRow['recurrorderno'] . "'";
+	$LineItemsSQL = "SELECT weberp_recurrsalesorderdetails.stkcode,
+							weberp_recurrsalesorderdetails.unitprice,
+							weberp_recurrsalesorderdetails.quantity,
+							weberp_recurrsalesorderdetails.discountpercent,
+							weberp_recurrsalesorderdetails.narrative,
+							weberp_stockmaster.taxcatid
+						FROM weberp_recurrsalesorderdetails INNER JOIN weberp_stockmaster
+							ON weberp_recurrsalesorderdetails.stkcode = weberp_stockmaster.stockid
+						WHERE weberp_recurrsalesorderdetails.recurrorderno ='" . $RecurrOrderRow['recurrorderno'] . "'";
 
 	$ErrMsg = _('The line items of the recurring order cannot be retrieved because');
 	$LineItemsResult = DB_query($LineItemsSQL,$ErrMsg);
@@ -168,7 +168,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 		$OrderTotal =0; //intialise
 		$OrderLineTotal =0;
-		$StartOf_LineItemsSQL = "INSERT INTO salesorderdetails (
+		$StartOf_LineItemsSQL = "INSERT INTO weberp_salesorderdetails (
 															orderno,
 															orderlineno,
 															stkcode,
@@ -192,7 +192,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 		} /* line items from recurring sales order details */
 	} //end if there are line items on the recurring order
 
-	$sql = "UPDATE recurringsalesorders SET lastrecurrence = '" . $DelDate . "'
+	$sql = "UPDATE weberp_recurringsalesorders SET lastrecurrence = '" . $DelDate . "'
 			WHERE recurrorderno='" . $RecurrOrderRow['recurrorderno'] ."'";
 	$ErrMsg = _('Could not update the last recurrence of the recurring order template. The database reported the error:');
 	$Result = DB_query($sql,$ErrMsg,true);
@@ -209,9 +209,9 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 		$SQL = "SELECT area,
 						defaultshipvia
-				FROM custbranch
-				WHERE custbranch.debtorno ='". $RecurrOrderRow['debtorno'] . "'
-				AND custbranch.branchcode = '" . $RecurrOrderRow['branchcode'] . "'";
+				FROM weberp_custbranch
+				WHERE weberp_custbranch.debtorno ='". $RecurrOrderRow['debtorno'] . "'
+				AND weberp_custbranch.branchcode = '" . $RecurrOrderRow['branchcode'] . "'";
 
 		$ErrMsg = _('Unable to determine the area where the sale is to, from the customer branches table, please select an area for this branch');
 		$Result = DB_query($SQL, $ErrMsg);
@@ -222,15 +222,15 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 		DB_free_result($Result);
 
 		$SQL = "SELECT rate
-				FROM currencies INNER JOIN debtorsmaster
-				ON debtorsmaster.currcode=currencies.currabrev
+				FROM weberp_currencies INNER JOIN weberp_debtorsmaster
+				ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 				WHERE debtorno='" . $RecurrOrderRow['debtorno'] . "'";
 		$ErrMsg = _('The exchange rate for the customer currency could not be retrieved from the currency table because:');
 		$Result = DB_query($SQL,$ErrMsg);
 		$myrow = DB_fetch_row($Result);
 		$CurrencyRate = $myrow[0];
 
-		$SQL = "SELECT taxprovinceid FROM locations WHERE loccode='" . $RecurrOrderRow['fromstkloc'] ."'";
+		$SQL = "SELECT taxprovinceid FROM weberp_locations WHERE loccode='" . $RecurrOrderRow['fromstkloc'] ."'";
 		$ErrMsg = _('Could not retrieve the tax province of the location from where the order was fulfilled because:');
 		$Result = DB_query($SQL,$ErrMsg);
 		$myrow=DB_fetch_row($Result);
@@ -257,20 +257,20 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			/*Gets the Taxes and rates applicable to this line from the TaxGroup of the branch and TaxCategory of the item
 			and the taxprovince of the dispatch location */
 
-			$SQL = "SELECT taxgrouptaxes.calculationorder,
-					taxauthorities.description,
-					taxgrouptaxes.taxauthid,
-					taxauthorities.taxglcode,
-					taxgrouptaxes.taxontax,
-					taxauthrates.taxrate
-			FROM taxauthrates INNER JOIN taxgrouptaxes ON
-				taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-				INNER JOIN taxauthorities ON
-				taxauthrates.taxauthority=taxauthorities.taxid
-			WHERE taxgrouptaxes.taxgroupid='" . $RecurrOrderRow['taxgroupid'] . "'
-			AND taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
-			AND taxauthrates.taxcatid = '" . $RecurrOrderLineRow['taxcatid'] . "'
-			ORDER BY taxgrouptaxes.calculationorder";
+			$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+					weberp_taxauthorities.description,
+					weberp_taxgrouptaxes.taxauthid,
+					weberp_taxauthorities.taxglcode,
+					weberp_taxgrouptaxes.taxontax,
+					weberp_taxauthrates.taxrate
+			FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+				weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+				INNER JOIN weberp_taxauthorities ON
+				weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+			WHERE weberp_taxgrouptaxes.taxgroupid='" . $RecurrOrderRow['taxgroupid'] . "'
+			AND weberp_taxauthrates.dispatchtaxprovince='" . $DispTaxProvinceID . "'
+			AND weberp_taxauthrates.taxcatid = '" . $RecurrOrderLineRow['taxcatid'] . "'
+			ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 			$ErrMsg = _('The taxes and rates for this item could not be retrieved because');
 			$GetTaxRatesResult = DB_query($SQL,$ErrMsg);
@@ -313,7 +313,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			$TotalFXTax += $LineTaxAmount;
 
 			/*Now update SalesOrderDetails for the quantity invoiced and the actual dispatch dates. */
-			$SQL = "UPDATE salesorderdetails
+			$SQL = "UPDATE weberp_salesorderdetails
 					SET qtyinvoiced = qtyinvoiced + " . $RecurrOrderLineRow['quantity'] . ",
 						actualdispatchdate = '" . $DelDate .  "',
 						completed='1'
@@ -328,7 +328,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			$LocalCurrencyPrice= ($RecurrOrderLineRow['unitprice'] *(1- floatval($RecurrOrderLineRow['discountpercent'])))/ $CurrencyRate;
 
 			// its a dummy item dummies always have nil stock (by definition so new qty on hand will be nil
-			$SQL = "INSERT INTO stockmoves (
+			$SQL = "INSERT INTO weberp_stockmoves (
 						stockid,
 						type,
 						transno,
@@ -367,12 +367,12 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 			/*Get the ID of the StockMove... */
-			$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+			$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 			/*Insert the taxes that applied to this line */
 			foreach ($LineTaxes[$LineCounter] as $Tax) {
 
-				$SQL = "INSERT INTO stockmovestaxes (stkmoveno,
+				$SQL = "INSERT INTO weberp_stockmovestaxes (stkmoveno,
 									taxauthid,
 									taxrate,
 									taxcalculationorder,
@@ -390,37 +390,37 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			/*Insert Sales Analysis records */
 
 			$SQL="SELECT COUNT(*),
-					salesanalysis.stkcategory,
-					salesanalysis.area,
-					salesanalysis.salesperson,
-					salesanalysis.periodno,
-					salesanalysis.typeabbrev,
-					salesanalysis.cust,
-					salesanalysis.custbranch,
-					salesanalysis.stockid
-				FROM salesanalysis,
-					custbranch,
-					stockmaster
-				WHERE salesanalysis.stkcategory=stockmaster.categoryid
-				AND salesanalysis.stockid=stockmaster.stockid
-				AND salesanalysis.cust=custbranch.debtorno
-				AND salesanalysis.custbranch=custbranch.branchcode
-				AND salesanalysis.area=custbranch.area
-				AND salesanalysis.salesperson=custbranch.salesman
-				AND salesanalysis.typeabbrev ='" . $RecurrOrderRow['ordertype'] . "'
-				AND salesanalysis.periodno='" . $PeriodNo . "'
-				AND salesanalysis.cust " . LIKE . "  '" . $RecurrOrderRow['debtorno'] . "'
-				AND salesanalysis.custbranch  " . LIKE . " '" . $RecurrOrderRow['branchcode'] . "'
-				AND salesanalysis.stockid  " . LIKE . " '" . $RecurrOrderLineRow['stkcode'] . "'
-				AND salesanalysis.budgetoractual='1'
-				GROUP BY salesanalysis.stockid,
-					salesanalysis.stkcategory,
-					salesanalysis.cust,
-					salesanalysis.custbranch,
-					salesanalysis.area,
-					salesanalysis.periodno,
-					salesanalysis.typeabbrev,
-					salesanalysis.salesperson";
+					weberp_salesanalysis.stkcategory,
+					weberp_salesanalysis.area,
+					weberp_salesanalysis.salesperson,
+					weberp_salesanalysis.periodno,
+					weberp_salesanalysis.typeabbrev,
+					weberp_salesanalysis.cust,
+					weberp_salesanalysis.custbranch,
+					weberp_salesanalysis.stockid
+				FROM weberp_salesanalysis,
+					weberp_custbranch,
+					weberp_stockmaster
+				WHERE weberp_salesanalysis.stkcategory=weberp_stockmaster.categoryid
+				AND weberp_salesanalysis.stockid=weberp_stockmaster.stockid
+				AND weberp_salesanalysis.cust=weberp_custbranch.debtorno
+				AND weberp_salesanalysis.custbranch=weberp_custbranch.branchcode
+				AND weberp_salesanalysis.area=weberp_custbranch.area
+				AND weberp_salesanalysis.salesperson=weberp_custbranch.salesman
+				AND weberp_salesanalysis.typeabbrev ='" . $RecurrOrderRow['ordertype'] . "'
+				AND weberp_salesanalysis.periodno='" . $PeriodNo . "'
+				AND weberp_salesanalysis.cust " . LIKE . "  '" . $RecurrOrderRow['debtorno'] . "'
+				AND weberp_salesanalysis.custbranch  " . LIKE . " '" . $RecurrOrderRow['branchcode'] . "'
+				AND weberp_salesanalysis.stockid  " . LIKE . " '" . $RecurrOrderLineRow['stkcode'] . "'
+				AND weberp_salesanalysis.budgetoractual='1'
+				GROUP BY weberp_salesanalysis.stockid,
+					weberp_salesanalysis.stkcategory,
+					weberp_salesanalysis.cust,
+					weberp_salesanalysis.custbranch,
+					weberp_salesanalysis.area,
+					weberp_salesanalysis.periodno,
+					weberp_salesanalysis.typeabbrev,
+					weberp_salesanalysis.salesperson";
 
 			$ErrMsg = _('The count of existing Sales analysis records could not run because');
 			$DbgMsg = _('SQL to count the no of sales analysis records');
@@ -430,23 +430,23 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 			if ($myrow[0]>0){  /*Update the existing record that already exists */
 
-				$SQL = "UPDATE salesanalysis
+				$SQL = "UPDATE weberp_salesanalysis
 					SET amt=amt+" . filter_number_format($RecurrOrderLineRow['unitprice'] * $RecurrOrderLineRow['quantity'] / $CurrencyRate) . ",
 					qty=qty +" . $RecurrOrderLineRow['quantity'] . ",
 					disc=disc+" . filter_number_format($RecurrOrderLineRow['discountpercent'] * $RecurrOrderLineRow['unitprice'] * $RecurrOrderLineRow['quantity'] / $CurrencyRate) . "
-					WHERE salesanalysis.area='" . $myrow[2] . "'
-					AND salesanalysis.salesperson='" . $myrow[3] . "'
+					WHERE weberp_salesanalysis.area='" . $myrow[2] . "'
+					AND weberp_salesanalysis.salesperson='" . $myrow[3] . "'
 					AND typeabbrev ='" . $RecurrOrderRow['ordertype'] . "'
 					AND periodno = '" . $PeriodNo . "'
 					AND cust  " . LIKE . " '" . $RecurrOrderRow['debtorno'] . "'
 					AND custbranch  " . LIKE . "  '" . $RecurrOrderRow['branchcode'] . "'
 					AND stockid  " . LIKE . " '" . $RecurrOrderLineRow['stkcode'] . "'
-					AND salesanalysis.stkcategory ='" . $myrow[1] . "'
+					AND weberp_salesanalysis.stkcategory ='" . $myrow[1] . "'
 					AND budgetoractual='1'";
 
 			} else { /* insert a new sales analysis record */
 
-				$SQL = "INSERT INTO salesanalysis (
+				$SQL = "INSERT INTO weberp_salesanalysis (
 									typeabbrev,
 									periodno,
 									amt,
@@ -470,15 +470,15 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 									'" . $RecurrOrderLineRow['quantity'] . "',
 									'" . filter_number_format($RecurrOrderLineRow['discountpercent'] * $RecurrOrderLineRow['unitprice'] * $RecurrOrderLineRow['quantity'] / $CurrencyRate) . "',
 									'" . $RecurrOrderLineRow['stkcode'] . "',
-									custbranch.area,
+									weberp_custbranch.area,
 									1,
-									custbranch.salesman,
-									stockmaster.categoryid
-								FROM stockmaster,
-									custbranch
-								WHERE stockmaster.stockid = '" . $RecurrOrderLineRow['stkcode'] . "'
-								AND custbranch.debtorno = '" . $RecurrOrderRow['debtorno'] . "'
-								AND custbranch.branchcode='" . $RecurrOrderRow['branchcode'] . "'";
+									weberp_custbranch.salesman,
+									weberp_stockmaster.categoryid
+								FROM weberp_stockmaster,
+									weberp_custbranch
+								WHERE weberp_stockmaster.stockid = '" . $RecurrOrderLineRow['stkcode'] . "'
+								AND weberp_custbranch.debtorno = '" . $RecurrOrderRow['debtorno'] . "'
+								AND weberp_custbranch.branchcode='" . $RecurrOrderRow['branchcode'] . "'";
 			}
 
 			$ErrMsg = _('Sales analysis record could not be added or updated because');
@@ -490,7 +490,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 				//Post sales transaction to GL credit sales
 				$SalesGLAccounts = GetSalesGLAccount($Area, $RecurrOrderLineRow['stkcode'], $RecurrOrderRow['ordertype'], $db);
 
-				$SQL = "INSERT INTO gltrans (
+				$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,
@@ -517,7 +517,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 				if ($RecurrOrderLineRow['discountpercent'] !=0){
 
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 							type,
 							typeno,
 							trandate,
@@ -557,7 +557,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 				/*Loop through the tax authorities array to post each total to the taxauth glcode */
 				foreach ($TaxTotals as $Tax){
-					$SQL = "INSERT INTO gltrans (
+					$SQL = "INSERT INTO weberp_gltrans (
 											type,
 											typeno,
 											trandate,
@@ -584,7 +584,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 			/*Post debtors transaction to GL debit debtors, credit freight re-charged and credit sales */
 			if (($TotalInvLocalCurr) !=0) {
-				$SQL = "INSERT INTO gltrans (
+				$SQL = "INSERT INTO weberp_gltrans (
 										type,
 										typeno,
 										trandate,
@@ -611,7 +611,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 			/*Could do with setting up a more flexible freight posting schema that looks at the sales type and area of the customer branch to determine where to post the freight recovery */
 
 			if ($RecurrOrderRow['freightcost'] !=0) {
-				$SQL = "INSERT INTO gltrans (
+				$SQL = "INSERT INTO weberp_gltrans (
 											type,
 											typeno,
 											trandate,
@@ -636,7 +636,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 		} /*end of if Sales and GL integrated */
 
 	/*Update order header for invoice charged on */
-		$SQL = "UPDATE salesorders SET comments = CONCAT(comments,' Inv ','" . $InvoiceNo . "') WHERE orderno= '" . $OrderNo . "'";
+		$SQL = "UPDATE weberp_salesorders SET comments = CONCAT(comments,' Inv ','" . $InvoiceNo . "') WHERE orderno= '" . $OrderNo . "'";
 
 		$ErrMsg = _('CRITICAL ERROR') . ' ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The sales order header could not be updated with the invoice number');
 		$DbgMsg = _('The following SQL to update the sales order was used');
@@ -644,7 +644,7 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 
 	/*Now insert the DebtorTrans */
 
-		$SQL = "INSERT INTO debtortrans (
+		$SQL = "INSERT INTO weberp_debtortrans (
 										transno,
 										type,
 										debtorno,
@@ -683,10 +683,10 @@ while ($RecurrOrderRow = DB_fetch_array($RecurrOrdersDueResult)){
 		$DbgMsg = _('The following SQL to insert the debtor transaction record was used');
 		$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		$DebtorTransID = DB_Last_Insert_ID($db,'debtortrans','id');
+		$DebtorTransID = DB_Last_Insert_ID($db,'weberp_debtortrans','id');
 
 
-		$SQL = "INSERT INTO debtortranstaxes (debtortransid,
+		$SQL = "INSERT INTO weberp_debtortranstaxes (debtortransid,
 							taxauthid,
 							taxamount)
 				VALUES ('" . $DebtorTransID . "',

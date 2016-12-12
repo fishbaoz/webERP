@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SuppLoginSetup.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Supplier Login Configuration');
@@ -68,7 +68,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1) {
 
-		$sql = "INSERT INTO www_users (userid,
+		$sql = "INSERT INTO weberp_www_users (userid,
 										realname,
 										supplierid,
 										password,
@@ -153,15 +153,15 @@ echo '<tr>
 //Make an array of the security roles where only one role is active and is ID 1
 
 //For the security role selection box, we will only show roles that have:
-//- Only one entry in securitygroups AND the tokenid of this entry == 9
+//- Only one entry in weberp_securitygroups AND the tokenid of this entry == 9
 
 //First get all available security role ID's'
-$RolesResult = DB_query("SELECT secroleid FROM securityroles");
+$RolesResult = DB_query("SELECT secroleid FROM weberp_securityroles");
 $FoundTheSupplierRole = false;
 while ($myroles = DB_fetch_array($RolesResult)){
 	//Now look to find the tokens for the role - we just wnat the role that has just one token i.e. token 9
 	$TokensResult = DB_query("SELECT tokenid
-								FROM securitygroups
+								FROM weberp_securitygroups
 								WHERE secroleid = '" . $myroles['secroleid'] ."'");
 
 	while ($mytoken = DB_fetch_row($TokensResult)) {
@@ -186,7 +186,7 @@ if (!$FoundTheSupplierRole){
 echo '<tr><td>' . _('Default Location') . ':</td>
 	<td><select name="DefaultLocation">';
 
-$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 $result = DB_query($sql);
 
 while ($myrow=DB_fetch_array($result)){

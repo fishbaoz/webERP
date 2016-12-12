@@ -168,35 +168,35 @@ if (isset($_POST['ShowSales'])){
 			$FromDate = FormatDateForSQL($_POST['FromDate']);
 			$ToDate = FormatDateForSQL($_POST['ToDate']);
 	}
-	$sql = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockcategory.categorydescription,
-					SUM(CASE WHEN stockmoves.type=10
-							OR stockmoves.type=11 THEN
+	$sql = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockcategory.categorydescription,
+					SUM(CASE WHEN weberp_stockmoves.type=10
+							OR weberp_stockmoves.type=11 THEN
 							 -qty
 							ELSE 0 END) as salesquantity,
-					SUM(CASE WHEN stockmoves.type=10 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END) as salesvalue,
-					SUM(CASE WHEN stockmoves.type=11 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END) as returnvalue,
-					SUM(CASE WHEN stockmoves.type=11
-								OR stockmoves.type=10 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=11
+								OR weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END) as netsalesvalue,
 					SUM((standardcost * -qty)) as cost
-			FROM stockmoves INNER JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			INNER JOIN stockcategory
-			ON stockmaster.categoryid=stockcategory.categoryid
-			WHERE (stockmoves.type=10 or stockmoves.type=11)
+			FROM weberp_stockmoves INNER JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_stockcategory
+			ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 			AND show_on_inv_crds =1
 			AND trandate>='" . $FromDate . "'
 			AND trandate<='" . $ToDate . "'
-			GROUP BY stockmaster.stockid,
-					stockmaster.description,
-					stockcategory.categorydescription ";
+			GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockcategory.categorydescription ";
 
 	if ($_POST['OrderBy']=='NetSales'){
 		$sql .= " ORDER BY netsalesvalue DESC ";

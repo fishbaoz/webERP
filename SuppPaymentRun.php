@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SuppPaymentRun.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 Class Allocation {
 	Var $TransID;
@@ -37,27 +37,27 @@ if ((isset($_POST['PrintPDF']) OR isset($_POST['PrintPDFAndProcess']))
 
 	include ('includes/PDFPaymentRunPageHeader.inc');
 
-	$sql = "SELECT suppliers.supplierid,
-					currencies.decimalplaces AS currdecimalplaces,
-					SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) AS balance
-			FROM suppliers INNER JOIN paymentterms
-			ON suppliers.paymentterms = paymentterms.termsindicator
-			INNER JOIN supptrans
-			ON suppliers.supplierid = supptrans.supplierno
-			INNER JOIN systypes
-			ON systypes.typeid = supptrans.type
-			INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
-			WHERE supptrans.ovamount + supptrans.ovgst - supptrans.alloc !=0
-			AND supptrans.duedate <='" . FormatDateForSQL($_POST['AmountsDueBy']) . "'
-			AND supptrans.hold=0
-			AND suppliers.currcode = '" . $_POST['Currency'] . "'
-			AND supptrans.supplierNo >= '" . $_POST['FromCriteria'] . "'
-			AND supptrans.supplierno <= '" . $_POST['ToCriteria'] . "'
-			GROUP BY suppliers.supplierid,
-					currencies.decimalplaces
-			HAVING SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) > 0
-			ORDER BY suppliers.supplierid";
+	$sql = "SELECT weberp_suppliers.supplierid,
+					weberp_currencies.decimalplaces AS currdecimalplaces,
+					SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) AS balance
+			FROM weberp_suppliers INNER JOIN weberp_paymentterms
+			ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+			INNER JOIN weberp_supptrans
+			ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+			INNER JOIN weberp_systypes
+			ON weberp_systypes.typeid = weberp_supptrans.type
+			INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
+			WHERE weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc !=0
+			AND weberp_supptrans.duedate <='" . FormatDateForSQL($_POST['AmountsDueBy']) . "'
+			AND weberp_supptrans.hold=0
+			AND weberp_suppliers.currcode = '" . $_POST['Currency'] . "'
+			AND weberp_supptrans.supplierNo >= '" . $_POST['FromCriteria'] . "'
+			AND weberp_supptrans.supplierno <= '" . $_POST['ToCriteria'] . "'
+			GROUP BY weberp_suppliers.supplierid,
+					weberp_currencies.decimalplaces
+			HAVING SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) > 0
+			ORDER BY weberp_suppliers.supplierid";
 
 	$SuppliersResult = DB_query($sql);
 
@@ -74,35 +74,35 @@ if ((isset($_POST['PrintPDF']) OR isset($_POST['PrintPDFAndProcess']))
 
 		$CurrDecimalPlaces = $SuppliersToPay['currdecimalplaces'];
 
-		$sql = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						systypes.typename,
-						paymentterms.terms,
-						supptrans.suppreference,
-						supptrans.trandate,
-						supptrans.rate,
-						supptrans.transno,
-						supptrans.type,
-						(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) AS balance,
-						(supptrans.ovamount + supptrans.ovgst ) AS trantotal,
-						supptrans.diffonexch,
-						supptrans.id
-				FROM suppliers INNER JOIN paymentterms
-				ON suppliers.paymentterms = paymentterms.termsindicator
-				INNER JOIN supptrans
-				ON suppliers.supplierid = supptrans.supplierno
-				INNER JOIN systypes
-				ON systypes.typeid = supptrans.type
-				WHERE supptrans.supplierno = '" . $SuppliersToPay['supplierid'] . "'
-				AND supptrans.ovamount + supptrans.ovgst - supptrans.alloc !=0
-				AND supptrans.duedate <='" . FormatDateForSQL($_POST['AmountsDueBy']) . "'
-				AND supptrans.hold = 0
-				AND suppliers.currcode = '" . $_POST['Currency'] . "'
-				AND supptrans.supplierno >= '" . $_POST['FromCriteria'] . "'
-				AND supptrans.supplierno <= '" . $_POST['ToCriteria'] . "'
-				ORDER BY supptrans.supplierno,
-					supptrans.type,
-					supptrans.transno";
+		$sql = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_systypes.typename,
+						weberp_paymentterms.terms,
+						weberp_supptrans.suppreference,
+						weberp_supptrans.trandate,
+						weberp_supptrans.rate,
+						weberp_supptrans.transno,
+						weberp_supptrans.type,
+						(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) AS balance,
+						(weberp_supptrans.ovamount + weberp_supptrans.ovgst ) AS trantotal,
+						weberp_supptrans.diffonexch,
+						weberp_supptrans.id
+				FROM weberp_suppliers INNER JOIN weberp_paymentterms
+				ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+				INNER JOIN weberp_supptrans
+				ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+				INNER JOIN weberp_systypes
+				ON weberp_systypes.typeid = weberp_supptrans.type
+				WHERE weberp_supptrans.supplierno = '" . $SuppliersToPay['supplierid'] . "'
+				AND weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc !=0
+				AND weberp_supptrans.duedate <='" . FormatDateForSQL($_POST['AmountsDueBy']) . "'
+				AND weberp_supptrans.hold = 0
+				AND weberp_suppliers.currcode = '" . $_POST['Currency'] . "'
+				AND weberp_supptrans.supplierno >= '" . $_POST['FromCriteria'] . "'
+				AND weberp_supptrans.supplierno <= '" . $_POST['ToCriteria'] . "'
+				ORDER BY weberp_supptrans.supplierno,
+					weberp_supptrans.type,
+					weberp_supptrans.transno";
 
 		$TransResult = DB_query($sql,'','',false,false);
 		if (DB_error_no() !=0) {
@@ -172,7 +172,7 @@ if ((isset($_POST['PrintPDF']) OR isset($_POST['PrintPDFAndProcess']))
 
 				/*Now update the SuppTrans for the allocation made and the fact that it is now settled */
 
-				$SQL = "UPDATE supptrans SET settled = 1,
+				$SQL = "UPDATE weberp_supptrans SET settled = 1,
 											alloc = '" . $DetailTrans['trantotal'] . "',
 											diffonexch = '" . ($DetailTrans['diffonexch'] + $DiffOnExch)  . "'
 							WHERE type = '" . $DetailTrans['type'] . "'
@@ -275,7 +275,7 @@ if ((isset($_POST['PrintPDF']) OR isset($_POST['PrintPDFAndProcess']))
 			<td>' . _('For Suppliers Trading in') . ':</td>
 			<td><select name="Currency">';
 
-	$sql = "SELECT currency, currabrev FROM currencies";
+	$sql = "SELECT currency, currabrev FROM weberp_currencies";
 	$result=DB_query($sql);
 
 	while ($myrow=DB_fetch_array($result)){
@@ -309,7 +309,7 @@ if ((isset($_POST['PrintPDF']) OR isset($_POST['PrintPDFAndProcess']))
             <td><input type="text" class="date" alt="'.$_SESSION['DefaultDateFormat'].'" name="AmountsDueBy" maxlength="11" size="12" value="' . $DefaultDate . '" /></td>
           </tr>';
 
-	$SQL = "SELECT bankaccountname, accountcode FROM bankaccounts";
+	$SQL = "SELECT bankaccountname, accountcode FROM weberp_bankaccounts";
 
 	$AccountsResults = DB_query($SQL,'','',false,false);
 

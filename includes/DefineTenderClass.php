@@ -72,7 +72,7 @@ Class Tender {
 		 */
 		if ($this->TenderId=='') {
 			$this->TenderId = GetNextTransNo(37, $db);
-			$HeaderSQL="INSERT INTO tenders (tenderid,
+			$HeaderSQL="INSERT INTO weberp_tenders (tenderid,
 											location,
 											address1,
 											address2,
@@ -93,7 +93,7 @@ Class Tender {
 										'" . $this->Telephone  . "',
 										'" . FormatDateForSQL($this->RequiredByDate) . "')";
 			foreach ($this->Suppliers as $Supplier) {
-				$SuppliersSQL[]="INSERT INTO tendersuppliers (tenderid,
+				$SuppliersSQL[]="INSERT INTO weberp_tendersuppliers (tenderid,
 															supplierid,
 															email)
 								VALUES ('" . $this->TenderId . "',
@@ -101,7 +101,7 @@ Class Tender {
 										'" . $Supplier->EmailAddress . "')";
 			}
 			foreach ($this->LineItems as $LineItem) {
-				$ItemsSQL[]="INSERT INTO tenderitems (tenderid,
+				$ItemsSQL[]="INSERT INTO weberp_tenderitems (tenderid,
 														stockid,
 														quantity,
 														units)
@@ -111,7 +111,7 @@ Class Tender {
 													'" . $LineItem->Units . "')";
 			}
 		} else {
-			$HeaderSQL="UPDATE tenders SET location='" . $this->Location  . "',
+			$HeaderSQL="UPDATE weberp_tenders SET location='" . $this->Location  . "',
 											address1='" . $this->DelAdd1  . "',
 											address2='" . $this->DelAdd2  . "',
 											address3='" . $this->DelAdd3  . "',
@@ -122,10 +122,10 @@ Class Tender {
 											requiredbydate='" . FormatDateForSQL($this->RequiredByDate)  . "'
 						WHERE tenderid = '" . $this->TenderId  . "'";
 			foreach ($this->Suppliers as $Supplier) {
-				$sql="DELETE FROM tendersuppliers
+				$sql="DELETE FROM weberp_tendersuppliers
 					WHERE  tenderid='" . $this->TenderId . "'";
 				$result=DB_query($sql);
-				$SuppliersSQL[]="INSERT INTO tendersuppliers (
+				$SuppliersSQL[]="INSERT INTO weberp_tendersuppliers (
 									tenderid,
 									supplierid,
 									email)
@@ -134,10 +134,10 @@ Class Tender {
 										'" . $Supplier->EmailAddress . "')";
 			}
 			foreach ($this->LineItems as $LineItem) {
-				$sql="DELETE FROM tenderitems
+				$sql="DELETE FROM weberp_tenderitems
 						WHERE  tenderid='" . $this->TenderId . "'";
 				$result=DB_query($sql);
-				$ItemsSQL[]="INSERT INTO tenderitems (tenderid,
+				$ItemsSQL[]="INSERT INTO weberp_tenderitems (tenderid,
 														stockid,
 														quantity,
 														units)

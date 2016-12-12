@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: ShiptsList.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 //$PageSecurity = 2;
 include ('includes/session.inc');
@@ -20,7 +20,7 @@ if (!isset($_GET['SupplierID']) or !isset($_GET['SupplierName'])){
 $SQL = "SELECT shiptref,
 		vessel,
 		eta
-	FROM shipments
+	FROM weberp_shipments
 	WHERE supplierid='" . $_GET['SupplierID'] . "'";
 $ErrMsg = _('No shipments were returned from the database because'). ' - '. DB_error_msg();
 $ShiptsResult = DB_query($SQL, $ErrMsg);

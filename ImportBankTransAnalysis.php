@@ -64,7 +64,7 @@ if (isset($_POST['AddGLCodeToTrans']) AND $_POST['AddGLCodeToTrans'] == _('Enter
 
 	$sql = "SELECT accountcode,
 					accountname
-				FROM chartmaster
+				FROM weberp_chartmaster
 				WHERE accountcode='" . $_POST['GLCode'] . "'";
 	$result = DB_query($sql);
 	if (DB_num_rows($result) == 0 AND $_POST['GLCode'] != ''){
@@ -135,7 +135,7 @@ if ($_SESSION['Trans'][$TransID]->Amount<0){ //its a payment
 
 	$result = DB_query("SELECT supplierid,
 								suppname
-						FROM suppliers
+						FROM weberp_suppliers
 						WHERE currcode='" . $_SESSION['Statement']->CurrCode . "'
 						ORDER BY suppname");
 	if ($_SESSION['Trans'][$TransID]->SupplierID ==''){
@@ -166,7 +166,7 @@ if ($_SESSION['Trans'][$TransID]->Amount<0){ //its a payment
 
 	$result = DB_query("SELECT debtorno,
 								name
-						FROM debtorsmaster
+						FROM weberp_debtorsmaster
 						WHERE currcode='" . $_SESSION['Statement']->CurrCode . "'
 						ORDER BY name");
 	if ($_SESSION['Trans'][$TransID]->DebtorNo ==''){
@@ -260,7 +260,7 @@ if ($AllowGLAnalysis==false){
 			<td>' . _('Account Selection') . ':<br />(' . _('If you know the code enter it above') . '<br />' . _('otherwise select the account from the list') . ')</td>
 			<td><select name="AcctSelection">';
 
-	$result = DB_query("SELECT accountcode, accountname FROM chartmaster ORDER BY accountcode");
+	$result = DB_query("SELECT accountcode, accountname FROM weberp_chartmaster ORDER BY accountcode");
 	echo '<option value=""></option>';
 	while ($myrow = DB_fetch_array($result)) {
 		if ($myrow['accountcode'] == $_POST['AcctSelection']) {
@@ -296,7 +296,7 @@ if ($AllowGLAnalysis==false){
 
 	$SQL = "SELECT tagref,
 					tagdescription
-			FROM tags
+			FROM weberp_tags
 			ORDER BY tagref";
 
 	$result=DB_query($SQL);

@@ -3,7 +3,7 @@
 /* Check that the stock code*/
 	function VerifyStockCode($StockCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(stockid)
-    				  FROM stockmaster
+    				  FROM weberp_stockmaster
 	    			  WHERE stockid='".$StockCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -16,7 +16,7 @@
 /* Check that the stock code exists*/
 	function VerifyStockCodeExists($StockCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(stockid)
-				      FROM stockmaster
+				      FROM weberp_stockmaster
 				      WHERE stockid='".$StockCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -29,7 +29,7 @@
 /* Verify the category exists */
 	function VerifyStockCategoryExists($StockCategory, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(categoryid)
-				      FROM stockcategory
+				      FROM weberp_stockcategory
 				      WHERE categoryid='".$StockCategory."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -75,7 +75,7 @@
  * must be in the same format as the date format specified in the
  * target webERP company */
 	function VerifyLastCurCostDate($CurCostDate, $i, $Errors, $db) {
-		$sql="SELECT confvalue FROM config WHERE confname='DefaultDateFormat'";
+		$sql="SELECT confvalue FROM weberp_config WHERE confname='DefaultDateFormat'";
 		$result=DB_query($sql);
 		$myrow=DB_fetch_array($result);
 		$DateFormat=$myrow[0];
@@ -214,7 +214,7 @@
 /* Check that the tax category exists*/
 	function VerifyTaxCatExists($TaxCat, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(taxcatid)
-				      FROM taxcategories
+				      FROM weberp_taxcategories
 				      WHERE taxcatid='".$TaxCat."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -257,7 +257,7 @@
 	}
 
 	function GetCategoryGLCode($CategoryID, $field, $db) {
-		$sql='SELECT '.$field." FROM stockcategory WHERE categoryid='".$CategoryID."'";
+		$sql='SELECT '.$field." FROM weberp_stockcategory WHERE categoryid='".$CategoryID."'";
 		$result = DB_Query($sql, $db);
 		$myrow = DB_fetch_row($result);
 		return $myrow[0];
@@ -364,10 +364,10 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$stocksql = 'INSERT INTO stockmaster ('.mb_substr($FieldNames,0,-2).') '.
+			$stocksql = 'INSERT INTO weberp_stockmaster ('.mb_substr($FieldNames,0,-2).') '.
 		  		'VALUES ('.mb_substr($FieldValues,0,-2).') ';
-			$locsql = "INSERT INTO locstock (loccode,stockid)
-				SELECT locations.loccode,'" . $StockItemDetails['stockid'] . "' FROM locations";
+			$locsql = "INSERT INTO weberp_locstock (loccode,stockid)
+				SELECT weberp_locations.loccode,'" . $StockItemDetails['stockid'] . "' FROM weberp_locations";
 			DB_Txn_Begin();
 			$stockresult = DB_Query($stocksql, $db);
 			$locresult = DB_Query($locsql, $db);
@@ -477,7 +477,7 @@
 		if (isset($StockItemDetails['decimalplaces'])){
 			$Errors=VerifyDecimalPlaces($StockItemDetails['decimalplaces'], sizeof($Errors), $Errors);
 		}
-		$sql='UPDATE stockmaster SET ';
+		$sql='UPDATE weberp_stockmaster SET ';
 		foreach ($StockItemDetails as $key => $value) {
 			$sql .= $key.'="'.$value.'", ';
 		}
@@ -509,7 +509,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT * FROM stockmaster WHERE stockid='".$StockID."'";
+		$sql="SELECT * FROM weberp_stockmaster WHERE stockid='".$StockID."'";
 		$result = DB_Query($sql, $db);
 		if (sizeof($Errors)==0) {
 			$Errors[0]=0;
@@ -531,7 +531,7 @@
 			return $Errors;
 		}
 		$sql="SELECT stockid
-			  FROM stockmaster
+			  FROM weberp_stockmaster
 			  WHERE " . $Field ." LIKE '%".$Criteria."%'";
 		$result = DB_Query($sql, $db);
 		$i=0;
@@ -562,7 +562,7 @@
 		}
 		$sql="SELECT quantity,
                      loccode
-               FROM locstock WHERE stockid='" . $StockID."'";
+               FROM weberp_locstock WHERE stockid='" . $StockID."'";
 		$result = DB_query($sql);
 		if (sizeof($Errors)==0) {
 			$i=0;
@@ -590,7 +590,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT reorderlevel, loccode FROM locstock WHERE stockid='".$StockID."'";
+		$sql="SELECT reorderlevel, loccode FROM weberp_locstock WHERE stockid='".$StockID."'";
 		$result = DB_Query($sql, $db);
 		if (sizeof($Errors)==0) {
 			$i=0;
@@ -618,7 +618,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="UPDATE locstock SET reorderlevel='".$ReorderLevel."'
+		$sql="UPDATE weberp_locstock SET reorderlevel='".$ReorderLevel."'
                      WHERE stockid='".$StockID."'
                      AND loccode='".$Location."'";
 		$result = DB_Query($sql, $db);
@@ -641,7 +641,7 @@
 			return $Errors;
 		}
 		$sql="SELECT sum(quantity)
-             FROM salesorderdetails
+             FROM weberp_salesorderdetails
              WHERE stkcode='".$StockID."'
              AND completed=0";
 		$result = DB_Query($sql, $db);
@@ -666,7 +666,7 @@
 			return $Errors;
 		}
 		$sql="SELECT sum(quantityord-quantityrecd)
-              FROM purchorderdetails
+              FROM weberp_purchorderdetails
               WHERE itemcode='".$StockID."'
               AND completed=0";
 		$result = DB_Query($sql, $db);
@@ -692,21 +692,21 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql = "SELECT COUNT(*) FROM prices
+		$sql = "SELECT COUNT(*) FROM weberp_prices
 				 WHERE stockid='".$StockID."'
 				 and typeabbrev='".$SalesType."'
 				 and currabrev='".$Currency."'";
 		$result = DB_Query($sql, $db);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]==0) {
-			$sql="INSERT INTO prices VALUES('". $StockID."',
+			$sql="INSERT INTO weberp_prices VALUES('". $StockID."',
                                             '". $SalesType ."',
                                             '". $Currency."',
                                             '',
                                             '". $Price ."',
                                             '')";
 		} else {
-			$sql='UPDATE prices SET price='. $Price .
+			$sql='UPDATE weberp_prices SET price='. $Price .
         			" WHERE  stockid='" .$StockID."'
 				    AND typeabbrev='".$SalesType."'
 				    AND currabrev='".$Currency."'";
@@ -729,7 +729,7 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql = "SELECT COUNT(*) FROM prices
+		$sql = "SELECT COUNT(*) FROM weberp_prices
 				 WHERE stockid='" .$StockID. "'
 				 AND typeabbrev='" .$SalesType. "'
 				 AND currabrev='".$Currency. "'
@@ -741,7 +741,7 @@
 			$Errors[0] = NoPricesSetup;
 			return $Errors;
 		} else {
-			$sql="SELECT price FROM prices
+			$sql="SELECT price FROM weberp_prices
 							WHERE stockid='" .$StockID. "'
 							 AND typeabbrev='" .$SalesType. "'
 							 AND currabrev='".$Currency. "'
@@ -766,8 +766,8 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT taxrate FROM taxauthrates LEFT JOIN stockmaster
-				ON taxauthrates.taxcatid=stockmaster.taxcatid
+		$sql="SELECT taxrate FROM weberp_taxauthrates LEFT JOIN weberp_stockmaster
+				ON weberp_taxauthrates.taxcatid=weberp_stockmaster.taxcatid
 				WHERE stockid='". $StockID . "'
                 AND taxauthority='". $TaxAuth . "'";
 		$result = DB_Query($sql, $db);
@@ -795,7 +795,7 @@
 		$adjglact=GetCategoryGLCode($itemdetails[1]['categoryid'], 'adjglact', $db);
 		$stockact=GetCategoryGLCode($itemdetails[1]['categoryid'], 'stockact', $db);
 
-		$stockmovesql="INSERT INTO stockmoves (stockid,
+		$stockmovesql="INSERT INTO weberp_stockmoves (stockid,
                                                type,
                                                transno,
                                                loccode,
@@ -813,10 +813,10 @@
                                        'api adjustment',
                                        '" .$Quantity."',
                                        '" .$newqoh."')";
-		$locstocksql='UPDATE locstock SET quantity = quantity + '.$Quantity."
+		$locstocksql='UPDATE weberp_locstock SET quantity = quantity + '.$Quantity."
                              WHERE loccode='".$Location."'
                              AND stockid='".$StockID."'";
-		$glupdatesql1="INSERT INTO gltrans (type,
+		$glupdatesql1="INSERT INTO weberp_gltrans (type,
                                             typeno,
                                             trandate,
                                             periodno,
@@ -830,7 +830,7 @@
                                            '" .$adjglact."',
                                            '".$itemdetails['materialcost']*-$Quantity. "',
                                            '" .$StockID.' x '.$Quantity.' @ '.$itemdetails['materialcost']."')";
-		$glupdatesql2="INSERT INTO gltrans (type,
+		$glupdatesql2="INSERT INTO weberp_gltrans (type,
                                             typeno,
                                             trandate,
                                             periodno,
@@ -844,7 +844,7 @@
                         '" .$stockact."',
                         '" .$itemdetails['materialcost']*$Quantity. "',
                         '" .$StockID.' x '.$Quantity.' @ '.$itemdetails['materialcost']."')";
-		$systypessql = "UPDATE systypes set typeno='".GetNextTransactionNo(17, $db)."' where typeid='17'";
+		$systypessql = "UPDATE weberp_systypes set typeno='".GetNextTransactionNo(17, $db)."' where typeid='17'";
 
 		DB_Txn_Begin();
 		DB_query($stockmovesql);
@@ -873,18 +873,18 @@
 		if (sizeof($Errors)!=0) {
 			return $Errors;
 		}
-		$sql="SELECT stockserialitems.stockid,
+		$sql="SELECT weberp_stockserialitems.stockid,
 				loccode,
-				stockserialitems.serialno as batchno,
+				weberp_stockserialitems.serialno as batchno,
 				quantity,
 				t.price as itemcost
-			FROM stockserialitems JOIN (SELECT stockmoves.stockid,
-										stockmoves.price,
-										stockserialmoves.serialno
-										FROM stockmoves JOIN stockserialmoves
-										ON stockmoves.stkmoveno=stockserialmoves.stockmoveno
-										WHERE stockmoves.type=25) as t
-				ON stockserialitems.stockid=t.stockid and stockserialitems.serialno=t.serialno
+			FROM weberp_stockserialitems JOIN (SELECT weberp_stockmoves.stockid,
+										weberp_stockmoves.price,
+										weberp_stockserialmoves.serialno
+										FROM weberp_stockmoves JOIN weberp_stockserialmoves
+										ON weberp_stockmoves.stkmoveno=weberp_stockserialmoves.stockmoveno
+										WHERE weberp_stockmoves.type=25) as t
+				ON weberp_stockserialitems.stockid=t.stockid and weberp_stockserialitems.serialno=t.serialno
 			WHERE stockid='".$StockID."' AND loccode='".$Location."'";
 		$result = DB_Query($sql, $db);
 		if (sizeof($Errors)==0) {

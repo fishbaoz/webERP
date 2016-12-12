@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: SupplierCredit.php 7354 2015-09-21 02:00:03Z exsonqu $ */
 
 /*This page is very largely the same as the SupplierInvoice.php script
 the same result could have been acheived by using if statements in that script and just having the one
@@ -38,7 +38,7 @@ if (isset($_GET['New'])) {
 }
 
 if (!isset($_SESSION['SuppTrans']->SupplierName)) {
-	$sql="SELECT suppname FROM suppliers WHERE supplierid='" . $_GET['SupplierID']."'";
+	$sql="SELECT suppname FROM weberp_suppliers WHERE supplierid='" . $_GET['SupplierID']."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	$SupplierName=$myrow[0];
@@ -70,23 +70,23 @@ if (isset($_GET['SupplierID']) and $_GET['SupplierID']!=''){
 
 /*Now retrieve supplier information - name, currency, default ex rate, terms, tax rate etc */
 
-	 $sql = "SELECT suppliers.suppname,
-					suppliers.supplierid,
-					paymentterms.terms,
-					paymentterms.daysbeforedue,
-					paymentterms.dayinfollowingmonth,
-					suppliers.currcode,
-					currencies.rate AS exrate,
-					currencies.decimalplaces AS currdecimalplaces,
-					suppliers.taxgroupid,
-					taxgroups.taxgroupdescription
-				FROM suppliers INNER JOIN taxgroups
-				ON suppliers.taxgroupid=taxgroups.taxgroupid
-				INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
-				INNER JOIN paymentterms
-				ON suppliers.paymentterms=paymentterms.termsindicator
-				WHERE suppliers.supplierid = '" . $_GET['SupplierID'] . "'";
+	 $sql = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.supplierid,
+					weberp_paymentterms.terms,
+					weberp_paymentterms.daysbeforedue,
+					weberp_paymentterms.dayinfollowingmonth,
+					weberp_suppliers.currcode,
+					weberp_currencies.rate AS exrate,
+					weberp_currencies.decimalplaces AS currdecimalplaces,
+					weberp_suppliers.taxgroupid,
+					weberp_taxgroups.taxgroupdescription
+				FROM weberp_suppliers INNER JOIN weberp_taxgroups
+				ON weberp_suppliers.taxgroupid=weberp_taxgroups.taxgroupid
+				INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
+				INNER JOIN weberp_paymentterms
+				ON weberp_suppliers.paymentterms=weberp_paymentterms.termsindicator
+				WHERE weberp_suppliers.supplierid = '" . $_GET['SupplierID'] . "'";
 
 	$ErrMsg = _('The supplier record selected') . ': ' . $_GET['SupplierID'] . ' ' ._('cannot be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the supplier details and failed was');
@@ -112,7 +112,7 @@ if (isset($_GET['SupplierID']) and $_GET['SupplierID']!=''){
 	$_SESSION['SuppTrans']->SupplierID = $_GET['SupplierID'];
 
 	$LocalTaxProvinceResult = DB_query("SELECT taxprovinceid
-										FROM locations
+										FROM weberp_locations
 										WHERE loccode = '" . $_SESSION['UserStockLocation'] . "'");
 
 	if(DB_num_rows($LocalTaxProvinceResult)==0){
@@ -707,7 +707,7 @@ then do the updates and inserts to process the credit note entered */
 			/*GL Items are straight forward - just do the credit postings to the GL accounts specified -
 			the debit is to creditors control act  done later for the total credit note value + tax*/
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -738,7 +738,7 @@ then do the updates and inserts to process the credit note entered */
 			/*shipment postings are also straight forward - just do the credit postings to the GRN suspense account
 			these entries are reversed from the GRN suspense when the shipment is closed - entries only to open shipts*/
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -764,7 +764,7 @@ then do the updates and inserts to process the credit note entered */
 
 			foreach ($_SESSION['SuppTrans']->Assets as $AssetAddition){
 				/* only the GL entries if the creditors->GL integration is enabled */
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -790,14 +790,14 @@ then do the updates and inserts to process the credit note entered */
 			/*contract postings need to get the WIP from the contract item's stock category record
 			 *  debit postings to this WIP account
 			 * the WIP account is tidied up when the contract is closed*/
-				$result = DB_query("SELECT wipact FROM stockcategory
-									INNER JOIN stockmaster
-									ON stockcategory.categoryid=stockmaster.categoryid
-									WHERE stockmaster.stockid='" . $Contract->ContractRef . "'");
+				$result = DB_query("SELECT wipact FROM weberp_stockcategory
+									INNER JOIN weberp_stockmaster
+									ON weberp_stockcategory.categoryid=weberp_stockmaster.categoryid
+									WHERE weberp_stockmaster.stockid='" . $Contract->ContractRef . "'");
 				$WIPRow = DB_fetch_row($result);
 				$WIPAccount = $WIPRow[0];
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 								typeno,
 								trandate,
 								periodno,
@@ -831,7 +831,7 @@ then do the updates and inserts to process the credit note entered */
 				  enter the GL entry to reverse the GRN suspense entry created on delivery at standard cost used on delivery */
 
 					if ($EnteredGRN->StdCostUnit * $EnteredGRN->This_QuantityInv != 0) {
-						$SQL = "INSERT INTO gltrans (type,
+						$SQL = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -877,7 +877,7 @@ then do the updates and inserts to process the credit note entered */
 								The cost of these items - $EnteredGRN->ChgPrice  / $_SESSION['SuppTrans']->ExRate
 								*/
 
-								$sql ="SELECT SUM(quantity) FROM locstock WHERE stockid='" . $EnteredGRN->ItemCode . "'";
+								$sql ="SELECT SUM(quantity) FROM weberp_locstock WHERE stockid='" . $EnteredGRN->ItemCode . "'";
 								$ErrMsg =  _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The quantity on hand could not be retrieved from the database');
 								$DbgMsg = _('The following SQL to retrieve the total stock quantity was used');
 								$Result = DB_query($sql, $ErrMsg, $DbgMsg, True);
@@ -900,7 +900,7 @@ then do the updates and inserts to process the credit note entered */
 										- $TotalQuantityOnHand)
 									* (($EnteredGRN->ChgPrice  / $_SESSION['SuppTrans']->ExRate) - $EnteredGRN->StdCostUnit);
 
-									$SQL = "INSERT INTO gltrans (type,
+									$SQL = "INSERT INTO weberp_gltrans (type,
 																typeno,
 																trandate,
 																periodno,
@@ -923,7 +923,7 @@ then do the updates and inserts to process the credit note entered */
 								}
 								/*Now post any remaining price variance to stock rather than price variances */
 
-								$SQL = "INSERT INTO gltrans (type,
+								$SQL = "INSERT INTO weberp_gltrans (type,
 															typeno,
 															trandate,
 															periodno,
@@ -959,13 +959,13 @@ then do the updates and inserts to process the credit note entered */
 
 									$CostIncrement = ($PurchPriceVar - $WriteOffToVariances) / $TotalQuantityOnHand;
 
-									$sql = "UPDATE stockmaster SET lastcost=materialcost+overheadcost+labourcost,
+									$sql = "UPDATE weberp_stockmaster SET lastcost=materialcost+overheadcost+labourcost,
 																	materialcost=materialcost-" . $CostIncrement . "
 											WHERE stockid='" . $EnteredGRN->ItemCode . "'";
 
 									$Result = DB_query($sql, $ErrMsg, $DbgMsg, True);
 								} else {
-									$sql = "UPDATE stockmaster SET lastcost=materialcost+overheadcost+labourcost,
+									$sql = "UPDATE weberp_stockmaster SET lastcost=materialcost+overheadcost+labourcost,
 																	materialcost=" . ($EnteredGRN->ChgPrice  / $_SESSION['SuppTrans']->ExRate) . " WHERE stockid='" . $EnteredGRN->ItemCode . "'";
 									$Result = DB_query($sql, $ErrMsg, $DbgMsg, True);
 								}
@@ -973,7 +973,7 @@ then do the updates and inserts to process the credit note entered */
 
 							} else { //It must be Standard Costing
 
-								$SQL = "INSERT INTO gltrans (type,
+								$SQL = "INSERT INTO weberp_gltrans (type,
 															typeno,
 															trandate,
 															periodno,
@@ -1005,14 +1005,14 @@ then do the updates and inserts to process the credit note entered */
 
 								/*Need to get the asset details  for posting */
 								$result = DB_query("SELECT costact
-													FROM fixedassets INNER JOIN fixedassetcategories
-													ON fixedassets.assetcategoryid= fixedassetcategories.categoryid
+													FROM weberp_fixedassets INNER JOIN weberp_fixedassetcategories
+													ON weberp_fixedassets.assetcategoryid= weberp_fixedassetcategories.categoryid
 													WHERE assetid='" . $EnteredGRN->AssetID . "'");
 								$AssetRow = DB_fetch_array($result);
 								$GLCode = $AssetRow['costact'];
 							} //the item was an asset
 
-							$SQL = "INSERT INTO gltrans (type,
+							$SQL = "INSERT INTO weberp_gltrans (type,
 														typeno,
 														trandate,
 														periodno,
@@ -1037,7 +1037,7 @@ then do the updates and inserts to process the credit note entered */
 
 					/*then its a purchase order item on a shipment - whole charge amount to GRN suspense pending closure of the shipment	when the variance is calculated and the GRN act cleared up for the shipment */
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -1070,7 +1070,7 @@ then do the updates and inserts to process the credit note entered */
 			foreach ($_SESSION['SuppTrans']->Taxes as $Tax){
 				/* Now the TAX account */
 				if ($Tax->TaxOvAmount/ $_SESSION['SuppTrans']->ExRate !=0){
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -1094,7 +1094,7 @@ then do the updates and inserts to process the credit note entered */
 			} /*end of loop to post the tax */
 			/* Now the control account */
 
-			$SQL = "INSERT INTO gltrans (type,
+			$SQL = "INSERT INTO weberp_gltrans (type,
 							typeno,
 							trandate,
 							periodno,
@@ -1117,7 +1117,7 @@ then do the updates and inserts to process the credit note entered */
 
 	/*Now insert the credit note into the SuppTrans table*/
 
-		$SQL = "INSERT INTO supptrans (transno,
+		$SQL = "INSERT INTO weberp_supptrans (transno,
 						type,
 						supplierno,
 						suppreference,
@@ -1145,12 +1145,12 @@ then do the updates and inserts to process the credit note entered */
 		$DbgMsg = _('The following SQL to insert the supplier credit note was used');
 		$Result = DB_query($SQL, $ErrMsg, $DbgMsg, True);
 
-		$SuppTransID = DB_Last_Insert_ID($db,'supptrans','id');
+		$SuppTransID = DB_Last_Insert_ID($db,'weberp_supptrans','id');
 
 		/* Insert the tax totals for each tax authority where tax was charged on the invoice */
 		foreach ($_SESSION['SuppTrans']->Taxes AS $TaxTotals) {
 
-			$SQL = "INSERT INTO supptranstaxes (supptransid,
+			$SQL = "INSERT INTO weberp_supptranstaxes (supptransid,
 												taxauthid,
 												taxamount)
 									VALUES ('" . $SuppTransID . "',
@@ -1167,14 +1167,14 @@ then do the updates and inserts to process the credit note entered */
 
 		foreach ($_SESSION['SuppTrans']->GRNs as $EnteredGRN){
 
-			$SQL = "UPDATE purchorderdetails SET qtyinvoiced = qtyinvoiced - " .$EnteredGRN->This_QuantityInv . "
+			$SQL = "UPDATE weberp_purchorderdetails SET qtyinvoiced = qtyinvoiced - " .$EnteredGRN->This_QuantityInv . "
 					WHERE podetailitem = '" . $EnteredGRN->PODetailItem ."'";
 
 			$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The quantity credited of the purchase order line could not be updated because');
 			$DbgMsg = _('The following SQL to update the purchase order details was used');
 			$Result = DB_query($SQL, $ErrMsg, $DbgMsg, True);
 
-			$SQL = "UPDATE grns SET quantityinv = quantityinv - " .
+			$SQL = "UPDATE weberp_grns SET quantityinv = quantityinv - " .
 					 $EnteredGRN->This_QuantityInv . " WHERE grnno = '" . $EnteredGRN->GRNNo . "'";
 
 			$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The quantity credited off the goods received record could not be updated because');
@@ -1188,7 +1188,7 @@ then do the updates and inserts to process the credit note entered */
 			if (mb_strlen($EnteredGRN->ShiptRef)>0 AND $EnteredGRN->ShiptRef!=0){
 
 				/* and insert the shipment charge records */
-				$SQL = "INSERT INTO shipmentcharges (shiptref,
+				$SQL = "INSERT INTO weberp_shipmentcharges (shiptref,
 													transtype,
 													transno,
 													stockid,
@@ -1208,7 +1208,7 @@ then do the updates and inserts to process the credit note entered */
 				$PurchPriceVar = $EnteredGRN->This_QuantityInv * (($EnteredGRN->ChgPrice  / $_SESSION['SuppTrans']->ExRate) - $EnteredGRN->StdCostUnit);
 				if ($PurchPriceVar !=0){
 					/*Add the fixed asset trans for the difference in the cost */
-					$SQL = "INSERT INTO fixedassettrans (assetid,
+					$SQL = "INSERT INTO weberp_fixedassettrans (assetid,
 														transtype,
 														transno,
 														transdate,
@@ -1228,8 +1228,8 @@ then do the updates and inserts to process the credit note entered */
 					$DbgMsg = _('The following SQL to insert the fixed asset transaction record was used');
 					$Result = DB_query($SQL,$ErrMsg, $DbgMsg, true);
 
-					/*Now update the asset cost in fixedassets table */
-					$SQL = "UPDATE fixedassets SET cost = cost - " . $PurchPriceVar  . "
+					/*Now update the asset cost in weberp_fixedassets table */
+					$SQL = "UPDATE weberp_fixedassets SET cost = cost - " . $PurchPriceVar  . "
 							WHERE assetid = '" . $EnteredGRN->AssetID . "'";
 					$ErrMsg = _('CRITICAL ERROR! NOTE DOWN THIS ERROR AND SEEK ASSISTANCE. The fixed asset cost was not able to be updated because:');
 					$DbgMsg = _('The following SQL was used to attempt the update of the fixed asset cost:');
@@ -1242,7 +1242,7 @@ then do the updates and inserts to process the credit note entered */
 
 		foreach ($_SESSION['SuppTrans']->Shipts as $ShiptChg){
 
-			$SQL = "INSERT INTO shipmentcharges (shiptref,
+			$SQL = "INSERT INTO weberp_shipmentcharges (shiptref,
 								transtype,
 								transno,
 								value)
@@ -1267,7 +1267,7 @@ then do the updates and inserts to process the credit note entered */
 			} else {
 				$Anticipated =0;
 			}
-			$SQL = "INSERT INTO contractcharges (contractref,
+			$SQL = "INSERT INTO weberp_contractcharges (contractref,
 												transtype,
 												transno,
 												amount,
@@ -1296,7 +1296,7 @@ then do the updates and inserts to process the credit note entered */
 			 */
 
 			/* First the fixed asset transaction */
-			$SQL = "INSERT INTO fixedassettrans (assetid,
+			$SQL = "INSERT INTO weberp_fixedassettrans (assetid,
 												transtype,
 												transno,
 												transdate,
@@ -1316,8 +1316,8 @@ then do the updates and inserts to process the credit note entered */
 			$DbgMsg = _('The following SQL to insert the fixed asset transaction record was used');
 			$Result = DB_query($SQL,$ErrMsg, $DbgMsg, true);
 
-			/*Now update the asset cost in fixedassets table */
-			$SQL = "UPDATE fixedassets SET cost = cost - " . ($AssetAddition->Amount  / $_SESSION['SuppTrans']->ExRate) . "
+			/*Now update the asset cost in weberp_fixedassets table */
+			$SQL = "UPDATE weberp_fixedassets SET cost = cost - " . ($AssetAddition->Amount  / $_SESSION['SuppTrans']->ExRate) . "
 					WHERE assetid = '" . $AssetAddition->AssetID . "'";
 			$ErrMsg = _('CRITICAL ERROR! NOTE DOWN THIS ERROR AND SEEK ASSISTANCE. The fixed asset cost  was not able to be updated because:');
 			$DbgMsg = _('The following SQL was used to attempt the update of the asset cost:');

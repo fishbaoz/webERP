@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: Factors.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -52,7 +52,7 @@ if (isset($_POST['Submit']) OR isset($_POST['Update'])) {
 	if ($InputError == 0 AND isset($_POST['Submit'])){
 		//And if its not a new part then update existing one
 
-		$sql = "INSERT INTO factorcompanies (id,
+		$sql = "INSERT INTO weberp_factorcompanies (id,
 						coyname,
 						address1,
 						address2,
@@ -85,7 +85,7 @@ if (isset($_POST['Submit']) OR isset($_POST['Update'])) {
 		prnMsg(_('A new factoring company for') . ' ' . $_POST['FactorName'] . ' ' . _('has been added to the database'),'success');
 
 	}elseif ($InputError == 0 and isset($_POST['Update'])) {
-		$sql = "UPDATE factorcompanies SET coyname='" . $_POST['FactorName'] . "',
+		$sql = "UPDATE weberp_factorcompanies SET coyname='" . $_POST['FactorName'] . "',
 				address1='" . $_POST['Address1'] . "',
 				address2='" . $_POST['Address2'] . "',
 				address3='" . $_POST['Address3'] . "',
@@ -125,7 +125,7 @@ if (isset($_POST['Delete'])) {
 
 	// PREVENT DELETES IF DEPENDENT RECORDS IN 'SuppTrans' , PurchOrders, SupplierContacts
 
-	$sql= "SELECT COUNT(*) FROM suppliers WHERE factorcompanyid='".$FactorID."'";
+	$sql= "SELECT COUNT(*) FROM weberp_suppliers WHERE factorcompanyid='".$FactorID."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0] > 0) {
@@ -135,7 +135,7 @@ if (isset($_POST['Delete'])) {
 	}
 
 	if ($CancelDelete == 0) {
-		$sql="DELETE FROM factorcompanies WHERE id='".$FactorID."'";
+		$sql="DELETE FROM weberp_factorcompanies WHERE id='".$FactorID."'";
 		$result = DB_query($sql);
 		prnMsg(_('Factoring company record record for') . ' ' . $_POST['FactorName'] . ' ' . _('has been deleted'),'success');
 		echo '<br />';
@@ -162,7 +162,7 @@ if (isset($FactorID) and isset($_POST['Amend'])) {
 					telephone,
 					fax,
 					email
-			FROM factorcompanies
+			FROM weberp_factorcompanies
 			WHERE id = '".$FactorID."'";
 
 	$result = DB_query($sql);
@@ -308,7 +308,7 @@ if (empty($FactorID) AND !isset($_POST['Create']) AND !isset($_POST['Amend'])) {
 					telephone,
 					fax,
 					email
-			FROM factorcompanies";
+			FROM weberp_factorcompanies";
 	$result=DB_query($sql);
 	$j=1;
 	while ($myrow = DB_fetch_array($result)) {

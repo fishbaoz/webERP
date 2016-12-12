@@ -167,31 +167,31 @@ if (isset($_POST['ShowSales'])){
 			$FromDate = FormatDateForSQL($_POST['FromDate']);
 			$ToDate = FormatDateForSQL($_POST['ToDate']);
 	}
-	$sql = "SELECT stockmoves.debtorno,
-					debtorsmaster.name,
-					SUM(CASE WHEN stockmoves.type=10
-							OR stockmoves.type=11 THEN
+	$sql = "SELECT weberp_stockmoves.debtorno,
+					weberp_debtorsmaster.name,
+					SUM(CASE WHEN weberp_stockmoves.type=10
+							OR weberp_stockmoves.type=11 THEN
 							 -qty
 							ELSE 0 END) as salesquantity,
-					SUM(CASE WHEN stockmoves.type=10 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* -qty
 							ELSE 0 END) as salesvalue,
-					SUM(CASE WHEN stockmoves.type=11 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=11 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END) as returnvalue,
-					SUM(CASE WHEN stockmoves.type=11
-								OR stockmoves.type=10 THEN
+					SUM(CASE WHEN weberp_stockmoves.type=11
+								OR weberp_stockmoves.type=10 THEN
 							price*(1-discountpercent)* (-qty)
 							ELSE 0 END) as netsalesvalue,
 					SUM((standardcost * -qty)) as cost
-			FROM stockmoves
-			INNER JOIN debtorsmaster
-			ON stockmoves.debtorno=debtorsmaster.debtorno
-			WHERE (stockmoves.type=10 or stockmoves.type=11)
+			FROM weberp_stockmoves
+			INNER JOIN weberp_debtorsmaster
+			ON weberp_stockmoves.debtorno=weberp_debtorsmaster.debtorno
+			WHERE (weberp_stockmoves.type=10 or weberp_stockmoves.type=11)
 			AND show_on_inv_crds =1
 			AND trandate>='" . $FromDate . "'
 			AND trandate<='" . $ToDate . "'
-			GROUP BY stockmoves.debtorno";
+			GROUP BY weberp_stockmoves.debtorno";
 
 	if ($_POST['OrderBy']=='NetSales'){
 		$sql .= " ORDER BY netsalesvalue DESC ";

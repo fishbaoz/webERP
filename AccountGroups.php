@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: AccountGroups.php 7678 2016-11-23 17:15:37Z rchacon $*/
 /* Defines the groupings of general ledger accounts */
 
 include('includes/session.inc');
@@ -20,7 +20,7 @@ ie the parent group results in a recursive group structure otherwise false ie 0 
 	$DbgMsg = _('The SQL that was used to retrieve the account groups of the parent account group and that failed in the process was');
 	do {
 		$sql = "SELECT parentgroupname
-				FROM accountgroups
+				FROM weberp_accountgroups
 				WHERE groupname='" . $GroupName ."'";
 
 		$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -41,7 +41,7 @@ if(isset($Errors)) {
 $Errors = array();
 
 if(isset($_POST['MoveGroup'])) {
-	$sql="UPDATE chartmaster SET group_='" . $_POST['DestinyAccountGroup'] . "' WHERE group_='" . $_POST['OriginalAccountGroup'] . "'";
+	$sql="UPDATE weberp_chartmaster SET group_='" . $_POST['DestinyAccountGroup'] . "' WHERE group_='" . $_POST['OriginalAccountGroup'] . "'";
 	$ErrMsg = _('An error occurred in moving the account group');
 	$DbgMsg = _('The SQL that was used to move the account group was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -62,7 +62,7 @@ if(isset($_POST['submit'])) {
 	$i=1;
 
 	$sql="SELECT count(groupname)
-			FROM accountgroups
+			FROM weberp_accountgroups
 			WHERE groupname='" . $_POST['GroupName'] . "'";
 
 	$DbgMsg = _('The SQL that was used to retrieve the information was');
@@ -99,7 +99,7 @@ if(isset($_POST['submit'])) {
 			$sql = "SELECT pandl,
 						sequenceintb,
 						sectioninaccounts
-					FROM accountgroups
+					FROM weberp_accountgroups
 					WHERE groupname='" . $_POST['ParentGroupName'] . "'";
 
 			$DbgMsg = _('The SQL that was used to retrieve the information was');
@@ -141,7 +141,7 @@ if(isset($_POST['submit'])) {
 
 			DB_IgnoreForeignKeys();
 
-			$sql = "UPDATE chartmaster
+			$sql = "UPDATE weberp_chartmaster
 					SET group_='" . $_POST['GroupName'] . "'
 					WHERE group_='" . $_POST['SelectedAccountGroup'] . "'";
 			$ErrMsg = _('An error occurred in renaming the account group');
@@ -149,7 +149,7 @@ if(isset($_POST['submit'])) {
 
 			$result = DB_query($sql, $ErrMsg, $DbgMsg);
 
-			$sql = "UPDATE accountgroups
+			$sql = "UPDATE weberp_accountgroups
 					SET parentgroupname='" . $_POST['GroupName'] . "'
 					WHERE parentgroupname='" . $_POST['SelectedAccountGroup'] . "'";
 
@@ -158,7 +158,7 @@ if(isset($_POST['submit'])) {
 			DB_ReinstateForeignKeys();
 		}
 
-		$sql = "UPDATE accountgroups SET groupname='" . $_POST['GroupName'] . "',
+		$sql = "UPDATE weberp_accountgroups SET groupname='" . $_POST['GroupName'] . "',
 										sectioninaccounts='" . $_POST['SectionInAccounts'] . "',
 										pandl='" . $_POST['PandL'] . "',
 										sequenceintb='" . $_POST['SequenceInTB'] . "',
@@ -172,7 +172,7 @@ if(isset($_POST['submit'])) {
 
 	/*Selected group is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new account group form */
 
-		$sql = "INSERT INTO accountgroups ( groupname,
+		$sql = "INSERT INTO weberp_accountgroups ( groupname,
 											sectioninaccounts,
 											sequenceintb,
 											pandl,
@@ -202,7 +202,7 @@ if(isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'ChartMaster'
 
-	$sql= "SELECT COUNT(group_) AS groups FROM chartmaster WHERE chartmaster.group_='" . $_GET['SelectedAccountGroup'] . "'";
+	$sql= "SELECT COUNT(group_) AS groups FROM weberp_chartmaster WHERE weberp_chartmaster.group_='" . $_GET['SelectedAccountGroup'] . "'";
 	$ErrMsg = _('An error occurred in retrieving the group information from chartmaster');
 	$DbgMsg = _('The SQL that was used to retrieve the information was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -219,7 +219,7 @@ if(isset($_POST['submit'])) {
 				<td>' . _('Parent Group') . ':' . '</td>
 				<td><select tabindex="2" ' . (in_array('ParentGroupName',$Errors) ?  'class="selecterror"' : '' ) . '  name="DestinyAccountGroup">';
 
-		$sql = "SELECT groupname FROM accountgroups";
+		$sql = "SELECT groupname FROM weberp_accountgroups";
 		$GroupResult = DB_query($sql,$ErrMsg,$DbgMsg);
 		while($GroupRow = DB_fetch_array($GroupResult) ) {
 
@@ -237,7 +237,7 @@ if(isset($_POST['submit'])) {
 		  </table>';
 
 	} else {
-		$sql = "SELECT COUNT(groupname) groupnames FROM accountgroups WHERE parentgroupname = '" . $_GET['SelectedAccountGroup'] . "'";
+		$sql = "SELECT COUNT(groupname) groupnames FROM weberp_accountgroups WHERE parentgroupname = '" . $_GET['SelectedAccountGroup'] . "'";
 		$ErrMsg = _('An error occurred in retrieving the parent group information');
 		$DbgMsg = _('The SQL that was used to retrieve the information was');
 		$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -247,7 +247,7 @@ if(isset($_POST['submit'])) {
 			echo '<br />' . _('There are') . ' ' . $myrow['groupnames'] . ' ' . _('account groups that have this group as its/there parent account group');
 
 		} else {
-			$sql="DELETE FROM accountgroups WHERE groupname='" . $_GET['SelectedAccountGroup'] . "'";
+			$sql="DELETE FROM weberp_accountgroups WHERE groupname='" . $_GET['SelectedAccountGroup'] . "'";
 			$ErrMsg = _('An error occurred in deleting the account group');
 			$DbgMsg = _('The SQL that was used to delete the account group was');
 			$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -271,8 +271,8 @@ if(!isset($_GET['SelectedAccountGroup']) AND !isset($_POST['SelectedAccountGroup
 					sequenceintb,
 					pandl,
 					parentgroupname
-			FROM accountgroups
-			LEFT JOIN accountsection ON sectionid = sectioninaccounts
+			FROM weberp_accountgroups
+			LEFT JOIN weberp_accountsection ON sectionid = sectioninaccounts
 			ORDER BY sequenceintb";
 
 	$DbgMsg = _('The sql that was used to retrieve the account group information was ');
@@ -344,7 +344,7 @@ if(!isset($_GET['delete'])) {
 						sequenceintb,
 						pandl,
 						parentgroupname
-				FROM accountgroups
+				FROM weberp_accountgroups
 				WHERE groupname='" . $_GET['SelectedAccountGroup'] ."'";
 
 		$ErrMsg = _('An error occurred in retrieving the account group information');
@@ -437,7 +437,7 @@ if(!isset($_GET['delete'])) {
 		( !isset($_POST['ParentGroupName']) ? 'selected="selected" ' : '' ),
 		'value="">', _('Top Level Group'), '</option>';
 
-	$sql = "SELECT groupname FROM accountgroups";
+	$sql = "SELECT groupname FROM weberp_accountgroups";
 	$groupresult = DB_query($sql,$ErrMsg,$DbgMsg);
 	while( $grouprow = DB_fetch_array($groupresult) ) {
 		if(isset($_POST['ParentGroupName']) AND $_POST['ParentGroupName']==$grouprow['groupname']) {
@@ -454,7 +454,7 @@ if(!isset($_GET['delete'])) {
 				( in_array('SectionInAccounts',$Errors) ? 'class="selecterror" ' : '' ),
 				'name="SectionInAccounts" tabindex="3">';
 
-	$sql = "SELECT sectionid, sectionname FROM accountsection ORDER BY sectionid";
+	$sql = "SELECT sectionid, sectionname FROM weberp_accountsection ORDER BY sectionid";
 	$secresult = DB_query($sql,$ErrMsg,$DbgMsg);
 	while( $secrow = DB_fetch_array($secresult) ) {
 		if($_POST['SectionInAccounts']==$secrow['sectionid']) {

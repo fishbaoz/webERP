@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: TaxGroups.php 7444 2016-01-13 07:32:36Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Tax Groups');
@@ -35,20 +35,20 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	unset($sql);
 	if(isset($_POST['GroupName']) ) { // Update or Add a tax group
 		if(isset($SelectedGroup)) { // Update a tax group
-			$sql = "UPDATE taxgroups SET taxgroupdescription = '". $_POST['GroupName'] ."'
+			$sql = "UPDATE weberp_taxgroups SET taxgroupdescription = '". $_POST['GroupName'] ."'
 					WHERE taxgroupid = '".$SelectedGroup . "'";
 			$ErrMsg = _('The update of the tax group description failed because');
 			$SuccessMsg = _('The tax group description was updated to') . ' ' . $_POST['GroupName'];
 		} else { // Add new tax group
 
 			$result = DB_query("SELECT taxgroupid
-								FROM taxgroups
+								FROM weberp_taxgroups
 								WHERE taxgroupdescription='" . $_POST['GroupName'] . "'");
 			if(DB_num_rows($result)==1) {
 				prnMsg( _('A new tax group could not be added because a tax group already exists for') . ' ' . $_POST['GroupName'],'warn');
 				unset($sql);
 			} else {
-				$sql = "INSERT INTO taxgroups (taxgroupdescription)
+				$sql = "INSERT INTO weberp_taxgroups (taxgroupdescription)
 						VALUES ('". $_POST['GroupName'] . "')";
 				$ErrMsg = _('The addition of the group failed because');
 				$SuccessMsg = _('Added the new tax group') . ' ' . $_POST['GroupName'];
@@ -60,7 +60,7 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 		$TaxAuthority = $_GET['TaxAuthority'];
 		if( isset($_GET['add']) ) { // adding a tax authority to a tax group
 
-			$sql = "INSERT INTO taxgrouptaxes ( taxgroupid,
+			$sql = "INSERT INTO weberp_taxgrouptaxes ( taxgroupid,
 												taxauthid,
 												calculationorder)
 					VALUES ('" . $SelectedGroup . "',
@@ -70,7 +70,7 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 			$ErrMsg = _('The addition of the tax failed because');
 			$SuccessMsg = _('The tax was added.');
 		} elseif( isset($_GET['remove']) ) { // remove a taxauthority from a tax group
-			$sql = "DELETE FROM taxgrouptaxes
+			$sql = "DELETE FROM weberp_taxgrouptaxes
 					WHERE taxgroupid = '".$SelectedGroup."'
 					AND taxauthid = '".$TaxAuthority . "'";
 			$ErrMsg = _('The removal of this tax failed because');
@@ -89,14 +89,14 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	}
 } elseif(isset($_POST['UpdateOrder'])) {
 	//A calculation order update
-	$sql = "SELECT taxauthid FROM taxgrouptaxes WHERE taxgroupid='" . $SelectedGroup . "'";
+	$sql = "SELECT taxauthid FROM weberp_taxgrouptaxes WHERE taxgroupid='" . $SelectedGroup . "'";
 	$Result = DB_query($sql,_('Could not get tax authorities in the selected tax group'));
 
 	while($myrow=DB_fetch_row($Result)) {
 
 		if(is_numeric($_POST['CalcOrder_' . $myrow[0]]) AND $_POST['CalcOrder_' . $myrow[0]] < 10) {
 
-			$sql = "UPDATE taxgrouptaxes
+			$sql = "UPDATE weberp_taxgrouptaxes
 				SET calculationorder='" . $_POST['CalcOrder_' . $myrow[0]] . "',
 					taxontax='" . $_POST['TaxOnTax_' . $myrow[0]] . "'
 				WHERE taxgroupid='" . $SelectedGroup . "'
@@ -109,7 +109,7 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 	//need to do a reality check to ensure that taxontax is relevant only for taxes after the first tax
 	$sql = "SELECT taxauthid,
 					taxontax
-			FROM taxgrouptaxes
+			FROM weberp_taxgrouptaxes
 			WHERE taxgroupid='" . $SelectedGroup . "'
 			ORDER BY calculationorder";
 
@@ -119,7 +119,7 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 		$myrow=DB_fetch_array($Result);
 		if($myrow['taxontax']==1) {
 			prnMsg(_('It is inappropriate to set tax on tax where the tax is the first in the calculation order. The system has changed it back to no tax on tax for this tax authority'),'warning');
-			$Result = DB_query("UPDATE taxgrouptaxes SET taxontax=0
+			$Result = DB_query("UPDATE weberp_taxgrouptaxes SET taxontax=0
 								WHERE taxgroupid='" . $SelectedGroup . "'
 								AND taxauthid='" . $myrow['taxauthid'] . "'");
 		}
@@ -127,14 +127,14 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 
 } elseif(isset($_GET['Delete'])) {
 	/* PREVENT DELETES IF DEPENDENT RECORDS IN 'custbranch, suppliers */
-	$sql= "SELECT COUNT(*) FROM custbranch WHERE taxgroupid='" . $_GET['SelectedGroup'] . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_custbranch WHERE taxgroupid='" . $_GET['SelectedGroup'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if($myrow[0]>0) {
 		prnMsg( _('Cannot delete this tax group because some customer branches are setup using it'),'warn');
 		echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('customer branches referring to this tax group');
 	} else {
-		$sql= "SELECT COUNT(*) FROM suppliers
+		$sql= "SELECT COUNT(*) FROM weberp_suppliers
 				WHERE taxgroupid='" . $_GET['SelectedGroup'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -143,10 +143,10 @@ if(isset($_POST['submit']) OR isset($_GET['remove']) OR isset($_GET['add']) ) {
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('suppliers referring to this tax group');
 		} else {
 
-			$sql="DELETE FROM taxgrouptaxes
+			$sql="DELETE FROM weberp_taxgrouptaxes
 					WHERE taxgroupid='" . $_GET['SelectedGroup'] . "'";
 			$result = DB_query($sql);
-			$sql="DELETE FROM taxgroups
+			$sql="DELETE FROM weberp_taxgroups
 					WHERE taxgroupid='" . $_GET['SelectedGroup'] . "'";
 			$result = DB_query($sql);
 			prnMsg( $_GET['GroupID'] . ' ' . _('tax group has been deleted') . '!','success');
@@ -162,7 +162,7 @@ if(!isset($SelectedGroup)) {
 
 	$sql = "SELECT taxgroupid,
 					taxgroupdescription
-			FROM taxgroups";
+			FROM weberp_taxgroups";
 	$result = DB_query($sql);
 
 	if( DB_num_rows($result) == 0 ) {
@@ -215,7 +215,7 @@ if(isset($SelectedGroup)) {
 
 	$sql = "SELECT taxgroupid,
 					taxgroupdescription
-			FROM taxgroups
+			FROM weberp_taxgroups
 			WHERE taxgroupid='" . $SelectedGroup . "'";
 	$result = DB_query($sql);
 	if( DB_num_rows($result) == 0 ) {
@@ -250,15 +250,15 @@ echo '<td><input type="submit" name="submit" value="' . _('Enter Group') . '" />
 if(isset($SelectedGroup)) {
 	$sql = "SELECT taxid,
 			description as taxname
-			FROM taxauthorities
+			FROM weberp_taxauthorities
 			ORDER BY taxid";
 
 	$sqlUsed = "SELECT taxauthid,
 				description AS taxname,
 				calculationorder,
 				taxontax
-			FROM taxgrouptaxes INNER JOIN taxauthorities
-				ON taxgrouptaxes.taxauthid=taxauthorities.taxid
+			FROM weberp_taxgrouptaxes INNER JOIN weberp_taxauthorities
+				ON weberp_taxgrouptaxes.taxauthid=weberp_taxauthorities.taxid
 			WHERE taxgroupid='". $SelectedGroup . "'
 			ORDER BY calculationorder";
 

@@ -26,42 +26,42 @@ if (isset($_POST['submit'])) {
 		$SQL = array();
 
 		if ($_SESSION['ShopName'] != $_POST['X_ShopName'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopName']) ."' WHERE confname = 'ShopName'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopName']) ."' WHERE confname = 'ShopName'";
 		}
 		if ($_SESSION['ShopTitle'] != $_POST['X_ShopTitle'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopTitle']) ."' WHERE confname = 'ShopTitle'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopTitle']) ."' WHERE confname = 'ShopTitle'";
 		}
 		if ($_SESSION['ShopManagerEmail'] != $_POST['X_ShopManagerEmail'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopManagerEmail']) ."' WHERE confname = 'ShopManagerEmail'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopManagerEmail']) ."' WHERE confname = 'ShopManagerEmail'";
 		}
 		if ($_SESSION['ShopPrivacyStatement'] != $_POST['X_ShopPrivacyStatement'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopPrivacyStatement']) ."' WHERE confname = 'ShopPrivacyStatement'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopPrivacyStatement']) ."' WHERE confname = 'ShopPrivacyStatement'";
 		}
 		if ($_SESSION['ShopFreightPolicy'] != $_POST['X_ShopFreightPolicy'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopFreightPolicy']) ."' WHERE confname = 'ShopFreightPolicy'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopFreightPolicy']) ."' WHERE confname = 'ShopFreightPolicy'";
 		}
 		if ($_SESSION['ShopTermsConditions'] != $_POST['X_ShopTermsConditions'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopTermsConditions']) ."' WHERE confname = 'ShopTermsConditions'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopTermsConditions']) ."' WHERE confname = 'ShopTermsConditions'";
 		}
 		if ($_SESSION['ShopAboutUs'] != $_POST['X_ShopAboutUs'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopAboutUs']) ."' WHERE confname = 'ShopAboutUs'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopAboutUs']) ."' WHERE confname = 'ShopAboutUs'";
 		}
 		if ($_SESSION['ShopContactUs'] != $_POST['X_ShopContactUs'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '" . DB_escape_string($_POST['X_ShopContactUs']) ."' WHERE confname = 'ShopContactUs'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '" . DB_escape_string($_POST['X_ShopContactUs']) ."' WHERE confname = 'ShopContactUs'";
 		}
 		if ($_SESSION['ShopDebtorNo'] != $_POST['X_ShopDebtorNo'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopDebtorNo']."' WHERE confname = 'ShopDebtorNo'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopDebtorNo']."' WHERE confname = 'ShopDebtorNo'";
 		}
 		if ($_SESSION['ShopBranchCode'] != $_POST['X_ShopBranchCode'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopBranchCode']."' WHERE confname = 'ShopBranchCode'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopBranchCode']."' WHERE confname = 'ShopBranchCode'";
 		}
 
 		if ($_SESSION['ShopShowOnlyAvailableItems'] != $_POST['X_ShopShowOnlyAvailableItems'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopShowOnlyAvailableItems']."' WHERE confname = 'ShopShowOnlyAvailableItems'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopShowOnlyAvailableItems']."' WHERE confname = 'ShopShowOnlyAvailableItems'";
 		}
 
 		if ($_SESSION['ShopShowQOHColumn'] != $_POST['X_ShopShowQOHColumn'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopShowQOHColumn']."' WHERE confname = 'ShopShowQOHColumn'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopShowQOHColumn']."' WHERE confname = 'ShopShowQOHColumn'";
 		}
 
 		if (isset($_POST['X_ShopStockLocations'])) {
@@ -71,98 +71,98 @@ if (isset($_POST['submit'])) {
 			}
 			$ShopStockLocations = mb_substr($ShopStockLocations,0,mb_strlen($ShopStockLocations)-1);
 			if ($_SESSION['ShopStockLocations'] != $ShopStockLocations){
-				$SQL[] = "UPDATE config SET confvalue='" . $ShopStockLocations . "' WHERE confname='ShopStockLocations'";
+				$SQL[] = "UPDATE weberp_config SET confvalue='" . $ShopStockLocations . "' WHERE confname='ShopStockLocations'";
 			}
 		}
 
 		if ($_SESSION['ShopAllowSurcharges'] != $_POST['X_ShopAllowSurcharges'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopAllowSurcharges']."' WHERE confname = 'ShopAllowSurcharges'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopAllowSurcharges']."' WHERE confname = 'ShopAllowSurcharges'";
 		}
 
 		if ($_SESSION['ShopAllowCreditCards'] != $_POST['X_ShopAllowCreditCards'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopAllowCreditCards']."' WHERE confname = 'ShopAllowCreditCards'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopAllowCreditCards']."' WHERE confname = 'ShopAllowCreditCards'";
 		}
 		if ($_SESSION['ShopAllowPayPal'] != $_POST['X_ShopAllowPayPal'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopAllowPayPal']."' WHERE confname = 'ShopAllowPayPal'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopAllowPayPal']."' WHERE confname = 'ShopAllowPayPal'";
 		}
 		if ($_SESSION['ShopAllowBankTransfer'] != $_POST['X_ShopAllowBankTransfer'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopAllowBankTransfer']."' WHERE confname = 'ShopAllowBankTransfer'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopAllowBankTransfer']."' WHERE confname = 'ShopAllowBankTransfer'";
 		}
 
 		if ($_SESSION['ShopPayPalSurcharge'] != $_POST['X_ShopPayPalSurcharge'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalSurcharge']."' WHERE confname = 'ShopPayPalSurcharge'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalSurcharge']."' WHERE confname = 'ShopPayPalSurcharge'";
 		}
 		if ($_SESSION['ShopBankTransferSurcharge'] != $_POST['X_ShopBankTransferSurcharge'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopBankTransferSurcharge']."' WHERE confname = 'ShopBankTransferSurcharge'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopBankTransferSurcharge']."' WHERE confname = 'ShopBankTransferSurcharge'";
 		}
 		if ($_SESSION['ShopCreditCardSurcharge'] != $_POST['X_ShopCreditCardSurcharge'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopCreditCardSurcharge']."' WHERE confname = 'ShopCreditCardSurcharge'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopCreditCardSurcharge']."' WHERE confname = 'ShopCreditCardSurcharge'";
 		}
 		if ($_SESSION['ShopSurchargeStockID'] != $_POST['X_ShopSurchargeStockID'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopSurchargeStockID']."' WHERE confname = 'ShopSurchargeStockID'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopSurchargeStockID']."' WHERE confname = 'ShopSurchargeStockID'";
 		}
 		if ($_SESSION['ShopCreditCardBankAccount'] != $_POST['X_ShopCreditCardBankAccount'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopCreditCardBankAccount']."' WHERE confname = 'ShopCreditCardBankAccount'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopCreditCardBankAccount']."' WHERE confname = 'ShopCreditCardBankAccount'";
 		}
 		if ($_SESSION['ShopPayPalBankAccount'] != $_POST['X_ShopPayPalBankAccount'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalBankAccount']."' WHERE confname = 'ShopPayPalBankAccount'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalBankAccount']."' WHERE confname = 'ShopPayPalBankAccount'";
 		}
 		if ($_SESSION['ShopPayPalCommissionAccount'] != $_POST['X_ShopPayPalCommissionAccount'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalCommissionAccount']."' WHERE confname = 'ShopPayPalCommissionAccount'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalCommissionAccount']."' WHERE confname = 'ShopPayPalCommissionAccount'";
 		}
 		if ($_SESSION['ShopFreightMethod'] != $_POST['X_ShopFreightMethod'] ) {
-			$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopFreightMethod']."' WHERE confname = 'ShopFreightMethod'";
+			$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopFreightMethod']."' WHERE confname = 'ShopFreightMethod'";
 		}
 
 		if (!$AllowDemoMode) {
 			if ($_SESSION['ShopCreditCardGateway'] != $_POST['X_ShopCreditCardGateway'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopCreditCardGateway']."' WHERE confname = 'ShopCreditCardGateway'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopCreditCardGateway']."' WHERE confname = 'ShopCreditCardGateway'";
 			}
 			if ($_SESSION['ShopPayPalUser'] != $_POST['X_ShopPayPalUser'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalUser']."' WHERE confname = 'ShopPayPalUser'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalUser']."' WHERE confname = 'ShopPayPalUser'";
 			}
 			if ($_SESSION['ShopPayPalPassword'] != $_POST['X_ShopPayPalPassword'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalPassword']."' WHERE confname = 'ShopPayPalPassword'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalPassword']."' WHERE confname = 'ShopPayPalPassword'";
 			}
 			if ($_SESSION['ShopPayPalSignature'] != $_POST['X_ShopPayPalSignature'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalSignature']."' WHERE confname = 'ShopPayPalSignature'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalSignature']."' WHERE confname = 'ShopPayPalSignature'";
 			}
 			if ($_SESSION['ShopPayPalProUser'] != $_POST['X_ShopPayPalProUser'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalProUser']."' WHERE confname = 'ShopPayPalProUser'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalProUser']."' WHERE confname = 'ShopPayPalProUser'";
 			}
 			if ($_SESSION['ShopPayPalPassword'] != $_POST['X_ShopPayPalProPassword'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalProPassword']."' WHERE confname = 'ShopPayPalProPassword'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalProPassword']."' WHERE confname = 'ShopPayPalProPassword'";
 			}
 			if ($_SESSION['ShopPayPalSignature'] != $_POST['X_ShopPayPalProSignature'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayPalProSignature']."' WHERE confname = 'ShopPayPalProSignature'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayPalProSignature']."' WHERE confname = 'ShopPayPalProSignature'";
 			}
 			if ($_SESSION['ShopPayFlowUser'] != $_POST['X_ShopPayFlowUser'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayFlowUser']."' WHERE confname = 'ShopPayFlowUser'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayFlowUser']."' WHERE confname = 'ShopPayFlowUser'";
 			}
 			if ($_SESSION['ShopPayFlowPassword'] != $_POST['X_ShopPayFlowPassword'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayFlowPassword']."' WHERE confname = 'ShopPayFlowPassword'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayFlowPassword']."' WHERE confname = 'ShopPayFlowPassword'";
 			}
 			if ($_SESSION['ShopPayFlowVendor'] != $_POST['X_ShopPayFlowVendor'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayFlowVendor']."' WHERE confname = 'ShopPayFlowVendor'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayFlowVendor']."' WHERE confname = 'ShopPayFlowVendor'";
 			}
 			if ($_SESSION['ShopPayFlowMerchant'] != $_POST['X_ShopPayFlowMerchant'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopPayFlowMerchant']."' WHERE confname = 'ShopPayFlowMerchant'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopPayFlowMerchant']."' WHERE confname = 'ShopPayFlowMerchant'";
 			}
 
 			if ($_SESSION['ShopMode'] != $_POST['X_ShopMode'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopMode']."' WHERE confname = 'ShopMode'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopMode']."' WHERE confname = 'ShopMode'";
 			}
 
 			if ($_SESSION['ShopSwipeHQMerchantID'] != $_POST['X_ShopSwipeHQMerchantID'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopSwipeHQMerchantID']."' WHERE confname = 'ShopSwipeHQMerchantID'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopSwipeHQMerchantID']."' WHERE confname = 'ShopSwipeHQMerchantID'";
 			}
 			if ($_SESSION['ShopSwipeHQAPIKey'] != $_POST['X_ShopSwipeHQAPIKey'] ) {
-				$SQL[] = "UPDATE config SET confvalue = '".$_POST['X_ShopSwipeHQAPIKey']."' WHERE confname = 'ShopSwipeHQAPIKey'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShopSwipeHQAPIKey']."' WHERE confname = 'ShopSwipeHQAPIKey'";
 			}
 		} //these options only available in live shop - not the demo.
 			else { //always ensure test mode and PayFlow for demo site
-				$SQL[] = "UPDATE config SET confvalue = 'test' WHERE confname = 'ShopMode'";
-				$SQL[] = "UPDATE config SET confvalue = 'PayPalPro' WHERE confname = 'ShopCreditCardGateway'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = 'test' WHERE confname = 'ShopMode'";
+				$SQL[] = "UPDATE weberp_config SET confvalue = 'PayPalPro' WHERE confname = 'ShopCreditCardGateway'";
 
 		}
 		$ErrMsg =  _('The shop configuration could not be updated because');
@@ -318,7 +318,7 @@ if (mb_strlen($_SESSION['ShopStockLocations'])>1){
 echo '<tr>
 		<td>' . _('Stock Locations') . ':</td>
 		<td><select name="X_ShopStockLocations[]" size="5" multiple="multiple" >';
-$LocResult = DB_query("SELECT loccode, locationname FROM locations");
+$LocResult = DB_query("SELECT loccode, locationname FROM weberp_locations");
 while ($LocRow = DB_fetch_array($LocResult)){
 	if (in_array($LocRow['loccode'],$Locations)){
 		echo '<option selected="selected" value="' . $LocRow['loccode'] . '">' . $LocRow['locationname']  . '</option>';
@@ -344,7 +344,7 @@ echo '</select></td>
 		<td>' . _('Add surcharges for different payment methods.') . '</td>
 	</tr>';
 
-$DummyItemsResult = DB_query("SELECT stockid, description FROM stockmaster WHERE mbflag='D'");
+$DummyItemsResult = DB_query("SELECT stockid, description FROM weberp_stockmaster WHERE mbflag='D'");
 echo '<tr>
 		<td>' . _('Surcharges Stock Item') . ':</td>
 		<td><select name="X_ShopSurchargeStockID">';
@@ -423,7 +423,7 @@ echo '</select></td>
 echo '<tr>
 		<td>' . _('Pay Pal Bank Account') . ':</td>
 		<td><select name="X_ShopPayPalBankAccount">';
-$BankAccountsResult = DB_query("SELECT accountcode, bankaccountname FROM bankaccounts");
+$BankAccountsResult = DB_query("SELECT accountcode, bankaccountname FROM weberp_bankaccounts");
 while ($BankAccountRow = DB_fetch_array($BankAccountsResult)){
 	if ($_SESSION['ShopPayPalBankAccount'] ==$BankAccountRow['accountcode']) {
 		echo '<option selected="selected" value="' . $BankAccountRow['accountcode'] . '">' . $BankAccountRow['bankaccountname'] . '</option>';
@@ -441,10 +441,10 @@ echo '<tr>
 		<td><select name="X_ShopPayPalCommissionAccount">';
 $AccountsResult = DB_query("SELECT accountcode,
 						accountname
-					FROM chartmaster INNER JOIN accountgroups
-					ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=1
-					ORDER BY chartmaster.accountcode");
+					FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+					ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=1
+					ORDER BY weberp_chartmaster.accountcode");
 while ($AccountRow = DB_fetch_array($AccountsResult)){
 	if ($_SESSION['ShopPayPalCommissionAccount'] == $AccountRow['accountcode']) {
 		echo '<option selected="selected" value="' . $AccountRow['accountcode'] . '">' . $AccountRow['accountname'] . '</option>';

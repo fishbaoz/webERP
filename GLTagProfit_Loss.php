@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLTagProfit_Loss.php 7385 2015-11-11 08:03:20Z tehonu $*/
 
 include ('includes/session.inc');
 $Title = _('Income and Expenditure by Tag');
@@ -43,7 +43,7 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 
 	$sql = "SELECT periodno,
 					lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			ORDER BY periodno DESC";
 	$Periods = DB_query($sql);
 
@@ -68,7 +68,7 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 		</tr>';
 	if (!isset($_POST['ToPeriod']) OR $_POST['ToPeriod']==''){
 		$LastDate = date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y')));
-		$sql = "SELECT periodno FROM periods where lastdate_in_period = '" . $LastDate . "'";
+		$sql = "SELECT periodno FROM weberp_periods where lastdate_in_period = '" . $LastDate . "'";
 		$MaxPrd = DB_query($sql);
 		$MaxPrdrow = DB_fetch_row($MaxPrd);
 		$DefaultToPeriod = (int) ($MaxPrdrow[0]);
@@ -99,7 +99,7 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 
 	$SQL = "SELECT tagref,
 				tagdescription
-				FROM tags
+				FROM weberp_tags
 				ORDER BY tagref";
 
 	$result=DB_query($SQL);
@@ -137,7 +137,7 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 
 } else if (isset($_POST['PrintPDF'])) {
 
-	$tagsql="SELECT tagdescription FROM tags WHERE tagref='".$_POST['tag']."'";
+	$tagsql="SELECT tagdescription FROM weberp_tags WHERE tagref='".$_POST['tag']."'";
 	$tagresult=DB_query($tagsql);
 	$tagrow=DB_fetch_array($tagresult);
 	$Tag=$tagrow['tagdescription'];
@@ -158,36 +158,36 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 	}
 
 	$sql = "SELECT lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			WHERE periodno='" . $_POST['ToPeriod'] . "'";
 	$PrdResult = DB_query($sql);
 	$myrow = DB_fetch_row($PrdResult);
 	$PeriodToDate = MonthAndYearFromSQLDate($myrow[0]);
 
 
-	$SQL = "SELECT accountgroups.sectioninaccounts,
-					accountgroups.groupname,
-					accountgroups.parentgroupname,
-					gltrans.account ,
-					chartmaster.accountname,
-					Sum(CASE WHEN (gltrans.periodno>='" . $_POST['FromPeriod'] . "' and gltrans.periodno<='" . $_POST['ToPeriod'] . "') THEN gltrans.amount ELSE 0 END) AS TotalAllPeriods,
-					Sum(CASE WHEN (gltrans.periodno='" . $_POST['ToPeriod'] . "') THEN gltrans.amount ELSE 0 END) AS TotalThisPeriod
-			FROM chartmaster 
-				INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname 
-				INNER JOIN gltrans ON chartmaster.accountcode= gltrans.account
-				INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-			WHERE accountgroups.pandl=1
-			AND gltrans.tag='" . $_POST['tag'] . "'
-			GROUP BY accountgroups.sectioninaccounts,
-					accountgroups.groupname,
-					accountgroups.parentgroupname,
-					gltrans.account,
-					chartmaster.accountname,
-					accountgroups.sequenceintb
-			ORDER BY accountgroups.sectioninaccounts,
-					accountgroups.sequenceintb,
-					accountgroups.groupname,
-					gltrans.account";
+	$SQL = "SELECT weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.groupname,
+					weberp_accountgroups.parentgroupname,
+					weberp_gltrans.account ,
+					weberp_chartmaster.accountname,
+					Sum(CASE WHEN (weberp_gltrans.periodno>='" . $_POST['FromPeriod'] . "' and weberp_gltrans.periodno<='" . $_POST['ToPeriod'] . "') THEN weberp_gltrans.amount ELSE 0 END) AS TotalAllPeriods,
+					Sum(CASE WHEN (weberp_gltrans.periodno='" . $_POST['ToPeriod'] . "') THEN weberp_gltrans.amount ELSE 0 END) AS TotalThisPeriod
+			FROM weberp_chartmaster 
+				INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname 
+				INNER JOIN weberp_gltrans ON weberp_chartmaster.accountcode= weberp_gltrans.account
+				INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+			WHERE weberp_accountgroups.pandl=1
+			AND weberp_gltrans.tag='" . $_POST['tag'] . "'
+			GROUP BY weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.groupname,
+					weberp_accountgroups.parentgroupname,
+					weberp_gltrans.account,
+					weberp_chartmaster.accountname,
+					weberp_accountgroups.sequenceintb
+			ORDER BY weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.sequenceintb,
+					weberp_accountgroups.groupname,
+					weberp_gltrans.account";
 
 	$AccountsResult = DB_query($SQL);
 
@@ -483,38 +483,38 @@ if ((!isset($_POST['FromPeriod']) AND !isset($_POST['ToPeriod'])) OR isset($_POS
 	}
 
 	$sql = "SELECT lastdate_in_period
-			FROM periods
+			FROM weberp_periods
 			WHERE periodno='" . $_POST['ToPeriod'] . "'";
 	$PrdResult = DB_query($sql);
 	$myrow = DB_fetch_row($PrdResult);
 	$PeriodToDate = MonthAndYearFromSQLDate($myrow[0]);
 
 
-	$SQL = "SELECT accountgroups.sectioninaccounts,
-					accountgroups.groupname,
-					accountgroups.parentgroupname,
-					gltrans.account,
-					chartmaster.accountname,
-					Sum(CASE WHEN (gltrans.periodno>='" . $_POST['FromPeriod'] . "' AND gltrans.periodno<='" . $_POST['ToPeriod'] . "') THEN gltrans.amount ELSE 0 END) AS TotalAllPeriods,
-					Sum(CASE WHEN (gltrans.periodno='" . $_POST['ToPeriod'] . "') THEN gltrans.amount ELSE 0 END) AS TotalThisPeriod
-			FROM chartmaster INNER JOIN accountgroups
-			ON chartmaster.group_ = accountgroups.groupname INNER JOIN gltrans
-			ON chartmaster.accountcode= gltrans.account
-			WHERE accountgroups.pandl=1
-			AND gltrans.tag='" . $_POST['tag'] . "'
-			GROUP BY accountgroups.sectioninaccounts,
-					accountgroups.groupname,
-					accountgroups.parentgroupname,
-					gltrans.account,
-					chartmaster.accountname
-			ORDER BY accountgroups.sectioninaccounts,
-					accountgroups.sequenceintb,
-					accountgroups.groupname,
-					gltrans.account";
+	$SQL = "SELECT weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.groupname,
+					weberp_accountgroups.parentgroupname,
+					weberp_gltrans.account,
+					weberp_chartmaster.accountname,
+					Sum(CASE WHEN (weberp_gltrans.periodno>='" . $_POST['FromPeriod'] . "' AND weberp_gltrans.periodno<='" . $_POST['ToPeriod'] . "') THEN weberp_gltrans.amount ELSE 0 END) AS TotalAllPeriods,
+					Sum(CASE WHEN (weberp_gltrans.periodno='" . $_POST['ToPeriod'] . "') THEN weberp_gltrans.amount ELSE 0 END) AS TotalThisPeriod
+			FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+			ON weberp_chartmaster.group_ = weberp_accountgroups.groupname INNER JOIN weberp_gltrans
+			ON weberp_chartmaster.accountcode= weberp_gltrans.account
+			WHERE weberp_accountgroups.pandl=1
+			AND weberp_gltrans.tag='" . $_POST['tag'] . "'
+			GROUP BY weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.groupname,
+					weberp_accountgroups.parentgroupname,
+					weberp_gltrans.account,
+					weberp_chartmaster.accountname
+			ORDER BY weberp_accountgroups.sectioninaccounts,
+					weberp_accountgroups.sequenceintb,
+					weberp_accountgroups.groupname,
+					weberp_gltrans.account";
 
 
 	$AccountsResult = DB_query($SQL,_('No general ledger accounts were returned by the SQL because'),_('The SQL that failed was'));
-	$sql="SELECT tagdescription FROM tags WHERE tagref='".$_POST['tag'] . "'";
+	$sql="SELECT tagdescription FROM weberp_tags WHERE tagref='".$_POST['tag'] . "'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 

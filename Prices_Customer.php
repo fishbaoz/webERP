@@ -1,15 +1,15 @@
 <?php
-/* $Id$*/
+/* $Id: Prices_Customer.php 7053 2014-12-28 23:21:24Z rchacon $*/
 
 include('includes/session.inc');
 
-$result = DB_query("SELECT debtorsmaster.name,
-							debtorsmaster.currcode,
-							debtorsmaster.salestype,
-							currencies.decimalplaces AS currdecimalplaces
-					 FROM debtorsmaster INNER JOIN currencies
-					 ON debtorsmaster.currcode=currencies.currabrev
-					 WHERE debtorsmaster.debtorno='" . $_SESSION['CustomerID'] . "'");
+$result = DB_query("SELECT weberp_debtorsmaster.name,
+							weberp_debtorsmaster.currcode,
+							weberp_debtorsmaster.salestype,
+							weberp_currencies.decimalplaces AS currdecimalplaces
+					 FROM weberp_debtorsmaster INNER JOIN weberp_currencies
+					 ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+					 WHERE weberp_debtorsmaster.debtorno='" . $_SESSION['CustomerID'] . "'");
 $myrow = DB_fetch_array($result);
 
 $Title = _('Special Prices for') . ' '. htmlspecialchars($myrow['name'], ENT_QUOTES, 'UTF-8');
@@ -40,10 +40,10 @@ $CurrCode = $myrow['currcode'];
 $SalesType = $myrow['salestype'];
 $CurrDecimalPlaces = $myrow['currdecimalplaces'];
 
-$result = DB_query("SELECT stockmaster.description,
-							stockmaster.mbflag
-					FROM stockmaster
-					WHERE stockmaster.stockid='" . $Item . "'");
+$result = DB_query("SELECT weberp_stockmaster.description,
+							weberp_stockmaster.mbflag
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='" . $Item . "'");
 
 $myrow = DB_fetch_row($result);
 if (DB_num_rows($result)==0){
@@ -73,10 +73,10 @@ if (isset($_POST['submit'])) {
 	}
 
 	if ($_POST['Branch'] !=''){
-		$sql = "SELECT custbranch.branchcode
-				FROM custbranch
-				WHERE custbranch.debtorno='" . $_SESSION['CustomerID'] . "'
-				AND custbranch.branchcode='" . $_POST['Branch'] . "'";
+		$sql = "SELECT weberp_custbranch.branchcode
+				FROM weberp_custbranch
+				WHERE weberp_custbranch.debtorno='" . $_SESSION['CustomerID'] . "'
+				AND weberp_custbranch.branchcode='" . $_POST['Branch'] . "'";
 
 		$result = DB_query($sql);
 		if (DB_num_rows($result) ==0){
@@ -112,24 +112,24 @@ if (isset($_POST['submit'])) {
 
 		//editing an existing price
 
-		$sql = "UPDATE prices SET typeabbrev='" . $SalesType . "',
+		$sql = "UPDATE weberp_prices SET typeabbrev='" . $SalesType . "',
 								currabrev='" . $CurrCode . "',
 								price='" . filter_number_format($_POST['Price']) . "',
 								branchcode='" . $_POST['Branch'] . "',
 								startdate='" . FormatDateForSQL($_POST['StartDate']) . "',
 								enddate='" . FormatDateForSQL($_POST['EndDate']) . "'
-				WHERE prices.stockid='" . $Item . "'
-				AND prices.typeabbrev='" . $SalesType . "'
-				AND prices.currabrev='" . $CurrCode . "'
-				AND prices.startdate='" . $_POST['OldStartDate'] . "'
-				AND prices.enddate='" . $_POST['OldEndDate'] . "'
-				AND prices.debtorno='" . $_SESSION['CustomerID'] . "'";
+				WHERE weberp_prices.stockid='" . $Item . "'
+				AND weberp_prices.typeabbrev='" . $SalesType . "'
+				AND weberp_prices.currabrev='" . $CurrCode . "'
+				AND weberp_prices.startdate='" . $_POST['OldStartDate'] . "'
+				AND weberp_prices.enddate='" . $_POST['OldEndDate'] . "'
+				AND weberp_prices.debtorno='" . $_SESSION['CustomerID'] . "'";
 
 		$msg = _('Price Updated');
 	} elseif ($InputError !=1) {
 
 	/*Selected price is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new price form */
-		$sql = "INSERT INTO prices (stockid,
+		$sql = "INSERT INTO weberp_prices (stockid,
 								typeabbrev,
 								currabrev,
 								debtorno,
@@ -170,14 +170,14 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-	$sql="DELETE FROM prices
-			WHERE prices.stockid = '". $Item ."'
-			AND prices.typeabbrev='". $SalesType ."'
-			AND prices.currabrev ='". $CurrCode ."'
-			AND prices.debtorno='" . $_SESSION['CustomerID'] . "'
-			AND prices.branchcode='" . $_GET['Branch'] . "'
-			AND prices.startdate='" . $_GET['StartDate'] . "'
-			AND prices.enddate='" . $_GET['EndDate'] . "'";
+	$sql="DELETE FROM weberp_prices
+			WHERE weberp_prices.stockid = '". $Item ."'
+			AND weberp_prices.typeabbrev='". $SalesType ."'
+			AND weberp_prices.currabrev ='". $CurrCode ."'
+			AND weberp_prices.debtorno='" . $_SESSION['CustomerID'] . "'
+			AND weberp_prices.branchcode='" . $_GET['Branch'] . "'
+			AND weberp_prices.startdate='" . $_GET['StartDate'] . "'
+			AND weberp_prices.enddate='" . $_GET['EndDate'] . "'";
 
 	$result = DB_query($sql);
 	prnMsg( _('This price has been deleted') . '!','success');
@@ -187,16 +187,16 @@ if (isset($_POST['submit'])) {
 //Always do this stuff
 //Show the normal prices in the currency of this customer
 
-$sql = "SELECT prices.price,
-				prices.currabrev,
-               prices.typeabbrev,
-               prices.startdate,
-               prices.enddate
-		FROM prices
-		WHERE  prices.stockid='" . $Item . "'
-		AND prices.typeabbrev='". $SalesType ."'
-		AND prices.currabrev ='". $CurrCode ."'
-		AND prices.debtorno=''
+$sql = "SELECT weberp_prices.price,
+				weberp_prices.currabrev,
+               weberp_prices.typeabbrev,
+               weberp_prices.startdate,
+               weberp_prices.enddate
+		FROM weberp_prices
+		WHERE  weberp_prices.stockid='" . $Item . "'
+		AND weberp_prices.typeabbrev='". $SalesType ."'
+		AND weberp_prices.currabrev ='". $CurrCode ."'
+		AND weberp_prices.debtorno=''
 		ORDER BY currabrev,
 						typeabbrev,
 						startdate";
@@ -232,21 +232,21 @@ echo '</table></td><td valign="top">';
 
 //now get the prices for the customer selected
 
-$sql = "SELECT prices.price,
-               prices.branchcode,
-			   custbranch.brname,
-			   prices.startdate,
-			   prices.enddate
-		FROM prices LEFT JOIN custbranch
-		ON prices.branchcode= custbranch.branchcode
-		WHERE prices.typeabbrev = '".$SalesType."'
-		AND prices.stockid='".$Item."'
-		AND prices.debtorno='" . $_SESSION['CustomerID'] . "'
-		AND prices.currabrev='".$CurrCode."'
-		AND (custbranch.debtorno='" . $_SESSION['CustomerID'] . "' OR
-						custbranch.debtorno IS NULL)
-		ORDER BY prices.branchcode,
-				prices.startdate";
+$sql = "SELECT weberp_prices.price,
+               weberp_prices.branchcode,
+			   weberp_custbranch.brname,
+			   weberp_prices.startdate,
+			   weberp_prices.enddate
+		FROM weberp_prices LEFT JOIN weberp_custbranch
+		ON weberp_prices.branchcode= weberp_custbranch.branchcode
+		WHERE weberp_prices.typeabbrev = '".$SalesType."'
+		AND weberp_prices.stockid='".$Item."'
+		AND weberp_prices.debtorno='" . $_SESSION['CustomerID'] . "'
+		AND weberp_prices.currabrev='".$CurrCode."'
+		AND (weberp_custbranch.debtorno='" . $_SESSION['CustomerID'] . "' OR
+						weberp_custbranch.debtorno IS NULL)
+		ORDER BY weberp_prices.branchcode,
+				weberp_prices.startdate";
 
 $ErrMsg = _('Could not retrieve the special prices set up because');
 $DbgMsg = _('The SQL used to retrieve these records was');
@@ -328,7 +328,7 @@ if (!isset($_POST['EndDate'])){
 
 $sql = "SELECT branchcode,
 				brname
-		FROM custbranch
+		FROM weberp_custbranch
 		WHERE debtorno='" . $_SESSION['CustomerID'] . "'";
 $result = DB_query($sql);
 
@@ -383,7 +383,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $CustomerID, 
 	$SQL = "SELECT branchcode,
 					startdate,
 					enddate
-					FROM prices
+					FROM weberp_prices
 					WHERE debtorno='" . $CustomerID . "'
 					AND stockid='" . $Item . "'
 					AND currabrev='" . $CurrAbbrev . "'
@@ -411,7 +411,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $CustomerID, 
 				$NextStartDate = ConvertSQLDate($myrow['startdate']);
 				if (Date1GreaterThanDate2(ConvertSQLDate($EndDate),ConvertSQLDate($myrow['startdate']))) {
 					/*Need to make the end date the new start date less 1 day */
-					$SQL = "UPDATE prices SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
+					$SQL = "UPDATE weberp_prices SET enddate = '" . FormatDateForSQL(DateAdd($NextStartDate,'d',-1))  . "'
 									WHERE stockid ='" .$Item . "'
 									AND currabrev='" . $CurrAbbrev . "'
 									AND typeabbrev='" . $PriceList . "'
@@ -434,7 +434,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $CustomerID, 
 	$SQL = "SELECT price,
 					startdate,
 					enddate
-				FROM prices
+				FROM weberp_prices
 				WHERE debtorno=''
 				AND stockid='" . $Item . "'
 				AND currabrev='" . $CurrAbbrev . "'
@@ -449,7 +449,7 @@ function ReSequenceEffectiveDates ($Item, $PriceList, $CurrAbbrev, $CustomerID, 
 		if (isset($OldStartDate)){
 		/*Need to make the end date the new start date less 1 day */
 			$NewEndDate = FormatDateForSQL(DateAdd(ConvertSQLDate($myrow['startdate']),'d',-1));
-			$SQL = "UPDATE prices SET enddate = '" . $NewEndDate  . "'
+			$SQL = "UPDATE weberp_prices SET enddate = '" . $NewEndDate  . "'
 						WHERE stockid ='" .$Item . "'
 						AND currabrev='" . $CurrAbbrev . "'
 						AND typeabbrev='" . $PriceList . "'

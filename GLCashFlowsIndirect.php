@@ -76,8 +76,8 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 		$Title, '" /> ', // Icon title.
 		$Title, '<br />', // Page title, reporting statement.
 		stripslashes($_SESSION['CompanyRecord']['coyname']), '<br />'; // Page title, reporting entity.
-	$PeriodFromName = DB_fetch_array(DB_query('SELECT lastdate_in_period FROM `periods` WHERE `periodno`=' . $_POST['PeriodFrom']));
-	$PeriodToName = DB_fetch_array(DB_query('SELECT lastdate_in_period FROM `periods` WHERE `periodno`=' . $_POST['PeriodTo']));
+	$PeriodFromName = DB_fetch_array(DB_query('SELECT lastdate_in_period FROM `weberp_periods` WHERE `periodno`=' . $_POST['PeriodFrom']));
+	$PeriodToName = DB_fetch_array(DB_query('SELECT lastdate_in_period FROM `weberp_periods` WHERE `periodno`=' . $_POST['PeriodTo']));
 	echo _('From'), ' ', MonthAndYearFromSQLDate($PeriodFromName['lastdate_in_period']), ' ', _('to'), ' ', MonthAndYearFromSQLDate($PeriodToName['lastdate_in_period']), '<br />'; // Page title, reporting period.
 	include_once('includes/CurrenciesArray.php');// Array to retrieve currency name.
 	echo _('All amounts stated in'), ': ', _($CurrencyName[$_SESSION['CompanyRecord']['currencydefault']]), '</p>';// Page title, reporting presentation currency and level of rounding used.
@@ -97,7 +97,7 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 	// Gets the net profit for the period GL account:
 	if(!isset($_SESSION['PeriodProfitAccount'])) {
 		$_SESSION['PeriodProfitAccount'] = '';
-		$MyRow = DB_fetch_array(DB_query("SELECT confvalue FROM `config` WHERE confname ='PeriodProfitAccount'"));
+		$MyRow = DB_fetch_array(DB_query("SELECT confvalue FROM `weberp_config` WHERE confname ='PeriodProfitAccount'"));
 		if($MyRow) {
 			$_SESSION['PeriodProfitAccount'] = $MyRow['confvalue'];
 		}
@@ -105,8 +105,8 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 	// Gets the retained earnings GL account:
 	if(!isset($_SESSION['RetainedEarningsAccount'])) {
 		$_SESSION['RetainedEarningsAccount'] = '';
-/*		$MyRow = DB_fetch_array(DB_query("SELECT confvalue FROM `config` WHERE confname ='RetainedEarningsAccount'"));*/
-		$MyRow = DB_fetch_array(DB_query("SELECT retainedearnings FROM companies WHERE coycode = 1"));
+/*		$MyRow = DB_fetch_array(DB_query("SELECT confvalue FROM `weberp_config` WHERE confname ='RetainedEarningsAccount'"));*/
+		$MyRow = DB_fetch_array(DB_query("SELECT retainedearnings FROM weberp_companies WHERE coycode = 1"));
 		if($MyRow) {
 			$_SESSION['RetainedEarningsAccount'] = $MyRow['confvalue'];
 		}
@@ -140,13 +140,13 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 				<td class="text">', _('Net profit for the period'), '</td>';
 		// Net profit for the period:
 		$Sql = "SELECT
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.actual ELSE 0 END) AS ActualProfit,
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.budget ELSE 0 END) AS BudgetProfit,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -chartdetails.actual ELSE 0 END) AS LastProfit
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=1";
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS ActualProfit,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.budget ELSE 0 END) AS BudgetProfit,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS LastProfit
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=1";
 		$MyRow1 = DB_fetch_array(DB_query($Sql));
 		echo	colDebitCredit($MyRow1['ActualProfit']),
 				colDebitCredit($MyRow1['BudgetProfit']),
@@ -157,15 +157,15 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 				<td class="text">', _('Dividends'), '</td>';
 		// Dividends:
 		$Sql = "SELECT
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.actual ELSE 0 END) AS ActualRetained,
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.budget ELSE 0 END) AS BudgetRetained,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN chartdetails.actual ELSE 0 END) AS LastRetained
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=0
-					AND chartdetails.accountcode!='" . $_SESSION['PeriodProfitAccount'] . "'
-					AND chartdetails.accountcode!='" . $_SESSION['RetainedEarningsAccount'] . "'";// Gets retained earnings by the complement method to include differences. The complement method: Changes(retained earnings) = -Changes(other accounts).
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.actual ELSE 0 END) AS ActualRetained,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.budget ELSE 0 END) AS BudgetRetained,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN weberp_chartdetails.actual ELSE 0 END) AS LastRetained
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=0
+					AND weberp_chartdetails.accountcode!='" . $_SESSION['PeriodProfitAccount'] . "'
+					AND weberp_chartdetails.accountcode!='" . $_SESSION['RetainedEarningsAccount'] . "'";// Gets retained earnings by the complement method to include differences. The complement method: Changes(retained earnings) = -Changes(other accounts).
 		$MyRow2 = DB_fetch_array(DB_query($Sql));
 		echo	colDebitCredit($MyRow2['ActualRetained'] - $MyRow1['ActualProfit']),
 				colDebitCredit($MyRow2['BudgetRetained'] - $MyRow1['BudgetProfit']),
@@ -184,21 +184,21 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 		$BudgetSection = 0;
 		$BudgetTotal = 0;
 		$Sql = "SELECT
-					chartmaster.cashflowsactivity,
-					chartdetails.accountcode,
-					chartmaster.accountname,
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.actual ELSE 0 END) AS ActualAmount,
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.budget ELSE 0 END) AS BudgetAmount,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -chartdetails.actual ELSE 0 END) AS LastAmount
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity!=4
+					weberp_chartmaster.cashflowsactivity,
+					weberp_chartdetails.accountcode,
+					weberp_chartmaster.accountname,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS ActualAmount,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.budget ELSE 0 END) AS BudgetAmount,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS LastAmount
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity!=4
 				GROUP BY
-					chartdetails.accountcode
+					weberp_chartdetails.accountcode
 				ORDER BY
-					chartmaster.cashflowsactivity,
-					chartdetails.accountcode";
+					weberp_chartmaster.cashflowsactivity,
+					weberp_chartdetails.accountcode";
 		$Result = DB_query($Sql);
 		$IdSection = -1;
 		// Looks for an account without setting up:
@@ -276,17 +276,17 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			$BudgetBeginning = 0;
 			$LastBeginning = 0;
 			$Sql = "SELECT
-						chartdetails.accountcode,
-						chartmaster.accountname,
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-					GROUP BY chartdetails.accountcode
-					ORDER BY chartdetails.accountcode";
+						weberp_chartdetails.accountcode,
+						weberp_chartmaster.accountname,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+					GROUP BY weberp_chartdetails.accountcode
+					ORDER BY weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -313,13 +313,13 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 		} else {
 			// Prints a summary of Cash and cash equivalents at beginning of period (Parameters: PeriodFrom, PeriodTo, ShowBudget=on, ShowZeroBalance=on/off, ShowCash=OFF):
 			$Sql = "SELECT
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4";
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4";
 			$Result = DB_query($Sql);
 			$MyRow = DB_fetch_array($Result);
 			$ActualBeginning = $MyRow['ActualAmount'];
@@ -337,17 +337,17 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			// Prints a detail of Cash and cash equivalents at end of period (Parameters: PeriodFrom, PeriodTo, ShowBudget=on, ShowZeroBalance=on/off, ShowCash=ON):
 			echo '<tr><td colspan="8">&nbsp;</td></tr>';
 			$Sql = "SELECT
-						chartdetails.accountcode,
-						chartmaster.accountname,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodTo']-11) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-					GROUP BY chartdetails.accountcode
-					ORDER BY chartdetails.accountcode";
+						weberp_chartdetails.accountcode,
+						weberp_chartmaster.accountname,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN weberp_chartdetails.bfwdbudget ELSE 0 END) AS BudgetAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodTo']-11) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+					GROUP BY weberp_chartdetails.accountcode
+					ORDER BY weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -388,18 +388,18 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			$BudgetCash = 0;
 			$LastCash = 0;
 			$Sql = "SELECT
-				chartdetails.accountcode,
-				chartmaster.accountname,
-				Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.actual ELSE 0 END) AS ActualAmount,
-				Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.budget ELSE 0 END) AS BudgetAmount,
-				Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN chartdetails.actual ELSE 0 END) AS LastAmount
-			FROM chartmaster
-				INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-				INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-			WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-			GROUP BY chartdetails.accountcode
+				weberp_chartdetails.accountcode,
+				weberp_chartmaster.accountname,
+				Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.actual ELSE 0 END) AS ActualAmount,
+				Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.budget ELSE 0 END) AS BudgetAmount,
+				Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN weberp_chartdetails.actual ELSE 0 END) AS LastAmount
+			FROM weberp_chartmaster
+				INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+				INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+			WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+			GROUP BY weberp_chartdetails.accountcode
 			ORDER BY
-				chartdetails.accountcode";
+				weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -459,12 +459,12 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 				<td class="text">', _('Net profit for the period'), '</td>';
 		// Net profit for the period:
 		$Sql = "SELECT
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.actual ELSE 0 END) AS ActualProfit,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -chartdetails.actual ELSE 0 END) AS LastProfit
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=1";
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS ActualProfit,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS LastProfit
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=1";
 		$MyRow1 = DB_fetch_array(DB_query($Sql));
 		echo	colDebitCredit($MyRow1['ActualProfit']),
 				colDebitCredit($MyRow1['LastProfit']),
@@ -474,14 +474,14 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 				<td class="text">', _('Dividends'), '</td>';
 		// Dividends:
 		$Sql = "SELECT
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.actual ELSE 0 END) AS ActualRetained,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN chartdetails.actual ELSE 0 END) AS LastRetained
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=0
-					AND chartdetails.accountcode!='" . $_SESSION['PeriodProfitAccount'] . "'
-					AND chartdetails.accountcode!='" . $_SESSION['RetainedEarningsAccount'] . "'";// Gets retained earnings by the complement method to include differences. The complement method: Changes(retained earnings) = -Changes(other accounts).
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.actual ELSE 0 END) AS ActualRetained,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN weberp_chartdetails.actual ELSE 0 END) AS LastRetained
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=0
+					AND weberp_chartdetails.accountcode!='" . $_SESSION['PeriodProfitAccount'] . "'
+					AND weberp_chartdetails.accountcode!='" . $_SESSION['RetainedEarningsAccount'] . "'";// Gets retained earnings by the complement method to include differences. The complement method: Changes(retained earnings) = -Changes(other accounts).
 		$MyRow2 = DB_fetch_array(DB_query($Sql));
 		echo	colDebitCredit($MyRow2['ActualRetained'] - $MyRow1['ActualProfit']),
 				colDebitCredit($MyRow2['LastRetained'] - $MyRow1['LastProfit']),
@@ -495,20 +495,20 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 		$LastTotal += $MyRow2['LastRetained'];
 		// Cash flows sections:
 		$Sql = "SELECT
-					chartmaster.cashflowsactivity,
-					chartdetails.accountcode,
-					chartmaster.accountname,
-					Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -chartdetails.actual ELSE 0 END) AS ActualAmount,
-					Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -chartdetails.actual ELSE 0 END) AS LastAmount
-				FROM chartmaster
-					INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-					INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-				WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity!=4
+					weberp_chartmaster.cashflowsactivity,
+					weberp_chartdetails.accountcode,
+					weberp_chartmaster.accountname,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS ActualAmount,
+					Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN -weberp_chartdetails.actual ELSE 0 END) AS LastAmount
+				FROM weberp_chartmaster
+					INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+					INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+				WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity!=4
 				GROUP BY
-					chartdetails.accountcode
+					weberp_chartdetails.accountcode
 				ORDER BY
-					chartmaster.cashflowsactivity,
-					chartdetails.accountcode";
+					weberp_chartmaster.cashflowsactivity,
+					weberp_chartdetails.accountcode";
 		$Result = DB_query($Sql);
 		$IdSection = -1;
 		// Looks for an account without setting up:
@@ -577,16 +577,16 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			$ActualBeginning = 0;
 			$LastBeginning = 0;
 			$Sql = "SELECT
-						chartdetails.accountcode,
-						chartmaster.accountname,
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-					GROUP BY chartdetails.accountcode
-					ORDER BY chartdetails.accountcode";
+						weberp_chartdetails.accountcode,
+						weberp_chartmaster.accountname,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+					GROUP BY weberp_chartdetails.accountcode
+					ORDER BY weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -610,12 +610,12 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 		} else {
 			// Prints a summary of Cash and cash equivalents at beginning of period (Parameters: PeriodFrom, PeriodTo, ShowBudget=OFF, ShowZeroBalance=on/off, ShowCash=OFF):
 			$Sql = "SELECT
-						Sum(CASE WHEN (chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4";
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . $_POST['PeriodFrom'] . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodFrom']-12) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4";
 			$Result = DB_query($Sql);
 			$MyRow = DB_fetch_array($Result);
 			$ActualBeginning = $MyRow['ActualAmount'];
@@ -631,16 +631,16 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			// Prints a detail of Cash and cash equivalents at end of period (Parameters: PeriodFrom, PeriodTo, ShowBudget=OFF, ShowZeroBalance=on/off, ShowCash=ON):
 			echo '<tr><td colspan="8">&nbsp;</td></tr>';
 			$Sql = "SELECT
-						chartdetails.accountcode,
-						chartmaster.accountname,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN chartdetails.bfwd ELSE 0 END) AS ActualAmount,
-						Sum(CASE WHEN (chartdetails.period = '" . ($_POST['PeriodTo']-11) . "') THEN chartdetails.bfwd ELSE 0 END) AS LastAmount
-					FROM chartmaster
-						INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-						INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-					WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-					GROUP BY chartdetails.accountcode
-					ORDER BY chartdetails.accountcode";
+						weberp_chartdetails.accountcode,
+						weberp_chartmaster.accountname,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodTo']+1) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS ActualAmount,
+						Sum(CASE WHEN (weberp_chartdetails.period = '" . ($_POST['PeriodTo']-11) . "') THEN weberp_chartdetails.bfwd ELSE 0 END) AS LastAmount
+					FROM weberp_chartmaster
+						INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+						INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+					WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+					GROUP BY weberp_chartdetails.accountcode
+					ORDER BY weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -677,17 +677,17 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			$ActualCash = 0;
 			$LastCash = 0;
 			$Sql = "SELECT
-				chartdetails.accountcode,
-				chartmaster.accountname,
-				Sum(CASE WHEN (chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN chartdetails.actual ELSE 0 END) AS ActualAmount,
-				Sum(CASE WHEN (chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN chartdetails.actual ELSE 0 END) AS LastAmount
-			FROM chartmaster
-				INNER JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode
-				INNER JOIN accountgroups ON chartmaster.group_=accountgroups.groupname
-			WHERE accountgroups.pandl=0 AND chartmaster.cashflowsactivity=4
-			GROUP BY chartdetails.accountcode
+				weberp_chartdetails.accountcode,
+				weberp_chartmaster.accountname,
+				Sum(CASE WHEN (weberp_chartdetails.period >= '" . $_POST['PeriodFrom'] . "' AND weberp_chartdetails.period <= '" . $_POST['PeriodTo'] . "') THEN weberp_chartdetails.actual ELSE 0 END) AS ActualAmount,
+				Sum(CASE WHEN (weberp_chartdetails.period >= '" . ($_POST['PeriodFrom']-12) . "' AND weberp_chartdetails.period <= '" . ($_POST['PeriodTo']-12) . "') THEN weberp_chartdetails.actual ELSE 0 END) AS LastAmount
+			FROM weberp_chartmaster
+				INNER JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode
+				INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+			WHERE weberp_accountgroups.pandl=0 AND weberp_chartmaster.cashflowsactivity=4
+			GROUP BY weberp_chartdetails.accountcode
 			ORDER BY
-				chartdetails.accountcode";
+				weberp_chartdetails.accountcode";
 			$Result = DB_query($Sql);
 			foreach($Result as $MyRow) {
 				if($MyRow['ActualAmount']<>0
@@ -781,7 +781,7 @@ if(isset($_POST['PeriodFrom']) AND isset($_POST['PeriodTo']) AND !isset($_POST['
 			'<tr>',
 				'<td><label for="PeriodFrom">', _('Select period from'), ':</label></td>
 		 		<td><select id="PeriodFrom" name="PeriodFrom" required="required">';
-	$Periods = DB_query('SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno ASC');
+	$Periods = DB_query('SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno ASC');
 	if(!isset($_POST['PeriodFrom'])) {
 		$BeginMonth = ($_SESSION['YearEnd']==12 ? 1 : $_SESSION['YearEnd']+1);// Sets January as the month that follows December.
 		if($BeginMonth <= date('n')) {// It is a month in the current year.

@@ -184,21 +184,21 @@ if (isset($_POST['CancelContract'])) {
 	}
 
 	if ($OK_to_delete==true){
-		$sql = "DELETE FROM contractbom WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
+		$sql = "DELETE FROM weberp_contractbom WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
 		$ErrMsg = _('The contract bill of materials could not be deleted because');
 		$DelResult=DB_query($sql,$ErrMsg);
-		$sql = "DELETE FROM contractreqts WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
+		$sql = "DELETE FROM weberp_contractreqts WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
 		$ErrMsg = _('The contract requirements could not be deleted because');
 		$DelResult=DB_query($sql,$ErrMsg);
-		$sql= "DELETE FROM contracts WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
+		$sql= "DELETE FROM weberp_contracts WHERE contractref='" . $_SESSION['Contract'.$identifier]->ContractRef . "'";
 		$ErrMsg = _('The contract could not be deleted because');
 		$DelResult=DB_query($sql,$ErrMsg);
 
 		if ($_SESSION['Contract'.$identifier]->Status==1){
-			$sql = "DELETE FROM salesorderdetails WHERE orderno='" . $_SESSION['Contract'.$identifier]->OrderNo . "'";
+			$sql = "DELETE FROM weberp_salesorderdetails WHERE orderno='" . $_SESSION['Contract'.$identifier]->OrderNo . "'";
 			$ErrMsg = _('The quotation lines for the contract could not be deleted because');
 			$DelResult=DB_query($sql,$ErrMsg);
-			$sql = "DELETE FROM salesorders WHERE orderno='" . $_SESSION['Contract'.$identifier]->OrderNo . "'";
+			$sql = "DELETE FROM weberp_salesorders WHERE orderno='" . $_SESSION['Contract'.$identifier]->OrderNo . "'";
 			$ErrMsg = _('The quotation for the contract could not be deleted because');
 			$DelResult=DB_query($sql,$ErrMsg);
 		}
@@ -248,7 +248,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 	}
 
 	//The contractRef cannot be the same as an existing stockid or contractref
-	$result = DB_query("SELECT stockid FROM stockmaster WHERE stockid='" . $_POST['ContractRef'] . "'");
+	$result = DB_query("SELECT stockid FROM weberp_stockmaster WHERE stockid='" . $_POST['ContractRef'] . "'");
 	if (DB_num_rows($result)==1 AND $_SESSION['Contract'.$identifier]->Status ==0){
 		prnMsg(_('The contract reference cannot be the same as a previously created stock item. Please modify the contract reference before continuing'),'error');
 		$InputError=true;
@@ -278,12 +278,12 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 		$_SESSION['Contract'.$identifier]->ExRate = filter_number_format($_POST['ExRate']);
 
 		/*Get the first work centre for the users location - until we set this up properly */
-		$result = DB_query("SELECT code FROM workcentres WHERE location='" . $_SESSION['Contract'.$identifier]->LocCode ."'");
+		$result = DB_query("SELECT code FROM weberp_workcentres WHERE location='" . $_SESSION['Contract'.$identifier]->LocCode ."'");
 		if (DB_num_rows($result)>0){
 			$WorkCentreRow = DB_fetch_row($result);
 			$WorkCentre = $WorkCentreRow[0];
 		} else { //need to add a default work centre for the location
-			$result = DB_query("INSERT INTO workcentres (code,
+			$result = DB_query("INSERT INTO weberp_workcentres (code,
 														location,
 														description,
 														overheadrecoveryact)
@@ -306,7 +306,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 					customerref,
 					exrate,
 					status
-			FROM contracts
+			FROM weberp_contracts
 			WHERE contractref='" . $_POST['ContractRef'] . "'";
 
 	$result = DB_query($sql);
@@ -319,7 +319,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 
 		if($ExistingContract['status']<=1 AND ! $InputError){
 			//then we can accept any changes at all do an update on the whole lot
-			$sql = "UPDATE contracts SET categoryid = '" . $_POST['CategoryID'] ."',
+			$sql = "UPDATE weberp_contracts SET categoryid = '" . $_POST['CategoryID'] ."',
 										requireddate = '" . FormatDateForSQL($_POST['RequiredDate']) . "',
 										loccode='" . $_POST['LocCode'] . "',
 										margin = '" . filter_number_format($_POST['Margin']) . "',
@@ -329,10 +329,10 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 			$ErrMsg = _('Cannot update the contract because');
 			$result = DB_query($sql,$ErrMsg);
 			/* also need to update the items on the contract BOM  - delete the existing contract BOM then add these items*/
-			$result = DB_query("DELETE FROM contractbom WHERE contractref='" .$_POST['ContractRef'] . "'");
+			$result = DB_query("DELETE FROM weberp_contractbom WHERE contractref='" .$_POST['ContractRef'] . "'");
 			$ErrMsg = _('Could not add a component to the contract bill of material');
 			foreach ($_SESSION['Contract'.$identifier]->ContractBOM as $Component){
-				$sql = "INSERT INTO contractbom (contractref,
+				$sql = "INSERT INTO weberp_contractbom (contractref,
 												stockid,
 												workcentreadded,
 												quantity)
@@ -344,10 +344,10 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 			}
 
 			/*also need to update the items on the contract requirements  - delete the existing database entries then add these */
-			$result = DB_query("DELETE FROM contractreqts WHERE contractref='" .$_POST['ContractRef'] . "'");
+			$result = DB_query("DELETE FROM weberp_contractreqts WHERE contractref='" .$_POST['ContractRef'] . "'");
 			$ErrMsg = _('Could not add a requirement to the contract requirements');
 			foreach ($_SESSION['Contract'.$identifier]->ContractReqts as $Requirement){
-				$sql = "INSERT INTO contractreqts (contractref,
+				$sql = "INSERT INTO weberp_contractreqts (contractref,
 													requirement,
 													costperunit,
 													quantity)
@@ -374,7 +374,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 			$ContractCost = $ContractReqtsCost+$ContractBOMCost;
 			$ContractPrice = ($ContractBOMCost+$ContractReqtsCost)/((100-$_SESSION['Contract'.$identifier]->Margin)/100);
 
-			$sql = "UPDATE stockmaster SET description='" . $_SESSION['Contract'.$identifier]->ContractDescription . "',
+			$sql = "UPDATE weberp_stockmaster SET description='" . $_SESSION['Contract'.$identifier]->ContractDescription . "',
 											longdescription='" . $_SESSION['Contract'.$identifier]->ContractDescription . "',
 											categoryid = '" . $_SESSION['Contract'.$identifier]->CategoryID . "',
 											materialcost= '" . $ContractCost . "'
@@ -384,7 +384,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 			$InsertNewItemResult = DB_query($sql, $ErrMsg, $DbgMsg);
 
 			//update the quotation
-			$sql = "UPDATE salesorderdetails
+			$sql = "UPDATE weberp_salesorderdetails
 						SET unitprice = '" . $ContractPrice* $_SESSION['Contract'.$identifier]->ExRate . "'
 						WHERE stkcode='" .  $_SESSION['Contract'.$identifier]->ContractRef . "'
 						AND orderno='" .  $_SESSION['Contract'.$identifier]->OrderNo . "'";
@@ -405,7 +405,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 		}
 	} elseif (!$InputError) { /*Its a new contract - so insert */
 
-		$sql = "INSERT INTO contracts ( contractref,
+		$sql = "INSERT INTO weberp_contracts ( contractref,
 										debtorno,
 										branchcode,
 										contractdescription,
@@ -432,7 +432,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 		/*Also need to add the reqts and contracbom*/
 		$ErrMsg = _('Could not add a component to the contract bill of material');
 		foreach ($_SESSION['Contract'.$identifier]->ContractBOM as $Component){
-			$sql = "INSERT INTO contractbom (contractref,
+			$sql = "INSERT INTO weberp_contractbom (contractref,
 											stockid,
 											workcentreadded,
 											quantity)
@@ -445,7 +445,7 @@ if (isset($_POST['CommitContract']) OR isset($_POST['CreateQuotation'])){
 
 		$ErrMsg = _('Could not add a requirement to the contract requirements');
 		foreach ($_SESSION['Contract'.$identifier]->ContractReqts as $Requirement){
-			$sql = "INSERT INTO contractreqts (contractref,
+			$sql = "INSERT INTO weberp_contractreqts (contractref,
 												requirement,
 												costperunit,
 												quantity)
@@ -477,13 +477,13 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 	$ContractPrice = ($ContractBOMCost+$ContractReqtsCost)/((100-$_SESSION['Contract'.$identifier]->Margin)/100);
 
 //Check if the item exists already
-	$sql = "SELECT stockid FROM stockmaster WHERE stockid='" . $_SESSION['Contract'.$identifier]->ContractRef."'";
+	$sql = "SELECT stockid FROM weberp_stockmaster WHERE stockid='" . $_SESSION['Contract'.$identifier]->ContractRef."'";
 	$ErrMsg =  _('The item could not be retrieved because');
 	$DbgMsg = _('The SQL that was used to find the item failed was');
 	$result = DB_query($sql, $ErrMsg, $DbgMsg);
 	if (DB_num_rows($result)==0) { //then the item doesn't currently exist so add it
 
-		$sql = "INSERT INTO stockmaster (stockid,
+		$sql = "INSERT INTO weberp_stockmaster (stockid,
 										description,
 										longdescription,
 										categoryid,
@@ -500,11 +500,11 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 		$ErrMsg =  _('The new contract item could not be added because');
 		$DbgMsg = _('The SQL that was used to insert the contract item failed was');
 		$InsertNewItemResult = DB_query($sql, $ErrMsg, $DbgMsg);
-		$sql = "INSERT INTO locstock (loccode,
+		$sql = "INSERT INTO weberp_locstock (loccode,
 										stockid)
-						SELECT locations.loccode,
+						SELECT weberp_locations.loccode,
 								'" . $_SESSION['Contract'.$identifier]->ContractRef . "'
-						FROM locations";
+						FROM weberp_locations";
 
 		$ErrMsg =  _('The locations for the item') . ' ' . $_SESSION['Contract'.$identifier]->ContractRef . ' ' . _('could not be added because');
 		$DbgMsg = _('NB Locations records can be added by opening the utility page') . ' <i>Z_MakeStockLocns.php</i> ' . _('The SQL that was used to add the location records that failed was');
@@ -513,22 +513,22 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 	//now add the quotation for the item
 
 	//first need to get some more details from the customer/branch record
-	$sql = "SELECT debtorsmaster.salestype,
-					custbranch.defaultshipvia,
-					custbranch.brname,
-					custbranch.braddress1,
-					custbranch.braddress2,
-					custbranch.braddress3,
-					custbranch.braddress4,
-					custbranch.braddress5,
-					custbranch.braddress6,
-					custbranch.phoneno,
-					custbranch.email,
-					custbranch.defaultlocation
-				FROM debtorsmaster INNER JOIN custbranch
-				ON debtorsmaster.debtorno=custbranch.debtorno
-				WHERE debtorsmaster.debtorno='" . $_SESSION['Contract'.$identifier]->DebtorNo  . "'
-				AND custbranch.branchcode='" . $_SESSION['Contract'.$identifier]->BranchCode . "'";
+	$sql = "SELECT weberp_debtorsmaster.salestype,
+					weberp_custbranch.defaultshipvia,
+					weberp_custbranch.brname,
+					weberp_custbranch.braddress1,
+					weberp_custbranch.braddress2,
+					weberp_custbranch.braddress3,
+					weberp_custbranch.braddress4,
+					weberp_custbranch.braddress5,
+					weberp_custbranch.braddress6,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.email,
+					weberp_custbranch.defaultlocation
+				FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+				ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+				WHERE weberp_debtorsmaster.debtorno='" . $_SESSION['Contract'.$identifier]->DebtorNo  . "'
+				AND weberp_custbranch.branchcode='" . $_SESSION['Contract'.$identifier]->BranchCode . "'";
 	$ErrMsg =  _('The customer and branch details could not be retrieved because');
 	$DbgMsg = _('The SQL that was used to find the customer and branch details failed was');
 	$CustomerDetailsResult = DB_query($sql, $ErrMsg, $DbgMsg);
@@ -538,7 +538,7 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 	//start a DB transaction
 	$Result = DB_Txn_Begin();
 	$OrderNo = GetNextTransNo(30, $db);
-	$HeaderSQL = "INSERT INTO salesorders (	orderno,
+	$HeaderSQL = "INSERT INTO weberp_salesorders (	orderno,
 											debtorno,
 											branchcode,
 											customerref,
@@ -582,7 +582,7 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 
 	$ErrMsg = _('The quotation cannot be added because');
 	$InsertQryResult = DB_query($HeaderSQL,$ErrMsg,true);
-	$LineItemSQL = "INSERT INTO salesorderdetails ( orderlineno,
+	$LineItemSQL = "INSERT INTO weberp_salesorderdetails ( orderlineno,
 													orderno,
 													stkcode,
 													unitprice,
@@ -599,10 +599,10 @@ if(isset($_POST['CreateQuotation']) AND !$InputError){
 	$DbgMsg = _('The SQL that failed was');
 	$ErrMsg = _('Unable to add the quotation line');
 	$Ins_LineItemResult = DB_query($LineItemSQL,$ErrMsg,$DbgMsg,true);
-	 //end of adding the quotation to salesorders/details
+	 //end of adding the quotation to weberp_salesorders/details
 
 	//make the status of the contract 1 - to indicate that it is now quoted
-	$sql = "UPDATE contracts SET orderno='" . $OrderNo . "',
+	$sql = "UPDATE weberp_contracts SET orderno='" . $OrderNo . "',
 								status='" . 1 . "'
 						WHERE contractref='" . DB_escape_string($_SESSION['Contract'.$identifier]->ContractRef) . "'";
 	$ErrMsg = _('Unable to update the contract status and order number because');
@@ -628,65 +628,65 @@ if (isset($_POST['SearchCustomers'])){
 		$_POST['CustKeywords'] = mb_strtoupper(trim($_POST['CustKeywords']));
 		$SearchString = '%' . str_replace(' ', '%', $_POST['CustKeywords']) . '%';
 
-		$SQL = "SELECT custbranch.brname,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.branchcode,
-						custbranch.debtorno,
-						debtorsmaster.name
-					FROM custbranch
-					LEFT JOIN debtorsmaster
-						ON custbranch.debtorno=debtorsmaster.debtorno
-					WHERE custbranch.brname " . LIKE . " '$SearchString'
-						AND custbranch.disabletrans=0
-					ORDER BY custbranch.debtorno, custbranch.branchcode";
+		$SQL = "SELECT weberp_custbranch.brname,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_custbranch
+					LEFT JOIN weberp_debtorsmaster
+						ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+					WHERE weberp_custbranch.brname " . LIKE . " '$SearchString'
+						AND weberp_custbranch.disabletrans=0
+					ORDER BY weberp_custbranch.debtorno, weberp_custbranch.branchcode";
 
 	} elseif (mb_strlen($_POST['CustCode'])>0){
 
 		$_POST['CustCode'] = mb_strtoupper(trim($_POST['CustCode']));
 
-		$SQL = "SELECT custbranch.brname,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.branchcode,
-						custbranch.debtorno,
-						debtorsmaster.name
-					FROM custbranch
-					LEFT JOIN debtorsmaster
-						ON custbranch.debtorno=debtorsmaster.debtorno
-					WHERE custbranch.branchcode " . LIKE . " '%" . $_POST['CustCode'] . "%'
-						AND custbranch.disabletrans=0
-					ORDER BY custbranch.debtorno";
+		$SQL = "SELECT weberp_custbranch.brname,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_custbranch
+					LEFT JOIN weberp_debtorsmaster
+						ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+					WHERE weberp_custbranch.branchcode " . LIKE . " '%" . $_POST['CustCode'] . "%'
+						AND weberp_custbranch.disabletrans=0
+					ORDER BY weberp_custbranch.debtorno";
 
 	} elseif (mb_strlen($_POST['CustPhone'])>0){
-		$SQL = "SELECT custbranch.brname,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.branchcode,
-						custbranch.debtorno,
-						debtorsmaster.name
-					FROM custbranch
-					LEFT JOIN debtorsmaster
-						ON custbranch.debtorno=debtorsmaster.debtorno
-					WHERE custbranch.phoneno " . LIKE . " '%" . $_POST['CustPhone'] . "%'
-						AND custbranch.disabletrans=0
-					ORDER BY custbranch.debtorno";
+		$SQL = "SELECT weberp_custbranch.brname,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_custbranch
+					LEFT JOIN weberp_debtorsmaster
+						ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+					WHERE weberp_custbranch.phoneno " . LIKE . " '%" . $_POST['CustPhone'] . "%'
+						AND weberp_custbranch.disabletrans=0
+					ORDER BY weberp_custbranch.debtorno";
 	} else {
-		$SQL = "SELECT custbranch.brname,
-						custbranch.contactname,
-						custbranch.phoneno,
-						custbranch.faxno,
-						custbranch.branchcode,
-						custbranch.debtorno,
-						debtorsmaster.name
-					FROM custbranch
-					LEFT JOIN debtorsmaster
-						ON custbranch.debtorno=debtorsmaster.debtorno
-					WHERE custbranch.disabletrans=0
-					ORDER BY custbranch.debtorno";
+		$SQL = "SELECT weberp_custbranch.brname,
+						weberp_custbranch.contactname,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.faxno,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_custbranch
+					LEFT JOIN weberp_debtorsmaster
+						ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+					WHERE weberp_custbranch.disabletrans=0
+					ORDER BY weberp_custbranch.debtorno";
 	}
 
 	$ErrMsg = _('The searched customer records requested cannot be retrieved because');
@@ -707,20 +707,20 @@ if (isset($_POST['SelectedCustomer'])) {
 	$_SESSION['Contract'.$identifier]->DebtorNo  = $_POST['SelectedCustomer'];
 	$_SESSION['Contract'.$identifier]->BranchCode = $_POST['SelectedBranch'];
 
-	$sql = "SELECT debtorsmaster.name,
-					custbranch.brname,
-					debtorsmaster.currcode,
-					debtorsmaster.holdreason,
-					holdreasons.dissallowinvoices,
-					currencies.rate
-			FROM debtorsmaster INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno
-			INNER JOIN holdreasons
-			ON debtorsmaster.holdreason=holdreasons.reasoncode
-			WHERE debtorsmaster.debtorno='" . $_SESSION['Contract'.$identifier]->DebtorNo  . "'
-			AND custbranch.branchcode='" . $_SESSION['Contract'.$identifier]->BranchCode . "'" ;
+	$sql = "SELECT weberp_debtorsmaster.name,
+					weberp_custbranch.brname,
+					weberp_debtorsmaster.currcode,
+					weberp_debtorsmaster.holdreason,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_currencies.rate
+			FROM weberp_debtorsmaster INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+			INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason=weberp_holdreasons.reasoncode
+			WHERE weberp_debtorsmaster.debtorno='" . $_SESSION['Contract'.$identifier]->DebtorNo  . "'
+			AND weberp_custbranch.branchcode='" . $_SESSION['Contract'.$identifier]->BranchCode . "'" ;
 
 	$ErrMsg = _('The customer record selected') . ': ' . $_SESSION['Contract'.$identifier]->DebtorNo . ' ' . _('cannot be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the customer details and failed was');
@@ -859,7 +859,7 @@ if (!isset($_SESSION['Contract'.$identifier]->DebtorNo)
 			<td>' . _('Category') . ':</td>
 			<td><select name="CategoryID" >';
 
-	$sql = "SELECT categoryid, categorydescription FROM stockcategory";
+	$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
 	$ErrMsg = _('The stock categories could not be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve stock categories and failed was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -874,7 +874,7 @@ if (!isset($_SESSION['Contract'.$identifier]->DebtorNo)
 
 	echo '</select><a target="_blank" href="'. $RootPath . '/StockCategories.php">' . _('Add or Modify Contract Categories') . '</a></td></tr>';
 
-	$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+	$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 	$ErrMsg = _('The stock locations could not be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve stock locations and failed was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -891,7 +891,7 @@ if (!isset($_SESSION['Contract'.$identifier]->DebtorNo)
 	}
 
 	echo '</select></td></tr>';
-	$sql = "SELECT code, description FROM workcentres INNER JOIN locationusers ON locationusers.loccode=workcentres.location AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+	$sql = "SELECT code, description FROM weberp_workcentres INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workcentres.location AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 	$result = DB_query($sql);
 
 	if (DB_num_rows($result)==0){

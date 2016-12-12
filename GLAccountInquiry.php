@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GLAccountInquiry.php 7582 2016-08-06 21:44:43Z rchacon $*/
 /* Shows the general ledger transactions for a specified account over a specified range of periods */
 
 include ('includes/session.inc');
@@ -54,14 +54,14 @@ echo '<table class="selection">
 			<td>' . _('Account').':</td>
 			<td><select name="Account">';
 
-$sql = "SELECT chartmaster.accountcode,
-			bankaccounts.accountcode AS bankact,
-			bankaccounts.currcode,
-			chartmaster.accountname
-		FROM chartmaster LEFT JOIN bankaccounts
-		ON chartmaster.accountcode=bankaccounts.accountcode
-		INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-		ORDER BY chartmaster.accountcode";
+$sql = "SELECT weberp_chartmaster.accountcode,
+			weberp_bankaccounts.accountcode AS bankact,
+			weberp_bankaccounts.currcode,
+			weberp_chartmaster.accountname
+		FROM weberp_chartmaster LEFT JOIN weberp_bankaccounts
+		ON weberp_chartmaster.accountcode=weberp_bankaccounts.accountcode
+		INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		ORDER BY weberp_chartmaster.accountcode";
 $Account = DB_query($sql);
 while ($myrow=DB_fetch_array($Account,$db)){
 	if($myrow['accountcode'] == $SelectedAccount){
@@ -83,7 +83,7 @@ echo '<tr>
 
 $SQL = "SELECT tagref,
 			tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result=DB_query($SQL);
@@ -103,7 +103,7 @@ echo '<tr>
 		<td>' . _('For Period range').':</td>
 		<td><select name="Period[]" size="12" multiple="multiple">';
 
-$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 $Periods = DB_query($sql);
 while ($myrow=DB_fetch_array($Periods,$db)){
 	if (isset($FirstPeriodSelected) AND $myrow['periodno'] >= $FirstPeriodSelected AND $myrow['periodno'] <= $LastPeriodSelected) {
@@ -133,9 +133,9 @@ if (isset($_POST['Show'])){
 	}
 	/*Is the account a balance sheet or a profit and loss account */
 	$result = DB_query("SELECT pandl
-				FROM accountgroups
-				INNER JOIN chartmaster ON accountgroups.groupname=chartmaster.group_
-				WHERE chartmaster.accountcode='" . $SelectedAccount ."'");
+				FROM weberp_accountgroups
+				INNER JOIN weberp_chartmaster ON weberp_accountgroups.groupname=weberp_chartmaster.group_
+				WHERE weberp_chartmaster.accountcode='" . $SelectedAccount ."'");
 	$PandLRow = DB_fetch_row($result);
 	if ($PandLRow[0]==1){
 		$PandLAccount = True;
@@ -149,18 +149,18 @@ if (isset($_POST['Show'])){
 	$sql= "SELECT counterindex,
 				type,
 				typename,
-				gltrans.typeno,
+				weberp_gltrans.typeno,
 				trandate,
 				narrative,
 				amount,
 				periodno,
-				gltrans.tag,
+				weberp_gltrans.tag,
 				tagdescription
-			FROM gltrans INNER JOIN systypes
-			ON systypes.typeid=gltrans.type
-			LEFT JOIN tags
-			ON gltrans.tag = tags.tagref
-			WHERE gltrans.account = '" . $SelectedAccount . "'
+			FROM weberp_gltrans INNER JOIN weberp_systypes
+			ON weberp_systypes.typeid=weberp_gltrans.type
+			LEFT JOIN weberp_tags
+			ON weberp_gltrans.tag = weberp_tags.tagref
+			WHERE weberp_gltrans.account = '" . $SelectedAccount . "'
 			AND posted=1
 			AND periodno>='" . $FirstPeriodSelected . "'
 			AND periodno<='" . $LastPeriodSelected . "'";
@@ -169,8 +169,8 @@ if (isset($_POST['Show'])){
  		$sql = $sql . " AND tag='" . $_POST['tag'] . "'";
 	}
 
-	$sql = $sql . " ORDER BY periodno, gltrans.trandate, counterindex";
-	$namesql = "SELECT accountname FROM chartmaster WHERE accountcode='" . $SelectedAccount . "'";
+	$sql = $sql . " ORDER BY periodno, weberp_gltrans.trandate, counterindex";
+	$namesql = "SELECT accountname FROM weberp_chartmaster WHERE accountcode='" . $SelectedAccount . "'";
 	$nameresult = DB_query($namesql);
 	$namerow=DB_fetch_array($nameresult);
 	$SelectedAccountName=$namerow['accountname'];
@@ -206,9 +206,9 @@ if (isset($_POST['Show'])){
 		$sql = "SELECT bfwd,
 					actual,
 					period
-				FROM chartdetails
-				WHERE chartdetails.accountcode='" . $SelectedAccount . "'
-				AND chartdetails.period='" . $FirstPeriodSelected . "'";
+				FROM weberp_chartdetails
+				WHERE weberp_chartdetails.accountcode='" . $SelectedAccount . "'
+				AND weberp_chartdetails.period='" . $FirstPeriodSelected . "'";
 
 		$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
 		$ChartDetailsResult = DB_query($sql,$ErrMsg);
@@ -243,9 +243,9 @@ if (isset($_POST['Show'])){
 				$sql = "SELECT bfwd,
 						actual,
 						period
-					FROM chartdetails
-					WHERE chartdetails.accountcode='" . $SelectedAccount . "'
-					AND chartdetails.period='" . $PeriodNo . "'";
+					FROM weberp_chartdetails
+					WHERE weberp_chartdetails.accountcode='" . $SelectedAccount . "'
+					AND weberp_chartdetails.period='" . $PeriodNo . "'";
 
 				$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
 				$ChartDetailsResult = DB_query($sql,$ErrMsg);
@@ -290,7 +290,7 @@ if (isset($_POST['Show'])){
 		$OrgAmt = '';
 		$Currency = '';
 		if ($myrow['type'] == 12 OR $myrow['type'] == 22 OR $myrow['type'] == 2 OR $myrow['type'] == 1) {
-			$banksql = "SELECT ref,currcode,amount FROM banktrans
+			$banksql = "SELECT ref,currcode,amount FROM weberp_banktrans
 				WHERE type='" .$myrow['type']."' AND transno='" . $myrow['typeno'] . "' AND bankact='" . $SelectedAccount . "'";
 			$ErrMsg = _('Failed to retrieve bank data');
 			$bankresult = DB_query($banksql,$ErrMsg);
@@ -301,7 +301,7 @@ if (isset($_POST['Show'])){
 				$Currency = $bankrow['currcode'];
 			} elseif ($myrow['type'] == 1) {
 				//We should find out when transaction happens between bank accounts;
-				$bankreceivesql = "SELECT ref,type,transno,currcode,amount FROM banktrans
+				$bankreceivesql = "SELECT ref,type,transno,currcode,amount FROM weberp_banktrans
 							WHERE ref LIKE '@%' AND transdate='" . $myrow['trandate'] . "' AND bankact='" . $SelectedAccount . "'";
 				$ErrMsg = _('Failed to retrieve bank receive data');
 				$bankresult = DB_query($bankreceivesql,$ErrMsg);

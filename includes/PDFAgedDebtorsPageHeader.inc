@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFAgedDebtorsPageHeader.inc 6941 2014-10-26 23:18:08Z daintree $*/
 /*PDF page header for aged analysis reports */
 $PageNumber++;
 if ($PageNumber>1){
@@ -18,7 +18,7 @@ $numHeads=2;
 $HeadingLine1 = _('Aged Customer Balances For Customers from') . ' ' . $_POST['FromCriteria'] . ' ' .  _('to') . ' ' . $_POST['ToCriteria'];
 $HeadingLine2 = _('And Trading in') . ' ' . $_POST['Currency'];
 if (trim($_POST['Salesman'])!=''){
-	$SQL = "SELECT salesmanname FROM salesman WHERE salesmancode='".$_POST['Salesman']."'";
+	$SQL = "SELECT salesmanname FROM weberp_salesman WHERE salesmancode='".$_POST['Salesman']."'";
 	$rs = DB_query($SQL,'','',False,False);
 	$row = DB_fetch_array($rs,$db);
 	$HeadingLine3 = _('And Has at Least 1 Branch Serviced By Sales Person #'). ' '. $_POST['Salesman'] . ' - ' . $row['salesmanname'];

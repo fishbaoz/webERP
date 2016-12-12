@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_salesman.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /* This function returns a list of the stock salesman codes
  * currently setup on webERP
@@ -12,7 +12,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = 'SELECT salesmancode FROM salesman';
+		$sql = 'SELECT salesmancode FROM weberp_salesman';
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -34,7 +34,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM salesman WHERE salesmancode='".$salesman."'";
+		$sql = "SELECT * FROM weberp_salesman WHERE salesmancode='".$salesman."'";
 		$result = DB_query($sql);
 		if (DB_num_rows($result)==0) {
 			$Errors[0]=NoSuchSalesMan;
@@ -64,7 +64,7 @@
 			$FieldNames.=$key.', ';
 			$FieldValues.='"'.$value.'", ';
 		}
-		$sql = 'INSERT INTO salesman ('.mb_substr($FieldNames,0,-2).') '.
+		$sql = 'INSERT INTO weberp_salesman ('.mb_substr($FieldNames,0,-2).') '.
 		  'VALUES ('.mb_substr($FieldValues,0,-2).') ';
 		if (sizeof($Errors)==0) {
 			$result = DB_Query($sql, $db);
@@ -89,7 +89,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM salesman WHERE salesmanname='".$SalesmanName."'";
+		$sql = "SELECT * FROM weberp_salesman WHERE salesmanname='".$SalesmanName."'";
 		$result = DB_query($sql);
 		if (DB_num_rows($result)==0) {
 			$Errors[0]=NoSuchSalesMan;

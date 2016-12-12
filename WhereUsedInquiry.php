@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: WhereUsedInquiry.php 7093 2015-01-22 20:15:40Z vvs2012 $*/
 
 include('includes/session.inc');
 $Title = _('Where Used Inquiry');
@@ -21,7 +21,7 @@ if (isset($StockID)){
 	$result = DB_query("SELECT description,
 								units,
 								mbflag
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='".$StockID."'");
 	$myrow = DB_fetch_row($result);
 	if (DB_num_rows($result)==0){
@@ -49,16 +49,16 @@ echo '<input type="submit" name="ShowWhereUsed" value="' . _('Show Where Used') 
 
 if (isset($StockID)) {
 
-	$SQL = "SELECT bom.*,
-				stockmaster.description,
-				stockmaster.discontinued
-			FROM bom INNER JOIN stockmaster
-			ON bom.parent = stockmaster.stockid
-			INNER JOIN locationusers ON locationusers.loccode=bom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+	$SQL = "SELECT weberp_bom.*,
+				weberp_stockmaster.description,
+				weberp_stockmaster.discontinued
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.parent = weberp_stockmaster.stockid
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_bom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			WHERE component='" . $StockID . "'
-                AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                AND bom.effectiveto > '" . date('Y-m-d') . "'
-			ORDER BY stockmaster.discontinued, bom.parent";
+                AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'
+			ORDER BY weberp_stockmaster.discontinued, weberp_bom.parent";
 
 	$ErrMsg = _('The parents for the selected part could not be retrieved because');;
 	$result = DB_query($SQL,$ErrMsg);

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: BankMatching.php 7092 2015-01-22 14:17:10Z rchacon $*/
 /* This script allows payments and receipts to be matched off against bank statements. */
 
 include('includes/session.inc');
@@ -48,14 +48,14 @@ if (isset($_POST['Update']) AND $_POST['RowCounter']>1){
 			/*Get amount to be cleared */
 			$sql = "SELECT amount,
 							exrate
-						FROM banktrans
+						FROM weberp_banktrans
 						WHERE banktransid='" . $_POST['BankTrans_' . $Counter]."'";
 			$ErrMsg =  _('Could not retrieve transaction information');
 			$result = DB_query($sql,$ErrMsg);
 			$myrow=DB_fetch_array($result);
 			$AmountCleared = round($myrow[0] / $myrow[1],2);
-			/*Update the banktrans recoord to match it off */
-			$sql = "UPDATE banktrans SET amountcleared= ". $AmountCleared . "
+			/*Update the weberp_banktrans recoord to match it off */
+			$sql = "UPDATE weberp_banktrans SET amountcleared= ". $AmountCleared . "
 									WHERE banktransid='" . $_POST['BankTrans_' . $Counter] . "'";
 			$ErrMsg =  _('Could not match off this payment because');
 			$result = DB_query($sql,$ErrMsg);
@@ -68,7 +68,7 @@ if (isset($_POST['Update']) AND $_POST['RowCounter']>1){
 
 			/*if the amount entered was numeric and negative for a payment or positive for a receipt */
 
-			$sql = "UPDATE banktrans SET amountcleared=" .  filter_number_format($_POST['AmtClear_' . $Counter]) . "
+			$sql = "UPDATE weberp_banktrans SET amountcleared=" .  filter_number_format($_POST['AmtClear_' . $Counter]) . "
 					 WHERE banktransid='" . $_POST['BankTrans_' . $Counter]."'";
 
 			$ErrMsg = _('Could not update the amount matched off this bank transaction because');
@@ -77,7 +77,7 @@ if (isset($_POST['Update']) AND $_POST['RowCounter']>1){
 		} elseif (isset($_POST['Unclear_' . $Counter])
 					AND $_POST['Unclear_' . $Counter]==True){
 
-			$sql = "UPDATE banktrans SET amountcleared = 0
+			$sql = "UPDATE weberp_banktrans SET amountcleared = 0
 					 WHERE banktransid='" . $_POST['BankTrans_' . $Counter]."'";
 			$ErrMsg =  _('Could not unclear this bank transaction because');
 			$result = DB_query($sql,$ErrMsg);
@@ -100,12 +100,12 @@ echo '<table class="selection">
 			<td align="left">' . _('Bank Account') . ':</td>
 			<td colspan="3"><select tabindex="1" autofocus="autofocus" name="BankAccount">';
 
-$sql = "SELECT bankaccounts.accountcode,
-				bankaccounts.bankaccountname
-		FROM bankaccounts, bankaccountusers
-		WHERE bankaccounts.accountcode=bankaccountusers.accountcode
-			AND bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
-		ORDER BY bankaccounts.bankaccountname";
+$sql = "SELECT weberp_bankaccounts.accountcode,
+				weberp_bankaccounts.bankaccountname
+		FROM weberp_bankaccounts, weberp_bankaccountusers
+		WHERE weberp_bankaccounts.accountcode=weberp_bankaccountusers.accountcode
+			AND weberp_bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
+		ORDER BY weberp_bankaccounts.bankaccountname";
 $resultBankActs = DB_query($sql);
 while ($myrow=DB_fetch_array($resultBankActs)){
 	if (isset($_POST['BankAccount'])
@@ -200,8 +200,8 @@ if ($InputError !=1
 
 	$BankResult = DB_query("SELECT decimalplaces,
 									currcode
-							FROM bankaccounts INNER JOIN currencies
-							ON bankaccounts.currcode=currencies.currabrev
+							FROM weberp_bankaccounts INNER JOIN weberp_currencies
+							ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
 							WHERE accountcode='" . $_POST['BankAccount'] . "'");
 	$BankRow = DB_fetch_array($BankResult);
 	$CurrDecimalPlaces = $BankRow['decimalplaces'];
@@ -215,7 +215,7 @@ if ($InputError !=1
 							transdate,
 							amount/exrate as amt,
 							banktranstype
-					FROM banktrans
+					FROM weberp_banktrans
 					WHERE amount < 0
 						AND transdate >= '". $SQLAfterDate . "'
 						AND transdate <= '" . $SQLBeforeDate . "'
@@ -229,7 +229,7 @@ if ($InputError !=1
 							transdate,
 							amount/exrate as amt,
 							banktranstype
-						FROM banktrans
+						FROM weberp_banktrans
 						WHERE amount > 0
 							AND transdate >= '". $SQLAfterDate . "'
 							AND transdate <= '" . $SQLBeforeDate . "'
@@ -244,7 +244,7 @@ if ($InputError !=1
 							transdate,
 							amount/exrate as amt,
 							banktranstype
-						FROM banktrans
+						FROM weberp_banktrans
 						WHERE amount < 0
 							AND transdate >= '". $SQLAfterDate . "'
 							AND transdate <= '" . $SQLBeforeDate . "'
@@ -258,7 +258,7 @@ if ($InputError !=1
 							transdate,
 							amount/exrate as amt,
 							banktranstype
-						FROM banktrans
+						FROM weberp_banktrans
 						WHERE amount > 0
 							AND transdate >= '". $SQLAfterDate . "'
 							AND transdate <= '" . $SQLBeforeDate . "'

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: PrintCustOrder.php 6941 2014-10-26 23:18:08Z daintree $ */
 
 include('includes/session.inc');
 include('includes/class.pdf.php');
@@ -37,41 +37,41 @@ If (!isset($_GET['TransNo']) OR $_GET['TransNo']==''){
 
 /*retrieve the order details from the database to print */
 $ErrMsg = _('There was a problem retrieving the order header details for Order Number') . ' ' . $_GET['TransNo'] . ' ' . _('from the database');
-$sql = "SELECT salesorders.customerref,
-			salesorders.comments,
-			salesorders.orddate,
-			salesorders.deliverto,
-			salesorders.deladd1,
-			salesorders.deladd2,
-			salesorders.deladd3,
-			salesorders.deladd4,
-			salesorders.deladd5,
-			salesorders.deladd6,
-			salesorders.debtorno,
-			salesorders.branchcode,
-			salesorders.deliverydate,
-			debtorsmaster.name,
-			debtorsmaster.address1,
-			debtorsmaster.address2,
-			debtorsmaster.address3,
-			debtorsmaster.address4,
-			debtorsmaster.address5,
-			debtorsmaster.address6,
-			shippers.shippername,
-			salesorders.printedpackingslip,
-			salesorders.datepackingslipprinted,
-			locations.locationname
-		FROM salesorders INNER JOIN debtorsmaster
-			ON salesorders.debtorno=debtorsmaster.debtorno
-		INNER JOIN shippers
-			ON salesorders.shipvia=shippers.shipper_id
-		INNER JOIN locations
-			ON salesorders.fromstkloc=locations.loccode
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE salesorders.orderno='" . $_GET['TransNo'] . "'";
+$sql = "SELECT weberp_salesorders.customerref,
+			weberp_salesorders.comments,
+			weberp_salesorders.orddate,
+			weberp_salesorders.deliverto,
+			weberp_salesorders.deladd1,
+			weberp_salesorders.deladd2,
+			weberp_salesorders.deladd3,
+			weberp_salesorders.deladd4,
+			weberp_salesorders.deladd5,
+			weberp_salesorders.deladd6,
+			weberp_salesorders.debtorno,
+			weberp_salesorders.branchcode,
+			weberp_salesorders.deliverydate,
+			weberp_debtorsmaster.name,
+			weberp_debtorsmaster.address1,
+			weberp_debtorsmaster.address2,
+			weberp_debtorsmaster.address3,
+			weberp_debtorsmaster.address4,
+			weberp_debtorsmaster.address5,
+			weberp_debtorsmaster.address6,
+			weberp_shippers.shippername,
+			weberp_salesorders.printedpackingslip,
+			weberp_salesorders.datepackingslipprinted,
+			weberp_locations.locationname
+		FROM weberp_salesorders INNER JOIN weberp_debtorsmaster
+			ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+		INNER JOIN weberp_shippers
+			ON weberp_salesorders.shipvia=weberp_shippers.shipper_id
+		INNER JOIN weberp_locations
+			ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE weberp_salesorders.orderno='" . $_GET['TransNo'] . "'";
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$sql .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$sql .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
 $result=DB_query($sql, $ErrMsg);
@@ -134,15 +134,15 @@ LETS GO */
 
 $PageNumber = 1;
 $ErrMsg = _('There was a problem retrieving the details for Order Number') . ' ' . $_GET['TransNo'] . ' ' . _('from the database');
-$sql = "SELECT salesorderdetails.stkcode,
-			stockmaster.description,
-			salesorderdetails.quantity,
-			salesorderdetails.qtyinvoiced,
-			salesorderdetails.unitprice,
-			stockmaster.decimalplaces
-		FROM salesorderdetails INNER JOIN stockmaster
-			ON salesorderdetails.stkcode=stockmaster.stockid
-		 WHERE salesorderdetails.orderno='" . $_GET['TransNo'] . "'";
+$sql = "SELECT weberp_salesorderdetails.stkcode,
+			weberp_stockmaster.description,
+			weberp_salesorderdetails.quantity,
+			weberp_salesorderdetails.qtyinvoiced,
+			weberp_salesorderdetails.unitprice,
+			weberp_stockmaster.decimalplaces
+		FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+			ON weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+		 WHERE weberp_salesorderdetails.orderno='" . $_GET['TransNo'] . "'";
 $result=DB_query($sql, $ErrMsg);
 
 if (DB_num_rows($result)>0){
@@ -226,9 +226,9 @@ if (DB_num_rows($result)>0){
 	$pdf->OutputD($_SESSION['DatabaseName'] . '_Customer_Order_' . $_GET['TransNo'] . '_' . Date('Y-m-d') .'.pdf');
 	$pdf-> __destruct();
 
-	$sql = "UPDATE salesorders SET printedpackingslip=1,
+	$sql = "UPDATE weberp_salesorders SET printedpackingslip=1,
 									datepackingslipprinted='" . Date('Y-m-d') . "'
-			WHERE salesorders.orderno='" . $_GET['TransNo'] . "'";
+			WHERE weberp_salesorders.orderno='" . $_GET['TransNo'] . "'";
 	$result = DB_query($sql);
 } else {
 	$Title = _('Print Packing Slip Error');

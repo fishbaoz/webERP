@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFGrn.php 7373 2015-10-30 12:12:52Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -40,38 +40,38 @@ if ($GRNNo == 'Preview'){
 	$NoOfGRNs =1;
 } else { //NOT PREVIEW
 
-	$sql="SELECT grns.itemcode,
-				grns.grnno,
-				grns.deliverydate,
-				grns.itemdescription,
-				grns.qtyrecd,
-				grns.supplierid,
-				grns.supplierref,
-				purchorderdetails.suppliersunit,
-				purchorderdetails.conversionfactor,
-				stockmaster.units,
-				stockmaster.decimalplaces
-			FROM grns INNER JOIN purchorderdetails
-			ON grns.podetailitem=purchorderdetails.podetailitem
-			INNER JOIN purchorders on purchorders.orderno = purchorderdetails.orderno
-			INNER JOIN locationusers ON locationusers.loccode=purchorders.intostocklocation AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			LEFT JOIN stockmaster
-			ON grns.itemcode=stockmaster.stockid
+	$sql="SELECT weberp_grns.itemcode,
+				weberp_grns.grnno,
+				weberp_grns.deliverydate,
+				weberp_grns.itemdescription,
+				weberp_grns.qtyrecd,
+				weberp_grns.supplierid,
+				weberp_grns.supplierref,
+				weberp_purchorderdetails.suppliersunit,
+				weberp_purchorderdetails.conversionfactor,
+				weberp_stockmaster.units,
+				weberp_stockmaster.decimalplaces
+			FROM weberp_grns INNER JOIN weberp_purchorderdetails
+			ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+			INNER JOIN weberp_purchorders on weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			LEFT JOIN weberp_stockmaster
+			ON weberp_grns.itemcode=weberp_stockmaster.stockid
 			WHERE grnbatch='". $GRNNo ."'";
 
 	$GRNResult=DB_query($sql);
 	$NoOfGRNs = DB_num_rows($GRNResult);
 	if($NoOfGRNs>0) { //there are GRNs to print
 
-		$sql = "SELECT suppliers.suppname,
-						suppliers.address1,
-						suppliers.address2 ,
-						suppliers.address3,
-						suppliers.address4,
-						suppliers.address5,
-						suppliers.address6
-				FROM grns INNER JOIN suppliers
-				ON grns.supplierid=suppliers.supplierid
+		$sql = "SELECT weberp_suppliers.suppname,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2 ,
+						weberp_suppliers.address3,
+						weberp_suppliers.address4,
+						weberp_suppliers.address5,
+						weberp_suppliers.address6
+				FROM weberp_grns INNER JOIN weberp_suppliers
+				ON weberp_grns.supplierid=weberp_suppliers.supplierid
 				WHERE grnbatch='". $GRNNo ."'";
 		$SuppResult = DB_query($sql,_('Could not get the supplier of the selected GRN'));
 		$SuppRow = DB_fetch_array($SuppResult);
@@ -128,19 +128,19 @@ if ($NoOfGRNs >0){
 			include ('includes/PDFGrnHeader.inc');
 		} //end if need a new page headed up
 
-		$SQL = "SELECT stockmaster.controlled
-			    FROM stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
+		$SQL = "SELECT weberp_stockmaster.controlled
+			    FROM weberp_stockmaster WHERE stockid ='" . $myrow['itemcode'] . "'";
 		$CheckControlledResult = DB_query($SQL,'<br />' . _('Could not determine if the item was controlled or not because') . ' ');
 		$ControlledRow = DB_fetch_row($CheckControlledResult);
 
 		if ($ControlledRow[0]==1) { /*Then its a controlled item */
-			$SQL = "SELECT stockserialmoves.serialno,
-					stockserialmoves.moveqty
-					FROM stockmoves INNER JOIN stockserialmoves
-					ON stockmoves.stkmoveno= stockserialmoves.stockmoveno
-					WHERE stockmoves.stockid='" . $myrow['itemcode'] . "'
-					AND stockmoves.type =25
-					AND stockmoves.transno='" . $GRNNo . "'";
+			$SQL = "SELECT weberp_stockserialmoves.serialno,
+					weberp_stockserialmoves.moveqty
+					FROM weberp_stockmoves INNER JOIN weberp_stockserialmoves
+					ON weberp_stockmoves.stkmoveno= weberp_stockserialmoves.stockmoveno
+					WHERE weberp_stockmoves.stockid='" . $myrow['itemcode'] . "'
+					AND weberp_stockmoves.type =25
+					AND weberp_stockmoves.transno='" . $GRNNo . "'";
 			$GetStockMoveResult = DB_query($SQL,_('Could not retrieve the stock movement reference number which is required in order to retrieve details of the serial items that came in with this GRN'));
 			while ($SerialStockMoves = DB_fetch_array($GetStockMoveResult)){
 				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x-20,$Page_Height-$YPos,$FormDesign->Data->Column1->Length,$FormDesign->Data->Column1->FontSize, _('Lot/Serial:'),'right');

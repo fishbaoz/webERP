@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PeriodsInquiry.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include ('includes/session.inc');
 
@@ -10,7 +10,7 @@ include('includes/header.inc');
 
 $SQL = "SELECT periodno ,
 		lastdate_in_period
-		FROM periods
+		FROM weberp_periods
 		ORDER BY periodno";
 
 $ErrMsg =  _('No periods were returned by the SQL because');

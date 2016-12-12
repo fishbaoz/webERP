@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: UnitsOfMeasure.php 6945 2014-10-27 07:20:48Z daintree $*/
 
 include('includes/session.inc');
 
@@ -39,7 +39,7 @@ if (isset($_POST['Submit'])) {
 
 		/*SelectedMeasureID could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 		// Check the name does not clash
-		$sql = "SELECT count(*) FROM unitsofmeasure
+		$sql = "SELECT count(*) FROM weberp_unitsofmeasure
 				WHERE unitid <> '" . $SelectedMeasureID ."'
 				AND unitname ".LIKE." '" . $_POST['MeasureName'] . "'";
 		$result = DB_query($sql);
@@ -51,7 +51,7 @@ if (isset($_POST['Submit'])) {
 			// Get the old name and check that the record still exist neet to be very carefull here
 			// idealy this is one of those sets that should be in a stored procedure simce even the checks are
 			// relavant
-			$sql = "SELECT unitname FROM unitsofmeasure
+			$sql = "SELECT unitname FROM weberp_unitsofmeasure
 				WHERE unitid = '" . $SelectedMeasureID . "'";
 			$result = DB_query($sql);
 			if ( DB_num_rows($result) != 0 ) {
@@ -59,10 +59,10 @@ if (isset($_POST['Submit'])) {
 				$myrow = DB_fetch_row($result);
 				$OldMeasureName = $myrow[0];
 				$sql = array();
-				$sql[] = "UPDATE unitsofmeasure
+				$sql[] = "UPDATE weberp_unitsofmeasure
 					SET unitname='" . $_POST['MeasureName'] . "'
 					WHERE unitname ".LIKE." '".$OldMeasureName."'";
-				$sql[] = "UPDATE stockmaster
+				$sql[] = "UPDATE weberp_stockmaster
 					SET units='" . $_POST['MeasureName'] . "'
 					WHERE units ".LIKE." '" . $OldMeasureName . "'";
 			} else {
@@ -73,7 +73,7 @@ if (isset($_POST['Submit'])) {
 		$msg = _('Unit of measure changed');
 	} elseif ($InputError !=1) {
 		/*SelectedMeasureID is null cos no item selected on first time round so must be adding a record*/
-		$sql = "SELECT count(*) FROM unitsofmeasure
+		$sql = "SELECT count(*) FROM weberp_unitsofmeasure
 				WHERE unitname " .LIKE. " '".$_POST['MeasureName'] ."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -81,7 +81,7 @@ if (isset($_POST['Submit'])) {
 			$InputError = 1;
 			prnMsg( _('The unit of measure can not be created because another with the same name already exists.'),'error');
 		} else {
-			$sql = "INSERT INTO unitsofmeasure (unitname )
+			$sql = "INSERT INTO weberp_unitsofmeasure (unitname )
 					VALUES ('" . $_POST['MeasureName'] ."')";
 		}
 		$msg = _('New unit of measure added');
@@ -118,7 +118,7 @@ if (isset($_POST['Submit'])) {
 //the link to delete a selected record was clicked instead of the submit button
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'stockmaster'
 	// Get the original name of the unit of measure the ID is just a secure way to find the unit of measure
-	$sql = "SELECT unitname FROM unitsofmeasure
+	$sql = "SELECT unitname FROM weberp_unitsofmeasure
 		WHERE unitid = '" . $SelectedMeasureID . "'";
 	$result = DB_query($sql);
 	if ( DB_num_rows($result) == 0 ) {
@@ -127,14 +127,14 @@ if (isset($_POST['Submit'])) {
 	} else {
 		$myrow = DB_fetch_row($result);
 		$OldMeasureName = $myrow[0];
-		$sql= "SELECT COUNT(*) FROM stockmaster WHERE units ".LIKE." '" . $OldMeasureName . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_stockmaster WHERE units ".LIKE." '" . $OldMeasureName . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
 			prnMsg( _('Cannot delete this unit of measure because inventory items have been created using this unit of measure'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('inventory items that refer to this unit of measure') . '</font>';
 		} else {
-			$sql="DELETE FROM unitsofmeasure WHERE unitname ".LIKE."'" . $OldMeasureName . "'";
+			$sql="DELETE FROM weberp_unitsofmeasure WHERE unitname ".LIKE."'" . $OldMeasureName . "'";
 			$result = DB_query($sql);
 			prnMsg( $OldMeasureName . ' ' . _('unit of measure has been deleted') . '!','success');
 		}
@@ -159,7 +159,7 @@ if (isset($_POST['Submit'])) {
 
 	$sql = "SELECT unitid,
 			unitname
-			FROM unitsofmeasure
+			FROM weberp_unitsofmeasure
 			ORDER BY unitid";
 
 	$ErrMsg = _('Could not get unit of measures because');
@@ -210,7 +210,7 @@ if (! isset($_GET['delete'])) {
 
 		$sql = "SELECT unitid,
 				unitname
-				FROM unitsofmeasure
+				FROM weberp_unitsofmeasure
 				WHERE unitid='" . $SelectedMeasureID . "'";
 
 		$result = DB_query($sql);

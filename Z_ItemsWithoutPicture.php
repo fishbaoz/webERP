@@ -6,14 +6,14 @@ include ('includes/session.inc');
 $Title = _('List of Items without picture');
 include ('includes/header.inc');
 
-$SQL = "SELECT stockmaster.stockid,
-			stockmaster.description,
-			stockcategory.categorydescription
-		FROM stockmaster, stockcategory
-		WHERE stockmaster.categoryid = stockcategory.categoryid
-			AND stockmaster.discontinued = 0
-			AND stockcategory.stocktype != 'D'
-		ORDER BY stockcategory.categorydescription, stockmaster.stockid";
+$SQL = "SELECT weberp_stockmaster.stockid,
+			weberp_stockmaster.description,
+			weberp_stockcategory.categorydescription
+		FROM weberp_stockmaster, weberp_stockcategory
+		WHERE weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+			AND weberp_stockmaster.discontinued = 0
+			AND weberp_stockcategory.stocktype != 'D'
+		ORDER BY weberp_stockcategory.categorydescription, weberp_stockmaster.stockid";
 $result = DB_query($SQL);
 $PrintHeader = TRUE;
 

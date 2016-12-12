@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PDFOrdersInvoiced.php 7623 2016-09-14 10:03:08Z exsonqu $*/
 
 include ('includes/session.inc');
 $Title = _('Orders Invoiced Report');
@@ -49,7 +49,7 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 			<td>' . _('Inventory Category') . '</td>
 			<td>';
 
-	$sql = "SELECT categorydescription, categoryid FROM stockcategory";
+	$sql = "SELECT categorydescription, categoryid FROM weberp_stockcategory";
 	$result = DB_query($sql);
 
 	echo '<select required="required" name="CategoryID">';
@@ -65,7 +65,7 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 			<td><select required="required" name="Location">
 				<option selected="selected" value="All">' . _('All Locations') . '</option>';
 
-	$result= DB_query("SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1");
+	$result= DB_query("SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1");
 	while ($myrow=DB_fetch_array($result)){
 		echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
 	}
@@ -91,160 +91,160 @@ if (!isset($_POST['FromDate']) OR !isset($_POST['ToDate']) OR $InputError==1){
 }
 
 if ($_POST['CategoryID']=='All' AND $_POST['Location']=='All'){
-	$sql= "SELECT salesorders.orderno,
-				  salesorders.debtorno,
-				  salesorders.branchcode,
-				  salesorders.customerref,
-				  salesorders.orddate,
-				  salesorders.fromstkloc,
-				  salesorders.printedpackingslip,
-				  salesorders.datepackingslipprinted,
-				  salesorderdetails.stkcode,
-				  stockmaster.description,
-				  stockmaster.units,
-				  stockmaster.decimalplaces,
-				  debtorsmaster.name,
-				  custbranch.brname,
-				  locations.locationname,
-				  SUM(salesorderdetails.quantity) AS totqty,
-				  SUM(salesorderdetails.qtyinvoiced) AS totqtyinvoiced
-			   FROM salesorders
-				 INNER JOIN salesorderdetails
-				 ON salesorders.orderno = salesorderdetails.orderno
-				 INNER JOIN stockmaster
-				 ON salesorderdetails.stkcode = stockmaster.stockid
-				 INNER JOIN debtorsmaster
-				 ON salesorders.debtorno=debtorsmaster.debtorno
-				 INNER JOIN custbranch
-				 ON custbranch.debtorno=salesorders.debtorno
-				 AND custbranch.branchcode=salesorders.branchcode
-				 INNER JOIN locations
-				 ON salesorders.fromstkloc=locations.loccode
-				 INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+	$sql= "SELECT weberp_salesorders.orderno,
+				  weberp_salesorders.debtorno,
+				  weberp_salesorders.branchcode,
+				  weberp_salesorders.customerref,
+				  weberp_salesorders.orddate,
+				  weberp_salesorders.fromstkloc,
+				  weberp_salesorders.printedpackingslip,
+				  weberp_salesorders.datepackingslipprinted,
+				  weberp_salesorderdetails.stkcode,
+				  weberp_stockmaster.description,
+				  weberp_stockmaster.units,
+				  weberp_stockmaster.decimalplaces,
+				  weberp_debtorsmaster.name,
+				  weberp_custbranch.brname,
+				  weberp_locations.locationname,
+				  SUM(weberp_salesorderdetails.quantity) AS totqty,
+				  SUM(weberp_salesorderdetails.qtyinvoiced) AS totqtyinvoiced
+			   FROM weberp_salesorders
+				 INNER JOIN weberp_salesorderdetails
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				 INNER JOIN weberp_stockmaster
+				 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+				 INNER JOIN weberp_debtorsmaster
+				 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+				 INNER JOIN weberp_custbranch
+				 ON weberp_custbranch.debtorno=weberp_salesorders.debtorno
+				 AND weberp_custbranch.branchcode=weberp_salesorders.branchcode
+				 INNER JOIN weberp_locations
+				 ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+				 INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			 WHERE orddate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 				  AND orddate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 
 } elseif ($_POST['CategoryID']!='All' AND $_POST['Location']=='All') {
-	$sql= "SELECT salesorders.orderno,
-				  salesorders.debtorno,
-				  salesorders.branchcode,
-				  salesorders.customerref,
-				  salesorders.orddate,
-				  salesorders.fromstkloc,
-				  salesorders.printedpackingslip,
-				  salesorders.datepackingslipprinted,
-				  salesorderdetails.stkcode,
-				  stockmaster.description,
-				  stockmaster.units,
-				  stockmaster.decimalplaces,
-				  debtorsmaster.name,
-				  custbranch.brname,
-				  locations.locationname,
-				  SUM(salesorderdetails.quantity) AS totqty,
-				  SUM(salesorderdetails.qtyinvoiced) AS totqtyinvoiced
-			 FROM salesorders
-				 INNER JOIN salesorderdetails
-				 ON salesorders.orderno = salesorderdetails.orderno
-				 INNER JOIN stockmaster
-				 ON salesorderdetails.stkcode = stockmaster.stockid
-				 INNER JOIN debtorsmaster
-				 ON salesorders.debtorno=debtorsmaster.debtorno
-				 INNER JOIN custbranch
-				 ON custbranch.debtorno=salesorders.debtorno
-				 AND custbranch.branchcode=salesorders.branchcode
-				 INNER JOIN locations
-				 ON salesorders.fromstkloc=locations.loccode
-				 INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			 WHERE stockmaster.categoryid ='" . $_POST['CategoryID'] . "'
+	$sql= "SELECT weberp_salesorders.orderno,
+				  weberp_salesorders.debtorno,
+				  weberp_salesorders.branchcode,
+				  weberp_salesorders.customerref,
+				  weberp_salesorders.orddate,
+				  weberp_salesorders.fromstkloc,
+				  weberp_salesorders.printedpackingslip,
+				  weberp_salesorders.datepackingslipprinted,
+				  weberp_salesorderdetails.stkcode,
+				  weberp_stockmaster.description,
+				  weberp_stockmaster.units,
+				  weberp_stockmaster.decimalplaces,
+				  weberp_debtorsmaster.name,
+				  weberp_custbranch.brname,
+				  weberp_locations.locationname,
+				  SUM(weberp_salesorderdetails.quantity) AS totqty,
+				  SUM(weberp_salesorderdetails.qtyinvoiced) AS totqtyinvoiced
+			 FROM weberp_salesorders
+				 INNER JOIN weberp_salesorderdetails
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				 INNER JOIN weberp_stockmaster
+				 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+				 INNER JOIN weberp_debtorsmaster
+				 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+				 INNER JOIN weberp_custbranch
+				 ON weberp_custbranch.debtorno=weberp_salesorders.debtorno
+				 AND weberp_custbranch.branchcode=weberp_salesorders.branchcode
+				 INNER JOIN weberp_locations
+				 ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+				 INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			 WHERE weberp_stockmaster.categoryid ='" . $_POST['CategoryID'] . "'
 				  AND orddate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 				  AND orddate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 } elseif ($_POST['CategoryID']=='All' AND $_POST['Location']!='All') {
-	$sql= "SELECT salesorders.orderno,
-				  salesorders.debtorno,
-				  salesorders.branchcode,
-				  salesorders.customerref,
-				  salesorders.orddate,
-				  salesorders.fromstkloc,
-				  salesorders.printedpackingslip,
-				  salesorders.datepackingslipprinted,
-				  salesorderdetails.stkcode,
-				  stockmaster.description,
-				  stockmaster.units,
-				  stockmaster.decimalplaces,
-				  debtorsmaster.name,
-				  custbranch.brname,
-				  locations.locationname,
-				  SUM(salesorderdetails.quantity) AS totqty,
-				  SUM(salesorderdetails.qtyinvoiced) AS totqtyinvoiced
-			 FROM salesorders
-				 INNER JOIN salesorderdetails
-				 ON salesorders.orderno = salesorderdetails.orderno
-				 INNER JOIN stockmaster
-				 ON salesorderdetails.stkcode = stockmaster.stockid
-				 INNER JOIN debtorsmaster
-				 ON salesorders.debtorno=debtorsmaster.debtorno
-				 INNER JOIN custbranch
-				 ON custbranch.debtorno=salesorders.debtorno
-				 AND custbranch.branchcode=salesorders.branchcode
-				 INNER JOIN locations
-				 ON salesorders.fromstkloc=locations.loccode
-				 INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			 WHERE salesorders.fromstkloc ='" . $_POST['Location'] . "'
+	$sql= "SELECT weberp_salesorders.orderno,
+				  weberp_salesorders.debtorno,
+				  weberp_salesorders.branchcode,
+				  weberp_salesorders.customerref,
+				  weberp_salesorders.orddate,
+				  weberp_salesorders.fromstkloc,
+				  weberp_salesorders.printedpackingslip,
+				  weberp_salesorders.datepackingslipprinted,
+				  weberp_salesorderdetails.stkcode,
+				  weberp_stockmaster.description,
+				  weberp_stockmaster.units,
+				  weberp_stockmaster.decimalplaces,
+				  weberp_debtorsmaster.name,
+				  weberp_custbranch.brname,
+				  weberp_locations.locationname,
+				  SUM(weberp_salesorderdetails.quantity) AS totqty,
+				  SUM(weberp_salesorderdetails.qtyinvoiced) AS totqtyinvoiced
+			 FROM weberp_salesorders
+				 INNER JOIN weberp_salesorderdetails
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				 INNER JOIN weberp_stockmaster
+				 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+				 INNER JOIN weberp_debtorsmaster
+				 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+				 INNER JOIN weberp_custbranch
+				 ON weberp_custbranch.debtorno=weberp_salesorders.debtorno
+				 AND weberp_custbranch.branchcode=weberp_salesorders.branchcode
+				 INNER JOIN weberp_locations
+				 ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+				 INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			 WHERE weberp_salesorders.fromstkloc ='" . $_POST['Location'] . "'
 				  AND orddate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 				  AND orddate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 
 } elseif ($_POST['CategoryID']!='All' AND $_POST['location']!='All'){
-	$sql= "SELECT salesorders.orderno,
-				  salesorders.debtorno,
-				  salesorders.branchcode,
-				  salesorders.customerref,
-				  salesorders.orddate,
-				  salesorders.fromstkloc,
-				  salesorderdetails.stkcode,
-				  stockmaster.description,
-				  stockmaster.units,
-				  stockmaster.decimalplaces,
-				  debtorsmaster.name,
-				  custbranch.brname,
-				  locations.locationname,
-				  SUM(salesorderdetails.quantity) AS totqty,
-				  SUM(salesorderdetails.qtyinvoiced) AS totqtyinvoiced
-			FROM salesorders
-				 INNER JOIN salesorderdetails
-				 ON salesorders.orderno = salesorderdetails.orderno
-				 INNER JOIN stockmaster
-				 ON salesorderdetails.stkcode = stockmaster.stockid
-				 INNER JOIN debtorsmaster
-				 ON salesorders.debtorno=debtorsmaster.debtorno
-				 INNER JOIN custbranch
-				 ON custbranch.debtorno=salesorders.debtorno
-				 AND custbranch.branchcode=salesorders.branchcode
-				 INNER JOIN locations
-				 ON salesorders.fromstkloc=locations.loccode
-				 INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE stockmaster.categoryid ='" . $_POST['CategoryID'] . "'
-				  AND salesorders.fromstkloc ='" . $_POST['Location'] . "'
+	$sql= "SELECT weberp_salesorders.orderno,
+				  weberp_salesorders.debtorno,
+				  weberp_salesorders.branchcode,
+				  weberp_salesorders.customerref,
+				  weberp_salesorders.orddate,
+				  weberp_salesorders.fromstkloc,
+				  weberp_salesorderdetails.stkcode,
+				  weberp_stockmaster.description,
+				  weberp_stockmaster.units,
+				  weberp_stockmaster.decimalplaces,
+				  weberp_debtorsmaster.name,
+				  weberp_custbranch.brname,
+				  weberp_locations.locationname,
+				  SUM(weberp_salesorderdetails.quantity) AS totqty,
+				  SUM(weberp_salesorderdetails.qtyinvoiced) AS totqtyinvoiced
+			FROM weberp_salesorders
+				 INNER JOIN weberp_salesorderdetails
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				 INNER JOIN weberp_stockmaster
+				 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+				 INNER JOIN weberp_debtorsmaster
+				 ON weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+				 INNER JOIN weberp_custbranch
+				 ON weberp_custbranch.debtorno=weberp_salesorders.debtorno
+				 AND weberp_custbranch.branchcode=weberp_salesorders.branchcode
+				 INNER JOIN weberp_locations
+				 ON weberp_salesorders.fromstkloc=weberp_locations.loccode
+				 INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_stockmaster.categoryid ='" . $_POST['CategoryID'] . "'
+				  AND weberp_salesorders.fromstkloc ='" . $_POST['Location'] . "'
 				  AND orddate >='" . FormatDateForSQL($_POST['FromDate']) . "'
 				  AND orddate <='" . FormatDateForSQL($_POST['ToDate']) . "'";
 }
 
 if ($_SESSION['SalesmanLogin'] != '') {
-	$sql .= " AND salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+	$sql .= " AND weberp_salesorders.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 }
 
-$sql .= " GROUP BY salesorders.orderno,
-					salesorders.debtorno,
-					salesorders.branchcode,
-					salesorders.customerref,
-					salesorders.orddate,
-					salesorders.fromstkloc,
-					salesorderdetails.stkcode,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.decimalplaces
-			ORDER BY salesorders.orderno";
+$sql .= " GROUP BY weberp_salesorders.orderno,
+					weberp_salesorders.debtorno,
+					weberp_salesorders.branchcode,
+					weberp_salesorders.customerref,
+					weberp_salesorders.orddate,
+					weberp_salesorders.fromstkloc,
+					weberp_salesorderdetails.stkcode,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces
+			ORDER BY weberp_salesorders.orderno";
 
 $Result=DB_query($sql,'','',false,false); //dont trap errors here
 
@@ -359,19 +359,19 @@ while ($myrow=DB_fetch_array($Result)){
 
 
 	/*OK now get the invoices where the item was charged */
-	$sql = "SELECT debtortrans.order_,
-					systypes.typename,
-					debtortrans.transno,
-					debtortrans.trandate,
-			 		stockmoves.price *(1-stockmoves.discountpercent) AS netprice,
-					-stockmoves.qty AS quantity,
-					stockmoves.narrative
-				FROM debtortrans INNER JOIN stockmoves
-					ON debtortrans.type = stockmoves.type
-					AND debtortrans.transno=stockmoves.transno
-					INNER JOIN systypes ON debtortrans.type=systypes.typeid
-				WHERE debtortrans.order_ ='" . $OrderNo . "'
-				AND stockmoves.stockid ='" . $myrow['stkcode'] . "'";
+	$sql = "SELECT weberp_debtortrans.order_,
+					weberp_systypes.typename,
+					weberp_debtortrans.transno,
+					weberp_debtortrans.trandate,
+			 		weberp_stockmoves.price *(1-weberp_stockmoves.discountpercent) AS netprice,
+					-weberp_stockmoves.qty AS quantity,
+					weberp_stockmoves.narrative
+				FROM weberp_debtortrans INNER JOIN weberp_stockmoves
+					ON weberp_debtortrans.type = weberp_stockmoves.type
+					AND weberp_debtortrans.transno=weberp_stockmoves.transno
+					INNER JOIN weberp_systypes ON weberp_debtortrans.type=weberp_systypes.typeid
+				WHERE weberp_debtortrans.order_ ='" . $OrderNo . "'
+				AND weberp_stockmoves.stockid ='" . $myrow['stkcode'] . "'";
 
 	$InvoicesResult =DB_query($sql);
 	if (DB_num_rows($InvoicesResult)>0){

@@ -59,7 +59,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 	$TransNo = GetNextTransNo( $_POST['TransactionType'], $db);
 
 	//Get the exchange rate to use between the transaction currency and the functional currency
-	$sql = "SELECT rate FROM currencies WHERE currabrev='" . $_POST['Currency'] . "'";
+	$sql = "SELECT rate FROM weberp_currencies WHERE currabrev='" . $_POST['Currency'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 	$ExRate = $myrow['rate'];
@@ -90,7 +90,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 		}
 
 		//first off check that the account code actually exists
-		$sql = "SELECT COUNT(accountcode) FROM chartmaster WHERE accountcode='" . $myrow[1] . "'";
+		$sql = "SELECT COUNT(accountcode) FROM weberp_chartmaster WHERE accountcode='" . $myrow[1] . "'";
 		$result = DB_query($sql);
 		$TestRow = DB_fetch_row($result);
 		if ($TestRow[0] == 0) {
@@ -106,7 +106,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 
 		//Then check that the tag ref is either zero, or exists in the tags table
 		if ($myrow[5] != 0) {
-			$sql = "SELECT COUNT(tagref) FROM tags WHERE tagref='" . $myrow[5] . "'";
+			$sql = "SELECT COUNT(tagref) FROM weberp_tags WHERE tagref='" . $myrow[5] . "'";
 			$result = DB_query($sql);
 			$TestRow = DB_fetch_row($result);
 			if ($TestRow[0] == 0) {
@@ -128,8 +128,8 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 		$myrow[3] = (double)$myrow[3];
 		if ($InputError !=1){
 
-			//Firstly add the line to the gltrans table
-			$sql = "INSERT INTO gltrans (type,
+			//Firstly add the line to the weberp_gltrans table
+			$sql = "INSERT INTO weberp_gltrans (type,
 										typeno,
 										chequeno,
 										trandate,
@@ -156,15 +156,15 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 
 				//Get the exchange rate to use between the transaction currency and the bank account currency
 				$sql = "SELECT rate
-						FROM currencies
-						INNER JOIN bankaccounts
-							ON currencies.currabrev=bankaccounts.currcode
-						WHERE bankaccounts.accountcode='" . $myrow[1] . "'";
+						FROM weberp_currencies
+						INNER JOIN weberp_bankaccounts
+							ON weberp_currencies.currabrev=weberp_bankaccounts.currcode
+						WHERE weberp_bankaccounts.accountcode='" . $myrow[1] . "'";
 						
 				$result = DB_query($sql);
 				$MyRateRow = DB_fetch_array($result);
 				$FuncExRate = $MyRateRow['rate'];
-				$sql = "INSERT INTO banktrans (transno,
+				$sql = "INSERT INTO weberp_banktrans (transno,
 												type,
 												bankact,
 												ref,
@@ -229,7 +229,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 			_('followed by rows containing these six fields for each price to be uploaded.') .  '<br />' .
 			_('The total of the transactions must come back to zero. Debits are positive, credits are negative.') .  '<br />' .
 			_('All the transactions must be within the same accounting period.') .  '<br />' .
-			_('The Account field must have a corresponding entry in the chartmaster table.') . '</div>';
+			_('The Account field must have a corresponding entry in the weberp_chartmaster table.') . '</div>';
 
 	echo '<br /><input type="hidden" name="MAX_FILE_SIZE" value="1000000" />';
 	echo _('Select Transaction Type') . ':&nbsp;
@@ -240,7 +240,7 @@ if (isset($_FILES['userfile']) and $_FILES['userfile']['name']) { //start file p
 			</select>&nbsp;&nbsp;';
 
 	echo _('Select Currency') . ':&nbsp;<select name="Currency">';
-	$SQL = "SELECT currency, currabrev, rate FROM currencies";
+	$SQL = "SELECT currency, currabrev, rate FROM weberp_currencies";
 	$result = DB_query($SQL);
 	if (DB_num_rows($result) == 0) {
 		echo '</select>';
@@ -268,7 +268,7 @@ include('includes/footer.inc');
 function IsBankAccount($Account) {
 	global $db;
 
-	$sql ="SELECT accountcode FROM bankaccounts WHERE accountcode='" . $Account . "'";
+	$sql ="SELECT accountcode FROM weberp_bankaccounts WHERE accountcode='" . $Account . "'";
 	$result = DB_query($sql);
 	if (DB_num_rows($result)==0) {
 		return false;

@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: CustomerReceipt.php 7591 2016-08-16 13:33:08Z tehonu $ */
 /* Entry of both customer receipts against accounts receivable and also general ledger or nominal receipts */
 
 include('includes/DefineReceiptClass.php');
@@ -63,9 +63,9 @@ if (!isset($_GET['Delete']) AND isset($_SESSION['ReceiptBatch' . $identifier])){
 	$SQL = "SELECT bankaccountname,
 					currcode,
 					decimalplaces
-			FROM bankaccounts
-			INNER JOIN currencies
-			ON bankaccounts.currcode=currencies.currabrev
+			FROM weberp_bankaccounts
+			INNER JOIN weberp_currencies
+			ON weberp_bankaccounts.currcode=weberp_currencies.currabrev
 			WHERE accountcode='" . $_POST['BankAccount']."'";
 
 	$ErrMsg =_('The bank account name cannot be retrieved because');
@@ -133,7 +133,7 @@ if (!isset($_GET['Delete']) AND isset($_SESSION['ReceiptBatch' . $identifier])){
 		*/
 
 		/*Get suggested FunctionalExRate between the bank account currency and the home (functional) currency */
-		$result = DB_query("SELECT rate, decimalplaces FROM currencies WHERE currabrev='" . $_SESSION['ReceiptBatch' . $identifier]->AccountCurrency . "'");
+		$result = DB_query("SELECT rate, decimalplaces FROM weberp_currencies WHERE currabrev='" . $_SESSION['ReceiptBatch' . $identifier]->AccountCurrency . "'");
 		$myrow = DB_fetch_array($result);
 		$SuggestedFunctionalExRate = $myrow['rate'];
 		$_SESSION['ReceiptBatch' . $identifier]->CurrDecimalPlaces = $myrow['decimalplaces'];
@@ -145,7 +145,7 @@ if (!isset($_GET['Delete']) AND isset($_SESSION['ReceiptBatch' . $identifier])){
 		$SuggestedExRate=1;
 	} elseif(isset($_POST['Currency'])) {
 		/*Get the exchange rate between the functional currency and the receipt currency*/
-		$result = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'");
+		$result = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'");
 		$myrow = DB_fetch_array($result);
 		$TableExRate = $myrow['rate']; //this is the rate of exchange between the functional currency and the receipt currency
 		/*Calculate cross rate to suggest appropriate exchange rate between receipt currency and account currency */
@@ -227,9 +227,9 @@ if (isset($Cancel)){
 if (isset($_POST['CommitBatch'])){
 
  /* once all receipts items entered, process all the data in the
-  session cookie into the DB creating a single banktrans for the whole amount
+  session cookie into the DB creating a single weberp_banktrans for the whole amount
   of all receipts in the batch and DebtorTrans records for each receipt item
-  all DebtorTrans will refer to a single banktrans. A GL entry is created for
+  all DebtorTrans will refer to a single weberp_banktrans. A GL entry is created for
   each GL receipt entry and one for the debtors entry and one for the bank
   account debit
 
@@ -249,7 +249,7 @@ if (isset($_POST['CommitBatch'])){
 	}
 
 	/*Make an array of the defined bank accounts */
-	$SQL = "SELECT accountcode FROM bankaccounts";
+	$SQL = "SELECT accountcode FROM weberp_bankaccounts";
 	$result = DB_query($SQL);
 	$BankAccounts = array();
 	$i=0;
@@ -298,7 +298,7 @@ if (isset($_POST['CommitBatch'])){
 			$k=1;
 		}
 
-		$SQL = "SELECT accountname FROM chartmaster WHERE accountcode='" . $ReceiptItem->GLCode . "'";
+		$SQL = "SELECT accountname FROM weberp_chartmaster WHERE accountcode='" . $ReceiptItem->GLCode . "'";
 		$Result=DB_query($SQL);
 		$myrow=DB_fetch_array($Result);
 
@@ -315,7 +315,7 @@ if (isset($_POST['CommitBatch'])){
 
 		if ($ReceiptItem->GLCode !=''){ //so its a GL receipt
 			if ($_SESSION['CompanyRecord']['gllink_debtors']==1){ /* then enter a GLTrans record */
-				 $SQL = "INSERT INTO gltrans (type,
+				 $SQL = "INSERT INTO weberp_gltrans (type,
 								 			typeno,
 											trandate,
 											periodno,
@@ -347,8 +347,8 @@ if (isset($_POST['CommitBatch'])){
 
 				/*Get the currency and rate of the bank account transferring to*/
 				$SQL = "SELECT currcode, rate
-							FROM bankaccounts INNER JOIN currencies
-							ON bankaccounts.currcode = currencies.currabrev
+							FROM weberp_bankaccounts INNER JOIN weberp_currencies
+							ON weberp_bankaccounts.currcode = weberp_currencies.currabrev
 							WHERE accountcode='" . $ReceiptItem->GLCode."'";
 				$TrfFromAccountResult = DB_query($SQL);
 				$TrfFromBankRow = DB_fetch_array($TrfFromAccountResult) ;
@@ -389,7 +389,7 @@ if (isset($_POST['CommitBatch'])){
 				*/
 
 				$PaymentTransNo = GetNextTransNo( 1, $db);
-				$SQL="INSERT INTO banktrans (transno,
+				$SQL="INSERT INTO weberp_banktrans (transno,
 											type,
 											bankact,
 											ref,
@@ -426,7 +426,7 @@ if (isset($_POST['CommitBatch'])){
 			 * We have the exchange rate between the bank account and the functional home currency  $_SESSION['ReceiptBatch']->ExRate
 			 * and the exchange rate betwen the currency being paid and the bank account */
 
-			$SQL = "INSERT INTO debtortrans (transno,
+			$SQL = "INSERT INTO weberp_debtortrans (transno,
 											type,
 											debtorno,
 											branchcode,
@@ -462,10 +462,10 @@ if (isset($_POST['CommitBatch'])){
 			$ErrMsg = _('Cannot insert a receipt transaction against the customer because') ;
 			$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-			$SQL = "UPDATE debtorsmaster
+			$SQL = "UPDATE weberp_debtorsmaster
 						SET lastpaiddate = '" . FormatDateForSQL($_SESSION['ReceiptBatch' . $identifier]->DateBanked) . "',
 						lastpaid='" . $ReceiptItem->Amount ."'
-					WHERE debtorsmaster.debtorno='" . $ReceiptItem->Customer . "'";
+					WHERE weberp_debtorsmaster.debtorno='" . $ReceiptItem->Customer . "'";
 
 			$DbgMsg = _('The SQL that failed to update the date of the last payment received was');
 			$ErrMsg = _('Cannot update the customer record for the date of the last payment received because');
@@ -480,7 +480,7 @@ if (isset($_POST['CommitBatch'])){
 
 	/*now enter the BankTrans entry */
 
-	$SQL="INSERT INTO banktrans (type,
+	$SQL="INSERT INTO weberp_banktrans (type,
 								transno,
 								bankact,
 								ref,
@@ -511,7 +511,7 @@ if (isset($_POST['CommitBatch'])){
 
 		if ($BatchReceiptsTotal!=0){
 			/* Bank account entry first */
-			$SQL="INSERT INTO gltrans (type,
+			$SQL="INSERT INTO weberp_gltrans (type,
 										typeno,
 										trandate,
 										periodno,
@@ -535,7 +535,7 @@ if (isset($_POST['CommitBatch'])){
 		}
 		if ($BatchDebtorTotal!=0){
 			/* Now Credit Debtors account with receipts + discounts */
-			$SQL="INSERT INTO gltrans ( type,
+			$SQL="INSERT INTO weberp_gltrans ( type,
 										typeno,
 										trandate,
 										periodno,
@@ -559,7 +559,7 @@ if (isset($_POST['CommitBatch'])){
 
 		if ($BatchDiscount!=0){
 			/* Now Debit Discount account with discounts allowed*/
-			$SQL="INSERT INTO gltrans ( type,
+			$SQL="INSERT INTO weberp_gltrans ( type,
 										typeno,
 										trandate,
 										periodno,
@@ -610,42 +610,42 @@ if (isset($_POST['Search'])){
 	if ($_POST['Keywords']==''
 		AND $_POST['CustCode']==''
 		AND $_POST['CustInvNo']=='') {
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name
-					FROM debtorsmaster
-					WHERE debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_debtorsmaster
+					WHERE weberp_debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
 	} else {
 		if (mb_strlen($_POST['Keywords'])>0) {
 			//insert wildcard characters in spaces
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name
-					FROM debtorsmaster
-					WHERE debtorsmaster.name " . LIKE . " '". $SearchString . "'
-					AND debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_debtorsmaster
+					WHERE weberp_debtorsmaster.name " . LIKE . " '". $SearchString . "'
+					AND weberp_debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
 
 		} elseif (mb_strlen($_POST['CustCode'])>0){
-			$SQL = "SELECT debtorsmaster.debtorno,
-						debtorsmaster.name
-					FROM debtorsmaster
-					WHERE debtorsmaster.debtorno " . LIKE . " '%" . $_POST['CustCode'] . "%'
-					AND debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
+			$SQL = "SELECT weberp_debtorsmaster.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_debtorsmaster
+					WHERE weberp_debtorsmaster.debtorno " . LIKE . " '%" . $_POST['CustCode'] . "%'
+					AND weberp_debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
 		} elseif (mb_strlen($_POST['CustInvNo'])>0){
-			$SQL = "SELECT debtortrans.debtorno,
-						debtorsmaster.name
-					FROM debtorsmaster LEFT JOIN debtortrans
-					ON debtorsmaster.debtorno=debtortrans.debtorno
-					WHERE debtortrans.transno " . LIKE . " '%" . $_POST['CustInvNo'] . "%'
-					AND debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
+			$SQL = "SELECT weberp_debtortrans.debtorno,
+						weberp_debtorsmaster.name
+					FROM weberp_debtorsmaster LEFT JOIN weberp_debtortrans
+					ON weberp_debtorsmaster.debtorno=weberp_debtortrans.debtorno
+					WHERE weberp_debtortrans.transno " . LIKE . " '%" . $_POST['CustInvNo'] . "%'
+					AND weberp_debtorsmaster.currcode= '" . $_SESSION['ReceiptBatch' . $identifier]->Currency . "'";
 		}
 	}
 		if ($_SESSION['SalesmanLogin'] != '') {
 			$SQL .= " AND EXISTS (
 						SELECT *
-						FROM 	custbranch
-						WHERE 	custbranch.debtorno = debtorsmaster.debtorno
-							AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "')";
+						FROM 	weberp_custbranch
+						WHERE 	weberp_custbranch.debtorno = weberp_debtorsmaster.debtorno
+							AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "')";
 		}
 
 		$CustomerSearchResult = DB_query($SQL,'','',false,false);
@@ -683,57 +683,57 @@ customer record returned by the search - this record is then auto selected */
 	   unset($_SESSION['CustomerRecord' . $identifier]);
 	}
 
-	$SQL = "SELECT debtorsmaster.name,
-				debtorsmaster.pymtdiscount,
-				debtorsmaster.currcode,
-				currencies.currency,
-				currencies.rate,
-				currencies.decimalplaces AS currdecimalplaces,
-				paymentterms.terms,
-				debtorsmaster.creditlimit,
-				holdreasons.dissallowinvoices,
-				holdreasons.reasondescription,
-				SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) AS balance,
-				SUM(CASE WHEN paymentterms.daysbeforedue > 0  THEN
-					CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) >= paymentterms.daysbeforedue  THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+	$SQL = "SELECT weberp_debtorsmaster.name,
+				weberp_debtorsmaster.pymtdiscount,
+				weberp_debtorsmaster.currcode,
+				weberp_currencies.currency,
+				weberp_currencies.rate,
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_paymentterms.terms,
+				weberp_debtorsmaster.creditlimit,
+				weberp_holdreasons.dissallowinvoices,
+				weberp_holdreasons.reasondescription,
+				SUM(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc) AS balance,
+				SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0  THEN
+					CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate)) >= weberp_paymentterms.daysbeforedue  THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				ELSE
-					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate), paymentterms.dayinfollowingmonth)) >= 0 THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate), weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				END) AS due,
-				SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-					CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight - debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+				SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+					CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue	AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight - weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				ELSE
-					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate), paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate), weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays1'] . " THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				END) AS overdue1,
-				SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-					CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+				SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+					CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_debtortrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ") THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				ELSE
-					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(debtortrans.trandate), paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+					CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_debtortrans.trandate), weberp_paymentterms.dayinfollowingmonth)) >= " . $_SESSION['PastDueDays2'] . " THEN weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc ELSE 0 END
 				END) AS overdue2
-			FROM debtorsmaster INNER JOIN paymentterms
-			ON debtorsmaster.paymentterms = paymentterms.termsindicator
-			INNER JOIN holdreasons
-			ON debtorsmaster.holdreason = holdreasons.reasoncode
-			INNER JOIN currencies
-			ON debtorsmaster.currcode = currencies.currabrev
-			INNER JOIN debtortrans
-			ON debtorsmaster.debtorno = debtortrans.debtorno
-			WHERE debtorsmaster.debtorno = '" . $_POST['CustomerID'] . "'";
+			FROM weberp_debtorsmaster INNER JOIN weberp_paymentterms
+			ON weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+			INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+			INNER JOIN weberp_debtortrans
+			ON weberp_debtorsmaster.debtorno = weberp_debtortrans.debtorno
+			WHERE weberp_debtorsmaster.debtorno = '" . $_POST['CustomerID'] . "'";
 	if ($_SESSION['SalesmanLogin'] != '') {
-		$SQL .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
-	$SQL .= " GROUP BY debtorsmaster.name,
-				debtorsmaster.pymtdiscount,
-				debtorsmaster.currcode,
-				currencies.currency,
-				currencies.rate,
-				currencies.decimalplaces,
-				paymentterms.terms,
-				debtorsmaster.creditlimit,
-				paymentterms.daysbeforedue,
-				paymentterms.dayinfollowingmonth,
-				debtorsmaster.creditlimit,
-				holdreasons.dissallowinvoices,
-				holdreasons.reasondescription";
+	$SQL .= " GROUP BY weberp_debtorsmaster.name,
+				weberp_debtorsmaster.pymtdiscount,
+				weberp_debtorsmaster.currcode,
+				weberp_currencies.currency,
+				weberp_currencies.rate,
+				weberp_currencies.decimalplaces,
+				weberp_paymentterms.terms,
+				weberp_debtorsmaster.creditlimit,
+				weberp_paymentterms.daysbeforedue,
+				weberp_paymentterms.dayinfollowingmonth,
+				weberp_debtorsmaster.creditlimit,
+				weberp_holdreasons.dissallowinvoices,
+				weberp_holdreasons.reasondescription";
 
 
 	$ErrMsg = _('The customer details could not be retrieved because');
@@ -746,23 +746,23 @@ customer record returned by the search - this record is then auto selected */
 
 		$NIL_BALANCE = True;
 
-		$SQL = "SELECT debtorsmaster.name,
-						debtorsmaster.pymtdiscount,
-						currencies.currency,
-						currencies.rate,
-						currencies.decimalplaces AS currdecimalplaces,
-						paymentterms.terms,
-						debtorsmaster.creditlimit,
-						debtorsmaster.currcode,
-						holdreasons.dissallowinvoices,
-						holdreasons.reasondescription
-					FROM debtorsmaster INNER JOIN paymentterms
-					ON debtorsmaster.paymentterms = paymentterms.termsindicator
-					INNER JOIN holdreasons
-					ON debtorsmaster.holdreason = holdreasons.reasoncode
-					INNER JOIN currencies
-					ON debtorsmaster.currcode = currencies.currabrev
-					WHERE debtorsmaster.debtorno = '" . $_POST['CustomerID'] . "'";
+		$SQL = "SELECT weberp_debtorsmaster.name,
+						weberp_debtorsmaster.pymtdiscount,
+						weberp_currencies.currency,
+						weberp_currencies.rate,
+						weberp_currencies.decimalplaces AS currdecimalplaces,
+						weberp_paymentterms.terms,
+						weberp_debtorsmaster.creditlimit,
+						weberp_debtorsmaster.currcode,
+						weberp_holdreasons.dissallowinvoices,
+						weberp_holdreasons.reasondescription
+					FROM weberp_debtorsmaster INNER JOIN weberp_paymentterms
+					ON weberp_debtorsmaster.paymentterms = weberp_paymentterms.termsindicator
+					INNER JOIN weberp_holdreasons
+					ON weberp_debtorsmaster.holdreason = weberp_holdreasons.reasoncode
+					INNER JOIN weberp_currencies
+					ON weberp_debtorsmaster.currcode = weberp_currencies.currabrev
+					WHERE weberp_debtorsmaster.debtorno = '" . $_POST['CustomerID'] . "'";
 
 		$ErrMsg = _('The customer details could not be retrieved because');
 		$DbgMsg = _('The SQL that failed was');
@@ -792,14 +792,14 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 /*show the batch header details and the entries in the batch so far */
 
 $SQL = "SELECT bankaccountname,
-				bankaccounts.accountcode,
-				bankaccounts.currcode
-		FROM bankaccounts
-		INNER JOIN chartmaster
-			ON bankaccounts.accountcode=chartmaster.accountcode
-		INNER JOIN bankaccountusers
-			ON bankaccounts.accountcode=bankaccountusers.accountcode
-		WHERE bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
+				weberp_bankaccounts.accountcode,
+				weberp_bankaccounts.currcode
+		FROM weberp_bankaccounts
+		INNER JOIN weberp_chartmaster
+			ON weberp_bankaccounts.accountcode=weberp_chartmaster.accountcode
+		INNER JOIN weberp_bankaccountusers
+			ON weberp_bankaccounts.accountcode=weberp_bankaccountusers.accountcode
+		WHERE weberp_bankaccountusers.userid = '" . $_SESSION['UserID'] ."'
 		ORDER BY bankaccountname";
 
 $ErrMsg = _('The bank accounts could not be retrieved because');
@@ -856,7 +856,7 @@ if (!isset($_SESSION['ReceiptBatch' . $identifier]->Currency)){
   $_SESSION['ReceiptBatch' . $identifier]->Currency=$_SESSION['CompanyRecord']['currencydefault'];
 }
 
-$SQL = "SELECT currency, currabrev, rate FROM currencies";
+$SQL = "SELECT currency, currabrev, rate FROM weberp_currencies";
 $result=DB_query($SQL);
 if (DB_num_rows($result)==0){
 	echo '</select></td></tr>';
@@ -934,7 +934,7 @@ foreach ($ReceiptTypes as $RcptType) {
 echo '</select></td>
 	</tr>';
 
-/* Receipt (Bank Account) info to be inserted on banktrans.ref, varchar(50). */
+/* Receipt (Bank Account) info to be inserted on weberp_banktrans.ref, varchar(50). */
 if (!isset($_SESSION['ReceiptBatch' . $identifier]->BankTransRef)) {
 	$_SESSION['ReceiptBatch' . $identifier]->BankTransRef='';
 }
@@ -943,7 +943,7 @@ echo '<tr>
 		<td><input maxlength="50" name="BankTransRef" size="52" tabindex="7" type="text" value="', $_SESSION['ReceiptBatch' . $identifier]->BankTransRef,'" /> <i>', _('Reference on Bank Transactions Inquiry'), '.</i></td>
 	</tr>';
 
-/* Receipt (Bank Account) info to be inserted on gltrans.narrative, varchar(200). */
+/* Receipt (Bank Account) info to be inserted on weberp_gltrans.narrative, varchar(200). */
 if (!isset($_SESSION['ReceiptBatch' . $identifier]->Narrative)) {
 	$_SESSION['ReceiptBatch' . $identifier]->Narrative='';
 }
@@ -987,7 +987,7 @@ if (isset($_SESSION['ReceiptBatch' . $identifier])){
 
 	foreach ($_SESSION['ReceiptBatch' . $identifier]->Items as $ReceiptItem) {
 
-		$SQL = "SELECT accountname FROM chartmaster WHERE accountcode='" . $ReceiptItem->GLCode . "'";
+		$SQL = "SELECT accountname FROM weberp_chartmaster WHERE accountcode='" . $ReceiptItem->GLCode . "'";
 		$Result=DB_query($SQL);
 		$myrow=DB_fetch_array($Result);
 
@@ -1086,7 +1086,7 @@ if (isset($_POST['GLEntry']) AND isset($_SESSION['ReceiptBatch' . $identifier]))
 
 	$SQL = "SELECT tagref,
 					tagdescription
-					FROM tags
+					FROM weberp_tags
 					ORDER BY tagref";
 
 	$result=DB_query($SQL);
@@ -1107,11 +1107,11 @@ if (isset($_POST['GLEntry']) AND isset($_SESSION['ReceiptBatch' . $identifier]))
 			<td>' . _('GL Account') . ':</td>
 			<td><select tabindex="8" name="GLCode">';
 
-	$SQL = "SELECT chartmaster.accountcode,
-					chartmaster.accountname
-			FROM chartmaster
-				INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canupd=1
-			ORDER BY chartmaster.accountcode";
+	$SQL = "SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname
+			FROM weberp_chartmaster
+				INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canupd=1
+			ORDER BY weberp_chartmaster.accountcode";
 	$result=DB_query($SQL);
 	if (DB_num_rows($result)==0){
 		echo '</select>' . _('No General ledger accounts have been set up yet') . ' - ' . _('receipts cannot be entered against GL accounts until the GL accounts are set up') . '</td>

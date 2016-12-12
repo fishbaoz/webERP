@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockDispatch.php 7494 2016-04-25 09:53:53Z daintree $*/
 
 // StockDispatch.php - Report of parts with overstock at one location that can be transferred
 // to another location to cover shortage based on reorder level. Creates loctransfer records
@@ -39,7 +39,7 @@ if (isset($_POST['PrintPDF'])) {
 
 	// from location
 	$ErrMsg = _('Could not retrieve location name from the database');
-	$sqlfrom="SELECT locationname FROM `locations` WHERE loccode='" . $_POST['FromLocation'] . "'";
+	$sqlfrom="SELECT locationname FROM `weberp_locations` WHERE loccode='" . $_POST['FromLocation'] . "'";
 	$result = DB_query($sqlfrom,$ErrMsg);
 	$Row = DB_fetch_row($result);
 	$FromLocation=$Row['0'];
@@ -48,7 +48,7 @@ if (isset($_POST['PrintPDF'])) {
 	$sqlto="SELECT locationname,
 					cashsalecustomer,
 					cashsalebranch
-			FROM `locations` 
+			FROM `weberp_locations` 
 			WHERE loccode='" . $_POST['ToLocation'] . "'";
 	$resultto = DB_query($sqlto,$ErrMsg);
 	$RowTo = DB_fetch_row($resultto);
@@ -57,12 +57,12 @@ if (isset($_POST['PrintPDF'])) {
 	$ToBranch=$RowTo['2'];
 
 	if($template=='fullprices'){
-		$SqlPrices="SELECT debtorsmaster.currcode,
-						debtorsmaster.salestype,
-						currencies.decimalplaces
-				FROM debtorsmaster, currencies
-				WHERE debtorsmaster.currcode = currencies.currabrev 
-					AND debtorsmaster.debtorno ='" . $ToCustomer . "'";
+		$SqlPrices="SELECT weberp_debtorsmaster.currcode,
+						weberp_debtorsmaster.salestype,
+						weberp_currencies.decimalplaces
+				FROM weberp_debtorsmaster, weberp_currencies
+				WHERE weberp_debtorsmaster.currcode = weberp_currencies.currabrev 
+					AND weberp_debtorsmaster.debtorno ='" . $ToCustomer . "'";
 		$ResultPrices = DB_query($SqlPrices,$ErrMsg);
 		$RowPrices = DB_fetch_row($ResultPrices);
 		$ToCurrency=$RowPrices['0'];
@@ -73,11 +73,11 @@ if (isset($_POST['PrintPDF'])) {
 	// Creates WHERE clause for stock categories. StockCat is defined as an array so can choose
 	// more than one category
 	if ($_POST['StockCat'] != 'All') {
-		$CategorySQL="SELECT categorydescription FROM stockcategory WHERE categoryid='".$_POST['StockCat']."'";
+		$CategorySQL="SELECT categorydescription FROM weberp_stockcategory WHERE categoryid='".$_POST['StockCat']."'";
 		$CategoryResult=DB_query($CategorySQL);
 		$CategoryRow=DB_fetch_array($CategoryResult);
 		$CategoryDescription=$CategoryRow['categorydescription'];
-		$WhereCategory = " AND stockmaster.categoryid ='" . $_POST['StockCat'] . "' ";
+		$WhereCategory = " AND weberp_stockmaster.categoryid ='" . $_POST['StockCat'] . "' ";
 	} else {
 		$CategoryDescription=_('All');
 		$WhereCategory = " ";
@@ -86,37 +86,37 @@ if (isset($_POST['PrintPDF'])) {
 	// If Strategy is "Items needed at TO location with overstock at FROM" we need to control the "needed at TO" part
 	// The "overstock at FROM" part is controlled in any case with AND (fromlocstock.quantity - fromlocstock.reorderlevel) > 0
 	if ($_POST['Strategy'] == 'All') {
-		$WhereCategory = $WhereCategory . " AND locstock.reorderlevel > locstock.quantity ";
+		$WhereCategory = $WhereCategory . " AND weberp_locstock.reorderlevel > weberp_locstock.quantity ";
 	}
 
-	$sql = "SELECT locstock.stockid,
-				stockmaster.description,
-				locstock.loccode,
-				locstock.quantity,
-				locstock.reorderlevel,
-				stockmaster.decimalplaces,
-				stockmaster.serialised,
-				stockmaster.controlled,
-				stockmaster.discountcategory,
-				ROUND((locstock.reorderlevel - locstock.quantity) *
+	$sql = "SELECT weberp_locstock.stockid,
+				weberp_stockmaster.description,
+				weberp_locstock.loccode,
+				weberp_locstock.quantity,
+				weberp_locstock.reorderlevel,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmaster.serialised,
+				weberp_stockmaster.controlled,
+				weberp_stockmaster.discountcategory,
+				ROUND((weberp_locstock.reorderlevel - weberp_locstock.quantity) *
 				   (1 + (" . filter_number_format($_POST['Percent']) . "/100)))
 				as neededqty,
 			   (fromlocstock.quantity - fromlocstock.reorderlevel)  as available,
 			   fromlocstock.reorderlevel as fromreorderlevel,
 			   fromlocstock.quantity as fromquantity
-			FROM stockmaster
-			LEFT JOIN stockcategory
-				ON stockmaster.categoryid=stockcategory.categoryid,
-			locstock
-			LEFT JOIN locstock AS fromlocstock ON
-			  locstock.stockid = fromlocstock.stockid
+			FROM weberp_stockmaster
+			LEFT JOIN weberp_stockcategory
+				ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid,
+			weberp_locstock
+			LEFT JOIN weberp_locstock AS fromlocstock ON
+			  weberp_locstock.stockid = fromlocstock.stockid
 			  AND fromlocstock.loccode = '" . $_POST['FromLocation'] . "'
-			WHERE locstock.stockid=stockmaster.stockid
-			AND locstock.loccode ='" . $_POST['ToLocation'] . "'
+			WHERE weberp_locstock.stockid=weberp_stockmaster.stockid
+			AND weberp_locstock.loccode ='" . $_POST['ToLocation'] . "'
 			AND (fromlocstock.quantity - fromlocstock.reorderlevel) > 0
-			AND stockcategory.stocktype<>'A'
-			AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M') " .
-			$WhereCategory . " ORDER BY locstock.loccode,locstock.stockid";
+			AND weberp_stockcategory.stocktype<>'A'
+			AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M') " .
+			$WhereCategory . " ORDER BY weberp_locstock.loccode,weberp_locstock.stockid";
 
 	$result = DB_query($sql,'','',false,true);
 
@@ -153,7 +153,7 @@ if (isset($_POST['PrintPDF'])) {
 		$InTransitQuantityAtFrom = 0;
 		if ($_SESSION['ProhibitNegativeStock']==1){
 			$InTransitSQL="SELECT SUM(shipqty-recqty) as intransit
-							FROM loctransfers
+							FROM weberp_loctransfers
 							WHERE stockid='" . $myrow['stockid'] . "'
 								AND shiploc='".$_POST['FromLocation']."'
 								AND shipqty>recqty";
@@ -167,7 +167,7 @@ if (isset($_POST['PrintPDF'])) {
 		// Check if TO location is already waiting to receive some stock of this item
 		$InTransitQuantityAtTo=0;
 		$InTransitSQL="SELECT SUM(shipqty-recqty) as intransit
-						FROM loctransfers
+						FROM weberp_loctransfers
 						WHERE stockid='" . $myrow['stockid'] . "'
 							AND recloc='".$_POST['ToLocation']."'
 							AND shipqty>recqty";
@@ -253,8 +253,8 @@ if (isset($_POST['PrintPDF'])) {
 				PrintHeader($pdf,$YPos,$PageNumber,$Page_Height,$Top_Margin,$Left_Margin,$Page_Width,$Right_Margin,$Trf_ID,$FromLocation,$ToLocation,$template,$CategoryDescription);
 			}
 
-			// Create loctransfers records for each record
-			$sql2 = "INSERT INTO loctransfers (reference,
+			// Create weberp_loctransfers records for each record
+			$sql2 = "INSERT INTO weberp_loctransfers (reference,
 												stockid,
 												shipqty,
 												shipdate,
@@ -324,7 +324,7 @@ if (isset($_POST['PrintPDF'])) {
 										. _('dispatch percentage entered, that needed quantity is inflated by the percentage entered.') . '<br/>'
 										. _('Use Bulk Inventory Transfer - Receive to process the batch') . '</div>';
 
-	$sql = "SELECT defaultlocation FROM www_users WHERE userid='".$_SESSION['UserID']."'";
+	$sql = "SELECT defaultlocation FROM weberp_www_users WHERE userid='".$_SESSION['UserID']."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 	$DefaultLocation = $myrow['defaultlocation'];
@@ -332,10 +332,10 @@ if (isset($_POST['PrintPDF'])) {
 	echo '<div>
 		  <br />';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 			locationname
-		FROM locations 
-		INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+		FROM weberp_locations 
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 	$resultStkLocs = DB_query($sql);
 	if (!isset($_POST['FromLocation'])) {
 		$_POST['FromLocation']=$DefaultLocation;
@@ -374,7 +374,7 @@ if (isset($_POST['PrintPDF'])) {
 	echo '</select></td>
 		</tr>';
 
-	$SQL="SELECT categoryid, categorydescription FROM stockcategory ORDER BY categorydescription";
+	$SQL="SELECT categoryid, categorydescription FROM weberp_stockcategory ORDER BY categorydescription";
 	$result1 = DB_query($SQL);
 	if (DB_num_rows($result1)==0){
 		echo '</table>';

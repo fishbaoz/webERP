@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Locations.php 7308 2015-05-19 14:13:54Z rchacon $*/
 /* Defines the inventory stocking locations or warehouses */
 
 include('includes/session.inc');
@@ -39,7 +39,7 @@ if(isset($_POST['submit'])) {
 			prnMsg(_('A cash sale customer and branch are necessary to fully setup the counter sales functionality'),'error');
 			$InputError =1;
 		} else {//customer branch is set too ... check it ties up with a valid customer
-			$sql = "SELECT * FROM custbranch
+			$sql = "SELECT * FROM weberp_custbranch
 					WHERE debtorno='" . $_POST['CashSaleCustomer'] . "'
 					AND branchcode='" . $_POST['CashSaleBranch'] . "'";
 
@@ -60,7 +60,7 @@ if(isset($_POST['submit'])) {
 			$_POST['Managed'] = 0;
 		}
 
-		$sql = "UPDATE locations SET loccode='" . $_POST['LocCode'] . "',
+		$sql = "UPDATE weberp_locations SET loccode='" . $_POST['LocCode'] . "',
 									locationname='" . $_POST['LocationName'] . "',
 									deladd1='" . $_POST['DelAdd1'] . "',
 									deladd2='" . $_POST['DelAdd2'] . "',
@@ -122,7 +122,7 @@ if(isset($_POST['submit'])) {
 
 		/*SelectedLocation is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new Location form */
 
-		$sql = "INSERT INTO locations (loccode,
+		$sql = "INSERT weberp_locations (loccode,
 										locationname,
 										deladd1,
 										deladd2,
@@ -171,16 +171,16 @@ if(isset($_POST['submit'])) {
 
 	/* Also need to add LocStock records for all existing stock items */
 
-		$sql = "INSERT INTO locstock (
+		$sql = "INSERT INTO weberp_locstock (
 					loccode,
 					stockid,
 					quantity,
 					reorderlevel)
 			SELECT '" . $_POST['LocCode'] . "',
-				stockmaster.stockid,
+				weberp_stockmaster.stockid,
 				0,
 				0
-			FROM stockmaster";
+			FROM weberp_stockmaster";
 
 		$ErrMsg = _('An error occurred inserting the new location stock records for all pre-existing parts because');
 		$DbgMsg = _('The SQL used to insert the new stock location records was');
@@ -188,17 +188,17 @@ if(isset($_POST['submit'])) {
 		prnMsg('........ ' . _('and new stock locations inserted for all existing stock items for the new location'), 'success');
 
 	/* Also need to add locationuser records for all existing users*/
-		$sql = "INSERT INTO locationusers (userid, loccode, canview, canupd)
-				SELECT www_users.userid,
-				locations.loccode,
+		$sql = "INSERT INTO weberp_locationusers (userid, loccode, canview, canupd)
+				SELECT weberp_www_users.userid,
+				weberp_locations.loccode,
 				1,
 				1
-				FROM www_users CROSS JOIN locations
-				LEFT JOIN locationusers
-				ON www_users.userid = locationusers.userid
-				AND locations.loccode = locationusers.loccode
-				WHERE locationusers.userid IS NULL
-				AND locations.loccode='". $_POST['LocCode'] . "';";
+				FROM weberp_www_users CROSS JOIN weberp_locations
+				LEFT JOIN weberp_locationusers
+				ON weberp_www_users.userid = weberp_locationusers.userid
+				AND weberp_locations.loccode = weberp_locationusers.loccode
+				WHERE weberp_locationusers.userid IS NULL
+				AND weberp_locations.loccode='". $_POST['LocCode'] . "';";
 
 		$ErrMsg = _('The users/locations that need user location records created cannot be retrieved because');
 		$Result = DB_query($sql,$ErrMsg);
@@ -230,31 +230,31 @@ if(isset($_POST['submit'])) {
 
 	/* Go through the tax authorities for all Locations deleting or adding TaxAuthRates records as necessary */
 
-	$result = DB_query("SELECT COUNT(taxid) FROM taxauthorities");
+	$result = DB_query("SELECT COUNT(taxid) FROM weberp_taxauthorities");
 	$NoTaxAuths =DB_fetch_row($result);
 
-	$DispTaxProvincesResult = DB_query("SELECT taxprovinceid FROM locations");
-	$TaxCatsResult = DB_query("SELECT taxcatid FROM taxcategories");
+	$DispTaxProvincesResult = DB_query("SELECT taxprovinceid FROM weberp_locations");
+	$TaxCatsResult = DB_query("SELECT taxcatid FROM weberp_taxcategories");
 	if(DB_num_rows($TaxCatsResult) > 0) {// This will only work if there are levels else we get an error on seek.
 
 		while ($myrow=DB_fetch_row($DispTaxProvincesResult)) {
 			/*Check to see there are TaxAuthRates records set up for this TaxProvince */
-			$NoTaxRates = DB_query("SELECT taxauthority FROM taxauthrates WHERE dispatchtaxprovince='" . $myrow[0] . "'");
+			$NoTaxRates = DB_query("SELECT taxauthority FROM weberp_taxauthrates WHERE dispatchtaxprovince='" . $myrow[0] . "'");
 
 			if(DB_num_rows($NoTaxRates) < $NoTaxAuths[0]) {
 
 				/*First off delete any tax authoritylevels already existing */
-				$DelTaxAuths = DB_query("DELETE FROM taxauthrates WHERE dispatchtaxprovince='" . $myrow[0] . "'");
+				$DelTaxAuths = DB_query("DELETE FROM weberp_taxauthrates WHERE dispatchtaxprovince='" . $myrow[0] . "'");
 
 				/*Now add the new TaxAuthRates required */
 				while ($CatRow = DB_fetch_row($TaxCatsResult)) {
-					$sql = "INSERT INTO taxauthrates (taxauthority,
+					$sql = "INSERT INTO weberp_taxauthrates (taxauthority,
 										dispatchtaxprovince,
 										taxcatid)
 							SELECT taxid,
 								'" . $myrow[0] . "',
 								'" . $CatRow[0] . "'
-							FROM taxauthorities";
+							FROM weberp_taxauthorities";
 
 					$InsTaxAuthRates = DB_query($sql);
 				}
@@ -270,7 +270,7 @@ if(isset($_POST['submit'])) {
 	$CancelDelete = 0;
 
 // PREVENT DELETES IF DEPENDENT RECORDS
-	$sql= "SELECT COUNT(*) FROM salesorders WHERE fromstkloc='". $SelectedLocation . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_salesorders WHERE fromstkloc='". $SelectedLocation . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if($myrow[0]>0) {
@@ -278,7 +278,7 @@ if(isset($_POST['submit'])) {
 		prnMsg(_('Cannot delete this location because sales orders have been created delivering from this location'),'warn');
 		echo _('There are') . ' ' . $myrow[0] . ' ' . _('sales orders with this Location code');
 	} else {
-		$sql= "SELECT COUNT(*) FROM stockmoves WHERE stockmoves.loccode='" . $SelectedLocation . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_stockmoves WHERE weberp_stockmoves.loccode='" . $SelectedLocation . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if($myrow[0]>0) {
@@ -287,9 +287,9 @@ if(isset($_POST['submit'])) {
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('stock movements with this Location code');
 
 		} else {
-			$sql= "SELECT COUNT(*) FROM locstock
-					WHERE locstock.loccode='". $SelectedLocation . "'
-					AND locstock.quantity !=0";
+			$sql= "SELECT COUNT(*) FROM weberp_locstock
+					WHERE weberp_locstock.loccode='". $SelectedLocation . "'
+					AND weberp_locstock.quantity !=0";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			if($myrow[0]>0) {
@@ -297,8 +297,8 @@ if(isset($_POST['submit'])) {
 				prnMsg(_('Cannot delete this location because location stock records exist that use this location and have a quantity on hand not equal to 0'),'warn');
 				echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('stock items with stock on hand at this location code');
 			} else {
-				$sql= "SELECT COUNT(*) FROM www_users
-						WHERE www_users.defaultlocation='" . $SelectedLocation . "'";
+				$sql= "SELECT COUNT(*) FROM weberp_www_users
+						WHERE weberp_www_users.defaultlocation='" . $SelectedLocation . "'";
 				$result = DB_query($sql);
 				$myrow = DB_fetch_row($result);
 				if($myrow[0]>0) {
@@ -306,17 +306,17 @@ if(isset($_POST['submit'])) {
 					prnMsg(_('Cannot delete this location because it is the default location for a user') . '. ' . _('The user record must be modified first'),'warn');
 					echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('users using this location as their default location');
 				} else {
-					$sql= "SELECT COUNT(*) FROM bom
-							WHERE bom.loccode='" . $SelectedLocation . "'";
+					$sql= "SELECT COUNT(*) FROM weberp_bom
+							WHERE weberp_bom.loccode='" . $SelectedLocation . "'";
 					$result = DB_query($sql);
 					$myrow = DB_fetch_row($result);
 					if($myrow[0]>0) {
 						$CancelDelete = 1;
 						prnMsg(_('Cannot delete this location because it is the default location for a bill of material') . '. ' . _('The bill of materials must be modified first'),'warn');
-						echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('bom components using this location');
+						echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('weberp_bom components using this location');
 					} else {
-						$sql= "SELECT COUNT(*) FROM workcentres
-								WHERE workcentres.location='" . $SelectedLocation . "'";
+						$sql= "SELECT COUNT(*) FROM weberp_workcentres
+								WHERE weberp_workcentres.location='" . $SelectedLocation . "'";
 						$result = DB_query($sql);
 						$myrow = DB_fetch_row($result);
 						if($myrow[0]>0) {
@@ -324,8 +324,8 @@ if(isset($_POST['submit'])) {
 							prnMsg(_('Cannot delete this location because it is used by some work centre records'),'warn');
 							echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('works centres using this location');
 						} else {
-							$sql= "SELECT COUNT(*) FROM workorders
-									WHERE workorders.loccode='" . $SelectedLocation . "'";
+							$sql= "SELECT COUNT(*) FROM weberp_workorders
+									WHERE weberp_workorders.loccode='" . $SelectedLocation . "'";
 							$result = DB_query($sql);
 							$myrow = DB_fetch_row($result);
 							if($myrow[0]>0) {
@@ -333,8 +333,8 @@ if(isset($_POST['submit'])) {
 								prnMsg(_('Cannot delete this location because it is used by some work order records'),'warn');
 								echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('work orders using this location');
 							} else {
-								$sql= "SELECT COUNT(*) FROM custbranch
-										WHERE custbranch.defaultlocation='" . $SelectedLocation . "'";
+								$sql= "SELECT COUNT(*) FROM weberp_custbranch
+										WHERE weberp_custbranch.defaultlocation='" . $SelectedLocation . "'";
 								$result = DB_query($sql);
 								$myrow = DB_fetch_row($result);
 								if($myrow[0]>0) {
@@ -342,7 +342,7 @@ if(isset($_POST['submit'])) {
 									prnMsg(_('Cannot delete this location because it is used by some branch records as the default location to deliver from'),'warn');
 									echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('branches set up to use this location by default');
 								} else {
-									$sql= "SELECT COUNT(*) FROM purchorders WHERE intostocklocation='" . $SelectedLocation . "'";
+									$sql= "SELECT COUNT(*) FROM weberp_purchorders WHERE intostocklocation='" . $SelectedLocation . "'";
 									$result = DB_query($sql);
 									$myrow = DB_fetch_row($result);
 									if($myrow[0]>0) {
@@ -361,21 +361,21 @@ if(isset($_POST['submit'])) {
 	if(! $CancelDelete) {
 
 		/* need to figure out if this location is the only one in the same tax province */
-		$result = DB_query("SELECT taxprovinceid FROM locations
+		$result = DB_query("SELECT taxprovinceid FROM weberp_locations
 							WHERE loccode='" . $SelectedLocation . "'");
 		$TaxProvinceRow = DB_fetch_row($result);
-		$result = DB_query("SELECT COUNT(taxprovinceid) FROM locations
+		$result = DB_query("SELECT COUNT(taxprovinceid) FROM weberp_locations
 							WHERE taxprovinceid='" .$TaxProvinceRow[0] . "'");
 		$TaxProvinceCount = DB_fetch_row($result);
 		if($TaxProvinceCount[0]==1) {
 		/* if its the only location in this tax authority then delete the appropriate records in TaxAuthLevels */
-			$result = DB_query("DELETE FROM taxauthrates
+			$result = DB_query("DELETE FROM weberp_taxauthrates
 								WHERE dispatchtaxprovince='" . $TaxProvinceRow[0] . "'");
 		}
 
-		$result= DB_query("DELETE FROM locstock WHERE loccode ='" . $SelectedLocation . "'");
-		$result = DB_query("DELETE FROM locationusers WHERE loccode='" . $SelectedLocation . "'");
-		$result = DB_query("DELETE FROM locations WHERE loccode='" . $SelectedLocation . "'");
+		$result= DB_query("DELETE FROM weberp_locstock WHERE loccode ='" . $SelectedLocation . "'");
+		$result = DB_query("DELETE FROM weberp_locationusers WHERE loccode='" . $SelectedLocation . "'");
+		$result = DB_query("DELETE FROM weberp_locations WHERE loccode='" . $SelectedLocation . "'");
 
 		prnMsg(_('Location') . ' ' . $SelectedLocation . ' ' . _('has been deleted') . '!', 'success');
 		unset ($SelectedLocation);
@@ -393,12 +393,12 @@ or deletion of the records*/
 
 	$sql = "SELECT loccode,
 				locationname,
-				taxprovinces.taxprovincename as description,
+				weberp_taxprovinces.taxprovincename as description,
 				glaccountcode,
 				allowinvoicing,
 				managed
-			FROM locations INNER JOIN taxprovinces
-			ON locations.taxprovinceid=taxprovinces.taxprovinceid";
+			FROM weberp_locations INNER JOIN weberp_taxprovinces
+			ON weberp_locations.taxprovinceid=weberp_taxprovinces.taxprovinceid";
 	$result = DB_query($sql);
 
 	if(DB_num_rows($result)==0) {
@@ -488,7 +488,7 @@ if(!isset($_GET['delete'])) {
 					usedforwo,
 					glaccountcode,
 					allowinvoicing
-				FROM locations
+				FROM weberp_locations
 				WHERE loccode='" . $SelectedLocation . "'";
 
 		$result = DB_query($sql);
@@ -644,7 +644,7 @@ if(!isset($_GET['delete'])) {
 			<td>' . _('Tax Province') . ':' . '</td>
 			<td><select name="TaxProvince">';
 
-	$TaxProvinceResult = DB_query("SELECT taxprovinceid, taxprovincename FROM taxprovinces");
+	$TaxProvinceResult = DB_query("SELECT taxprovinceid, taxprovincename FROM weberp_taxprovinces");
 	while ($myrow=DB_fetch_array($TaxProvinceResult)) {
 		if($_POST['TaxProvince']==$myrow['taxprovinceid']) {
 			echo '<option selected="selected" value="' . $myrow['taxprovinceid'] . '">' . $myrow['taxprovincename'] . '</option>';

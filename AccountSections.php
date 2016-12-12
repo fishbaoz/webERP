@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: AccountSections.php 7518 2016-05-13 04:47:08Z rchacon $*/
 /* Defines the sections in the general ledger reports */
 
 include('includes/session.inc');
@@ -9,22 +9,22 @@ $BookMark = 'AccountSections';
 include('includes/header.inc');
 
 // SOME TEST TO ENSURE THAT AT LEAST INCOME AND COST OF SALES ARE THERE
-	$sql= "SELECT sectionid FROM accountsection WHERE sectionid=1";
+	$sql= "SELECT sectionid FROM weberp_accountsection WHERE sectionid=1";
 	$result = DB_query($sql);
 
 	if( DB_num_rows($result) == 0 ) {
-		$sql = "INSERT INTO accountsection (sectionid,
+		$sql = "INSERT INTO weberp_accountsection (sectionid,
 											sectionname)
 									VALUES (1,
 											'Income')";
 		$result = DB_query($sql);
 	}
 
-	$sql= "SELECT sectionid FROM accountsection WHERE sectionid=2";
+	$sql= "SELECT sectionid FROM weberp_accountsection WHERE sectionid=2";
 	$result = DB_query($sql);
 
 	if( DB_num_rows($result) == 0 ) {
-		$sql = "INSERT INTO accountsection (sectionid,
+		$sql = "INSERT INTO weberp_accountsection (sectionid,
 											sectionname)
 									VALUES (2,
 											'Cost Of Sales')";
@@ -52,7 +52,7 @@ if(isset($_POST['submit'])) {
 	//first off validate inputs sensible
 	if(isset($_POST['SectionID'])) {
 		$sql="SELECT sectionid
-					FROM accountsection
+					FROM weberp_accountsection
 					WHERE sectionid='".$_POST['SectionID']."'";
 		$result=DB_query($sql);
 
@@ -92,7 +92,7 @@ if(isset($_POST['submit'])) {
 
 		/*SelectedSectionID could also exist if submit had not been clicked this code would not run in this case cos submit is false of course see the delete code below*/
 
-		$sql = "UPDATE accountsection SET sectionname='" . $_POST['SectionName'] . "'
+		$sql = "UPDATE weberp_accountsection SET sectionname='" . $_POST['SectionName'] . "'
 				WHERE sectionid = '" . $_POST['SelectedSectionID'] . "'";
 
 		$msg = _('Record Updated');
@@ -100,7 +100,7 @@ if(isset($_POST['submit'])) {
 
 	/*SelectedSectionID is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new account section form */
 
-		$sql = "INSERT INTO accountsection (sectionid,
+		$sql = "INSERT INTO weberp_accountsection (sectionid,
 											sectionname
 										) VALUES (
 											'" . $_POST['SectionID'] . "',
@@ -120,8 +120,8 @@ if(isset($_POST['submit'])) {
 } elseif(isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
-// PREVENT DELETES IF DEPENDENT RECORDS IN 'accountgroups'
-	$sql= "SELECT COUNT(sectioninaccounts) AS sections FROM accountgroups WHERE sectioninaccounts='" . $_GET['SelectedSectionID'] . "'";
+// PREVENT DELETES IF DEPENDENT RECORDS IN 'weberp_accountgroups'
+	$sql= "SELECT COUNT(sectioninaccounts) AS sections FROM weberp_accountgroups WHERE sectioninaccounts='" . $_GET['SelectedSectionID'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 	if($myrow['sections']>0) {
@@ -132,12 +132,12 @@ if(isset($_POST['submit'])) {
 
 	} else {
 		//Fetch section name
-		$sql = "SELECT sectionname FROM accountsection WHERE sectionid='".$_GET['SelectedSectionID'] . "'";
+		$sql = "SELECT sectionname FROM weberp_accountsection WHERE sectionid='".$_GET['SelectedSectionID'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);
 		$SectionName = $myrow['sectionname'];
 
-		$sql="DELETE FROM accountsection WHERE sectionid='" . $_GET['SelectedSectionID'] . "'";
+		$sql="DELETE FROM weberp_accountsection WHERE sectionid='" . $_GET['SelectedSectionID'] . "'";
 		$result = DB_query($sql);
 		prnMsg( $SectionName . ' ' . _('section has been deleted') . '!','success');
 
@@ -161,7 +161,7 @@ if(!isset($_GET['SelectedSectionID']) AND !isset($_POST['SelectedSectionID'])) {
 
 	$sql = "SELECT sectionid,
 			sectionname
-		FROM accountsection
+		FROM weberp_accountsection
 		ORDER BY sectionid";
 
 	$ErrMsg = _('Could not get account group sections because');
@@ -223,7 +223,7 @@ if(! isset($_GET['delete'])) {
 
 		$sql = "SELECT sectionid,
 				sectionname
-			FROM accountsection
+			FROM weberp_accountsection
 			WHERE sectionid='" . $_GET['SelectedSectionID'] ."'";
 
 		$result = DB_query($sql);

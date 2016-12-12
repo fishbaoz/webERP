@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: MailInventoryValuation.php 6966 2014-11-06 09:15:09Z daintree $ */
 
 $AllowAnyone = true;
 
@@ -68,49 +68,49 @@ $line_height = 12;
 /*Now figure out the inventory data to report for the category range under review */
 if ($Location=='All'){
 
-	$SQL = "SELECT stockmaster.categoryid,
-				stockcategory.categorydescription,
-				stockmaster.stockid,
-				stockmaster.description,
-				SUM(locstock.quantity) as qtyonhand,
-				stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS unitcost,
-				SUM(locstock.quantity) *(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS itemtotal
-			FROM stockmaster,
-				stockcategory,
-				locstock
-			WHERE stockmaster.stockid=locstock.stockid
-			AND stockmaster.categoryid=stockcategory.categoryid
-			GROUP BY stockmaster.categoryid,
-				stockcategory.categorydescription,
+	$SQL = "SELECT weberp_stockmaster.categoryid,
+				weberp_stockcategory.categorydescription,
+				weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				SUM(weberp_locstock.quantity) as qtyonhand,
+				weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS unitcost,
+				SUM(weberp_locstock.quantity) *(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS itemtotal
+			FROM weberp_stockmaster,
+				weberp_stockcategory,
+				weberp_locstock
+			WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+			AND weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			GROUP BY weberp_stockmaster.categoryid,
+				weberp_stockcategory.categorydescription,
 				unitcost,
-				stockmaster.stockid,
-				stockmaster.description
-			HAVING SUM(locstock.quantity)!=0
-			AND stockmaster.categoryid >= '" . $FromCriteria . "'
-			AND stockmaster.categoryid <= '" . $ToCriteria . "'
-			ORDER BY stockmaster.categoryid,
-				stockmaster.stockid";
+				weberp_stockmaster.stockid,
+				weberp_stockmaster.description
+			HAVING SUM(weberp_locstock.quantity)!=0
+			AND weberp_stockmaster.categoryid >= '" . $FromCriteria . "'
+			AND weberp_stockmaster.categoryid <= '" . $ToCriteria . "'
+			ORDER BY weberp_stockmaster.categoryid,
+				weberp_stockmaster.stockid";
 
 } else {
 
-	$SQL = "SELECT stockmaster.categoryid,
-				stockcategory.categorydescription,
-				stockmaster.stockid,
-				stockmaster.description,
-				locstock.quantity as qtyonhand,
-				stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS unitcost,
-				locstock.quantity *(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) AS itemtotal
-			FROM stockmaster,
-				stockcategory,
-				locstock
-			WHERE stockmaster.stockid=locstock.stockid
-			AND stockmaster.categoryid=stockcategory.categoryid
-			AND locstock.quantity!=0
-			AND stockmaster.categoryid >= '" . $FromCriteria . "'
-			AND stockmaster.categoryid <= '" . $ToCriteria . "'
-			AND locstock.loccode = '" . $Location . "'
-			ORDER BY stockmaster.categoryid,
-				stockmaster.stockid";
+	$SQL = "SELECT weberp_stockmaster.categoryid,
+				weberp_stockcategory.categorydescription,
+				weberp_stockmaster.stockid,
+				weberp_stockmaster.description,
+				weberp_locstock.quantity as qtyonhand,
+				weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS unitcost,
+				weberp_locstock.quantity *(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) AS itemtotal
+			FROM weberp_stockmaster,
+				weberp_stockcategory,
+				weberp_locstock
+			WHERE weberp_stockmaster.stockid=weberp_locstock.stockid
+			AND weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			AND weberp_locstock.quantity!=0
+			AND weberp_stockmaster.categoryid >= '" . $FromCriteria . "'
+			AND weberp_stockmaster.categoryid <= '" . $ToCriteria . "'
+			AND weberp_locstock.loccode = '" . $Location . "'
+			ORDER BY weberp_stockmaster.categoryid,
+				weberp_stockmaster.stockid";
 
 }
 $InventoryResult = DB_query($SQL,'','',false,true);

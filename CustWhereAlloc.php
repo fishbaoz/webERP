@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: CustWhereAlloc.php 7628 2016-09-21 16:14:21Z rchacon $*/
 /* Shows to which invoices a receipt was allocated to */
 
 include('includes/session.inc');
@@ -63,19 +63,19 @@ if(isset($_POST['ShowResults']) AND  $_POST['TransNo']=='') {
 if(isset($_POST['ShowResults']) AND $_POST['TransNo']!='') {
 
 /*First off get the DebtorTransID of the transaction (invoice normally) selected */
-	$sql = "SELECT debtortrans.id,
+	$sql = "SELECT weberp_debtortrans.id,
 				ovamount+ovgst AS totamt,
-				currencies.decimalplaces AS currdecimalplaces,
-				debtorsmaster.currcode
-			FROM debtortrans INNER JOIN debtorsmaster
-			ON debtortrans.debtorno=debtorsmaster.debtorno
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
+				weberp_currencies.decimalplaces AS currdecimalplaces,
+				weberp_debtorsmaster.currcode
+			FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+			ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 			WHERE type='" . $_POST['TransType'] . "'
 			AND transno = '" . $_POST['TransNo']."'";
 
 	if($_SESSION['SalesmanLogin'] != '') {
-			$sql .= " AND debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
+			$sql .= " AND weberp_debtortrans.salesperson='" . $_SESSION['SalesmanLogin'] . "'";
 	}
 	$result = DB_query($sql );
 
@@ -87,22 +87,22 @@ if(isset($_POST['ShowResults']) AND $_POST['TransNo']!='') {
 		$sql = "SELECT type,
 					transno,
 					trandate,
-					debtortrans.debtorno,
+					weberp_debtortrans.debtorno,
 					reference,
-					debtortrans.rate,
+					weberp_debtortrans.rate,
 					ovamount+ovgst+ovfreight+ovdiscount as totalamt,
-					custallocns.amt
-				FROM debtortrans
-				INNER JOIN custallocns ";
+					weberp_custallocns.amt
+				FROM weberp_debtortrans
+				INNER JOIN weberp_custallocns ";
 		if($_POST['TransType']==12 OR $_POST['TransType'] == 11) {
 
 			$TitleInfo = ($_POST['TransType'] == 12)?_('Receipt'):_('Credit Note');
-			$sql .= "ON debtortrans.id = custallocns.transid_allocto
-				WHERE custallocns.transid_allocfrom = '" . $AllocToID . "'";
+			$sql .= "ON weberp_debtortrans.id = weberp_custallocns.transid_allocto
+				WHERE weberp_custallocns.transid_allocfrom = '" . $AllocToID . "'";
 		} else {
 			$TitleInfo = _('invoice');
-			$sql .= "ON debtortrans.id = custallocns.transid_allocfrom
-				WHERE custallocns.transid_allocto = '" . $AllocToID . "'";
+			$sql .= "ON weberp_debtortrans.id = weberp_custallocns.transid_allocfrom
+				WHERE weberp_custallocns.transid_allocto = '" . $AllocToID . "'";
 		}
 		$sql .= " ORDER BY transno ";
 

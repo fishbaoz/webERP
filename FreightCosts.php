@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: FreightCosts.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Freight Costs Maintenance');
@@ -30,7 +30,7 @@ if (!isset($LocationFrom) OR !isset($ShipperID)) {
 	echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
     echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	$sql = "SELECT shippername, shipper_id FROM shippers";
+	$sql = "SELECT shippername, shipper_id FROM weberp_shippers";
 	$ShipperResults = DB_query($sql);
 
 	echo '<table class="selection">
@@ -46,9 +46,9 @@ if (!isset($LocationFrom) OR !isset($ShipperID)) {
 				<td>' . _('Select the warehouse') . ' (' . _('ship from location') . ')</td>
 				<td><select name="LocationFrom">';
 
-	$sql = "SELECT locations.loccode,
+	$sql = "SELECT weberp_locations.loccode,
 					locationname
-			FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+			FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 	$LocationResults = DB_query($sql);
 
 	while ($myrow = DB_fetch_array($LocationResults)){
@@ -63,11 +63,11 @@ if (!isset($LocationFrom) OR !isset($ShipperID)) {
 
 } else {
 
-	$sql = "SELECT shippername FROM shippers WHERE shipper_id = '".$ShipperID."'";
+	$sql = "SELECT shippername FROM weberp_shippers WHERE shipper_id = '".$ShipperID."'";
 	$ShipperResults = DB_query($sql);
 	$myrow = DB_fetch_row($ShipperResults);
 	$ShipperName = $myrow[0];
-	$sql = "SELECT locationname FROM locations WHERE loccode = '".$LocationFrom."'";
+	$sql = "SELECT locationname FROM weberp_locations WHERE loccode = '".$LocationFrom."'";
 	$LocationResults = DB_query($sql);
 	$myrow = DB_fetch_row($LocationResults);
 	$LocationName = $myrow[0];
@@ -120,7 +120,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SelectedFreightCost) AND $InputError !=1) {
 
-		$sql = "UPDATE freightcosts
+		$sql = "UPDATE weberp_freightcosts
 				SET	locationfrom='".$LocationFrom."',
 					destinationcountry='" . $_POST['DestinationCountry'] . "',
 					destination='" . $_POST['Destination'] . "',
@@ -139,7 +139,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected freight cost is null cos no item selected on first time round so must be adding a record must be submitting new entries */
 
-		$sql = "INSERT INTO freightcosts (locationfrom,
+		$sql = "INSERT INTO weberp_freightcosts (locationfrom,
 											destinationcountry,
 											destination,
 											shipperid,
@@ -182,7 +182,7 @@ if (isset($_POST['submit'])) {
 
 } elseif (isset($_GET['delete'])) {
 
-	$sql = "DELETE FROM freightcosts WHERE shipcostfromid='" . $SelectedFreightCost . "'";
+	$sql = "DELETE FROM weberp_freightcosts WHERE shipcostfromid='" . $SelectedFreightCost . "'";
 	$result = DB_query($sql);
 	prnMsg( _('Freight cost record deleted'),'success');
 	unset ($SelectedFreightCost);
@@ -200,9 +200,9 @@ if (!isset($SelectedFreightCost) AND isset($LocationFrom) AND isset($ShipperID))
 					maxcub,
 					fixedprice,
 					minimumchg
-				FROM freightcosts
-				WHERE freightcosts.locationfrom = '".$LocationFrom. "'
-				AND freightcosts.shipperid = '" . $ShipperID . "'
+				FROM weberp_freightcosts
+				WHERE weberp_freightcosts.locationfrom = '".$LocationFrom. "'
+				AND weberp_freightcosts.shipperid = '" . $ShipperID . "'
 				ORDER BY destinationcountry, 
 						destination,
 						maxkgs,
@@ -300,7 +300,7 @@ if (isset($LocationFrom) AND isset($ShipperID)) {
 					maxcub,
 					fixedprice,
 					minimumchg
-				FROM freightcosts
+				FROM weberp_freightcosts
 				WHERE shipcostfromid='" . $SelectedFreightCost ."'";
 
 		$result = DB_query($sql);

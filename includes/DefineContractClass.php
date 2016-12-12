@@ -62,7 +62,7 @@ Class Contract {
 
 	function Remove_ContractComponent($ContractComponent_ID){
 		global $db;
-		$result = DB_query("DELETE FROM contractbom
+		$result = DB_query("DELETE FROM weberp_contractbom
 											WHERE contractref='" . $this->ContractRef . "'
 											AND stockid='" . $this->ContractBOM[$ContractComponent_ID]->StockID . "'");
 		unset($this->ContractBOM[$ContractComponent_ID]);
@@ -86,7 +86,7 @@ function Add_To_ContractRequirements($Requirement,
 
 	function Remove_ContractRequirement($ContractRequirementID){
 		global $db;
-		$result = DB_query("DELETE FROM contractreqts WHERE contractreqid='" . $this->ContractReqts[$ContractRequirementID]->ContractReqID . "'");
+		$result = DB_query("DELETE FROM weberp_contractreqts WHERE contractreqid='" . $this->ContractReqts[$ContractRequirementID]->ContractReqID . "'");
 		unset($this->ContractReqts[$ContractRequirementID]);
 	}
 

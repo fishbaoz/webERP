@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GLBudgets.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
@@ -42,7 +42,7 @@ echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'
 
 $SQL = "SELECT accountcode,
 				accountname
-			FROM chartmaster
+			FROM weberp_chartmaster
 			ORDER BY accountcode";
 
 $result=DB_query($SQL);
@@ -93,21 +93,21 @@ if (isset($SelectedAccount) and $SelectedAccount != '') {
 
 	$CurrentYearEndPeriod = GetPeriod(Date($_SESSION['DefaultDateFormat'],YearEndDate($_SESSION['YearEnd'],0)),$db);
 
-// If the update button has been hit, then update chartdetails with the budget figures
+// If the update button has been hit, then update weberp_chartdetails with the budget figures
 // for this year and next.
 	if (isset($_POST['update'])) {
 		$ErrMsg = _('Cannot update GL budgets');
 		$DbgMsg = _('The SQL that failed to update the GL budgets was');
 		for ($i=1; $i<=12; $i++) {
-			$SQL="UPDATE chartdetails SET budget='" . round(filter_number_format($_POST[$i.'last']),$_SESSION['CompanyRecord']['decimalplaces']). "'
+			$SQL="UPDATE weberp_chartdetails SET budget='" . round(filter_number_format($_POST[$i.'last']),$_SESSION['CompanyRecord']['decimalplaces']). "'
 					WHERE period='" . ($CurrentYearEndPeriod-(24-$i)) ."'
 					AND  accountcode = '" . $SelectedAccount."'";
 			$result=DB_query($SQL,$ErrMsg,$DbgMsg);
-			$SQL="UPDATE chartdetails SET budget='" . round(filter_number_format($_POST[$i.'this']),$_SESSION['CompanyRecord']['decimalplaces']). "'
+			$SQL="UPDATE weberp_chartdetails SET budget='" . round(filter_number_format($_POST[$i.'this']),$_SESSION['CompanyRecord']['decimalplaces']). "'
 					WHERE period='" . ($CurrentYearEndPeriod-(12-$i)) ."'
 					AND  accountcode = '" . $SelectedAccount."'";
 			$result=DB_query($SQL,$ErrMsg,$DbgMsg);
-			$SQL="UPDATE chartdetails SET budget='". round(filter_number_format($_POST[$i.'next']),$_SESSION['CompanyRecord']['decimalplaces'])."'
+			$SQL="UPDATE weberp_chartdetails SET budget='". round(filter_number_format($_POST[$i.'next']),$_SESSION['CompanyRecord']['decimalplaces'])."'
 					WHERE period='" .  ($CurrentYearEndPeriod+$i) ."'
 					AND  accountcode = '" . $SelectedAccount."'";
 			$result=DB_query($SQL,$ErrMsg,$DbgMsg);
@@ -123,13 +123,13 @@ if (isset($SelectedAccount) and $SelectedAccount != '') {
 		$period=GetPeriod(Date($_SESSION['DefaultDateFormat'],$MonthEnd),$db, false);
 		$PeriodEnd[$period]=Date('M Y',$MonthEnd);
 	}
-	include('includes/GLPostings.inc'); //creates chartdetails with correct values
+	include('includes/GLPostings.inc'); //creates weberp_chartdetails with correct values
 // End of create periods
 
 	$SQL="SELECT period,
 					budget,
 					actual
-				FROM chartdetails
+				FROM weberp_chartdetails
 				WHERE accountcode='" . $SelectedAccount . "'";
 
 	$result=DB_query($SQL);
@@ -242,12 +242,12 @@ if (isset($SelectedAccount) and $SelectedAccount != '') {
 		</div>
 		</form>';
 
-	$SQL="SELECT MIN(periodno) FROM periods";
+	$SQL="SELECT MIN(periodno) FROM weberp_periods";
 	$result=DB_query($SQL);
 	$MyRow=DB_fetch_array($result);
 	$FirstPeriod=$MyRow[0];
 
-	$SQL="SELECT MAX(periodno) FROM periods";
+	$SQL="SELECT MAX(periodno) FROM weberp_periods";
 	$result=DB_query($SQL);
 	$MyRow=DB_fetch_array($result);
 	$LastPeriod=$MyRow[0];
@@ -259,7 +259,7 @@ if (isset($SelectedAccount) and $SelectedAccount != '') {
 					actual,
 					bfwd,
 					bfwdbudget
-				FROM chartdetails
+				FROM weberp_chartdetails
 				WHERE period ='". $i . "'
 				AND  accountcode = '" . $SelectedAccount . "'";
 
@@ -269,7 +269,7 @@ if (isset($SelectedAccount) and $SelectedAccount != '') {
 		while ($myrow=DB_fetch_array($result)){
 
 			$CFwdBudget = $myrow['bfwdbudget'] + $myrow['budget'];
-			$sql = "UPDATE chartdetails
+			$sql = "UPDATE weberp_chartdetails
 					SET bfwdbudget='" . $CFwdBudget . "'
 					WHERE period='" . ($myrow['period'] +1) . "'
 					AND  accountcode = '" . $SelectedAccount . "'";

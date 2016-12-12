@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectGLAccount.php 7577 2016-08-02 06:29:19Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -17,39 +17,39 @@ if (isset($_POST['Search'])){
 		$msg=_('Account name keywords have been used in preference to the account code extract entered');
 	}
 	if ($_POST['Keywords']=='' AND $_POST['GLCode']=='') {
-            $SQL = "SELECT chartmaster.accountcode,
-                    chartmaster.accountname,
-                    chartmaster.group_,
-                    CASE WHEN accountgroups.pandl!=0 THEN '" . _('Profit and Loss') . "' ELSE '" . _('Balance Sheet') ."' END AS pl
-                    FROM chartmaster,
-                        accountgroups,
-						glaccountusers
-					WHERE glaccountusers.accountcode = chartmaster.accountcode 
-						AND glaccountusers.userid='" .  $_SESSION['UserID'] . "'
-						AND glaccountusers.canview=1 
-						AND chartmaster.group_=accountgroups.groupname
-                    ORDER BY chartmaster.accountcode";
+            $SQL = "SELECT weberp_chartmaster.accountcode,
+                    weberp_chartmaster.accountname,
+                    weberp_chartmaster.group_,
+                    CASE WHEN weberp_accountgroups.pandl!=0 THEN '" . _('Profit and Loss') . "' ELSE '" . _('Balance Sheet') ."' END AS pl
+                    FROM weberp_chartmaster,
+                        weberp_accountgroups,
+						weberp_glaccountusers
+					WHERE weberp_glaccountusers.accountcode = weberp_chartmaster.accountcode 
+						AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "'
+						AND weberp_glaccountusers.canview=1 
+						AND weberp_chartmaster.group_=weberp_accountgroups.groupname
+                    ORDER BY weberp_chartmaster.accountcode";
     }
 	elseif (mb_strlen($_POST['Keywords'])>0) {
 			//insert wildcard characters in spaces
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-			$SQL = "SELECT chartmaster.accountcode,
-					chartmaster.accountname,
-					chartmaster.group_,
-					CASE WHEN accountgroups.pandl!=0
+			$SQL = "SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname,
+					weberp_chartmaster.group_,
+					CASE WHEN weberp_accountgroups.pandl!=0
 						THEN '" . _('Profit and Loss') . "'
 						ELSE '" . _('Balance Sheet') . "' END AS pl
-				FROM chartmaster,
-					accountgroups,
-					glaccountusers
-				WHERE glaccountusers.accountcode = chartmaster.accountcode 
-					AND glaccountusers.userid='" .  $_SESSION['UserID'] . "'
-					AND glaccountusers.canview=1 
-					AND chartmaster.group_ = accountgroups.groupname
+				FROM weberp_chartmaster,
+					weberp_accountgroups,
+					weberp_glaccountusers
+				WHERE weberp_glaccountusers.accountcode = weberp_chartmaster.accountcode 
+					AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_glaccountusers.canview=1 
+					AND weberp_chartmaster.group_ = weberp_accountgroups.groupname
 					AND accountname " . LIKE  . "'". $SearchString ."'
-				ORDER BY accountgroups.sequenceintb,
-					chartmaster.accountcode";
+				ORDER BY weberp_accountgroups.sequenceintb,
+					weberp_chartmaster.accountcode";
 
 		} elseif (mb_strlen($_POST['GLCode'])>0){
 			if (!empty($_POST['GLCode'])) {
@@ -57,19 +57,19 @@ if (isset($_POST['Search'])){
 				exit;
 			}
 
-			$SQL = "SELECT chartmaster.accountcode,
-					chartmaster.accountname,
-					chartmaster.group_,
-					CASE WHEN accountgroups.pandl!=0 THEN '" . _('Profit and Loss') . "' ELSE '" . _('Balance Sheet') ."' END AS pl
-					FROM chartmaster,
-						accountgroups, 
-						glaccountusers
-				WHERE glaccountusers.accountcode = chartmaster.accountcode 
-					AND glaccountusers.userid='" .  $_SESSION['UserID'] . "'
-					AND glaccountusers.canview=1 
-					AND chartmaster.group_=accountgroups.groupname
-					AND chartmaster.accountcode >= '" . $_POST['GLCode'] . "'
-					ORDER BY chartmaster.accountcode";
+			$SQL = "SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname,
+					weberp_chartmaster.group_,
+					CASE WHEN weberp_accountgroups.pandl!=0 THEN '" . _('Profit and Loss') . "' ELSE '" . _('Balance Sheet') ."' END AS pl
+					FROM weberp_chartmaster,
+						weberp_accountgroups, 
+						weberp_glaccountusers
+				WHERE weberp_glaccountusers.accountcode = weberp_chartmaster.accountcode 
+					AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_glaccountusers.canview=1 
+					AND weberp_chartmaster.group_=weberp_accountgroups.groupname
+					AND weberp_chartmaster.accountcode >= '" . $_POST['GLCode'] . "'
+					ORDER BY weberp_chartmaster.accountcode";
 		}
 		if (isset($SQL) and $SQL!=''){
 			$result = DB_query($SQL);
@@ -99,11 +99,11 @@ if (!isset($AccountID)) {
 			<td><input type="text" name="Keywords" size="20" maxlength="25" /></td>
 			<td><b>' .  _('OR') . '</b></td>';
 
-	$SQLAccountSelect="SELECT chartmaster.accountcode,
-							chartmaster.accountname
-						FROM chartmaster
-						INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-						ORDER BY chartmaster.accountcode";
+	$SQLAccountSelect="SELECT weberp_chartmaster.accountcode,
+							weberp_chartmaster.accountname
+						FROM weberp_chartmaster
+						INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+						ORDER BY weberp_chartmaster.accountcode";
 
 	$ResultSelection=DB_query($SQLAccountSelect);
 	echo '<td><select name="GLCode">';

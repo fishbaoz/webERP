@@ -32,7 +32,7 @@ if (isset($_POST['AddContractChgToInvoice'])){
 	if ($_POST['ContractRef'] == ''){
 		$_POST['ContractRef'] = $_POST['ContractSelection'];
 	} else{
-		$result = DB_query("SELECT contractref FROM contracts
+		$result = DB_query("SELECT contractref FROM weberp_contracts
 							WHERE status=2
 							AND contractref='" . $_POST['ContractRef'] . "'");
 		if (DB_num_rows($result)==0){
@@ -137,8 +137,8 @@ echo '<tr>
 		<td><select name="ContractSelection">';
 
 $sql = "SELECT contractref, name
-		FROM contracts INNER JOIN debtorsmaster
-		ON contracts.debtorno=debtorsmaster.debtorno
+		FROM weberp_contracts INNER JOIN weberp_debtorsmaster
+		ON weberp_contracts.debtorno=weberp_debtorsmaster.debtorno
 		WHERE status=2"; //only show customer ordered contracts not quotes or contracts that are finished with
 
 $result = DB_query($sql);

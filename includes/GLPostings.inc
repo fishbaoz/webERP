@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLPostings.inc 7506 2016-05-06 03:25:37Z exsonqu $*/
 
 /* This file contains the code to post GL transactions.
 
@@ -23,44 +23,44 @@ ChartDetail records should already exist - they are created (from includes/DateF
 */
 
 
-$FirstPeriodResult = DB_query("SELECT MIN(periodno) FROM periods");
+$FirstPeriodResult = DB_query("SELECT MIN(periodno) FROM weberp_periods");
 $FirstPeriodRow = DB_fetch_row($FirstPeriodResult);
 $CreateFrom = $FirstPeriodRow[0];
 
 if (is_null($FirstPeriodRow[0])){
 	//There are no periods defined
-	$InsertFirstPeriodResult = DB_query("INSERT INTO periods VALUES (-1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')-1,0,Date('Y'))) . "')",_('Could not insert first period'));
-	$InsertFirstPeriodResult = DB_query("INSERT INTO periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')",_('Could not insert first period'));
-	$InsertFirstPeriodResult = DB_query("INSERT INTO periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')",_('Could not insert second period'));
+	$InsertFirstPeriodResult = DB_query("INSERT INTO weberp_periods VALUES (-1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')-1,0,Date('Y'))) . "')",_('Could not insert first period'));
+	$InsertFirstPeriodResult = DB_query("INSERT INTO weberp_periods VALUES (0,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+1,0,Date('Y'))) . "')",_('Could not insert first period'));
+	$InsertFirstPeriodResult = DB_query("INSERT INTO weberp_periods VALUES (1,'" . Date('Y-m-d',mktime(0,0,0,Date('m')+2,0,Date('Y'))) . "')",_('Could not insert second period'));
 	$CreateFrom=-1;
 }
 
-$LastPeriodResult = DB_query("SELECT MAX(periodno) FROM periods");
+$LastPeriodResult = DB_query("SELECT MAX(periodno) FROM weberp_periods");
 $LastPeriodRow = DB_fetch_row($LastPeriodResult);
 
 
 $CreateTo = $LastPeriodRow[0];
 
-/*First off see if there are in fact any chartdetails */
+/*First off see if there are in fact any weberp_chartdetails */
 
-$sql = "SELECT chartmaster.accountcode, MIN(periods.periodno) AS startperiod
-				FROM (chartmaster CROSS JOIN periods)
-				LEFT JOIN chartdetails ON chartmaster.accountcode = chartdetails.accountcode
-				AND periods.periodno = chartdetails.period
-				WHERE (periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
-				AND chartdetails.actual IS NULL
-				GROUP BY chartmaster.accountcode";
+$sql = "SELECT weberp_chartmaster.accountcode, MIN(weberp_periods.periodno) AS startperiod
+				FROM (weberp_chartmaster CROSS JOIN weberp_periods)
+				LEFT JOIN weberp_chartdetails ON weberp_chartmaster.accountcode = weberp_chartdetails.accountcode
+				AND weberp_periods.periodno = weberp_chartdetails.period
+				WHERE (weberp_periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
+				AND weberp_chartdetails.actual IS NULL
+				GROUP BY weberp_chartmaster.accountcode";
 
 $ChartDetailsNotSetUpResult = DB_query($sql,_('Could not test to see that all chart detail records properly initiated'));
 
 if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 	//first lets retrieve those new added accountcode and period;
-	$sql = "SELECT chartmaster.accountcode,periods.periodno 
-		FROM (chartmaster CROSS JOIN periods) 
-		LEFT JOIN chartdetails ON chartmaster.accountcode=chartdetails.accountcode 
-		AND periods.periodno=chartdetails.period 
-		WHERE (periods.periodno BETWEEN '" . $CreateFrom . "' AND '" . $CreateTo . "')
-		AND chartdetails.accountcode IS NULL ORDER BY accountcode,periodno";
+	$sql = "SELECT weberp_chartmaster.accountcode,weberp_periods.periodno 
+		FROM (weberp_chartmaster CROSS JOIN weberp_periods) 
+		LEFT JOIN weberp_chartdetails ON weberp_chartmaster.accountcode=weberp_chartdetails.accountcode 
+		AND weberp_periods.periodno=weberp_chartdetails.period 
+		WHERE (weberp_periods.periodno BETWEEN '" . $CreateFrom . "' AND '" . $CreateTo . "')
+		AND weberp_chartdetails.accountcode IS NULL ORDER BY accountcode,periodno";
 	$ErrMsg = _('Failed to retrieve new account code and periods');
 	$NewPeriodResult = DB_query($sql,$ErrMsg);
 	if (DB_num_rows($result)>0){ 
@@ -70,14 +70,14 @@ if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 				$NewPeriods[$NewPeriodsRow['accountcode']] = $NewPeriodsRow['period'];
 			}
 		}
-		/*Now insert the chartdetails records that do not already exist */
-		$sql = "INSERT INTO chartdetails (accountcode, period)
-					SELECT chartmaster.accountcode, periods.periodno
-					FROM (chartmaster CROSS JOIN periods)
-					LEFT JOIN chartdetails ON chartmaster.accountcode = chartdetails.accountcode
-					AND periods.periodno = chartdetails.period
-					WHERE (periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
-					AND chartdetails.accountcode IS NULL";
+		/*Now insert the weberp_chartdetails records that do not already exist */
+		$sql = "INSERT INTO weberp_chartdetails (accountcode, period)
+					SELECT weberp_chartmaster.accountcode, weberp_periods.periodno
+					FROM (weberp_chartmaster CROSS JOIN weberp_periods)
+					LEFT JOIN weberp_chartdetails ON weberp_chartmaster.accountcode = weberp_chartdetails.accountcode
+					AND weberp_periods.periodno = weberp_chartdetails.period
+					WHERE (weberp_periods.periodno BETWEEN '"  . $CreateFrom . "' AND '" . $CreateTo . "')
+					AND weberp_chartdetails.accountcode IS NULL";
 
 		$ErrMsg = _('Inserting new chart details records required failed because');
 		$InsChartDetailsRecords = DB_query($sql,$ErrMsg);
@@ -88,7 +88,7 @@ if(DB_num_rows($ChartDetailsNotSetUpResult)>0){
 if (isset($NewPeriods)) {
 	foreach ($NewPeriods as $Account=>$Period) {
 		if ($Period>$CreateFrom) {
-			$sql = "UPDATE chartdetails SET bfwd=(SELECT t.bfwd FROM (SELECT bfwd+actual as bfwd FROM chartdetails WHERE accountcode='" . $Account . "' AND period='" . ($Period - 1) . "') AS t) WHERE accountcode='" . $Account . "' AND period>= " . $Period;
+			$sql = "UPDATE weberp_chartdetails SET bfwd=(SELECT t.bfwd FROM (SELECT bfwd+actual as bfwd FROM weberp_chartdetails WHERE accountcode='" . $Account . "' AND period='" . ($Period - 1) . "') AS t) WHERE accountcode='" . $Account . "' AND period>= " . $Period;
 			$ErrMsg = _('Failed to update the bfwd amount');
 			$BfwdResult = DB_query($sql,$ErrMsg);
 		}
@@ -103,7 +103,7 @@ for ( $CurrPeriod = $CreateFrom; $CurrPeriod <= $CreateTo; $CurrPeriod++ ) {
 					periodno,
 					account,
 					amount
-				FROM gltrans
+				FROM weberp_gltrans
 				WHERE posted=0
 				AND periodno='" . $CurrPeriod . "'
 				ORDER BY account";
@@ -115,13 +115,13 @@ for ( $CurrPeriod = $CreateFrom; $CurrPeriod <= $CreateTo; $CurrPeriod++ ) {
 	$TotalAmount=0;
 	while ($UnpostedTrans=DB_fetch_array($UnpostedTransResult)) {
 		if($CurrentAccount != $UnpostedTrans['account'] AND $CurrentAccount!='0') {
-			$sql = "UPDATE chartdetails SET actual = actual + " . $TotalAmount . "
+			$sql = "UPDATE weberp_chartdetails SET actual = actual + " . $TotalAmount . "
 					WHERE accountcode = '" . $CurrentAccount . "'
 					AND period= '" . $CurrPeriod . "'";
 			$ErrMsg = _('Failed to update actual amount in chartdetails table');
 			$PostPrd = DB_query($sql,$ErrMsg,'',true);
 			/*Update the BFwd for all following ChartDetail records */
-			$sql = "UPDATE chartdetails SET bfwd = bfwd + " . $TotalAmount . "
+			$sql = "UPDATE weberp_chartdetails SET bfwd = bfwd + " . $TotalAmount . "
 					WHERE accountcode = '" . $CurrentAccount . "'
 					AND period > '" . $CurrPeriod . "'";
 			$ErrMsg = _('Failed to update bfwd amount in chartdetails table');
@@ -133,20 +133,20 @@ for ( $CurrPeriod = $CreateFrom; $CurrPeriod <= $CreateTo; $CurrPeriod++ ) {
 	} 
 	// There will be one account still to post after the loop
 	if($CurrentAccount != '0') {
-		$sql = "UPDATE chartdetails SET actual = actual + " . $TotalAmount . "
+		$sql = "UPDATE weberp_chartdetails SET actual = actual + " . $TotalAmount . "
 				WHERE accountcode = '" . $CurrentAccount . "'
 				AND period= '" . $CurrPeriod . "'";
 		$ErrMsg = _('Failed to update actual amount in chartdetails table');
 		$PostPrd = DB_query($sql,$ErrMsg,'',true);
 		/*Update the BFwd for all following ChartDetail records */
-		$sql = "UPDATE chartdetails SET bfwd = bfwd + " . $TotalAmount . "
+		$sql = "UPDATE weberp_chartdetails SET bfwd = bfwd + " . $TotalAmount . "
 				WHERE accountcode = '" . $CurrentAccount . "'
 				AND period > '" . $CurrPeriod . "'";
 		$ErrMsg = _('Failed to update actual amount in chartdetails table');
 		$PostBFwds = DB_query($sql,$ErrMsg,'',true);
 	}
 	
-	$sql = "UPDATE gltrans SET posted = 1 WHERE periodno = '" . $CurrPeriod . "' AND posted=0";
+	$sql = "UPDATE weberp_gltrans SET posted = 1 WHERE periodno = '" . $CurrPeriod . "' AND posted=0";
 	$ErrMsg = _('Failed to update gltrans table');
 	$Posted = DB_query($sql,$ErrMsg,'',true);
 	

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_CurrencyDebtorsBalances.php 7052 2014-12-28 21:40:12Z rchacon $*/
 /* This script is an utility to show debtors balances in total by currency. */
 
 include ('includes/session.inc');
@@ -15,11 +15,11 @@ echo '<p class="page_title_text"><img alt="" src="'.$RootPath.'/css/'.$Theme.
 $sql = "SELECT SUM(ovamount+ovgst+ovdiscount+ovfreight-alloc) AS currencybalance,
 		currcode,
 		decimalplaces AS currdecimalplaces,
-		SUM((ovamount+ovgst+ovdiscount+ovfreight-alloc)/debtortrans.rate) AS localbalance
-	FROM debtortrans INNER JOIN debtorsmaster
-		ON debtortrans.debtorno=debtorsmaster.debtorno
-	INNER JOIN currencies
-	ON debtorsmaster.currcode=currencies.currabrev
+		SUM((ovamount+ovgst+ovdiscount+ovfreight-alloc)/weberp_debtortrans.rate) AS localbalance
+	FROM weberp_debtortrans INNER JOIN weberp_debtorsmaster
+		ON weberp_debtortrans.debtorno=weberp_debtorsmaster.debtorno
+	INNER JOIN weberp_currencies
+	ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
 	WHERE (ovamount+ovgst+ovdiscount+ovfreight-alloc)<>0 GROUP BY currcode";
 
 $result = DB_query($sql);

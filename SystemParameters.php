@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SystemParameters.php 7644 2016-10-11 15:52:19Z rchacon $*/
 /* This script is for maintenance of the system parameters. */
 
 include('includes/session.inc');
@@ -117,7 +117,7 @@ if (isset($_POST['submit'])) {
 		$sql = array();
 
 		if ($_SESSION['DefaultDateFormat'] != $_POST['X_DefaultDateFormat'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DefaultDateFormat']."' WHERE confname = 'DefaultDateFormat'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DefaultDateFormat']."' WHERE confname = 'DefaultDateFormat'";
 		}
 		if($DefaultTheme != $_POST['X_DefaultTheme']) {// If not equal, update the default theme.
 			// BEGIN: Update the config.php file:
@@ -139,218 +139,218 @@ if (isset($_POST['submit'])) {
 			// END: Update the config.php file.
 		}
 		if ($_SESSION['PastDueDays1'] != $_POST['X_PastDueDays1'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_PastDueDays1']."' WHERE confname = 'PastDueDays1'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_PastDueDays1']."' WHERE confname = 'PastDueDays1'";
 		}
 		if ($_SESSION['PastDueDays2'] != $_POST['X_PastDueDays2'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_PastDueDays2']."' WHERE confname = 'PastDueDays2'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_PastDueDays2']."' WHERE confname = 'PastDueDays2'";
 		}
 		if ($_SESSION['DefaultCreditLimit'] != $_POST['X_DefaultCreditLimit'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DefaultCreditLimit']."' WHERE confname = 'DefaultCreditLimit'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DefaultCreditLimit']."' WHERE confname = 'DefaultCreditLimit'";
 		}
 		if ($_SESSION['Show_Settled_LastMonth'] != $_POST['X_Show_Settled_LastMonth'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_Show_Settled_LastMonth']."' WHERE confname = 'Show_Settled_LastMonth'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_Show_Settled_LastMonth']."' WHERE confname = 'Show_Settled_LastMonth'";
 		}
 		if ($_SESSION['RomalpaClause'] != $_POST['X_RomalpaClause'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_RomalpaClause'] . "' WHERE confname = 'RomalpaClause'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_RomalpaClause'] . "' WHERE confname = 'RomalpaClause'";
 		}
 		if ($_SESSION['QuickEntries'] != $_POST['X_QuickEntries'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_QuickEntries']."' WHERE confname = 'QuickEntries'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_QuickEntries']."' WHERE confname = 'QuickEntries'";
 		}
 
 		if ($_SESSION['WorkingDaysWeek'] != $_POST['X_WorkingDaysWeek'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_WorkingDaysWeek']."' WHERE confname = 'WorkingDaysWeek'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_WorkingDaysWeek']."' WHERE confname = 'WorkingDaysWeek'";
 		}
 
 		if ($_SESSION['DispatchCutOffTime'] != $_POST['X_DispatchCutOffTime'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DispatchCutOffTime']."' WHERE confname = 'DispatchCutOffTime'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DispatchCutOffTime']."' WHERE confname = 'DispatchCutOffTime'";
 		}
 		if ($_SESSION['AllowSalesOfZeroCostItems'] != $_POST['X_AllowSalesOfZeroCostItems'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_AllowSalesOfZeroCostItems']."' WHERE confname = 'AllowSalesOfZeroCostItems'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_AllowSalesOfZeroCostItems']."' WHERE confname = 'AllowSalesOfZeroCostItems'";
 		}
 		if ($_SESSION['CreditingControlledItems_MustExist'] != $_POST['X_CreditingControlledItems_MustExist'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_CreditingControlledItems_MustExist']."' WHERE confname = 'CreditingControlledItems_MustExist'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_CreditingControlledItems_MustExist']."' WHERE confname = 'CreditingControlledItems_MustExist'";
 		}
 		if ($_SESSION['DefaultPriceList'] != $_POST['X_DefaultPriceList'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DefaultPriceList']."' WHERE confname = 'DefaultPriceList'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DefaultPriceList']."' WHERE confname = 'DefaultPriceList'";
 		}
 		if ($_SESSION['Default_Shipper'] != $_POST['X_Default_Shipper'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_Default_Shipper']."' WHERE confname = 'Default_Shipper'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_Default_Shipper']."' WHERE confname = 'Default_Shipper'";
 		}
 		if ($_SESSION['DoFreightCalc'] != $_POST['X_DoFreightCalc'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DoFreightCalc']."' WHERE confname = 'DoFreightCalc'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DoFreightCalc']."' WHERE confname = 'DoFreightCalc'";
 		}
 		if ($_SESSION['FreightChargeAppliesIfLessThan'] != $_POST['X_FreightChargeAppliesIfLessThan'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_FreightChargeAppliesIfLessThan']."' WHERE confname = 'FreightChargeAppliesIfLessThan'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_FreightChargeAppliesIfLessThan']."' WHERE confname = 'FreightChargeAppliesIfLessThan'";
 		}
 		if ($_SESSION['DefaultTaxCategory'] != $_POST['X_DefaultTaxCategory'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DefaultTaxCategory']."' WHERE confname = 'DefaultTaxCategory'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DefaultTaxCategory']."' WHERE confname = 'DefaultTaxCategory'";
 		}
 		if ($_SESSION['TaxAuthorityReferenceName'] != $_POST['X_TaxAuthorityReferenceName'] ) {
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_TaxAuthorityReferenceName'] . "' WHERE confname = 'TaxAuthorityReferenceName'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_TaxAuthorityReferenceName'] . "' WHERE confname = 'TaxAuthorityReferenceName'";
 		}
 		if ($_SESSION['CountryOfOperation'] != $_POST['X_CountryOfOperation'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_CountryOfOperation'] ."' WHERE confname = 'CountryOfOperation'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_CountryOfOperation'] ."' WHERE confname = 'CountryOfOperation'";
 		}
 		if ($_SESSION['StandardCostDecimalPlaces'] != $_POST['X_StandardCostDecimalPlaces'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_StandardCostDecimalPlaces']."' WHERE confname = 'StandardCostDecimalPlaces'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_StandardCostDecimalPlaces']."' WHERE confname = 'StandardCostDecimalPlaces'";
 		}
 		if ($_SESSION['NumberOfPeriodsOfStockUsage'] != $_POST['X_NumberOfPeriodsOfStockUsage'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_NumberOfPeriodsOfStockUsage']."' WHERE confname = 'NumberOfPeriodsOfStockUsage'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_NumberOfPeriodsOfStockUsage']."' WHERE confname = 'NumberOfPeriodsOfStockUsage'";
 		}
 		if ($_SESSION['Check_Qty_Charged_vs_Del_Qty'] != $_POST['X_Check_Qty_Charged_vs_Del_Qty'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_Check_Qty_Charged_vs_Del_Qty']."' WHERE confname = 'Check_Qty_Charged_vs_Del_Qty'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_Check_Qty_Charged_vs_Del_Qty']."' WHERE confname = 'Check_Qty_Charged_vs_Del_Qty'";
 		}
 		if ($_SESSION['Check_Price_Charged_vs_Order_Price'] != $_POST['X_Check_Price_Charged_vs_Order_Price'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_Check_Price_Charged_vs_Order_Price']."' WHERE confname = 'Check_Price_Charged_vs_Order_Price'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_Check_Price_Charged_vs_Order_Price']."' WHERE confname = 'Check_Price_Charged_vs_Order_Price'";
 		}
 		if ($_SESSION['OverChargeProportion'] != $_POST['X_OverChargeProportion'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_OverChargeProportion']."' WHERE confname = 'OverChargeProportion'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_OverChargeProportion']."' WHERE confname = 'OverChargeProportion'";
 		}
 		if ($_SESSION['OverReceiveProportion'] != $_POST['X_OverReceiveProportion'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_OverReceiveProportion']."' WHERE confname = 'OverReceiveProportion'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_OverReceiveProportion']."' WHERE confname = 'OverReceiveProportion'";
 		}
 		if ($_SESSION['PO_AllowSameItemMultipleTimes'] != $_POST['X_PO_AllowSameItemMultipleTimes'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_PO_AllowSameItemMultipleTimes']."' WHERE confname = 'PO_AllowSameItemMultipleTimes'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_PO_AllowSameItemMultipleTimes']."' WHERE confname = 'PO_AllowSameItemMultipleTimes'";
 		}
 		if ($_SESSION['SO_AllowSameItemMultipleTimes'] != $_POST['X_SO_AllowSameItemMultipleTimes'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_SO_AllowSameItemMultipleTimes']."' WHERE confname = 'SO_AllowSameItemMultipleTimes'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_SO_AllowSameItemMultipleTimes']."' WHERE confname = 'SO_AllowSameItemMultipleTimes'";
 		}
 		if ($_SESSION['YearEnd'] != $_POST['X_YearEnd'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_YearEnd']."' WHERE confname = 'YearEnd'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_YearEnd']."' WHERE confname = 'YearEnd'";
 		}
 		if ($_SESSION['PageLength'] != $_POST['X_PageLength'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_PageLength']."' WHERE confname = 'PageLength'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_PageLength']."' WHERE confname = 'PageLength'";
 		}
 		if ($_SESSION['DefaultDisplayRecordsMax'] != $_POST['X_DefaultDisplayRecordsMax'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_DefaultDisplayRecordsMax']."' WHERE confname = 'DefaultDisplayRecordsMax'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_DefaultDisplayRecordsMax']."' WHERE confname = 'DefaultDisplayRecordsMax'";
 		}
 		if ($_SESSION['MaxImageSize'] != $_POST['X_MaxImageSize'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_MaxImageSize']."' WHERE confname = 'MaxImageSize'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_MaxImageSize']."' WHERE confname = 'MaxImageSize'";
 		}
 		if ($_SESSION['ShowStockidOnImages'] != $_POST['X_ShowStockidOnImages'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_ShowStockidOnImages']."' WHERE confname = 'ShowStockidOnImages'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_ShowStockidOnImages']."' WHERE confname = 'ShowStockidOnImages'";
 		}
 //new number must be shown
 		if ($_SESSION['NumberOfMonthMustBeShown'] != $_POST['X_NumberOfMonthMustBeShown'] ) {
-			$sql[] = "UPDATE config SET confvalue = '".$_POST['X_NumberOfMonthMustBeShown']."' WHERE confname = 'NumberOfMonthMustBeShown'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '".$_POST['X_NumberOfMonthMustBeShown']."' WHERE confname = 'NumberOfMonthMustBeShown'";
 		}
 		if ($_SESSION['part_pics_dir'] != $_POST['X_part_pics_dir'] ) {
-			$sql[] = "UPDATE config SET confvalue = 'companies/" . $_SESSION['DatabaseName'] . '/' . $_POST['X_part_pics_dir']."' WHERE confname = 'part_pics_dir'";
+			$sql[] = "UPDATE weberp_config SET confvalue = 'companies/" . $_SESSION['DatabaseName'] . '/' . $_POST['X_part_pics_dir']."' WHERE confname = 'part_pics_dir'";
 		}
 		if ($_SESSION['reports_dir'] != $_POST['X_reports_dir'] ) {
-			$sql[] = "UPDATE config SET confvalue = 'companies/" . $_SESSION['DatabaseName'] . '/' . $_POST['X_reports_dir']."' WHERE confname = 'reports_dir'";
+			$sql[] = "UPDATE weberp_config SET confvalue = 'companies/" . $_SESSION['DatabaseName'] . '/' . $_POST['X_reports_dir']."' WHERE confname = 'reports_dir'";
 		}
 		if ($_SESSION['AutoDebtorNo'] != $_POST['X_AutoDebtorNo'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_AutoDebtorNo'])."' WHERE confname = 'AutoDebtorNo'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_AutoDebtorNo'])."' WHERE confname = 'AutoDebtorNo'";
 		}
 		if ($_SESSION['AutoSupplierNo'] != $_POST['X_AutoSupplierNo'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_AutoSupplierNo'])."' WHERE confname = 'AutoSupplierNo'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_AutoSupplierNo'])."' WHERE confname = 'AutoSupplierNo'";
 		}
 		if ($_SESSION['HTTPS_Only'] != $_POST['X_HTTPS_Only'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_HTTPS_Only'])."' WHERE confname = 'HTTPS_Only'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_HTTPS_Only'])."' WHERE confname = 'HTTPS_Only'";
 		}
 		if ($_SESSION['DB_Maintenance'] != $_POST['X_DB_Maintenance'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_DB_Maintenance'])."' WHERE confname = 'DB_Maintenance'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_DB_Maintenance'])."' WHERE confname = 'DB_Maintenance'";
 		}
 		if ($_SESSION['DefaultBlindPackNote'] != $_POST['X_DefaultBlindPackNote'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_DefaultBlindPackNote'])."' WHERE confname = 'DefaultBlindPackNote'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_DefaultBlindPackNote'])."' WHERE confname = 'DefaultBlindPackNote'";
 		}
 		if ($_SESSION['ShowValueOnGRN'] != $_POST['X_ShowValueOnGRN'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_ShowValueOnGRN'])."' WHERE confname = 'ShowValueOnGRN'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_ShowValueOnGRN'])."' WHERE confname = 'ShowValueOnGRN'";
 		}
 		if ($_SESSION['PackNoteFormat'] != $_POST['X_PackNoteFormat'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_PackNoteFormat'])."' WHERE confname = 'PackNoteFormat'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_PackNoteFormat'])."' WHERE confname = 'PackNoteFormat'";
 		}
 		if ($_SESSION['CheckCreditLimits'] != $_POST['X_CheckCreditLimits'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". ($_POST['X_CheckCreditLimits'])."' WHERE confname = 'CheckCreditLimits'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". ($_POST['X_CheckCreditLimits'])."' WHERE confname = 'CheckCreditLimits'";
 		}
 		if ($_SESSION['WikiApp'] !== $_POST['X_WikiApp'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_WikiApp']."' WHERE confname = 'WikiApp'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_WikiApp']."' WHERE confname = 'WikiApp'";
 		}
 		if ($_SESSION['WikiPath'] != $_POST['X_WikiPath'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_WikiPath']."' WHERE confname = 'WikiPath'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_WikiPath']."' WHERE confname = 'WikiPath'";
 		}
 		if ($_SESSION['ProhibitJournalsToControlAccounts'] != $_POST['X_ProhibitJournalsToControlAccounts'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_ProhibitJournalsToControlAccounts']."' WHERE confname = 'ProhibitJournalsToControlAccounts'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_ProhibitJournalsToControlAccounts']."' WHERE confname = 'ProhibitJournalsToControlAccounts'";
 		}
 		if ($_SESSION['InvoiceQuantityDefault'] != $_POST['X_InvoiceQuantityDefault'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_InvoiceQuantityDefault']."' WHERE confname = 'InvoiceQuantityDefault'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_InvoiceQuantityDefault']."' WHERE confname = 'InvoiceQuantityDefault'";
 		}
 		if ($_SESSION['InvoicePortraitFormat'] != $_POST['X_InvoicePortraitFormat'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_InvoicePortraitFormat']."' WHERE confname = 'InvoicePortraitFormat'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_InvoicePortraitFormat']."' WHERE confname = 'InvoicePortraitFormat'";
 		}
 		if ($_SESSION['AllowOrderLineItemNarrative'] != $_POST['X_AllowOrderLineItemNarrative'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_AllowOrderLineItemNarrative']."' WHERE confname = 'AllowOrderLineItemNarrative'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_AllowOrderLineItemNarrative']."' WHERE confname = 'AllowOrderLineItemNarrative'";
 		}
 		if ($_SESSION['GoogleTranslatorAPIKey'] != $_POST['X_GoogleTranslatorAPIKey'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_GoogleTranslatorAPIKey']."' WHERE confname = 'GoogleTranslatorAPIKey'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_GoogleTranslatorAPIKey']."' WHERE confname = 'GoogleTranslatorAPIKey'";
 		}
 		if ($_SESSION['RequirePickingNote'] != $_POST['X_RequirePickingNote'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_RequirePickingNote']."' WHERE confname = 'RequirePickingNote'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_RequirePickingNote']."' WHERE confname = 'RequirePickingNote'";
 		}
 		if ($_SESSION['geocode_integration'] != $_POST['X_geocode_integration'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_geocode_integration']."' WHERE confname = 'geocode_integration'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_geocode_integration']."' WHERE confname = 'geocode_integration'";
 		}
 		if ($_SESSION['Extended_SupplierInfo'] != $_POST['X_Extended_SupplierInfo'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_Extended_SupplierInfo']."' WHERE confname = 'Extended_SupplierInfo'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_Extended_SupplierInfo']."' WHERE confname = 'Extended_SupplierInfo'";
 		}
 		if ($_SESSION['Extended_CustomerInfo'] != $_POST['X_Extended_CustomerInfo'] ) {
-			$sql[] = "UPDATE config SET confvalue = '". $_POST['X_Extended_CustomerInfo']."' WHERE confname = 'Extended_CustomerInfo'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '". $_POST['X_Extended_CustomerInfo']."' WHERE confname = 'Extended_CustomerInfo'";
 		}
 		if ($_SESSION['ProhibitPostingsBefore'] != $_POST['X_ProhibitPostingsBefore'] ) {
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_ProhibitPostingsBefore']."' WHERE confname = 'ProhibitPostingsBefore'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_ProhibitPostingsBefore']."' WHERE confname = 'ProhibitPostingsBefore'";
 		}
 		if ($_SESSION['WeightedAverageCosting'] != $_POST['X_WeightedAverageCosting'] ) {
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_WeightedAverageCosting']."' WHERE confname = 'WeightedAverageCosting'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_WeightedAverageCosting']."' WHERE confname = 'WeightedAverageCosting'";
 		}
 		if ($_SESSION['AutoIssue'] != $_POST['X_AutoIssue']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_AutoIssue'] . "' WHERE confname='AutoIssue'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_AutoIssue'] . "' WHERE confname='AutoIssue'";
 		}
 		if ($_SESSION['ProhibitNegativeStock'] != $_POST['X_ProhibitNegativeStock']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_ProhibitNegativeStock'] . "' WHERE confname='ProhibitNegativeStock'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_ProhibitNegativeStock'] . "' WHERE confname='ProhibitNegativeStock'";
 		}
 		if ($_SESSION['MonthsAuditTrail'] != $_POST['X_MonthsAuditTrail']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_MonthsAuditTrail'] . "' WHERE confname='MonthsAuditTrail'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_MonthsAuditTrail'] . "' WHERE confname='MonthsAuditTrail'";
 		}
 		if ($_SESSION['LogSeverity'] != $_POST['X_LogSeverity']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_LogSeverity'] . "' WHERE confname='LogSeverity'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_LogSeverity'] . "' WHERE confname='LogSeverity'";
 		}
 		if ($_SESSION['LogPath'] != $_POST['X_LogPath']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_LogPath'] . "' WHERE confname='LogPath'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_LogPath'] . "' WHERE confname='LogPath'";
 		}
 		if ($_SESSION['UpdateCurrencyRatesDaily'] != $_POST['X_UpdateCurrencyRatesDaily']){
 			if ($_POST['X_UpdateCurrencyRatesDaily']==1) {
-				$sql[] = "UPDATE config SET confvalue='".Date('Y-m-d')."' WHERE confname='UpdateCurrencyRatesDaily'";
+				$sql[] = "UPDATE weberp_config SET confvalue='".Date('Y-m-d')."' WHERE confname='UpdateCurrencyRatesDaily'";
 			} else {
-				$sql[] = "UPDATE config SET confvalue='0' WHERE confname='UpdateCurrencyRatesDaily'";
+				$sql[] = "UPDATE weberp_config SET confvalue='0' WHERE confname='UpdateCurrencyRatesDaily'";
 			}
 		}
 		if ($_SESSION['ExchangeRateFeed'] != $_POST['X_ExchangeRateFeed']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_ExchangeRateFeed'] . "' WHERE confname='ExchangeRateFeed'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_ExchangeRateFeed'] . "' WHERE confname='ExchangeRateFeed'";
 		}
 		if ($_SESSION['FactoryManagerEmail'] != $_POST['X_FactoryManagerEmail']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_FactoryManagerEmail'] . "' WHERE confname='FactoryManagerEmail'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_FactoryManagerEmail'] . "' WHERE confname='FactoryManagerEmail'";
 		}
 		if ($_SESSION['PurchasingManagerEmail'] != $_POST['X_PurchasingManagerEmail']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_PurchasingManagerEmail'] . "' WHERE confname='PurchasingManagerEmail'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_PurchasingManagerEmail'] . "' WHERE confname='PurchasingManagerEmail'";
 		}
 		if ($_SESSION['InventoryManagerEmail'] != $_POST['X_InventoryManagerEmail']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_InventoryManagerEmail'] . "' WHERE confname='InventoryManagerEmail'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_InventoryManagerEmail'] . "' WHERE confname='InventoryManagerEmail'";
 		}
 		if ($_SESSION['AutoCreateWOs'] != $_POST['X_AutoCreateWOs']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_AutoCreateWOs'] . "' WHERE confname='AutoCreateWOs'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_AutoCreateWOs'] . "' WHERE confname='AutoCreateWOs'";
 		}
 		if ($_SESSION['DefaultFactoryLocation'] != $_POST['X_DefaultFactoryLocation']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_DefaultFactoryLocation'] . "' WHERE confname='DefaultFactoryLocation'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_DefaultFactoryLocation'] . "' WHERE confname='DefaultFactoryLocation'";
 		}
 		if ($_SESSION['DefineControlledOnWOEntry'] != $_POST['X_DefineControlledOnWOEntry']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_DefineControlledOnWOEntry'] . "' WHERE confname='DefineControlledOnWOEntry'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_DefineControlledOnWOEntry'] . "' WHERE confname='DefineControlledOnWOEntry'";
 		}
 		if ($_SESSION['FrequentlyOrderedItems'] != $_POST['X_FrequentlyOrderedItems']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_FrequentlyOrderedItems'] . "' WHERE confname='FrequentlyOrderedItems'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_FrequentlyOrderedItems'] . "' WHERE confname='FrequentlyOrderedItems'";
 		}
 		if ($_SESSION['AutoAuthorisePO'] != $_POST['X_AutoAuthorisePO']){
-			$sql[] = "UPDATE config SET confvalue='" . $_POST['X_AutoAuthorisePO'] . "' WHERE confname='AutoAuthorisePO'";
+			$sql[] = "UPDATE weberp_config SET confvalue='" . $_POST['X_AutoAuthorisePO'] . "' WHERE confname='AutoAuthorisePO'";
 		}
 		if (isset($_POST['X_ItemDescriptionLanguages'])) {
 			$ItemDescriptionLanguages = '';
@@ -359,23 +359,23 @@ if (isset($_POST['submit'])) {
 			}
 
 			if ($_SESSION['ItemDescriptionLanguages'] != $ItemDescriptionLanguages){
-				$sql[] = "UPDATE config SET confvalue='" . $ItemDescriptionLanguages . "' WHERE confname='ItemDescriptionLanguages'";
+				$sql[] = "UPDATE weberp_config SET confvalue='" . $ItemDescriptionLanguages . "' WHERE confname='ItemDescriptionLanguages'";
 			}
 		}
 		if ($_SESSION['SmtpSetting'] != $_POST['X_SmtpSetting']){
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_SmtpSetting'] . "' WHERE confname='SmtpSetting'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_SmtpSetting'] . "' WHERE confname='SmtpSetting'";
 
 		}
 		if ($_SESSION['QualityLogSamples'] != $_POST['X_QualityLogSamples']){
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_QualityLogSamples'] . "' WHERE confname='QualityLogSamples'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_QualityLogSamples'] . "' WHERE confname='QualityLogSamples'";
 
 		}
 		if ($_SESSION['QualityProdSpecText'] != $_POST['X_QualityProdSpecText']){
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_QualityProdSpecText'] . "' WHERE confname='QualityProdSpecText'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_QualityProdSpecText'] . "' WHERE confname='QualityProdSpecText'";
 
 		}
 		if ($_SESSION['QualityCOAText'] != $_POST['X_QualityCOAText']){
-			$sql[] = "UPDATE config SET confvalue = '" . $_POST['X_QualityCOAText'] . "' WHERE confname='QualityCOAText'";
+			$sql[] = "UPDATE weberp_config SET confvalue = '" . $_POST['X_QualityCOAText'] . "' WHERE confname='QualityCOAText'";
 
 		}
 		$ErrMsg =  _('The system configuration could not be updated because');
@@ -635,7 +635,7 @@ echo '<tr style="outline: 1px solid"><td>' . _('Controlled Items Must Exist For 
 	<td>' . _('This parameter relates to the behaviour of the controlled items code. If a serial numbered item has not previously existed then a credit note for it will not be allowed if this is set to Yes') . '</td></tr>';
 
 // DefaultPriceList
-$sql = "SELECT typeabbrev, sales_type FROM salestypes ORDER BY sales_type";
+$sql = "SELECT typeabbrev, sales_type FROM weberp_salestypes ORDER BY sales_type";
 $ErrMsg = _('Could not load price lists');
 $result = DB_query($sql,$ErrMsg);
 echo '<tr style="outline: 1px solid"><td>' . _('Default Price List') . ':</td>';
@@ -651,7 +651,7 @@ echo '</select></td>
 	<td>' . _('This price list is used as a last resort where there is no price set up for an item in the price list that the customer is set up for') . '</td></tr>';
 
 // Default_Shipper
-$sql = "SELECT shipper_id, shippername FROM shippers ORDER BY shippername";
+$sql = "SELECT shipper_id, shippername FROM weberp_shippers ORDER BY shippername";
 $ErrMsg = _('Could not load shippers');
 $result = DB_query($sql,$ErrMsg);
 echo '<tr style="outline: 1px solid"><td>' . _('Default Shipper') . ':</td>';
@@ -710,7 +710,7 @@ echo '</select></td>
 
 
 //==HJ== drop down list for tax category
-$sql = "SELECT taxcatid, taxcatname FROM taxcategories ORDER BY taxcatname";
+$sql = "SELECT taxcatid, taxcatname FROM weberp_taxcategories ORDER BY taxcatname";
 $ErrMsg = _('Could not load tax categories table');
 $result = DB_query($sql,$ErrMsg);
 echo '<tr style="outline: 1px solid"><td>' . _('Default Tax Category') . ':</td>';
@@ -861,7 +861,7 @@ echo '<tr style="outline: 1px solid">
 	</tr>';
 //NumberOfMonthMustBeShown
 $sql = "SELECT confvalue
-		FROM `config`
+		FROM `weberp_config`
 		WHERE confname ='numberOfMonthMustBeShown'";
 
 $ErrMsg = _('Could not load the Number Of Month Must be Shown');
@@ -1050,7 +1050,7 @@ echo '<tr style="outline: 1px solid">
 		<td>' . _('Prohibit GL Journals to Periods Prior To') . ':</td>
 		<td><select name="X_ProhibitPostingsBefore">';
 
-$sql = "SELECT lastdate_in_period FROM periods ORDER BY periodno DESC";
+$sql = "SELECT lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 $ErrMsg = _('Could not load periods table');
 $result = DB_query($sql,$ErrMsg);
 if ($_SESSION['ProhibitPostingsBefore']=='' OR $_SESSION['ProhibitPostingsBefore']=='1900-01-01' OR !isset($_SESSION['ProhibitPostingsBefore'])){
@@ -1175,7 +1175,7 @@ echo '</select></td><td>' . _('Setting this parameter to Yes will ensure that wh
 echo '<tr style="outline: 1px solid"><td>' . _('Default Factory Location') . ':</td>
 	<td><select name="X_DefaultFactoryLocation">';
 
-$sql = "SELECT loccode,locationname FROM locations";
+$sql = "SELECT loccode,locationname FROM weberp_locations";
 $ErrMsg = _('Could not load locations table');
 $result = DB_query($sql,$ErrMsg);
 while ($LocationRow = DB_fetch_array($result)){

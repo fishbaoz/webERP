@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: FTP_RadioBeacon.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*Variables required to configure this script must be set in config.php */
 
@@ -13,31 +13,31 @@ include('includes/SQL_CommonFunctions.inc');
 /*Logic should allow entry of an order number which returns
 some details of the order for confirming before producing the file for ftp */
 
-$SQL = "SELECT salesorders.orderno,
-				debtorsmaster.name,
-				custbranch.brname,
-				salesorders.customerref,
-				salesorders.orddate,
-				salesorders.deliverto,
-				salesorders.deliverydate,
-				sum(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)) as ordervalue,
+$SQL = "SELECT weberp_salesorders.orderno,
+				weberp_debtorsmaster.name,
+				weberp_custbranch.brname,
+				weberp_salesorders.customerref,
+				weberp_salesorders.orddate,
+				weberp_salesorders.deliverto,
+				weberp_salesorders.deliverydate,
+				sum(weberp_salesorderdetails.unitprice*weberp_salesorderdetails.quantity*(1-weberp_salesorderdetails.discountpercent)) as ordervalue,
 				datepackingslipprinted,
 				printedpackingslip
-			FROM salesorders,
-				salesorderdetails,
-				debtorsmaster,
-				custbranch
-			WHERE salesorders.orderno = salesorderdetails.orderno
-			AND salesorders.debtorno = debtorsmaster.debtorno
-			AND debtorsmaster.debtorno = custbranch.debtorno
-			AND salesorderdetails.completed=0
-			AND salesorders.fromstkloc = '". $_SESSION['RadioBeaconStockLocation'] . "'
-			GROUP BY salesorders.orderno,
-				salesorders.debtorno,
-				salesorders.branchcode,
-				salesorders.customerref,
-				salesorders.orddate,
-				salesorders.deliverto";
+			FROM weberp_salesorders,
+				weberp_salesorderdetails,
+				weberp_debtorsmaster,
+				weberp_custbranch
+			WHERE weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			AND weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+			AND weberp_debtorsmaster.debtorno = weberp_custbranch.debtorno
+			AND weberp_salesorderdetails.completed=0
+			AND weberp_salesorders.fromstkloc = '". $_SESSION['RadioBeaconStockLocation'] . "'
+			GROUP BY weberp_salesorders.orderno,
+				weberp_salesorders.debtorno,
+				weberp_salesorders.branchcode,
+				weberp_salesorders.customerref,
+				weberp_salesorders.orddate,
+				weberp_salesorders.deliverto";
 
 $ErrMsg = _('No orders were returned because');
 $SalesOrdersResult = DB_query($SQL,$ErrMsg);
@@ -145,7 +145,7 @@ if (isset($_GET['OrderNo'])){ /*An order has been selected for sending */
 
 	/*Now get the order header info */
 
-	$sql = "SELECT salesorders.debtorno,
+	$sql = "SELECT weberp_salesorders.debtorno,
 					customerref,
 					comments,
 					orddate,
@@ -168,11 +168,11 @@ if (isset($_GET['OrderNo'])){ /*An order has been selected for sending */
 					address6,
 					printedpackingslip,
 					datepackingslipprinted
-				FROM salesorders,
-					debtorsmaster
-				WHERE salesorders.debtorno=debtorsmaster.debtorno
-				AND salesorders.fromstkloc = '". $_SESSION['RadioBeaconStockLocation'] . "'
-				AND salesorders.orderno='" . $_GET['OrderNo'] . "'";
+				FROM weberp_salesorders,
+					weberp_debtorsmaster
+				WHERE weberp_salesorders.debtorno=weberp_debtorsmaster.debtorno
+				AND weberp_salesorders.fromstkloc = '". $_SESSION['RadioBeaconStockLocation'] . "'
+				AND weberp_salesorders.orderno='" . $_GET['OrderNo'] . "'";
 
 
 	$ErrMsg = _('There was a problem retrieving the order header details for Order Number') . ' ' . $_GET['OrderNo'] . ' ' . _('from the database');
@@ -196,10 +196,10 @@ if (isset($_GET['OrderNo'])){ /*An order has been selected for sending */
 						units,
 						qtyinvoiced,
 						unitprice
-					FROM salesorderdetails,
-						stockmaster
-					WHERE salesorderdetails.stkcode=stockmaster.stockid
-					AND salesorderdetails.orderno=" . $_GET['OrderNo'];
+					FROM weberp_salesorderdetails,
+						weberp_stockmaster
+					WHERE weberp_salesorderdetails.stkcode=weberp_stockmaster.stockid
+					AND weberp_salesorderdetails.orderno=" . $_GET['OrderNo'];
 
 		$ErrMsg = _('There was a problem retrieving the line details for order number') . ' ' . $_GET['OrderNo'] . ' ' . _('from the database because');
 		$result=DB_query($sql, $ErrMsg);
@@ -282,7 +282,7 @@ if (isset($_GET['OrderNo'])){ /*An order has been selected for sending */
 			ftp_quit($conn_id);
 
 			/* Update the order printed flag to prevent double sendings */
-			$sql = "UPDATE salesorders SET printedpackingslip=1, datepackingslipprinted='" . Date('Y-m-d') . "' WHERE salesorders.orderno=" . $_GET['OrderNo'];
+			$sql = "UPDATE weberp_salesorders SET printedpackingslip=1, datepackingslipprinted='" . Date('Y-m-d') . "' WHERE weberp_salesorders.orderno=" . $_GET['OrderNo'];
 			$result = DB_query($sql);
 
 			echo '<p>' . _('Order Number') . ' ' . $_GET['OrderNo'] . ' ' . _('has been sent via FTP to Radio Beacon a copy of the file that was sent is held on the server at') . '<br />' . $FileName;

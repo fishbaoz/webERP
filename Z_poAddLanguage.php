@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_poAddLanguage.php 7502 2016-05-01 15:05:34Z rchacon $*/
 /* Allows a new language po file to be created */
 
 /* Steve Kitchen/Kaill */

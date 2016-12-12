@@ -42,12 +42,12 @@ if(! isset($_POST['BalancePeriodEnd']) or isset($_POST['SelectADifferentPeriod']
 /*				<td><select required="required" name="ToPeriod">';*/
 
 	$periodno=GetPeriod(Date($_SESSION['DefaultDateFormat']), $db);
-	$sql = "SELECT lastdate_in_period FROM periods WHERE periodno='".$periodno . "'";
+	$sql = "SELECT lastdate_in_period FROM weberp_periods WHERE periodno='".$periodno . "'";
 	$result = DB_query($sql);
 	$myrow=DB_fetch_array($result);
 	$lastdate_in_period=$myrow[0];
 
-	$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
+	$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
 	$Periods = DB_query($sql);
 
 	while($myrow=DB_fetch_array($Periods)) {
@@ -87,7 +87,7 @@ if(! isset($_POST['BalancePeriodEnd']) or isset($_POST['SelectADifferentPeriod']
 
 	$RetainedEarningsAct = $_SESSION['CompanyRecord']['retainedearnings'];
 
-	$sql = "SELECT lastdate_in_period FROM periods WHERE periodno='" . $_POST['BalancePeriodEnd'] . "'";
+	$sql = "SELECT lastdate_in_period FROM weberp_periods WHERE periodno='" . $_POST['BalancePeriodEnd'] . "'";
 	$PrdResult = DB_query($sql);
 	$myrow = DB_fetch_row($PrdResult);
 	$BalanceDate = ConvertSQLDate($myrow[0]);
@@ -129,39 +129,39 @@ if(! isset($_POST['BalancePeriodEnd']) or isset($_POST['SelectADifferentPeriod']
 		<tbody>';// thead and tfoot used in conjunction with tbody enable scrolling of the table body independently of the header and footer. Also, when printing a large table that spans multiple pages, these elements can enable the table header to be printed at the top of each page.
 
 	// Calculate B/Fwd retained earnings:
-	$SQL = "SELECT Sum(CASE WHEN chartdetails.period='" . $_POST['BalancePeriodEnd'] . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS accumprofitbfwd,
-			Sum(CASE WHEN chartdetails.period='" . ($_POST['BalancePeriodEnd'] - 12) . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS accumprofitbfwdly
-		FROM chartmaster INNER JOIN accountgroups
-		ON chartmaster.group_ = accountgroups.groupname INNER JOIN chartdetails
-		ON chartmaster.accountcode= chartdetails.accountcode
-		WHERE accountgroups.pandl=1";
+	$SQL = "SELECT Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['BalancePeriodEnd'] . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS accumprofitbfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . ($_POST['BalancePeriodEnd'] - 12) . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS accumprofitbfwdly
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+		ON weberp_chartmaster.group_ = weberp_accountgroups.groupname INNER JOIN weberp_chartdetails
+		ON weberp_chartmaster.accountcode= weberp_chartdetails.accountcode
+		WHERE weberp_accountgroups.pandl=1";
 
 	$AccumProfitResult = DB_query($SQL,_('The accumulated profits brought forward could not be calculated by the SQL because'));
 
 	$AccumProfitRow = DB_fetch_array($AccumProfitResult); /*should only be one row returned */
 
-	$SQL = "SELECT accountgroups.sectioninaccounts,
-			accountgroups.groupname,
-			accountgroups.parentgroupname,
-			chartdetails.accountcode,
-			chartmaster.accountname,
-			Sum(CASE WHEN chartdetails.period='" . $_POST['BalancePeriodEnd'] . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS balancecfwd,
-			Sum(CASE WHEN chartdetails.period='" . ($_POST['BalancePeriodEnd'] - 12) . "' THEN chartdetails.bfwd + chartdetails.actual ELSE 0 END) AS balancecfwdly
-		FROM chartmaster
-			INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname
-			INNER JOIN chartdetails	ON chartmaster.accountcode= chartdetails.accountcode
-			INNER JOIN glaccountusers ON glaccountusers.accountcode=chartmaster.accountcode AND glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND glaccountusers.canview=1
-		WHERE accountgroups.pandl=0
-		GROUP BY accountgroups.groupname,
-			chartdetails.accountcode,
-			chartmaster.accountname,
-			accountgroups.parentgroupname,
-			accountgroups.sequenceintb,
-			accountgroups.sectioninaccounts
-		ORDER BY accountgroups.sectioninaccounts,
-			accountgroups.sequenceintb,
-			accountgroups.groupname,
-			chartdetails.accountcode";
+	$SQL = "SELECT weberp_accountgroups.sectioninaccounts,
+			weberp_accountgroups.groupname,
+			weberp_accountgroups.parentgroupname,
+			weberp_chartdetails.accountcode,
+			weberp_chartmaster.accountname,
+			Sum(CASE WHEN weberp_chartdetails.period='" . $_POST['BalancePeriodEnd'] . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS balancecfwd,
+			Sum(CASE WHEN weberp_chartdetails.period='" . ($_POST['BalancePeriodEnd'] - 12) . "' THEN weberp_chartdetails.bfwd + weberp_chartdetails.actual ELSE 0 END) AS balancecfwdly
+		FROM weberp_chartmaster
+			INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
+			INNER JOIN weberp_chartdetails	ON weberp_chartmaster.accountcode= weberp_chartdetails.accountcode
+			INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		WHERE weberp_accountgroups.pandl=0
+		GROUP BY weberp_accountgroups.groupname,
+			weberp_chartdetails.accountcode,
+			weberp_chartmaster.accountname,
+			weberp_accountgroups.parentgroupname,
+			weberp_accountgroups.sequenceintb,
+			weberp_accountgroups.sectioninaccounts
+		ORDER BY weberp_accountgroups.sectioninaccounts,
+			weberp_accountgroups.sequenceintb,
+			weberp_accountgroups.groupname,
+			weberp_chartdetails.accountcode";
 
 	$AccountsResult = DB_query($SQL,_('No general ledger accounts were returned by the SQL because'));
 

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PDFStockCheckComparison.php 7679 2016-11-23 19:08:09Z rchacon $*/
 /* Creates a pdf comparing the quantites entered as counted at a given range of locations against the quantity stored as on hand as at the time a stock check was initiated. */
 
 include('includes/session.inc');
@@ -19,14 +19,14 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 /*First off do the Inventory Comparison file stuff */
 	if ($_POST['ReportOrClose']=='ReportAndClose'){
 
-		$sql = "SELECT stockcheckfreeze.stockid,
-						stockcheckfreeze.loccode,
+		$sql = "SELECT weberp_stockcheckfreeze.stockid,
+						weberp_stockcheckfreeze.loccode,
 						qoh,
 						materialcost+labourcost+overheadcost AS standardcost
-				FROM stockmaster INNER JOIN stockcheckfreeze
-				ON stockcheckfreeze.stockid=stockmaster.stockid
-				ORDER BY stockcheckfreeze.loccode,
-						stockcheckfreeze.stockid";
+				FROM weberp_stockmaster INNER JOIN weberp_stockcheckfreeze
+				ON weberp_stockcheckfreeze.stockid=weberp_stockmaster.stockid
+				ORDER BY weberp_stockcheckfreeze.loccode,
+						weberp_stockcheckfreeze.stockid";
 
 		$StockChecks = DB_query($sql,'','',false,false);
 		if (DB_error_no() !=0) {
@@ -48,11 +48,11 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 
 		while ($myrow = DB_fetch_array($StockChecks)){
 
-			$sql = "SELECT SUM(stockcounts.qtycounted) AS totcounted,
-					COUNT(stockcounts.stockid) AS noofcounts
-					FROM stockcounts
-					WHERE stockcounts.stockid='" . $myrow['stockid'] . "'
-					AND stockcounts.loccode='" . $myrow['loccode'] . "'";
+			$sql = "SELECT SUM(weberp_stockcounts.qtycounted) AS totcounted,
+					COUNT(weberp_stockcounts.stockid) AS noofcounts
+					FROM weberp_stockcounts
+					WHERE weberp_stockcounts.stockid='" . $myrow['stockid'] . "'
+					AND weberp_stockcounts.loccode='" . $myrow['loccode'] . "'";
 
 			$StockCounts = DB_query($sql);
 			if (DB_error_no() !=0) {
@@ -82,9 +82,9 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 				DB_Txn_Begin();
 
 				// Need to get the current location quantity will need it later for the stock movement
-				$SQL="SELECT locstock.quantity
-						FROM locstock
-					WHERE locstock.stockid='" . $myrow['stockid'] . "'
+				$SQL="SELECT weberp_locstock.quantity
+						FROM weberp_locstock
+					WHERE weberp_locstock.stockid='" . $myrow['stockid'] . "'
 					AND loccode= '" . $myrow['loccode'] . "'";
 
 				$Result = DB_query($SQL);
@@ -96,7 +96,7 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 					$QtyOnHandPrior = 0;
 				}
 
-				$SQL = "INSERT INTO stockmoves (stockid,
+				$SQL = "INSERT INTO weberp_stockmoves (stockid,
 								type,
 								transno,
 								loccode,
@@ -122,7 +122,7 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 				$DbgMsg = _('The following SQL to insert the stock movement record was used');
 				$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 
-				$SQL = "UPDATE locstock
+				$SQL = "UPDATE weberp_locstock
 						SET quantity = quantity + '" . $StockQtyDifference . "'
 						WHERE stockid='" . $myrow['stockid'] . "'
 						AND loccode='" . $myrow['loccode'] . "'";
@@ -136,7 +136,7 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The general ledger transaction entries could not be added because');
 					$DbgMsg = _('The following SQL to insert the GL entries was used');
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -155,7 +155,7 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The general ledger transaction entries could not be added because');
 					$DbgMsg = _('The following SQL to insert the GL entries was used');
 
-					$SQL = "INSERT INTO gltrans (type,
+					$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -183,27 +183,27 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 	// now do the report
 	$ErrMsg = _('The Inventory Comparison data could not be retrieved because');
 	$DbgMsg = _('The following SQL to retrieve the Inventory Comparison data was used');
-	$sql = "SELECT stockcheckfreeze.stockid,
+	$sql = "SELECT weberp_stockcheckfreeze.stockid,
 					description,
-					stockmaster.categoryid,
-					stockcategory.categorydescription,
-					stockcheckfreeze.loccode,
-					locations.locationname,
-					stockcheckfreeze.qoh,
-					stockmaster.decimalplaces,
+					weberp_stockmaster.categoryid,
+					weberp_stockcategory.categorydescription,
+					weberp_stockcheckfreeze.loccode,
+					weberp_locations.locationname,
+					weberp_stockcheckfreeze.qoh,
+					weberp_stockmaster.decimalplaces,
 					bin
-			FROM stockcheckfreeze INNER JOIN stockmaster
-				ON stockcheckfreeze.stockid=stockmaster.stockid
-			INNER JOIN stockcategory
-				ON stockmaster.categoryid=stockcategory.categoryid
-			INNER JOIN locations
-				ON stockcheckfreeze.loccode=locations.loccode
-			INNER JOIN locstock
-				ON stockcheckfreeze.loccode=locstock.loccode
-				AND stockcheckfreeze.stockid=locstock.stockid
-			ORDER BY stockcheckfreeze.loccode,
-				stockmaster.categoryid,
-				stockcheckfreeze.stockid";
+			FROM weberp_stockcheckfreeze INNER JOIN weberp_stockmaster
+				ON weberp_stockcheckfreeze.stockid=weberp_stockmaster.stockid
+			INNER JOIN weberp_stockcategory
+				ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+			INNER JOIN weberp_locations
+				ON weberp_stockcheckfreeze.loccode=weberp_locations.loccode
+			INNER JOIN weberp_locstock
+				ON weberp_stockcheckfreeze.loccode=weberp_locstock.loccode
+				AND weberp_stockcheckfreeze.stockid=weberp_locstock.stockid
+			ORDER BY weberp_stockcheckfreeze.loccode,
+				weberp_stockmaster.categoryid,
+				weberp_stockcheckfreeze.stockid";
 
 	$CheckedItems = DB_query($sql, $ErrMsg, $DbgMsg);
 
@@ -257,7 +257,7 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 
 		$SQL = "SELECT qtycounted,
 						reference
-				FROM stockcounts
+				FROM weberp_stockcounts
 				WHERE loccode ='" . $Location . "'
 				AND stockid = '" . $CheckItemRow['stockid'] . "'";
 
@@ -326,10 +326,10 @@ If (isset($_POST['PrintPDF']) AND isset($_POST['ReportOrClose'])){
 
 	if ($_POST['ReportOrClose']=='ReportAndClose'){
 		//need to print the report first before this but don't risk re-adjusting all the stock!!
-		$sql = "TRUNCATE TABLE stockcheckfreeze";
+		$sql = "TRUNCATE TABLE weberp_stockcheckfreeze";
 		$result = DB_query($sql);
 
-		$sql = "TRUNCATE TABLE stockcounts";
+		$sql = "TRUNCATE TABLE weberp_stockcounts";
 		$result = DB_query($sql);
 	}
 

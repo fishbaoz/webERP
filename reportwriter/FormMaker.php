@@ -7,8 +7,8 @@ require($PathPrefix . 'includes/session.inc');
 
 // TBD The followiung line needs to be replace when more translations are available
 $ReportLanguage = 'en_US';					// default language file
-define('DBReports','reports');			// name of the databse holding the main report information (ReportID)
-define('DBRptFields','reportfields');	// name of the database holding the report fields
+define('DBReports','weberp_reports');			// name of the databse holding the main report information (ReportID)
+define('DBRptFields','weberp_reportfields');	// name of the database holding the report fields
 //define('FPDF_FONTPATH','../fonts/');  FPDF path to fonts directory
 define('DefRptPath',$PathPrefix . 'companies/' . $_SESSION['DatabaseName'] . '/reportwriter/');	// path to default reports
 // Fetch necessary include files - Host application specific (webERP)

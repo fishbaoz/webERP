@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLCodesInquiry.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include ('includes/session.inc');
 
@@ -11,7 +11,7 @@ include('includes/header.inc');
 $SQL = "SELECT group_,
 		accountcode ,
 		accountname
-		FROM chartmaster INNER JOIN accountgroups ON chartmaster.group_ = accountgroups.groupname
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups ON weberp_chartmaster.group_ = weberp_accountgroups.groupname
 		ORDER BY sequenceintb,
 				accountcode";
 

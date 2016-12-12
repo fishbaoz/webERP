@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SQL_CommonFunctions.inc 7618 2016-09-12 02:35:30Z exsonqu $*/
 
 /* Common SQL Functions */
 
@@ -16,12 +16,12 @@ Also updates the transaction number
 etc
 *
 */
-	DB_query("SELECT typeno FROM systypes WHERE typeid='" . $TransType ."' FOR UPDATE");
-	$SQL = "UPDATE systypes SET typeno = typeno + 1 WHERE typeid = '" . $TransType . "'";
+	DB_query("SELECT typeno FROM weberp_systypes WHERE typeid='" . $TransType ."' FOR UPDATE");
+	$SQL = "UPDATE weberp_systypes SET typeno = typeno + 1 WHERE typeid = '" . $TransType . "'";
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The transaction number could not be incremented');
 	$DbgMsg =  _('The following SQL to increment the transaction number was used');
 	$UpdTransNoResult = DB_query($SQL,$ErrMsg,$DbgMsg);
-	$SQL = "SELECT typeno FROM systypes WHERE typeid= '" . $TransType . "'";
+	$SQL = "SELECT typeno FROM weberp_systypes WHERE typeid= '" . $TransType . "'";
 	$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': <BR>' . _('The next transaction number could not be retrieved from the database because');
 	$DbgMsg =  _('The following SQL to retrieve the transaction number was used');
 	$GetTransNoResult = DB_query($SQL,$ErrMsg,$DbgMsg);
@@ -40,9 +40,9 @@ Function GetStockGLCode ($StockID, &$db){
 						purchpricevaract,
 						materialuseagevarac,
 						wipact
-				FROM stockmaster INNER JOIN stockcategory
-				ON stockmaster.categoryid=stockcategory.categoryid
-				WHERE stockmaster.stockid = '" . $StockID . "'";
+				FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+				ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
+				WHERE weberp_stockmaster.stockid = '" . $StockID . "'";
 
 	$ErrMsg =  _('The stock GL codes could not be retrieved because');
 	$GetStkGLResult = DB_query($QuerySQL, $ErrMsg);
@@ -56,7 +56,7 @@ Function GetTaxRate ($TaxAuthority, $DispatchTaxProvince, $TaxCategory, &$db){
 /*Gets the Tax rate applicable to an item from the TaxAuthority of the branch and TaxLevel of the item */
 
 	$QuerySQL = "SELECT taxrate
-				FROM taxauthrates
+				FROM weberp_taxauthrates
 				WHERE taxauthority='" . $TaxAuthority . "'
 				AND dispatchtaxprovince='" . $DispatchTaxProvince . "'
 				AND taxcatid = '" . $TaxCategory . "'";
@@ -76,20 +76,20 @@ Function GetTaxRate ($TaxAuthority, $DispatchTaxProvince, $TaxCategory, &$db){
 
 Function GetTaxes ($TaxGroup, $DispatchTaxProvince, $TaxCategory, &$db) {
 
-	$SQL = "SELECT taxgrouptaxes.calculationorder,
-					taxauthorities.description,
-					taxgrouptaxes.taxauthid,
-					taxauthorities.taxglcode,
-					taxgrouptaxes.taxontax,
-					taxauthrates.taxrate
-			FROM taxauthrates INNER JOIN taxgrouptaxes ON
-				taxauthrates.taxauthority=taxgrouptaxes.taxauthid
-				INNER JOIN taxauthorities ON
-				taxauthrates.taxauthority=taxauthorities.taxid
-			WHERE taxgrouptaxes.taxgroupid='" . $TaxGroup . "'
-			AND taxauthrates.dispatchtaxprovince='" . $DispatchTaxProvince . "'
-			AND taxauthrates.taxcatid = '" . $TaxCategory . "'
-			ORDER BY taxgrouptaxes.calculationorder";
+	$SQL = "SELECT weberp_taxgrouptaxes.calculationorder,
+					weberp_taxauthorities.description,
+					weberp_taxgrouptaxes.taxauthid,
+					weberp_taxauthorities.taxglcode,
+					weberp_taxgrouptaxes.taxontax,
+					weberp_taxauthrates.taxrate
+			FROM weberp_taxauthrates INNER JOIN weberp_taxgrouptaxes ON
+				weberp_taxauthrates.taxauthority=weberp_taxgrouptaxes.taxauthid
+				INNER JOIN weberp_taxauthorities ON
+				weberp_taxauthrates.taxauthority=weberp_taxauthorities.taxid
+			WHERE weberp_taxgrouptaxes.taxgroupid='" . $TaxGroup . "'
+			AND weberp_taxauthrates.dispatchtaxprovince='" . $DispatchTaxProvince . "'
+			AND weberp_taxauthrates.taxcatid = '" . $TaxCategory . "'
+			ORDER BY weberp_taxgrouptaxes.calculationorder";
 
 
 	$ErrMsg = _('The taxes and rate for this tax group could not be retrieved because');
@@ -107,14 +107,14 @@ Function GetTaxes ($TaxGroup, $DispatchTaxProvince, $TaxCategory, &$db) {
 
 Function GetCreditAvailable($DebtorNo,&$db) {
 
-	$sql = "SELECT debtorsmaster.debtorno,
-			debtorsmaster.creditlimit,
-			SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) as balance
-		FROM debtorsmaster INNER JOIN debtortrans
-			ON debtorsmaster.debtorno=debtortrans.debtorno
-		WHERE debtorsmaster.debtorno='" . $DebtorNo . "'
-		GROUP BY debtorsmaster.debtorno,
-			debtorsmaster.creditlimit";
+	$sql = "SELECT weberp_debtorsmaster.debtorno,
+			weberp_debtorsmaster.creditlimit,
+			SUM(weberp_debtortrans.ovamount + weberp_debtortrans.ovgst + weberp_debtortrans.ovfreight + weberp_debtortrans.ovdiscount - weberp_debtortrans.alloc) as balance
+		FROM weberp_debtorsmaster INNER JOIN weberp_debtortrans
+			ON weberp_debtorsmaster.debtorno=weberp_debtortrans.debtorno
+		WHERE weberp_debtorsmaster.debtorno='" . $DebtorNo . "'
+		GROUP BY weberp_debtorsmaster.debtorno,
+			weberp_debtorsmaster.creditlimit";
 
 	$ErrMsg =  _('The current account balance of the customer could not be retrieved because');
 	$GetAccountBalanceResult = DB_query($sql, $ErrMsg);
@@ -125,21 +125,21 @@ Function GetCreditAvailable($DebtorNo,&$db) {
 		$CreditAvailable = $myrow['creditlimit'] - $myrow['balance'];
 	} else {
 		$sql = "SELECT creditlimit
-				FROM debtorsmaster
+				FROM weberp_debtorsmaster
 				WHERE debtorno='" . $DebtorNo . "'";
 		$GetAccountBalanceResult = DB_query($sql, $ErrMsg);
 		$myrow = DB_fetch_array($GetAccountBalanceResult);
 		$CreditAvailable = $myrow['creditlimit'];
 	}
 	/*Take into account the value of outstanding sales orders too */
-	$sql = "SELECT SUM(salesorderdetails.unitprice *
-				(salesorderdetails.quantity - salesorderdetails.qtyinvoiced) *
-				(1 - salesorderdetails.discountpercent)) AS ordervalue
-				FROM salesorders INNER JOIN salesorderdetails
-				ON salesorders.orderno = salesorderdetails.orderno
-				WHERE salesorders.debtorno = '" . $DebtorNo . "'
-				AND salesorderdetails.completed = 0
-				AND salesorders.quotation = 0";
+	$sql = "SELECT SUM(weberp_salesorderdetails.unitprice *
+				(weberp_salesorderdetails.quantity - weberp_salesorderdetails.qtyinvoiced) *
+				(1 - weberp_salesorderdetails.discountpercent)) AS ordervalue
+				FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+				ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				WHERE weberp_salesorders.debtorno = '" . $DebtorNo . "'
+				AND weberp_salesorderdetails.completed = 0
+				AND weberp_salesorders.quotation = 0";
 
 	$ErrMsg =  _('The value of outstanding orders for the customer could not be retrieved because');
 	$GetOSOrdersResult = DB_query($sql, $ErrMsg);
@@ -161,7 +161,7 @@ function ItemCostUpdateGL($db, $StockID, $NewCost, $OldCost, $QOH) {
 
 		$ValueOfChange = $QOH * ($NewCost - $OldCost);
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -180,7 +180,7 @@ function ItemCostUpdateGL($db, $StockID, $NewCost, $OldCost, $QOH) {
 		$DbgMsg = _('The following SQL to insert the GLTrans record was used');
 		$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 						typeno,
 						trandate,
 						periodno,
@@ -203,20 +203,20 @@ function ItemCostUpdateGL($db, $StockID, $NewCost, $OldCost, $QOH) {
 
 /* Calculates the material cost of a bill of materials, given parent code*/
 function BomMaterialCost($Parent, $db) {
-	$SQL = "SELECT materialcost FROM stockmaster WHERE stockid='" . $Parent . "'";
+	$SQL = "SELECT materialcost FROM weberp_stockmaster WHERE stockid='" . $Parent . "'";
 	$result1 = DB_query($SQL);
 	$MyRow1 = DB_fetch_row($result1);
 	$OldCost = $MyRow1[0];
-	$SQL = "SELECT sum(quantity) as qoh from locstock where stockid='" . $Parent . "'";
+	$SQL = "SELECT sum(quantity) as qoh from weberp_locstock where stockid='" . $Parent . "'";
 	$result1 = DB_query($SQL);
 	$MyRow1 = DB_fetch_row($result1);
 	$QOH = $MyRow1[0];
-	$SQL = "SELECT Sum(stockmaster.materialcost*bom.quantity) AS SumOfmaterialcost
-	   					FROM bom LEFT JOIN stockmaster
-						ON bom.component = stockmaster.stockid
-						WHERE bom.parent='". $Parent . "'
-                        AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                        AND bom.effectiveto > '" . date('Y-m-d') . "'";
+	$SQL = "SELECT Sum(weberp_stockmaster.materialcost*weberp_bom.quantity) AS SumOfmaterialcost
+	   					FROM weberp_bom LEFT JOIN weberp_stockmaster
+						ON weberp_bom.component = weberp_stockmaster.stockid
+						WHERE weberp_bom.parent='". $Parent . "'
+                        AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                        AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 	$result = DB_query($SQL);
 	$MyRow = DB_fetch_row($result);
 	$MaterialCost = $MyRow[0];
@@ -228,14 +228,14 @@ function BomMaterialCost($Parent, $db) {
 	return $MaterialCost;
 }
 
-/*Iterates through the levels of the bom, recalculating each bom it meets*/
+/*Iterates through the levels of the weberp_bom, recalculating each weberp_bom it meets*/
 function UpdateCost($db, $Item) {
-	$SQL = "SELECT parent FROM bom where component = '" . $Item . "'";
+	$SQL = "SELECT parent FROM weberp_bom where component = '" . $Item . "'";
 	$Result = DB_query($SQL);
 	while ($MyRow=DB_fetch_array($Result)){
 		$NewParent = $MyRow['parent'];
 		$MaterialCost = BomMaterialCost($NewParent, $db);
-		$SQL = "UPDATE stockmaster SET materialcost=" . $MaterialCost . " WHERE stockid='" . $NewParent . "'";
+		$SQL = "UPDATE weberp_stockmaster SET materialcost=" . $MaterialCost . " WHERE stockid='" . $NewParent . "'";
 		$result1 = DB_query($SQL);
 		if (DB_error_no()!=0) {
 			return 1;
@@ -245,7 +245,7 @@ function UpdateCost($db, $Item) {
 	return 0;
 }
 
-/* Accepts work order information and iterates through the bom, inserting real components (dissolving phantom assemblies) */
+/* Accepts work order information and iterates through the weberp_bom, inserting real components (dissolving phantom assemblies) */
 function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID='') {
 
 	// remember, 'G' is for ghost (phantom part type)
@@ -256,7 +256,7 @@ function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID='') 
 	}
 
 	// insert new real immediate components of this item
-	$sql = "INSERT INTO worequirements (wo,
+	$sql = "INSERT INTO weberp_worequirements (wo,
 				parentstockid,
 				stockid,
 				qtypu,
@@ -264,20 +264,20 @@ function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID='') 
 				autoissue)
 			SELECT '" . $WO . "',
 				'" . $ParentID . "',
-				bom.component,
-				bom.quantity*" . $Qty . ",
+				weberp_bom.component,
+				weberp_bom.quantity*" . $Qty . ",
 				materialcost+labourcost+overheadcost,
-				bom.autoissue
-			FROM bom INNER JOIN stockmaster
-			ON bom.component=stockmaster.stockid
-			WHERE bom.parent='" . $StockID . "'
-			AND bom.loccode ='" . $LocCode . "'
-            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-            AND bom.effectiveto > '" . date('Y-m-d') . "'
-			AND stockmaster.mbflag<>'G'
-			AND bom.component NOT IN (
+				weberp_bom.autoissue
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.component=weberp_stockmaster.stockid
+			WHERE weberp_bom.parent='" . $StockID . "'
+			AND weberp_bom.loccode ='" . $LocCode . "'
+            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+            AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'
+			AND weberp_stockmaster.mbflag<>'G'
+			AND weberp_bom.component NOT IN (
 				SELECT stockid
-				FROM worequirements
+				FROM weberp_worequirements
 				WHERE wo = '" . $WO . "'
 				AND parentstockid = '" . $ParentID . "'
 			)";
@@ -288,45 +288,45 @@ function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID='') 
 	//     - the same component could occur in multiple dissolved phantom assemblies
 	//     - need to sum quantities of multiple component occurrences
 	if ($ParentID != $StockID) {
-		$sql = "UPDATE worequirements
+		$sql = "UPDATE weberp_worequirements
 					INNER JOIN (
 						SELECT CAST('" . $WO . "' AS SIGNED) as wo,
 							CAST('NODE-1' AS CHAR) as parentstockid,
-							bom.component AS stockid,
-							bom.quantity*1 AS qtypu,
+							weberp_bom.component AS stockid,
+							weberp_bom.quantity*1 AS qtypu,
 							materialcost+labourcost+overheadcost AS stdcost,
-							bom.autoissue
-						FROM bom INNER JOIN stockmaster
-						ON bom.component=stockmaster.stockid
-						WHERE bom.parent='" . $StockID . "'
-						AND bom.loccode ='" . $LocCode . "'
-                        AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                        AND bom.effectiveto > '" . date('Y-m-d') . "'
-						AND stockmaster.mbflag<>'G'
-						AND bom.component IN (
+							weberp_bom.autoissue
+						FROM weberp_bom INNER JOIN weberp_stockmaster
+						ON weberp_bom.component=weberp_stockmaster.stockid
+						WHERE weberp_bom.parent='" . $StockID . "'
+						AND weberp_bom.loccode ='" . $LocCode . "'
+                        AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                        AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'
+						AND weberp_stockmaster.mbflag<>'G'
+						AND weberp_bom.component IN (
 							SELECT stockid
-							FROM worequirements
+							FROM weberp_worequirements
 							WHERE wo = '" . $WO . "'
 							AND parentstockid = '". $ParentID . "'
 						)
-					) AS g ON g.wo=worequirements.wo
-						AND g.parentstockid=worequirements.parentstockid
-						AND g.stockid=worequirements.stockid
-					SET worequirements.qtypu=worequirements.qtypu+g.qtypu";
+					) AS g ON g.wo=weberp_worequirements.wo
+						AND g.parentstockid=weberp_worequirements.parentstockid
+						AND g.stockid=weberp_worequirements.stockid
+					SET weberp_worequirements.qtypu=weberp_worequirements.qtypu+g.qtypu";
 		$result = DB_query($sql);
 	}
 
 	// dissolve phantom assemblies
 	$sql = "SELECT
-				bom.component,
-				bom.quantity
-			FROM bom INNER JOIN stockmaster
-			ON bom.component=stockmaster.stockid
+				weberp_bom.component,
+				weberp_bom.quantity
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.component=weberp_stockmaster.stockid
 			WHERE parent='" . $StockID . "'
 			AND loccode ='" . $LocCode . "'
-            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-            AND bom.effectiveto > '" . date('Y-m-d') . "'
-			AND stockmaster.mbflag='G'";
+            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+            AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'
+			AND weberp_stockmaster.mbflag='G'";
 	$result = DB_query($sql);
 	while ($MyRow=DB_fetch_array($result)) {
 		WoRealRequirements($db, $WO, $LocCode, $MyRow['component'], $MyRow['quantity'], $ParentID);
@@ -338,7 +338,7 @@ function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID='') 
 function EnsureGLEntriesBalance ($TransType, $TransTypeNo, $db) {
 
 	$result = DB_query("SELECT SUM(amount)
-						FROM gltrans
+						FROM weberp_gltrans
 						WHERE type = '" . $TransType . "'
 						AND typeno = '" . $TransTypeNo . "'");
 	$myrow = DB_fetch_row($result);
@@ -349,13 +349,13 @@ function EnsureGLEntriesBalance ($TransType, $TransTypeNo, $db) {
 		} else {
 			$result = DB_query("SELECT counterindex,
 										MAX(amount)
-								FROM gltrans
+								FROM weberp_gltrans
 								WHERE type = '" . $TransType . "'
 								AND typeno = '" . $TransTypeNo . "'
 								GROUP BY counterindex");
 			$myrow = DB_fetch_array($result);
 			$TransToAmend = $myrow['counterindex'];
-			$result = DB_query("UPDATE gltrans SET amount = amount - " . $Difference . "
+			$result = DB_query("UPDATE weberp_gltrans SET amount = amount - " . $Difference . "
 								WHERE counterindex = '" . $TransToAmend . "'");
 
 		}
@@ -376,24 +376,24 @@ function GetQuantityOnOrderDueToPurchaseOrders($StockID, $Location){
 		$ErrMsg = _('The quantity on order due to purchase orders for') . ' ' . $StockID . ' ' . _('to be received into all locations cannot be retrieved because');
 	}else{
 		// Just 1 location to consider
-		$WhereLocation = " AND purchorders.intostocklocation = '" . $Location . "'";
+		$WhereLocation = " AND weberp_purchorders.intostocklocation = '" . $Location . "'";
 		$ErrMsg = _('The quantity on order due to purchase orders for') . ' ' . $StockID . ' ' . _('to be received into') . ' ' . $Location . ' ' . _('cannot be retrieved because');
 	}
 
-	$SQL="SELECT SUM(purchorderdetails.quantityord -purchorderdetails.quantityrecd) AS QtyOnOrder
-		FROM purchorders
-			INNER JOIN purchorderdetails
-				ON purchorders.orderno=purchorderdetails.orderno
-			INNER JOIN locationusers
-				ON locationusers.loccode=purchorders.intostocklocation
-					AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-					AND locationusers.canview=1
-		WHERE purchorderdetails.itemcode='" . $StockID . "'
-			AND purchorderdetails.completed = 0
-			AND purchorders.status<>'Cancelled'
-			AND purchorders.status<>'Pending'
-			AND purchorders.status<>'Rejected'
-			AND purchorders.status<>'Completed'" .
+	$SQL="SELECT SUM(weberp_purchorderdetails.quantityord -weberp_purchorderdetails.quantityrecd) AS QtyOnOrder
+		FROM weberp_purchorders
+			INNER JOIN weberp_purchorderdetails
+				ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+			INNER JOIN weberp_locationusers
+				ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation
+					AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_locationusers.canview=1
+		WHERE weberp_purchorderdetails.itemcode='" . $StockID . "'
+			AND weberp_purchorderdetails.completed = 0
+			AND weberp_purchorders.status<>'Cancelled'
+			AND weberp_purchorders.status<>'Pending'
+			AND weberp_purchorders.status<>'Rejected'
+			AND weberp_purchorders.status<>'Completed'" .
 			$WhereLocation;
 
 	$QOOResult = DB_query($SQL, $ErrMsg);
@@ -421,20 +421,20 @@ function GetQuantityOnOrderDueToWorkOrders($StockID, $Location){
 		$ErrMsg = _('The quantity on order due to work orders for') . ' ' . $StockID . ' ' . _('to be received into all locations cannot be retrieved because');
 	}else{
 		// Just 1 location to consider
-		$WhereLocation = " AND workorders.loccode='" . $Location . "'";
+		$WhereLocation = " AND weberp_workorders.loccode='" . $Location . "'";
 		$ErrMsg = _('The quantity on order due to work orders for') . ' ' . $StockID . ' ' . _('to be received into') . ' ' . $Location . ' ' . _('cannot be retrieved because');
 	}
 
-	$SQL="SELECT SUM(woitems.qtyreqd-woitems.qtyrecd) AS qtywo
-		FROM woitems
-			INNER JOIN workorders
-				ON woitems.wo=workorders.wo
-			INNER JOIN locationusers
-				ON locationusers.loccode=workorders.loccode
-					AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-					AND locationusers.canview=1
-		WHERE workorders.closed=0
-			AND woitems.stockid='" . $StockID . "'" .
+	$SQL="SELECT SUM(weberp_woitems.qtyreqd-weberp_woitems.qtyrecd) AS qtywo
+		FROM weberp_woitems
+			INNER JOIN weberp_workorders
+				ON weberp_woitems.wo=weberp_workorders.wo
+			INNER JOIN weberp_locationusers
+				ON weberp_locationusers.loccode=weberp_workorders.loccode
+					AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_locationusers.canview=1
+		WHERE weberp_workorders.closed=0
+			AND weberp_woitems.stockid='" . $StockID . "'" .
 			$WhereLocation;
 
 	$QOOResult = DB_query($SQL, $ErrMsg);
@@ -449,13 +449,13 @@ function GetQuantityOnOrderDueToWorkOrders($StockID, $Location){
 
 /*Creates sample and testresults */
 function CreateQASample ($ProdSpecKey, $LotKey, $Identifier, $Comments, $Cert, $DuplicateOK, $db) {
-	$result = DB_query("SELECT COUNT(testid) FROM prodspecs
+	$result = DB_query("SELECT COUNT(testid) FROM weberp_prodspecs
 							WHERE keyval='" . $ProdSpecKey . "'
 							AND active='1'",	$db);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		if ($DuplicateOK==0) {
-			$result = DB_query("SELECT COUNT(sampleid) FROM qasamples
+			$result = DB_query("SELECT COUNT(sampleid) FROM weberp_qasamples
 								WHERE prodspeckey='" . $ProdSpecKey . "'
 								AND lotkey='" . $LotKey ."'",	$db);
 			$myrow2 = DB_fetch_row($result);
@@ -463,7 +463,7 @@ function CreateQASample ($ProdSpecKey, $LotKey, $Identifier, $Comments, $Cert, $
 			$myrow2[0]=0;
 		}
 		if ($myrow2[0]==0 OR $DuplicateOK==1) {
-			$SQL = "INSERT INTO qasamples (prodspeckey,
+			$SQL = "INSERT INTO weberp_qasamples (prodspeckey,
 											lotkey,
 											identifier,
 											comments,
@@ -478,10 +478,10 @@ function CreateQASample ($ProdSpecKey, $LotKey, $Identifier, $Comments, $Cert, $
 										'" . $_SESSION['UserID'] . "',
 										'" . date('Y-m-d') . "')";
 			$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The create of the qasamples record failed');
-			$DbgMsg = _('The following SQL to create the qasamples was used');
+			$DbgMsg = _('The following SQL to create the weberp_qasamples was used');
 			$Result = DB_query($SQL, $db, $ErrMsg, $DbgMsg, true);
-			$SampleID=DB_Last_Insert_ID($db,'qasamples','sampleid');
-			$SQL = "INSERT INTO sampleresults (sampleid,
+			$SampleID=DB_Last_Insert_ID($db,'weberp_qasamples','sampleid');
+			$SQL = "INSERT INTO weberp_sampleresults (sampleid,
 											testid,
 											defaultvalue,
 											targetvalue,
@@ -497,10 +497,10 @@ function CreateQASample ($ProdSpecKey, $LotKey, $Identifier, $Comments, $Cert, $
 											rangemax,
 											showoncert,
 											showontestplan
-											FROM prodspecs WHERE keyval='" .$ProdSpecKey. "'
-											AND prodspecs.active='1'";
+											FROM weberp_prodspecs WHERE keyval='" .$ProdSpecKey. "'
+											AND weberp_prodspecs.active='1'";
 			$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The create of the sampleresults record failed');
-			$DbgMsg = _('The following SQL to create the sampleresults was used');
+			$DbgMsg = _('The following SQL to create the weberp_sampleresults was used');
 			$Result = DB_query($SQL, $db, $ErrMsg, $DbgMsg, true);
 			
 		} //$myrow2[0]=0

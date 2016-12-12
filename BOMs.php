@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: BOMs.php 7617 2016-09-10 09:07:58Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -19,7 +19,7 @@ function display_children($Parent, $Level, &$BOMTree) {
 						component,
 						sequence/pow(10,digitals) 
 							AS sequence
-						FROM bom
+						FROM weberp_bom
 						WHERE parent='" . $Parent. "'
 						ORDER BY sequence ASC");
 	if (DB_num_rows($c_result) > 0) {
@@ -55,7 +55,7 @@ function CheckForRecursiveBOM ($UltimateParent, $ComponentToCheck, $db) {
 /* returns true ie 1 if the BOM contains the parent part as a component
 ie the BOM is recursive otherwise false ie 0 */
 
-	$sql = "SELECT component FROM bom WHERE parent='".$ComponentToCheck."'";
+	$sql = "SELECT component FROM weberp_bom WHERE parent='".$ComponentToCheck."'";
 	$ErrMsg = _('An error occurred in retrieving the components of the BOM during the check for recursion');
 	$DbgMsg = _('The SQL that was used to retrieve the components of the BOM and that failed in the process was');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -78,39 +78,39 @@ ie the BOM is recursive otherwise false ie 0 */
 function DisplayBOMItems($UltimateParent, $Parent, $Component,$Level, $db) {
 
 		global $ParentMBflag;
-		$sql = "SELECT bom.sequence,
-						bom.digitals,
-						bom.component,
-						stockcategory.categorydescription,
-						stockmaster.description as itemdescription,
-						stockmaster.units,
-						locations.locationname,
-						locations.loccode,
-						workcentres.description as workcentrename,
-						workcentres.code as workcentrecode,
-						bom.quantity,
-						bom.effectiveafter,
-						bom.effectiveto,
-						stockmaster.mbflag,
-						bom.autoissue,
-						bom.remark,
-						stockmaster.controlled,
-						locstock.quantity AS qoh,
-						stockmaster.decimalplaces
-				FROM bom INNER JOIN stockmaster
-				ON bom.component=stockmaster.stockid
-				INNER JOIN stockcategory 
-				ON stockcategory.categoryid = stockmaster.categoryid
-				INNER JOIN locations ON
-				bom.loccode = locations.loccode
-				INNER JOIN workcentres
-				ON bom.workcentreadded=workcentres.code
-				INNER JOIN locstock
-				ON bom.loccode=locstock.loccode
-				AND bom.component = locstock.stockid
-				INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-				WHERE bom.component='".$Component."'
-				AND bom.parent = '".$Parent."'";
+		$sql = "SELECT weberp_bom.sequence,
+						weberp_bom.digitals,
+						weberp_bom.component,
+						weberp_stockcategory.categorydescription,
+						weberp_stockmaster.description as itemdescription,
+						weberp_stockmaster.units,
+						weberp_locations.locationname,
+						weberp_locations.loccode,
+						weberp_workcentres.description as workcentrename,
+						weberp_workcentres.code as workcentrecode,
+						weberp_bom.quantity,
+						weberp_bom.effectiveafter,
+						weberp_bom.effectiveto,
+						weberp_stockmaster.mbflag,
+						weberp_bom.autoissue,
+						weberp_bom.remark,
+						weberp_stockmaster.controlled,
+						weberp_locstock.quantity AS qoh,
+						weberp_stockmaster.decimalplaces
+				FROM weberp_bom INNER JOIN weberp_stockmaster
+				ON weberp_bom.component=weberp_stockmaster.stockid
+				INNER JOIN weberp_stockcategory 
+				ON weberp_stockcategory.categoryid = weberp_stockmaster.categoryid
+				INNER JOIN weberp_locations ON
+				weberp_bom.loccode = weberp_locations.loccode
+				INNER JOIN weberp_workcentres
+				ON weberp_bom.workcentreadded=weberp_workcentres.code
+				INNER JOIN weberp_locstock
+				ON weberp_bom.loccode=weberp_locstock.loccode
+				AND weberp_bom.component = weberp_locstock.stockid
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+				WHERE weberp_bom.component='".$Component."'
+				AND weberp_bom.parent = '".$Parent."'";
 
 		$ErrMsg = _('Could not retrieve the BOM components because');
 		$DbgMsg = _('The SQL used to retrieve the components was');
@@ -326,7 +326,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			$i++;
 		}
 		if($_POST['AutoIssue']==1 AND isset($_POST['Component'])){
-			$sql = "SELECT controlled FROM stockmaster WHERE stockid='" . $_POST['Component'] . "'";
+			$sql = "SELECT controlled FROM weberp_stockmaster WHERE stockid='" . $_POST['Component'] . "'";
 			$CheckControlledResult = DB_query($sql);
 			$CheckControlledRow = DB_fetch_row($CheckControlledResult);
 			if ($CheckControlledRow[0]==1){
@@ -351,7 +351,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			$Sequence = filter_number_format($_POST['Sequence']);
 			$Digitals = GetDigitals($_POST['Sequence']);
 			$Sequence = $Sequence * pow(10,$Digitals);
-			$sql = "UPDATE bom SET sequence='" . $Sequence . "',
+			$sql = "UPDATE weberp_bom SET sequence='" . $Sequence . "',
 						digitals = '" . $Digitals . "',
 						workcentreadded='" . $_POST['WorkCentreAdded'] . "',
 						loccode='" . $_POST['LocCode'] . "',
@@ -360,8 +360,8 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 						quantity= '" . filter_number_format($_POST['Quantity']) . "',
 						autoissue='" . $_POST['AutoIssue'] . "',
 						remark='" . $_POST['Remark'] . "'
-					WHERE bom.parent='" . $SelectedParent . "'
-					AND bom.component='" . $SelectedComponent . "'";
+					WHERE weberp_bom.parent='" . $SelectedParent . "'
+					AND weberp_bom.component='" . $SelectedComponent . "'";
 
 			$ErrMsg =  _('Could not update this BOM component because');
 			$DbgMsg =  _('The SQL used to update the component was');
@@ -380,7 +380,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 
 				/*Now check to see that the component is not already on the BOM */
 				$sql = "SELECT component
-						FROM bom
+						FROM weberp_bom
 						WHERE parent='".$SelectedParent."'
 						AND component='" . $_POST['Component'] . "'
 						AND workcentreadded='" . $_POST['WorkCentreAdded'] . "'
@@ -396,7 +396,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 					$Digitals = GetDigitals($_POST['Sequence']);
 					$Sequence = $Sequence * pow(10,$Digitals);
 
-					$sql = "INSERT INTO bom (sequence,
+					$sql = "INSERT INTO weberp_bom (sequence,
 									digitals,
 											parent,
 											component,
@@ -446,7 +446,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 
 	//the link to delete a selected record was clicked instead of the Submit button
 
-		$sql="DELETE FROM bom
+		$sql="DELETE FROM weberp_bom
 				WHERE parent='".$SelectedParent."'
 				AND component='".$SelectedComponent."'
 				AND loccode='".$Location."'
@@ -457,7 +457,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 		$result = DB_query($sql,$ErrMsg,$DbgMsg);
 
 		$ComponentSQL = "SELECT component
-							FROM bom
+							FROM weberp_bom
 							WHERE parent='" . $SelectedParent ."'";
 		$ComponentResult = DB_query($ComponentSQL);
 		$ComponentArray = DB_fetch_row($ComponentResult);
@@ -481,10 +481,10 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 	}
 
 	//DisplayBOMItems($SelectedParent, $db);
-	$sql = "SELECT stockmaster.description,
-					stockmaster.mbflag
-			FROM stockmaster
-			WHERE stockmaster.stockid='" . $SelectedParent . "'";
+	$sql = "SELECT weberp_stockmaster.description,
+					weberp_stockmaster.mbflag
+			FROM weberp_stockmaster
+			WHERE weberp_stockmaster.stockid='" . $SelectedParent . "'";
 
 	$ErrMsg = _('Could not retrieve the description of the parent part because');
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
@@ -514,13 +514,13 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 
 	echo '<br /><div class="centre noprint"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">' . _('Select a Different BOM') . '</a></div><br />';
 	// Display Manufatured Parent Items
-	$sql = "SELECT bom.parent,
-				stockmaster.description,
-				stockmaster.mbflag
-			FROM bom INNER JOIN locationusers ON locationusers.loccode=bom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1, stockmaster
-			WHERE bom.component='".$SelectedParent."'
-			AND stockmaster.stockid=bom.parent
-			AND stockmaster.mbflag='M'";
+	$sql = "SELECT weberp_bom.parent,
+				weberp_stockmaster.description,
+				weberp_stockmaster.mbflag
+			FROM weberp_bom INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_bom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1, weberp_stockmaster
+			WHERE weberp_bom.component='".$SelectedParent."'
+			AND weberp_stockmaster.stockid=weberp_bom.parent
+			AND weberp_stockmaster.mbflag='M'";
 
 	$ErrMsg = _('Could not retrieve the description of the parent part because');
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
@@ -538,13 +538,13 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
      echo '</table>';
 	}
 	// Display Assembly Parent Items
-	$sql = "SELECT bom.parent,
-				stockmaster.description,
-				stockmaster.mbflag
-		FROM bom INNER JOIN stockmaster
-		ON bom.parent=stockmaster.stockid
-		WHERE bom.component='".$SelectedParent."'
-		AND stockmaster.mbflag='A'";
+	$sql = "SELECT weberp_bom.parent,
+				weberp_stockmaster.description,
+				weberp_stockmaster.mbflag
+		FROM weberp_bom INNER JOIN weberp_stockmaster
+		ON weberp_bom.parent=weberp_stockmaster.stockid
+		WHERE weberp_bom.component='".$SelectedParent."'
+		AND weberp_stockmaster.mbflag='A'";
 
 	$ErrMsg = _('Could not retrieve the description of the parent part because');
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
@@ -562,14 +562,14 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
         echo '</table>';
 	}
 	// Display Kit Sets
-	$sql = "SELECT bom.parent,
-				stockmaster.description,
-				stockmaster.mbflag
-			FROM bom INNER JOIN stockmaster
-			ON bom.parent=stockmaster.stockid
-			INNER JOIN locationusers ON locationusers.loccode=bom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-			WHERE bom.component='".$SelectedParent."'
-			AND stockmaster.mbflag='K'";
+	$sql = "SELECT weberp_bom.parent,
+				weberp_stockmaster.description,
+				weberp_stockmaster.mbflag
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.parent=weberp_stockmaster.stockid
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_bom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+			WHERE weberp_bom.component='".$SelectedParent."'
+			AND weberp_stockmaster.mbflag='K'";
 
 	$ErrMsg = _('Could not retrieve the description of the parent part because');
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
@@ -587,13 +587,13 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
         echo '</table>';
 	}
 	// Display Phantom/Ghosts
-	$sql = "SELECT bom.parent,
-				stockmaster.description,
-				stockmaster.mbflag
-			FROM bom INNER JOIN stockmaster
-			ON bom.parent=stockmaster.stockid
-			WHERE bom.component='".$SelectedParent."'
-			AND stockmaster.mbflag='G'";
+	$sql = "SELECT weberp_bom.parent,
+				weberp_stockmaster.description,
+				weberp_stockmaster.mbflag
+			FROM weberp_bom INNER JOIN weberp_stockmaster
+			ON weberp_bom.parent=weberp_stockmaster.stockid
+			WHERE weberp_bom.component='".$SelectedParent."'
+			AND weberp_stockmaster.mbflag='G'";
 
 	$ErrMsg = _('Could not retrieve the description of the parent part because');
 	$DbgMsg = _('The SQL used to retrieve description of the parent part was');
@@ -702,15 +702,15 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 
 			$sql = "SELECT sequence,
 						digitals,
-						bom.loccode,
+						weberp_bom.loccode,
 						effectiveafter,
 						effectiveto,
 						workcentreadded,
 						quantity,
 						autoissue,
 						remark
-					FROM bom
-					INNER JOIN locationusers ON locationusers.loccode=bom.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
+					FROM weberp_bom
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_bom.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 					WHERE parent='".$SelectedParent."'
 					AND component='".$SelectedComponent."'";
 
@@ -756,29 +756,29 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			echo '<select ' . (in_array('ComponentCode',$Errors) ?  'class="selecterror"' : '' ) .' tabindex="1" name="Component">';
 
 			if ($ParentMBflag=='A'){ /*Its an assembly */
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description
-						FROM stockmaster INNER JOIN stockcategory
-							ON stockmaster.categoryid = stockcategory.categoryid
-						WHERE ((stockcategory.stocktype='L' AND stockmaster.mbflag ='D')
-						OR stockmaster.mbflag !='D')
-						AND stockmaster.mbflag !='K'
-						AND stockmaster.mbflag !='A'
-						AND stockmaster.controlled = 0
-						AND stockmaster.stockid != '".$SelectedParent."'
-						ORDER BY stockmaster.stockid";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+						WHERE ((weberp_stockcategory.stocktype='L' AND weberp_stockmaster.mbflag ='D')
+						OR weberp_stockmaster.mbflag !='D')
+						AND weberp_stockmaster.mbflag !='K'
+						AND weberp_stockmaster.mbflag !='A'
+						AND weberp_stockmaster.controlled = 0
+						AND weberp_stockmaster.stockid != '".$SelectedParent."'
+						ORDER BY weberp_stockmaster.stockid";
 
 			} else { /*Its either a normal manufac item, phantom, kitset - controlled items ok */
-				$sql = "SELECT stockmaster.stockid,
-							stockmaster.description
-						FROM stockmaster INNER JOIN stockcategory
-							ON stockmaster.categoryid = stockcategory.categoryid
-						WHERE ((stockcategory.stocktype='L' AND stockmaster.mbflag ='D')
-						OR stockmaster.mbflag !='D')
-						AND stockmaster.mbflag !='K'
-						AND stockmaster.mbflag !='A'
-						AND stockmaster.stockid != '".$SelectedParent."'
-						ORDER BY stockmaster.stockid";
+				$sql = "SELECT weberp_stockmaster.stockid,
+							weberp_stockmaster.description
+						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+							ON weberp_stockmaster.categoryid = weberp_stockcategory.categoryid
+						WHERE ((weberp_stockcategory.stocktype='L' AND weberp_stockmaster.mbflag ='D')
+						OR weberp_stockmaster.mbflag !='D')
+						AND weberp_stockmaster.mbflag !='K'
+						AND weberp_stockmaster.mbflag !='A'
+						AND weberp_stockmaster.stockid != '".$SelectedParent."'
+						ORDER BY weberp_stockmaster.stockid";
 			}
 
 			$ErrMsg = _('Could not retrieve the list of potential components because');
@@ -803,13 +803,13 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 
 		DB_free_result($result);
 		$sql = "SELECT locationname,
-					locations.loccode
-				FROM locations
-				INNER JOIN locationusers
-					ON locationusers.loccode=locations.loccode
-					AND locationusers.userid='" .  $_SESSION['UserID'] . "'
-					AND locationusers.canupd=1
-				WHERE locations.usedforwo = 1";
+					weberp_locations.loccode
+				FROM weberp_locations
+				INNER JOIN weberp_locationusers
+					ON weberp_locationusers.loccode=weberp_locations.loccode
+					AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "'
+					AND weberp_locationusers.canupd=1
+				WHERE weberp_locations.usedforwo = 1";
 		$result = DB_query($sql);
 
 		while ($myrow = DB_fetch_array($result)) {
@@ -829,7 +829,7 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			<tr>
 				<td>' . _('Work Centre Added') . ': </td><td>';
 
-		$sql = "SELECT code, description FROM workcentres INNER JOIN locationusers ON locationusers.loccode=workcentres.location AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+		$sql = "SELECT code, description FROM weberp_workcentres INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workcentres.location AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 		$result = DB_query($sql);
 
 		if (DB_num_rows($result)==0){
@@ -940,43 +940,43 @@ if (isset($Select)) { //Parent Stock Item selected so display BOM or edit Compon
 			//insert wildcard characters in spaces
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-			$sql = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.decimalplaces,
-					stockmaster.mbflag,
-					SUM(locstock.quantity) as totalonhand
-				FROM stockmaster INNER JOIN locstock
-				ON stockmaster.stockid = locstock.stockid
-				WHERE stockmaster.description " . LIKE . " '".$SearchString."'
-				AND (stockmaster.mbflag='M' OR stockmaster.mbflag='K' OR stockmaster.mbflag='A' OR stockmaster.mbflag='G')
-				GROUP BY stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.decimalplaces,
-					stockmaster.mbflag
-				ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.mbflag,
+					SUM(weberp_locstock.quantity) as totalonhand
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				WHERE weberp_stockmaster.description " . LIKE . " '".$SearchString."'
+				AND (weberp_stockmaster.mbflag='M' OR weberp_stockmaster.mbflag='K' OR weberp_stockmaster.mbflag='A' OR weberp_stockmaster.mbflag='G')
+				GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.decimalplaces,
+					weberp_stockmaster.mbflag
+				ORDER BY weberp_stockmaster.stockid";
 
 		} elseif (mb_strlen($_POST['StockCode'])>0){
-			$sql = "SELECT stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.mbflag,
-					stockmaster.decimalplaces,
-					sum(locstock.quantity) as totalonhand
-				FROM stockmaster INNER JOIN locstock
-				ON stockmaster.stockid = locstock.stockid
-				WHERE stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
-				AND (stockmaster.mbflag='M'
-					OR stockmaster.mbflag='K'
-					OR stockmaster.mbflag='G'
-					OR stockmaster.mbflag='A')
-				GROUP BY stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units,
-					stockmaster.mbflag,
-					stockmaster.decimalplaces
-				ORDER BY stockmaster.stockid";
+			$sql = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.mbflag,
+					weberp_stockmaster.decimalplaces,
+					sum(weberp_locstock.quantity) as totalonhand
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				WHERE weberp_stockmaster.stockid " . LIKE  . "'%" . $_POST['StockCode'] . "%'
+				AND (weberp_stockmaster.mbflag='M'
+					OR weberp_stockmaster.mbflag='K'
+					OR weberp_stockmaster.mbflag='G'
+					OR weberp_stockmaster.mbflag='A')
+				GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units,
+					weberp_stockmaster.mbflag,
+					weberp_stockmaster.decimalplaces
+				ORDER BY weberp_stockmaster.stockid";
 
 		}
 

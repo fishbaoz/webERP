@@ -1,6 +1,6 @@
 webERP README
 
-/* $Id$*/
+/* $Id: README.txt 5797 2013-01-26 22:31:34Z daintree $*/
 
 INSTALLATION
 

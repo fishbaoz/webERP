@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockTransfers.php 7462 2016-02-20 08:27:29Z tehonu $*/
 /* Entry of point to point stock location transfers of a single part. */
 
 include('includes/DefineSerialItems.php');
@@ -33,12 +33,12 @@ if(isset($_POST['CheckCode'])) {
 	if(mb_strlen($_POST['StockText'])>0) {
 		$sql="SELECT stockid,
 					description
-			 FROM stockmaster
+			 FROM weberp_stockmaster
 			 WHERE description " . LIKE . " '%" . $_POST['StockText'] . "%'";
 	} else {
 		$sql="SELECT stockid,
 					description
-			  FROM stockmaster
+			  FROM weberp_stockmaster
 			  WHERE stockid " . LIKE . " '%" . $_POST['StockCode']."%'";
 	}
 	$ErrMsg=_('The stock information cannot be retrieved because');
@@ -109,7 +109,7 @@ if($NewTransfer) {
 							serialised,
 							perishable,
 							decimalplaces
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='" . trim(mb_strtoupper($_POST['StockID'])) . "'");
 
 	if(DB_num_rows($result) == 0) {
@@ -161,7 +161,7 @@ if(isset($_POST['StockLocationTo']) ) {
 
 if(isset($_POST['EnterTransfer']) ) {
 
-	$result = DB_query("SELECT * FROM stockmaster WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID ."'");
+	$result = DB_query("SELECT * FROM weberp_stockmaster WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID ."'");
 	$myrow = DB_fetch_row($result);
 	$InputError = false;
 	if(DB_num_rows($result)==0) {
@@ -193,9 +193,9 @@ if(isset($_POST['EnterTransfer']) ) {
 		$Result = DB_Txn_Begin();
 
 		// Need to get the current location quantity will need it later for the stock movement
-		$SQL="SELECT locstock.quantity
-				FROM locstock
-				WHERE locstock.stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
+		$SQL="SELECT weberp_locstock.quantity
+				FROM weberp_locstock
+				WHERE weberp_locstock.stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 				AND loccode= '" . $_SESSION['Transfer']->StockLocationFrom . "'";
 
 		$ErrMsg =  _('Could not retrieve the QOH at the sending location because');
@@ -225,16 +225,16 @@ if(isset($_POST['EnterTransfer']) ) {
 				$AccountCode = $StockGLCode['stockact'];// Select account code for stock.
 			}
 			// Get the item cost:
-			$SQLstandardcost = "SELECT stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS standardcost
-								FROM stockmaster
-								WHERE stockmaster.stockid ='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'";
+			$SQLstandardcost = "SELECT weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS standardcost
+								FROM weberp_stockmaster
+								WHERE weberp_stockmaster.stockid ='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'";
 			$ErrMsg = _('The standard cost of the item cannot be retrieved because');
 			$DbgMsg = _('The SQL that failed was');
 			$ResultStandardCost = DB_query($SQLstandardcost,$ErrMsg,$DbgMsg);
 			$myrow = DB_fetch_array($ResultStandardCost);
 			$StandardCost = $myrow['standardcost'];// QUESTION: Standard cost for: Assembly (value="A") and Manufactured (value="M") items ?
 			// Insert record:
-			$SQL = "INSERT INTO gltrans (
+			$SQL = "INSERT INTO weberp_gltrans (
 					periodno,
 					trandate,
 					type,
@@ -255,7 +255,7 @@ if(isset($_POST['EnterTransfer']) ) {
 					$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 		}
 		// Insert the stock movement for the stock going out of the from location
-		$SQL = "INSERT INTO stockmoves(stockid,
+		$SQL = "INSERT INTO weberp_stockmoves(stockid,
 										type,
 										transno,
 										loccode,
@@ -283,7 +283,7 @@ if(isset($_POST['EnterTransfer']) ) {
 		$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 		/*Get the ID of the StockMove... */
-		$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+		$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 /*Insert the StockSerialMovements and update the StockSerialItems  for controlled items*/
 
@@ -294,7 +294,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				/*First need to check if the serial items already exists or not in the location from */
 				$SQL = "SELECT COUNT(*)
-						FROM stockserialitems
+						FROM weberp_stockserialitems
 						WHERE
 						stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 						AND loccode='" . $_SESSION['Transfer']->StockLocationFrom . "'
@@ -306,7 +306,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				if($SerialItemExistsRow[0]==1) {
 
-					$SQL = "UPDATE stockserialitems
+					$SQL = "UPDATE weberp_stockserialitems
 							SET quantity= quantity - '" . $Item->BundleQty . "',
 							expirationdate='" . FormatDateForSQL($Item->ExpiryDate) . "'
 							WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
@@ -318,7 +318,7 @@ if(isset($_POST['EnterTransfer']) ) {
 					$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 				} else {
 					/*Need to insert a new serial item record */
-					$SQL = "INSERT INTO stockserialitems (stockid,
+					$SQL = "INSERT INTO weberp_stockserialitems (stockid,
 										loccode,
 										serialno,
 										expirationdate,
@@ -337,7 +337,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				/* now insert the serial stock movement */
 
-				$SQL = "INSERT INTO stockserialmoves (
+				$SQL = "INSERT INTO weberp_stockserialmoves (
 								stockmoveno,
 								stockid,
 								serialno,
@@ -358,9 +358,9 @@ if(isset($_POST['EnterTransfer']) ) {
 
 
 		// Need to get the current location quantity will need it later for the stock movement
-		$SQL="SELECT locstock.quantity
-				FROM locstock
-				WHERE locstock.stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
+		$SQL="SELECT weberp_locstock.quantity
+				FROM weberp_locstock
+				WHERE weberp_locstock.stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 				AND loccode= '" . $_SESSION['Transfer']->StockLocationTo . "'";
 		$ErrMsg = _('Could not retrieve QOH at the destination because');
 		$Result = DB_query($SQL, $ErrMsg, $DbgMsg,true);
@@ -381,16 +381,16 @@ if(isset($_POST['EnterTransfer']) ) {
 				$AccountCode = $StockGLCode['stockact'];// Select account code for stock.
 			}
 			// Get the item cost:
-			$SQLstandardcost = "SELECT stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS standardcost
-								FROM stockmaster
-								WHERE stockmaster.stockid ='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'";
+			$SQLstandardcost = "SELECT weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost AS standardcost
+								FROM weberp_stockmaster
+								WHERE weberp_stockmaster.stockid ='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'";
 			$ErrMsg = _('The standard cost of the item cannot be retrieved because');
 			$DbgMsg = _('The SQL that failed was');
 			$ResultStandardCost = DB_query($SQLstandardcost,$ErrMsg,$DbgMsg);
 			$myrow = DB_fetch_array($ResultStandardCost);
 			$StandardCost = $myrow['standardcost'];// QUESTION: Standard cost for: Assembly (value="A") and Manufactured (value="M") items ?
 			// Insert record:
-			$SQL = "INSERT INTO gltrans (
+			$SQL = "INSERT INTO weberp_gltrans (
 					periodno,
 					trandate,
 					type,
@@ -411,7 +411,7 @@ if(isset($_POST['EnterTransfer']) ) {
 			$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 		}
 		// Insert the stock movement for the stock coming into the to location
-		$SQL = "INSERT INTO stockmoves (stockid,
+		$SQL = "INSERT INTO weberp_stockmoves (stockid,
 						type,
 						transno,
 						loccode,
@@ -437,7 +437,7 @@ if(isset($_POST['EnterTransfer']) ) {
 		$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
 		/*Get the ID of the StockMove... */
-		$StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
+		$StkMoveNo = DB_Last_Insert_ID($db,'weberp_stockmoves','stkmoveno');
 
 /*Insert the StockSerialMovements and update the StockSerialItems  for controlled items*/
 
@@ -448,7 +448,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				/*First need to check if the serial items already exists or not in the location from */
 				$SQL = "SELECT COUNT(*)
-						FROM stockserialitems
+						FROM weberp_stockserialitems
 						WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 						AND loccode='" . $_SESSION['Transfer']->StockLocationTo . "'
 						AND serialno='" . $Item->BundleRef . "'";
@@ -459,7 +459,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				if($SerialItemExistsRow[0]==1) {
 
-					$SQL = "UPDATE stockserialitems
+					$SQL = "UPDATE weberp_stockserialitems
 							SET quantity= quantity + '" . $Item->BundleQty . "',
 								expirationdate='" . FormatDateForSQL($Item->ExpiryDate) . "'
 							WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
@@ -471,7 +471,7 @@ if(isset($_POST['EnterTransfer']) ) {
 					$Result = DB_query($SQL, $ErrMsg, $DbgMsg, true);
 				} else {
 					/*Need to insert a new serial item record */
-					$SQL = "INSERT INTO stockserialitems (stockid,
+					$SQL = "INSERT INTO weberp_stockserialitems (stockid,
 														loccode,
 														serialno,
 														expirationdate,
@@ -492,7 +492,7 @@ if(isset($_POST['EnterTransfer']) ) {
 
 				/* now insert the serial stock movement */
 
-				$SQL = "INSERT INTO stockserialmoves (stockmoveno,
+				$SQL = "INSERT INTO weberp_stockserialmoves (stockmoveno,
 									stockid,
 									serialno,
 									moveqty)
@@ -508,7 +508,7 @@ if(isset($_POST['EnterTransfer']) ) {
 		} /*end if the transfer item is a controlled item */
 
 
-		$SQL = "UPDATE locstock SET quantity = quantity - '" . round($_SESSION['Transfer']->TransferItem[0]->Quantity,$_SESSION['Transfer']->TransferItem[0]->DecimalPlaces) . "'
+		$SQL = "UPDATE weberp_locstock SET quantity = quantity - '" . round($_SESSION['Transfer']->TransferItem[0]->Quantity,$_SESSION['Transfer']->TransferItem[0]->DecimalPlaces) . "'
 				WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 				AND loccode='" . $_SESSION['Transfer']->StockLocationFrom . "'";
 
@@ -516,7 +516,7 @@ if(isset($_POST['EnterTransfer']) ) {
 		$DbgMsg = _('The following SQL to update the location stock record was used');
 		$Result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		$SQL = "UPDATE locstock
+		$SQL = "UPDATE weberp_locstock
 				SET quantity = quantity + '" . round($_SESSION['Transfer']->TransferItem[0]->Quantity,$_SESSION['Transfer']->TransferItem[0]->DecimalPlaces) . "'
 				WHERE stockid='" . $_SESSION['Transfer']->TransferItem[0]->StockID . "'
 				AND loccode='" . $_SESSION['Transfer']->StockLocationTo . "'";
@@ -578,7 +578,7 @@ echo '<tr>
 		<td>' . _('From Stock Location').':</td>
 		<td><select name="StockLocationFrom">';
 
-$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
 $resultStkLocs = DB_query($sql);
 while($myrow=DB_fetch_array($resultStkLocs)) {
 	if(isset($_SESSION['Transfer']->StockLocationFrom)) {

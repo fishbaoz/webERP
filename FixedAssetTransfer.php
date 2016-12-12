@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: FixedAssetTransfer.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -18,7 +18,7 @@ foreach ($_POST as $AssetToMove => $Value) { //Value is not used?
 	if (mb_substr($AssetToMove,0,4)=='Move') { // the form variable is of the format MoveAssetID so need to strip the move bit off
 		$AssetID	= mb_substr($AssetToMove,4);
 		if (isset($_POST['Location' . $AssetID]) AND $_POST['Location' . $AssetID] !=''){
-			$sql		= "UPDATE fixedassets
+			$sql		= "UPDATE weberp_fixedassets
 						SET assetlocation='".$_POST['Location'.$AssetID] ."'
 						WHERE assetid='". $AssetID . "'";
 
@@ -34,7 +34,7 @@ if (isset($_GET['AssetID'])) {
 } else if (isset($_POST['AssetID'])) {
 	$AssetID=$_POST['AssetID'];
 } else {
-	$sql="SELECT categoryid, categorydescription FROM fixedassetcategories";
+	$sql="SELECT categoryid, categorydescription FROM weberp_fixedassetcategories";
 	$result=DB_query($sql);
 	echo '<form action="'. htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">';
     echo '<div>';
@@ -79,7 +79,7 @@ if (isset($_GET['AssetID'])) {
 			} else {
 				echo '<option value="ALL">' . _('Any asset location') . '</option>';
 			}
-			$result = DB_query("SELECT locationid, locationdescription FROM fixedassetlocations");
+			$result = DB_query("SELECT locationid, locationdescription FROM weberp_fixedassetlocations");
 
 			while ($myrow = DB_fetch_array($result)) {
 				if ($myrow['locationid'] == $_POST['AssetLocation']) {
@@ -132,23 +132,23 @@ if (isset($_POST['Search'])) {
 	}
 
 
-	$sql= "SELECT fixedassets.assetid,
-				fixedassets.cost,
-				fixedassets.accumdepn,
-				fixedassets.description,
-				fixedassets.depntype,
-				fixedassets.serialno,
-				fixedassets.barcode,
-				fixedassets.assetlocation as ItemAssetLocation,
-				fixedassetlocations.locationdescription
-			FROM fixedassets
-			INNER JOIN fixedassetlocations
-			ON fixedassets.assetlocation=fixedassetlocations.locationid
-			WHERE fixedassets.assetcategoryid " . LIKE . "'".$_POST['AssetCat']."'
-			AND fixedassets.description " . LIKE . "'".$Keywords."'
-			AND fixedassets.assetid " . LIKE . "'".$AssetID."'
-			AND fixedassets.assetlocation " . LIKE . "'".$AssetLocation."'
-			ORDER BY fixedassets.assetid";
+	$sql= "SELECT weberp_fixedassets.assetid,
+				weberp_fixedassets.cost,
+				weberp_fixedassets.accumdepn,
+				weberp_fixedassets.description,
+				weberp_fixedassets.depntype,
+				weberp_fixedassets.serialno,
+				weberp_fixedassets.barcode,
+				weberp_fixedassets.assetlocation as ItemAssetLocation,
+				weberp_fixedassetlocations.locationdescription
+			FROM weberp_fixedassets
+			INNER JOIN weberp_fixedassetlocations
+			ON weberp_fixedassets.assetlocation=weberp_fixedassetlocations.locationid
+			WHERE weberp_fixedassets.assetcategoryid " . LIKE . "'".$_POST['AssetCat']."'
+			AND weberp_fixedassets.description " . LIKE . "'".$Keywords."'
+			AND weberp_fixedassets.assetid " . LIKE . "'".$AssetID."'
+			AND weberp_fixedassets.assetlocation " . LIKE . "'".$AssetLocation."'
+			ORDER BY weberp_fixedassets.assetid";
 
 
 	$Result=DB_query($sql);
@@ -167,7 +167,7 @@ if (isset($_POST['Search'])) {
 			<th colspan="2">' . _('Move To') . '</th>
 		</tr>';
 
-	$locationsql="SELECT locationid, locationdescription from fixedassetlocations";
+	$locationsql="SELECT locationid, locationdescription from weberp_fixedassetlocations";
 	$LocationResult=DB_query($locationsql);
 
 	while ($myrow=DB_fetch_array($Result)) {

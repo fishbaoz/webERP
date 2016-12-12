@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SuppPriceList.php 7679 2016-11-23 19:08:09Z rchacon $*/
 /*  */
 
 include('includes/session.inc');
@@ -23,8 +23,8 @@ if (isset($_POST['PrintPDF'])) {
 	$sqlsup = "SELECT suppname,
 					  currcode,
 					  decimalplaces AS currdecimalplaces
-				FROM suppliers INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
+				FROM weberp_suppliers INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
 				WHERE supplierid='" . $_POST['supplier'] . "'";
 	$resultsup = DB_query($sqlsup);
 	$RowSup = DB_fetch_array($resultsup);
@@ -35,7 +35,7 @@ if (isset($_POST['PrintPDF'])) {
 	//get category
 	if ($_POST['category']!='all'){
 		$sqlcat="SELECT categorydescription
-				FROM `stockcategory`
+				FROM `weberp_stockcategory`
 				WHERE categoryid ='" . $_POST['category'] . "'";
 
 		$resultcat = DB_query($sqlcat);
@@ -55,78 +55,78 @@ if (isset($_POST['PrintPDF'])) {
 
 	//price and category = all
 	if (($_POST['price']=='all') AND ($_POST['category']=='all')){
-		$sql = "SELECT 	purchdata.stockid,
-					stockmaster.description,
-					purchdata.price,
-					purchdata.conversionfactor,
-					(purchdata.effectivefrom)as dateprice,
-					purchdata.supplierdescription,
-					purchdata.suppliers_partno
-				FROM purchdata,stockmaster
+		$sql = "SELECT 	weberp_purchdata.stockid,
+					weberp_stockmaster.description,
+					weberp_purchdata.price,
+					weberp_purchdata.conversionfactor,
+					(weberp_purchdata.effectivefrom)as dateprice,
+					weberp_purchdata.supplierdescription,
+					weberp_purchdata.suppliers_partno
+				FROM weberp_purchdata,weberp_stockmaster
 				WHERE supplierno='" . $_POST['supplier'] . "'
-				AND stockmaster.stockid=purchdata.stockid
+				AND weberp_stockmaster.stockid=weberp_purchdata.stockid
 				ORDER BY stockid ASC ,dateprice DESC";
 	} else {
 	//category=all and price != all
 		if (($_POST['price']!='all') AND ($_POST['category']=='all')){
 
-			$sql = "SELECT purchdata.stockid,
-							stockmaster.description,
-							(SELECT purchdata.price
-							 FROM purchdata
-							 WHERE purchdata.stockid = stockmaster.stockid
+			$sql = "SELECT weberp_purchdata.stockid,
+							weberp_stockmaster.description,
+							(SELECT weberp_purchdata.price
+							 FROM weberp_purchdata
+							 WHERE weberp_purchdata.stockid = weberp_stockmaster.stockid
 							 ORDER BY effectivefrom DESC
 							 LIMIT 0,1) AS price,
-							purchdata.conversionfactor,
-							(SELECT purchdata.effectivefrom
-							 FROM purchdata
-							 WHERE purchdata.stockid = stockmaster.stockid
+							weberp_purchdata.conversionfactor,
+							(SELECT weberp_purchdata.effectivefrom
+							 FROM weberp_purchdata
+							 WHERE weberp_purchdata.stockid = weberp_stockmaster.stockid
 							 ORDER BY effectivefrom DESC
 							 LIMIT 0,1) AS dateprice,
-							purchdata.supplierdescription,
-							purchdata.suppliers_partno
-					FROM purchdata, stockmaster
+							weberp_purchdata.supplierdescription,
+							weberp_purchdata.suppliers_partno
+					FROM weberp_purchdata, weberp_stockmaster
 					WHERE supplierno = '" . $_POST['supplier'] . "'
-					AND stockmaster.stockid = purchdata.stockid
+					AND weberp_stockmaster.stockid = weberp_purchdata.stockid
 					GROUP BY stockid
 					ORDER BY stockid ASC , dateprice DESC";
 		} else {
 			//price = all category !=all
 			if (($_POST['price']=='all')and($_POST['category']!='all')){
 
-				$sql = "SELECT 	purchdata.stockid,
-								stockmaster.description,
-								purchdata.price,
-								purchdata.conversionfactor,
-								(purchdata.effectivefrom)as dateprice,
-								purchdata.supplierdescription,
-								purchdata.suppliers_partno
-						FROM purchdata,stockmaster
+				$sql = "SELECT 	weberp_purchdata.stockid,
+								weberp_stockmaster.description,
+								weberp_purchdata.price,
+								weberp_purchdata.conversionfactor,
+								(weberp_purchdata.effectivefrom)as dateprice,
+								weberp_purchdata.supplierdescription,
+								weberp_purchdata.suppliers_partno
+						FROM weberp_purchdata,weberp_stockmaster
 						WHERE supplierno='" . $_POST['supplier'] . "'
-						AND stockmaster.stockid=purchdata.stockid
-						AND stockmaster.categoryid='" . $_POST['category'] .  "'
+						AND weberp_stockmaster.stockid=weberp_purchdata.stockid
+						AND weberp_stockmaster.categoryid='" . $_POST['category'] .  "'
 						ORDER BY stockid ASC ,dateprice DESC";
 			} else {
 			//price != all category !=all
-				$sql = "SELECT 	purchdata.stockid,
-								stockmaster.description,
-								(SELECT purchdata.price
-								 FROM purchdata
-								 WHERE purchdata.stockid = stockmaster.stockid
+				$sql = "SELECT 	weberp_purchdata.stockid,
+								weberp_stockmaster.description,
+								(SELECT weberp_purchdata.price
+								 FROM weberp_purchdata
+								 WHERE weberp_purchdata.stockid = weberp_stockmaster.stockid
 								 ORDER BY effectivefrom DESC
 								 LIMIT 0,1) AS price,
-								purchdata.conversionfactor,
-								(SELECT purchdata.effectivefrom
-								FROM purchdata
-								WHERE purchdata.stockid = stockmaster.stockid
+								weberp_purchdata.conversionfactor,
+								(SELECT weberp_purchdata.effectivefrom
+								FROM weberp_purchdata
+								WHERE weberp_purchdata.stockid = weberp_stockmaster.stockid
 								ORDER BY effectivefrom DESC
 								LIMIT 0,1) AS dateprice,
-								purchdata.supplierdescription,
-								purchdata.suppliers_partno
-						FROM purchdata,stockmaster
+								weberp_purchdata.supplierdescription,
+								weberp_purchdata.suppliers_partno
+						FROM weberp_purchdata,weberp_stockmaster
 						WHERE supplierno='" . $_POST['supplier'] . "'
-						AND stockmaster.stockid=purchdata.stockid
-						AND stockmaster.categoryid='" . $_POST['category'] .  "'
+						AND weberp_stockmaster.stockid=weberp_purchdata.stockid
+						AND weberp_stockmaster.categoryid='" . $_POST['category'] .  "'
 						GROUP BY stockid
 						ORDER BY stockid ASC ,dateprice DESC";
 			}
@@ -215,7 +215,7 @@ if (isset($_POST['PrintPDF'])) {
     echo '<div>';
     echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-	$sql = "SELECT supplierid,suppname FROM `suppliers`";
+	$sql = "SELECT supplierid,suppname FROM `weberp_suppliers`";
 	$result = DB_query($sql);
 	echo '<table class="selection">
 			<tr>
@@ -231,7 +231,7 @@ if (isset($_POST['PrintPDF'])) {
 	echo '</select></td>
 		</tr>';
 
-	$sql="SELECT categoryid, categorydescription FROM stockcategory";
+	$sql="SELECT categoryid, categorydescription FROM weberp_stockcategory";
 	$result = DB_query($sql);
 	echo '<tr>
 			<td>' . _('Category') . ':</td>

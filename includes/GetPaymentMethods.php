@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: GetPaymentMethods.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 $PaytTypes    = array();
 $ReceiptTypes = array();
@@ -7,7 +7,7 @@ $ReceiptTypes = array();
 $sql = 'SELECT paymentname,
 			paymenttype,
 			receipttype
-			FROM paymentmethods
+			FROM weberp_paymentmethods
 			ORDER by paymentname';
 
 $PMResult = DB_query($sql);

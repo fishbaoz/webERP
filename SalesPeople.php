@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SalesPeople.php 7548 2016-05-30 09:59:55Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Sales People Maintenance');
@@ -93,7 +93,7 @@ if (isset($_POST['submit'])) {
 
 		/*SelectedSalesPerson could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 
-		$sql = "UPDATE salesman SET salesmanname='" . $_POST['SalesmanName'] . "',
+		$sql = "UPDATE weberp_salesman SET salesmanname='" . $_POST['SalesmanName'] . "',
 						commissionrate1='" . filter_number_format($_POST['CommissionRate1']) . "',
 						smantel='" . $_POST['SManTel'] . "',
 						smanfax='" . $_POST['SManFax'] . "',
@@ -107,7 +107,7 @@ if (isset($_POST['submit'])) {
 
 	/*Selected group is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new Sales-person form */
 
-		$sql = "INSERT INTO salesman (salesmancode,
+		$sql = "INSERT INTO weberp_salesman (salesmancode,
 						salesmanname,
 						commissionrate1,
 						commissionrate2,
@@ -152,27 +152,27 @@ $BookMark = 'SalespeopleDelete';
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'DebtorsMaster'
 
-	$sql= "SELECT COUNT(*) FROM custbranch WHERE  custbranch.salesman='".$SelectedSalesPerson."'";
+	$sql= "SELECT COUNT(*) FROM weberp_custbranch WHERE  weberp_custbranch.salesman='".$SelectedSalesPerson."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this salesperson because branches are set up referring to them') . ' - ' . _('first alter the branches concerned') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('branches that refer to this salesperson'),'error');
 
 	} else {
-		$sql= "SELECT COUNT(*) FROM salesanalysis WHERE salesanalysis.salesperson='".$SelectedSalesPerson."'";
+		$sql= "SELECT COUNT(*) FROM weberp_salesanalysis WHERE weberp_salesanalysis.salesperson='".$SelectedSalesPerson."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
 			prnMsg(_('Cannot delete this salesperson because sales analysis records refer to them') , '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('sales analysis records that refer to this salesperson'),'error');
 		} else {
-			$sql= "SELECT COUNT(*) FROM www_users WHERE salesman='".$SelectedSalesPerson."'";
+			$sql= "SELECT COUNT(*) FROM weberp_www_users WHERE salesman='".$SelectedSalesPerson."'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			if ($myrow[0]>0) {
 				prnMsg(_('Cannot delete this salesperson because') , '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('user records that refer to this salesperson') . '.' ._('First delete any users that refer to this sales person'),'error');
 			} else {
 
-				$sql="DELETE FROM salesman WHERE salesmancode='". $SelectedSalesPerson."'";
+				$sql="DELETE FROM weberp_salesman WHERE salesmancode='". $SelectedSalesPerson."'";
 				$ErrMsg = _('The salesperson could not be deleted because');
 				$result = DB_query($sql,$ErrMsg);
 
@@ -199,7 +199,7 @@ or deletion of the records*/
 				breakpoint,
 				commissionrate2,
 				current
-			FROM salesman";
+			FROM weberp_salesman";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -278,7 +278,7 @@ if (! isset($_GET['delete'])) {
 					breakpoint,
 					commissionrate2,
 					current
-				FROM salesman
+				FROM weberp_salesman
 				WHERE salesmancode='".$SelectedSalesPerson."'";
 
 		$result = DB_query($sql);

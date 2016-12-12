@@ -18,20 +18,20 @@ if (isset($_POST['UpdateSalesAnalysis'])){
 
 	/* Loop around each customer/branch combo */
 	
-	$sql = "SELECT debtorsmaster.debtorno,
+	$sql = "SELECT weberp_debtorsmaster.debtorno,
 					branchcode,
 					salestype,
 					area,
 					salesman
-			FROM debtorsmaster INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno";
+			FROM weberp_debtorsmaster INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno";
 
 	$ErrMsg = _('Could not retrieve the customer records to be updated because');
 	$result = DB_query($sql,$ErrMsg);
 
 	while ($CustomerRow = DB_fetch_array($result)){
 
-		$SQL = "UPDATE salesanalysis SET area = '" . $CustomerRow['area'] . "',
+		$SQL = "UPDATE weberp_salesanalysis SET area = '" . $CustomerRow['area'] . "',
 										typeabbrev= '" . $CustomerRow['salestype'] . "',
 										salesperson= '" . $CustomerRow['salesman'] . "'
 				WHERE cust='" . $CustomerRow['debtorno'] . "'

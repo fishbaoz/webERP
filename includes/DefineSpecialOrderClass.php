@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: DefineSpecialOrderClass.php 5768 2012-12-20 08:38:22Z daintree $*/
 /* Definition of the SpecialOrder class to hold all the information for a special quote/order and delivery
 */
 

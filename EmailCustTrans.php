@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: EmailCustTrans.php 7245 2015-03-30 21:46:47Z vvs2012 $*/
 
 include('includes/session.inc');
 include('includes/header.inc');
@@ -46,11 +46,11 @@ echo '<input type="hidden" name="InvOrCredit" value="' . $_GET['InvOrCredit'] . 
 echo '<br /><table>';
 
 $SQL = "SELECT email
-		FROM custbranch INNER JOIN debtortrans
-			ON custbranch.debtorno= debtortrans.debtorno
-			AND custbranch.branchcode=debtortrans.branchcode
-		WHERE debtortrans.type='" . $TypeCode . "'
-		AND debtortrans.transno='" .$_GET['FromTransNo'] . "'";
+		FROM weberp_custbranch INNER JOIN weberp_debtortrans
+			ON weberp_custbranch.debtorno= weberp_debtortrans.debtorno
+			AND weberp_custbranch.branchcode=weberp_debtortrans.branchcode
+		WHERE weberp_debtortrans.type='" . $TypeCode . "'
+		AND weberp_debtortrans.transno='" .$_GET['FromTransNo'] . "'";
 
 $ErrMsg = _('There was a problem retrieving the contact details for the customer');
 $ContactResult=DB_query($SQL,$ErrMsg);

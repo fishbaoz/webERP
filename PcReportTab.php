@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: PcReportTab.php 7679 2016-11-23 19:08:09Z rchacon $ */
 /*  */
 
 include ('includes/session.inc');
@@ -42,7 +42,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 			<td><select name="SelectedTabs">';
 
 	$SQL = "SELECT tabcode
-		FROM pctabs
+		FROM weberp_pctabs
 		WHERE ( authorizer='" . $_SESSION['UserID'] .
 			"' OR usercode ='" . $_SESSION['UserID'].
 			"' OR assigner ='" . $_SESSION['UserID'] . "' )
@@ -93,7 +93,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	$SQL_FromDate = FormatDateForSQL($_POST['FromDate']);
 	$SQL_ToDate = FormatDateForSQL($_POST['ToDate']);
 
-	$SQL = "SELECT * FROM pcashdetails
+	$SQL = "SELECT * FROM weberp_pcashdetails
 			WHERE tabcode='".$SelectedTabs."'
 			AND date >='" . $SQL_FromDate . "' AND date <= '" . $SQL_ToDate . "'
 			ORDER BY date, counterindex ASC";
@@ -120,14 +120,14 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 
 	include('includes/PDFTabReportHeader.inc');
 
-	$SqlTabs = "SELECT * FROM pctabs
+	$SqlTabs = "SELECT * FROM weberp_pctabs
 			WHERE tabcode='".$SelectedTabs."'";
 
 	$TabResult = DB_query($SqlTabs, _('No Petty Cash tabs were returned by the SQL because'), _('The SQL that failed was:'));
 
 	$Tabs=DB_fetch_array($TabResult);
 
-	$SqlBalance = "SELECT SUM(amount) FROM pcashdetails
+	$SqlBalance = "SELECT SUM(amount) FROM weberp_pcashdetails
 					WHERE tabcode='".$SelectedTabs."'
 					AND date<'".$SQL_FromDate."'";
 
@@ -188,7 +188,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	while ($myrow=DB_fetch_array($TabDetail)) {
 
 		$sqldes="SELECT description
-					FROM pcexpenses
+					FROM weberp_pcexpenses
 					WHERE codeexpense='". $myrow[3] . "'";
 
 		$ResultDes = DB_query($sqldes);
@@ -210,7 +210,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	}  //end of while loop
 
 	$sqlamount="SELECT sum(amount)
-				FROM pcashdetails
+				FROM weberp_pcashdetails
 				WHERE tabcode='".$SelectedTabs."'
 				AND date<='".$SQL_ToDate."'";
 
@@ -249,7 +249,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	echo '<input type="hidden" name="FromDate" value="' . $_POST['FromDate'] . '" />
 			<input type="hidden" name="ToDate" value="' . $_POST['ToDate'] . '" />';
 
-	$SqlTabs = "SELECT * FROM pctabs
+	$SqlTabs = "SELECT * FROM weberp_pctabs
 			WHERE tabcode='".$SelectedTabs."'";
 
 	$TabResult = DB_query($SqlTabs,
@@ -278,7 +278,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 			</tr>';
 
 	$SqlBalance = "SELECT SUM(amount)
-			FROM pcashdetails
+			FROM weberp_pcashdetails
 			WHERE tabcode='".$SelectedTabs."'
 			AND date<'".$SQL_FromDate."'";
 
@@ -296,7 +296,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 			</tr>';
 
 	$SqlBalanceNotAut = "SELECT SUM(amount)
-			FROM pcashdetails
+			FROM weberp_pcashdetails
 			WHERE tabcode= '".$SelectedTabs."'
 			AND authorized = '0000-00-00'
 			AND date<'".$SQL_FromDate."'";
@@ -318,7 +318,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	Account Code ,   Account Name , Month Actual, Month Budget, Period Actual, Period Budget */
 
 
-	$SQL = "SELECT * FROM pcashdetails
+	$SQL = "SELECT * FROM weberp_pcashdetails
 			WHERE tabcode='".$SelectedTabs."'
 				AND date >='" . $SQL_FromDate . "'
 				AND date <= '" . $SQL_ToDate . "'
@@ -352,7 +352,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 
 
 	$sqldes="SELECT description
-				FROM pcexpenses
+				FROM weberp_pcexpenses
 				WHERE codeexpense='". $myrow['3'] . "'";
 
 	$ResultDes = DB_query($sqldes);
@@ -394,7 +394,7 @@ if ((! isset($_POST['FromDate']) AND ! isset($_POST['ToDate'])) OR isset($_POST[
 	}
 
 	$sqlamount="SELECT sum(amount)
-				FROM pcashdetails
+				FROM weberp_pcashdetails
 				WHERE tabcode='".$SelectedTabs."'
 				AND date<='".$SQL_ToDate."'";
 

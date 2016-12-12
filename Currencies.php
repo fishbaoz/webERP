@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Currencies.php 7644 2016-10-11 15:52:19Z rchacon $*/
 /* This script defines the currencies available. Each customer and supplier must be defined as transacting in one of the currencies defined here. */
 
 include('includes/session.inc');
@@ -45,7 +45,7 @@ if (isset($_POST['submit'])) {
 	$i=1;
 
 	$sql="SELECT count(currabrev)
-			FROM currencies
+			FROM weberp_currencies
 			WHERE currabrev='".$_POST['Abbreviation']."'";
 
 	$result=DB_query($sql);
@@ -100,14 +100,14 @@ if (isset($_POST['submit'])) {
 	if (isset($SelectedCurrency) AND $InputError !=1) {
 		/*Get the previous exchange rate. We will need it later to adjust bank account balances */
 		$SQLOldRate = "SELECT rate
-				FROM currencies
+				FROM weberp_currencies
 				WHERE currabrev = '" . $SelectedCurrency . "'";
 		$ResultOldRate = DB_query($SQLOldRate);
 		$myrow = DB_fetch_row($ResultOldRate);
 		$OldRate = $myrow[0];
 
 		/*SelectedCurrency could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
-		$sql = "UPDATE currencies SET	country='". $_POST['Country']. "',
+		$sql = "UPDATE weberp_currencies SET	country='". $_POST['Country']. "',
 										hundredsname='" . $_POST['HundredsName'] . "',
 										decimalplaces='" . filter_number_format($_POST['DecimalPlaces']) . "',
 										rate='" .filter_number_format($_POST['ExchangeRate']) . "',
@@ -119,7 +119,7 @@ if (isset($_POST['submit'])) {
 	} else if ($InputError !=1) {
 
 	/*Selected currencies is null cos no item selected on first time round so must be adding a record must be submitting new entries in the new payment terms form */
-		$sql = "INSERT INTO currencies (currency,
+		$sql = "INSERT INTO weberp_currencies (currency,
 										currabrev,
 										country,
 										hundredsname,
@@ -160,14 +160,14 @@ if (isset($_POST['submit'])) {
 		/* get all the bank accounts denominated on the selected currency */
 		$SQLBankAccounts = "SELECT 	bankaccountname,
 									accountcode
-							FROM bankaccounts
+							FROM weberp_bankaccounts
 							WHERE currcode = '" . $SelectedCurrency . "'";
 		$resultBankAccounts = DB_query($SQLBankAccounts);
 		while ($myrowBankAccount=DB_fetch_array($resultBankAccounts)){
 
 			/*Get the balance of the bank account concerned */
 			$SQL = "SELECT bfwd+actual AS balance
-					FROM chartdetails
+					FROM weberp_chartdetails
 					WHERE period='" . $PeriodNo . "'
 					AND accountcode='" . $myrowBankAccount['accountcode'] . "'";
 
@@ -184,7 +184,7 @@ if (isset($_POST['submit'])) {
 			$DifferenceToAdjust = $NewBalanceInFucntionalCurrency - $OldBalanceInFunctionalCurrency;
 			if($OldRate != $NewRate){
 
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -202,7 +202,7 @@ if (isset($_POST['submit'])) {
 				$ErrMsg = _('Cannot insert a GL entry for the exchange difference because');
 				$DbgMsg = _('The SQL that failed to insert the exchange difference GL entry was');
 				$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
-				$SQL = "INSERT INTO gltrans (type,
+				$SQL = "INSERT INTO weberp_gltrans (type,
 											typeno,
 											trandate,
 											periodno,
@@ -237,7 +237,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN DebtorsMaster
 
-	$sql= "SELECT COUNT(*) FROM debtorsmaster
+	$sql= "SELECT COUNT(*) FROM weberp_debtorsmaster
 			WHERE currcode = '" . $SelectedCurrency . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
@@ -246,15 +246,15 @@ if (isset($_POST['submit'])) {
 		prnMsg(_('Cannot delete this currency because customer accounts have been created referring to this currency') .
 		 	'<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('customer accounts that refer to this currency'),'warn');
 	} else {
-		$sql= "SELECT COUNT(*) FROM suppliers
-				WHERE suppliers.currcode = '".$SelectedCurrency."'";
+		$sql= "SELECT COUNT(*) FROM weberp_suppliers
+				WHERE weberp_suppliers.currcode = '".$SelectedCurrency."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0] > 0) {
 			prnMsg(_('Cannot delete this currency because supplier accounts have been created referring to this currency')
 			 . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('supplier accounts that refer to this currency'),'warn');
 		} else {
-			$sql= "SELECT COUNT(*) FROM banktrans
+			$sql= "SELECT COUNT(*) FROM weberp_banktrans
 					WHERE currcode = '" . $SelectedCurrency . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
@@ -264,7 +264,7 @@ if (isset($_POST['submit'])) {
 			} elseif ($FunctionalCurrency==$SelectedCurrency){
 				prnMsg(_('Cannot delete this currency because it is the functional currency of the company'),'warn');
 			} else {
-				$sql= "SELECT COUNT(*) FROM bankaccounts
+				$sql= "SELECT COUNT(*) FROM weberp_bankaccounts
 					WHERE currcode = '" . $SelectedCurrency . "'";
 				$result = DB_query($sql);
 				$myrow = DB_fetch_row($result);
@@ -273,7 +273,7 @@ if (isset($_POST['submit'])) {
 					'<br />' . ' ' . _('There are') . ' ' . $myrow[0] . ' ' . _('bank accounts that refer to this currency'),'warn');
 				} else {
 					//only delete if used in neither customer or supplier, comp prefs, bank trans accounts
-					$sql="DELETE FROM currencies WHERE currabrev='" . $SelectedCurrency . "'";
+					$sql="DELETE FROM weberp_currencies WHERE currabrev='" . $SelectedCurrency . "'";
 					$result = DB_query($sql);
 					prnMsg(_('The currency definition record has been deleted'),'success');
 				}
@@ -296,7 +296,7 @@ or deletion of the records*/
 					rate,
 					decimalplaces,
 					webcart
-				FROM currencies";
+				FROM weberp_currencies";
 	$result = DB_query($sql);
 
 	echo '<table class="selection">';
@@ -431,7 +431,7 @@ if (!isset($_GET['delete'])) {
 						decimalplaces,
 						rate,
 						webcart
-				FROM currencies
+				FROM weberp_currencies
 				WHERE currabrev='" . $SelectedCurrency . "'";
 
 		$ErrMsg = _('An error occurred in retrieving the currency information');;

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: FixedAssetLocations.php 6941 2014-10-26 23:18:08Z daintree $ */
 
 include('includes/session.inc');
 $Title = _('Fixed Asset Locations');
@@ -24,7 +24,7 @@ if (isset($_POST['submit']) AND !isset($_POST['delete'])) {
 		$InputError=1;
 	}
 	if ($InputError==0) {
-		$sql="INSERT INTO fixedassetlocations
+		$sql="INSERT INTO weberp_fixedassetlocations
 				VALUES ('".$_POST['LocationID']."',
 						'".$_POST['LocationDescription']."',
 						'".$_POST['ParentLocationID']."')";
@@ -32,7 +32,7 @@ if (isset($_POST['submit']) AND !isset($_POST['delete'])) {
 	}
 }
 if (isset($_GET['SelectedLocation'])) {
-	$sql="SELECT * FROM fixedassetlocations
+	$sql="SELECT * FROM weberp_fixedassetlocations
 		WHERE locationid='".$_GET['SelectedLocation']."'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
@@ -54,7 +54,7 @@ if (isset($_POST['update']) and !isset($_POST['delete'])) {
 			$InputError=1;
 		}
 		if ($InputError==0) {
-			 $sql="UPDATE fixedassetlocations
+			 $sql="UPDATE weberp_fixedassetlocations
 					SET locationdescription='" . $_POST['LocationDescription'] . "',
 						parentlocationid='" . $_POST['ParentLocationID'] . "'
 					WHERE locationid ='" . $_POST['LocationID'] . "'";
@@ -67,14 +67,14 @@ if (isset($_POST['update']) and !isset($_POST['delete'])) {
 	if (isset($_POST['delete']))  {
 		$InputError=0;
 
-		$sql="SELECT COUNT(locationid) FROM fixedassetlocations WHERE parentlocationid='" . $_POST['LocationID']."'";
+		$sql="SELECT COUNT(locationid) FROM weberp_fixedassetlocations WHERE parentlocationid='" . $_POST['LocationID']."'";
 		$result = DB_query($sql);
 		$myrow=DB_fetch_row($result);
 		if ($myrow[0]>0) {
 			prnMsg(_('This location has child locations so cannot be removed'), 'warning');
 			$InputError=1;
 		}
-		$sql="SELECT COUNT(assetid) FROM fixedassets WHERE assetlocation='" . $_POST['LocationID']."'";
+		$sql="SELECT COUNT(assetid) FROM weberp_fixedassets WHERE assetlocation='" . $_POST['LocationID']."'";
 		$result = DB_query($sql);
 		$myrow=DB_fetch_row($result);
 		if ($myrow[0]>0) {
@@ -82,14 +82,14 @@ if (isset($_POST['update']) and !isset($_POST['delete'])) {
 			$InputError=1;
 		}
 		if ($InputError==0) {
-			$sql = "DELETE FROM fixedassetlocations WHERE locationid = '".$_POST['LocationID']."'";
+			$sql = "DELETE FROM weberp_fixedassetlocations WHERE locationid = '".$_POST['LocationID']."'";
 			$result = DB_query($sql);
 			prnMsg(_('The location has been deleted successfully'), 'success');
 		}
 	}
 }
 
-$sql='SELECT * FROM fixedassetlocations';
+$sql='SELECT * FROM weberp_fixedassetlocations';
 $result=DB_query($sql);
 
 if (DB_num_rows($result) > 0) {
@@ -104,7 +104,7 @@ while ($myrow=DB_fetch_array($result)) {
 	echo '<tr>
 			<td>' . $myrow['locationid'] . '</td>
 			<td>' . $myrow['locationdescription'] . '</td>';
-	$ParentSql="SELECT locationdescription FROM fixedassetlocations WHERE locationid='".$myrow['parentlocationid']."'";
+	$ParentSql="SELECT locationdescription FROM weberp_fixedassetlocations WHERE locationid='".$myrow['parentlocationid']."'";
 	$ParentResult=DB_query($ParentSql);
 	$ParentRow=DB_fetch_array($ParentResult);
 	echo '<td>' . $ParentRow['locationdescription'] . '</td>
@@ -135,7 +135,7 @@ echo '<tr>
 		<th style="text-align:left">' . _('Parent Location') . '</th>
 		<td><select name="ParentLocationID">';
 
-$sql="SELECT locationid, locationdescription FROM fixedassetlocations";
+$sql="SELECT locationid, locationdescription FROM weberp_fixedassetlocations";
 $result=DB_query($sql);
 
 echo '<option value=""></option>';

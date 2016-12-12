@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: PurchData.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include ('includes/session.inc');
 
@@ -41,7 +41,7 @@ if (isset($_POST['StockUOM'])) {
 
 /*Deleting a supplier purchasing discount */
 if (isset($_GET['DeleteDiscountID'])){
-	$Result = DB_query("DELETE FROM supplierdiscounts WHERE id='" . intval($_GET['DeleteDiscountID']) . "'");
+	$Result = DB_query("DELETE FROM weberp_supplierdiscounts WHERE id='" . intval($_GET['DeleteDiscountID']) . "'");
 	prnMsg(_('Deleted the supplier discount record'),'success');
 }
 
@@ -89,7 +89,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 		prnMsg (_('The date this purchase price is to take effect from must be entered in the format') . ' ' . $_SESSION['DefaultDateFormat'],'error');
 	}
     if ($InputError == 0 AND isset($_POST['AddRecord'])) {
-        $sql = "INSERT INTO purchdata (supplierno,
+        $sql = "INSERT INTO weberp_purchdata (supplierno,
 										stockid,
 										price,
 										effectivefrom,
@@ -116,7 +116,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
         prnMsg(_('This supplier purchasing data has been added to the database'), 'success');
     }
     if ($InputError == 0 AND isset($_POST['UpdateRecord'])) {
-        $sql = "UPDATE purchdata SET price='" . filter_number_format($_POST['Price']) . "',
+        $sql = "UPDATE weberp_purchdata SET price='" . filter_number_format($_POST['Price']) . "',
 										effectivefrom='" . FormatDateForSQL($_POST['EffectiveFrom']) . "',
 										suppliersuom='" . $_POST['SuppliersUOM'] . "',
 										conversionfactor='" . filter_number_format($_POST['ConversionFactor']) . "',
@@ -125,9 +125,9 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 										leadtime='" . filter_number_format($_POST['LeadTime']) . "',
 										minorderqty='" . filter_number_format($_POST['MinOrderQty']) . "',
 										preferred='" . $_POST['Preferred'] . "'
-							WHERE purchdata.stockid='" . $StockID . "'
-							AND purchdata.supplierno='" . $SupplierID . "'
-							AND purchdata.effectivefrom='" . $_POST['WasEffectiveFrom'] . "'";
+							WHERE weberp_purchdata.stockid='" . $StockID . "'
+							AND weberp_purchdata.supplierno='" . $SupplierID . "'
+							AND weberp_purchdata.effectivefrom='" . $_POST['WasEffectiveFrom'] . "'";
         $ErrMsg = _('The supplier purchasing details could not be updated because');
         $DbgMsg = _('The SQL that failed was');
         $UpdResult = DB_query($sql, $ErrMsg, $DbgMsg);
@@ -151,7 +151,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 				$DiscountInputError = true;
 			}
 			if ($DiscountInputError == false) {
-				$sql = "UPDATE supplierdiscounts SET discountnarrative ='" . $_POST['DiscountNarrative' . $i] . "',
+				$sql = "UPDATE weberp_supplierdiscounts SET discountnarrative ='" . $_POST['DiscountNarrative' . $i] . "',
 													discountamount ='" . filter_number_format($_POST['DiscountAmount' . $i]) . "',
 													discountpercent = '" . filter_number_format($_POST['DiscountPercent' . $i])/100 . "',
 													effectivefrom = '" . FormatDateForSQL($_POST['DiscountEffectiveFrom' . $i]) . "',
@@ -174,7 +174,7 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 			prnMsg(_('Some supplier discount narrative was entered but both the discount amount and the discount percent are zero. One of these must be none zero to create a valid supplier discount record. The supplier discount record was not added.'),'error');
 		} else {
 			/*It looks like a valid new discount entry has been entered - need to insert it into DB */
-			$sql = "INSERT INTO supplierdiscounts ( supplierno,
+			$sql = "INSERT INTO weberp_supplierdiscounts ( supplierno,
 													stockid,
 													discountnarrative,
 													discountamount,
@@ -223,10 +223,10 @@ if ((isset($_POST['AddRecord']) OR isset($_POST['UpdateRecord'])) AND isset($Sup
 }
 
 if (isset($_GET['Delete'])) {
-    $sql = "DELETE FROM purchdata
-	   				WHERE purchdata.supplierno='" . $SupplierID . "'
-	   				AND purchdata.stockid='" . $StockID . "'
-	   				AND purchdata.effectivefrom='" . $EffectiveFrom . "'";
+    $sql = "DELETE FROM weberp_purchdata
+	   				WHERE weberp_purchdata.supplierno='" . $SupplierID . "'
+	   				AND weberp_purchdata.stockid='" . $StockID . "'
+	   				AND weberp_purchdata.effectivefrom='" . $EffectiveFrom . "'";
     $ErrMsg = _('The supplier purchasing details could not be deleted because');
     $DelResult = DB_query($sql, $ErrMsg);
     prnMsg(_('This purchasing data record has been successfully deleted'), 'success');
@@ -236,29 +236,29 @@ if (isset($_GET['Delete'])) {
 
 if ($Edit == false) {
 
-	$ItemResult = DB_query("SELECT description FROM stockmaster WHERE stockid='" . $StockID . "'");
+	$ItemResult = DB_query("SELECT description FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 	$DescriptionRow = DB_fetch_array($ItemResult);
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . ' ' . _('For Stock Code') . ' - ' . $StockID . ' - ' . $DescriptionRow['description'] . '</p><br />';
 
-    $sql = "SELECT purchdata.supplierno,
-				suppliers.suppname,
-				purchdata.price,
-				suppliers.currcode,
-				purchdata.effectivefrom,
-				purchdata.suppliersuom,
-				purchdata.supplierdescription,
-				purchdata.leadtime,
-				purchdata.suppliers_partno,
-				purchdata.minorderqty,
-				purchdata.preferred,
-				purchdata.conversionfactor,
-				currencies.decimalplaces AS currdecimalplaces
-			FROM purchdata INNER JOIN suppliers
-				ON purchdata.supplierno=suppliers.supplierid
-			INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
-			WHERE purchdata.stockid = '" . $StockID . "'
-			ORDER BY purchdata.effectivefrom DESC";
+    $sql = "SELECT weberp_purchdata.supplierno,
+				weberp_suppliers.suppname,
+				weberp_purchdata.price,
+				weberp_suppliers.currcode,
+				weberp_purchdata.effectivefrom,
+				weberp_purchdata.suppliersuom,
+				weberp_purchdata.supplierdescription,
+				weberp_purchdata.leadtime,
+				weberp_purchdata.suppliers_partno,
+				weberp_purchdata.minorderqty,
+				weberp_purchdata.preferred,
+				weberp_purchdata.conversionfactor,
+				weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_purchdata INNER JOIN weberp_suppliers
+				ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+			INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
+			WHERE weberp_purchdata.stockid = '" . $StockID . "'
+			ORDER BY weberp_purchdata.effectivefrom DESC";
     $ErrMsg = _('The supplier purchasing details for the selected part could not be retrieved because');
     $PurchDataResult = DB_query($sql, $ErrMsg);
     if (DB_num_rows($PurchDataResult) == 0 and $StockID != '') {
@@ -349,12 +349,12 @@ if ($Edit == false) {
 if (isset($SupplierID) AND $SupplierID != '' AND !isset($_POST['SearchSupplier'])) {
 	/*NOT EDITING AN EXISTING BUT SUPPLIER selected OR ENTERED*/
 
-    $sql = "SELECT suppliers.suppname,
-					suppliers.currcode,
-					currencies.decimalplaces AS currdecimalplaces
-			FROM suppliers
-			INNER JOIN currencies
-			ON suppliers.currcode=currencies.currabrev
+    $sql = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+			FROM weberp_suppliers
+			INNER JOIN weberp_currencies
+			ON weberp_suppliers.currcode=weberp_currencies.currabrev
 			WHERE supplierid='".$SupplierID."'";
     $ErrMsg = _('The supplier details for the selected supplier could not be retrieved because');
     $DbgMsg = _('The SQL that failed was');
@@ -396,7 +396,7 @@ if (isset($SupplierID) AND $SupplierID != '' AND !isset($_POST['SearchSupplier']
 }
 
 if ($Edit == true) {
-	$ItemResult = DB_query("SELECT description FROM stockmaster WHERE stockid='" . $StockID . "'");
+	$ItemResult = DB_query("SELECT description FROM weberp_stockmaster WHERE stockid='" . $StockID . "'");
 	$DescriptionRow = DB_fetch_array($ItemResult);
 	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . ' ' . _('For Stock Code') . ' - ' . $StockID . ' - ' . $DescriptionRow['description'] . '</p><br />';
 }
@@ -413,24 +413,24 @@ if (isset($_POST['SearchSupplier'])) {
         //insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.currcode,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3
-				FROM suppliers
-				WHERE suppliers.suppname " . LIKE  . " '".$SearchString."'";
+		$SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3
+				FROM weberp_suppliers
+				WHERE weberp_suppliers.suppname " . LIKE  . " '".$SearchString."'";
 
     } elseif (mb_strlen($_POST['SupplierCode']) > 0) {
-        $SQL = "SELECT suppliers.supplierid,
-						suppliers.suppname,
-						suppliers.currcode,
-						suppliers.address1,
-						suppliers.address2,
-						suppliers.address3
-				FROM suppliers
-				WHERE suppliers.supplierid " . LIKE . " '%" . $_POST['SupplierCode'] . "%'";
+        $SQL = "SELECT weberp_suppliers.supplierid,
+						weberp_suppliers.suppname,
+						weberp_suppliers.currcode,
+						weberp_suppliers.address1,
+						weberp_suppliers.address2,
+						weberp_suppliers.address3
+				FROM weberp_suppliers
+				WHERE weberp_suppliers.supplierid " . LIKE . " '%" . $_POST['SupplierCode'] . "%'";
 
     } //one of keywords or SupplierCode was more than a zero length string
     $ErrMsg = _('The suppliers matching the criteria entered could not be retrieved because');
@@ -440,11 +440,11 @@ if (isset($_POST['SearchSupplier'])) {
 
 if (isset($SuppliersResult)) {
 	if (isset($StockID)) {
-        $result = DB_query("SELECT stockmaster.description,
-								stockmaster.units,
-								stockmaster.mbflag
-						FROM stockmaster
-						WHERE stockmaster.stockid='".$StockID."'");
+        $result = DB_query("SELECT weberp_stockmaster.description,
+								weberp_stockmaster.units,
+								weberp_stockmaster.mbflag
+						FROM weberp_stockmaster
+						WHERE weberp_stockmaster.stockid='".$StockID."'");
 		$myrow = DB_fetch_row($result);
 		$StockUOM = $myrow[1];
 		if (DB_num_rows($result) == 1) {
@@ -512,29 +512,29 @@ if (isset($SuppliersResult)) {
 if (!isset($SuppliersResult)) {
 	if ($Edit == true OR isset($_GET['Copy'])) {
 
-		 $sql = "SELECT purchdata.supplierno,
-						suppliers.suppname,
-						purchdata.price,
-						purchdata.effectivefrom,
-						suppliers.currcode,
-						purchdata.suppliersuom,
-						purchdata.supplierdescription,
-						purchdata.leadtime,
-						purchdata.conversionfactor,
-						purchdata.suppliers_partno,
-						purchdata.minorderqty,
-						purchdata.preferred,
-						stockmaster.units,
-						currencies.decimalplaces AS currdecimalplaces
-				FROM purchdata INNER JOIN suppliers
-					ON purchdata.supplierno=suppliers.supplierid
-				INNER JOIN stockmaster
-					ON purchdata.stockid=stockmaster.stockid
-				INNER JOIN currencies
-					ON suppliers.currcode = currencies.currabrev
-				WHERE purchdata.supplierno='" . $SupplierID . "'
-				AND purchdata.stockid='" . $StockID . "'
-				AND purchdata.effectivefrom='" . $EffectiveFrom . "'";
+		 $sql = "SELECT weberp_purchdata.supplierno,
+						weberp_suppliers.suppname,
+						weberp_purchdata.price,
+						weberp_purchdata.effectivefrom,
+						weberp_suppliers.currcode,
+						weberp_purchdata.suppliersuom,
+						weberp_purchdata.supplierdescription,
+						weberp_purchdata.leadtime,
+						weberp_purchdata.conversionfactor,
+						weberp_purchdata.suppliers_partno,
+						weberp_purchdata.minorderqty,
+						weberp_purchdata.preferred,
+						weberp_stockmaster.units,
+						weberp_currencies.decimalplaces AS currdecimalplaces
+				FROM weberp_purchdata INNER JOIN weberp_suppliers
+					ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+				INNER JOIN weberp_stockmaster
+					ON weberp_purchdata.stockid=weberp_stockmaster.stockid
+				INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode = weberp_currencies.currabrev
+				WHERE weberp_purchdata.supplierno='" . $SupplierID . "'
+				AND weberp_purchdata.stockid='" . $StockID . "'
+				AND weberp_purchdata.effectivefrom='" . $EffectiveFrom . "'";
 
 		$ErrMsg = _('The supplier purchasing details for the selected supplier and item could not be retrieved because');
 		$EditResult = DB_query($sql, $ErrMsg);
@@ -686,7 +686,7 @@ if (!isset($SuppliersResult)) {
 						discountamount,
 						effectivefrom,
 						effectiveto
-				FROM supplierdiscounts
+				FROM weberp_supplierdiscounts
 				WHERE supplierno = '" . $SupplierID . "'
 				AND stockid = '" . $StockID . "'";
 

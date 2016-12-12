@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: MailSalesReport.php 6033 2013-06-24 07:36:26Z daintree $*/
 /*Now this is not secure so a malicious user could send multiple emails of the report to the intended receipients
 
 The intention is that this script is called from cron at intervals defined with a command like:

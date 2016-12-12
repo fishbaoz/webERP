@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: DiscountMatrix.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Discount Matrix Maintenance');
@@ -51,7 +51,7 @@ if (isset($_POST['submit'])) {
 
 	if ($InputError !=1) {
 
-		$sql = "INSERT INTO discountmatrix (salestype,
+		$sql = "INSERT INTO weberp_discountmatrix (salestype,
 							discountcategory,
 							quantitybreak,
 							discountrate)
@@ -71,7 +71,7 @@ if (isset($_POST['submit'])) {
 } elseif (isset($_GET['Delete']) and $_GET['Delete']=='yes') {
 /*the link to delete a selected record was clicked instead of the submit button */
 
-	$sql="DELETE FROM discountmatrix
+	$sql="DELETE FROM weberp_discountmatrix
 		WHERE discountcategory='" .$_GET['DiscountCategory'] . "'
 		AND salestype='" . $_GET['SalesType'] . "'
 		AND quantitybreak='" . $_GET['QuantityBreak']."'";
@@ -90,7 +90,7 @@ echo '<table class="selection">';
 
 $sql = "SELECT typeabbrev,
 		sales_type
-		FROM salestypes";
+		FROM weberp_salestypes";
 
 $result = DB_query($sql);
 
@@ -109,7 +109,7 @@ while ($myrow = DB_fetch_array($result)){
 echo '</select></td></tr>';
 
 
-$sql = "SELECT DISTINCT discountcategory FROM stockmaster WHERE discountcategory <>''";
+$sql = "SELECT DISTINCT discountcategory FROM weberp_stockmaster WHERE discountcategory <>''";
 $result = DB_query($sql);
 if (DB_num_rows($result) > 0) {
 	echo '<tr>
@@ -148,8 +148,8 @@ $sql = "SELECT sales_type,
 			discountcategory,
 			quantitybreak,
 			discountrate
-		FROM discountmatrix INNER JOIN salestypes
-			ON discountmatrix.salestype=salestypes.typeabbrev
+		FROM weberp_discountmatrix INNER JOIN weberp_salestypes
+			ON weberp_discountmatrix.salestype=weberp_salestypes.typeabbrev
 		ORDER BY salestype,
 			discountcategory,
 			quantitybreak";

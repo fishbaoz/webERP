@@ -142,36 +142,36 @@ if (isset($_POST['DoIt']) AND ($_POST['PrintOrEmail'] == 'Print' OR $ViewingOnly
 if (isset($SelectedWO) AND $SelectedWO != '' AND $SelectedWO > 0 AND $SelectedWO != 'Preview') {
 	/*retrieve the order details from the database to print */
 	$ErrMsg = _('There was a problem retrieving the Work order header details for Order Number') . ' ' . $SelectedWO . ' ' . _('from the database');
-	$sql = "SELECT workorders.wo,
-							 workorders.loccode,
-							 locations.locationname,
-							 locations.deladd1,
-							 locations.deladd2,
-							 locations.deladd3,
-							 locations.deladd4,
-							 locations.deladd5,
-							 locations.deladd6,
-							 workorders.requiredby,
-							 workorders.startdate,
-							 workorders.closed,
-							 stockmaster.description,
-							 stockmaster.decimalplaces,
-							 stockmaster.units,
-							 stockmaster.controlled,
-							 woitems.stockid,
-							 woitems.qtyreqd,
-							 woitems.qtyrecd,
-							 woitems.comments,
-							 woitems.nextlotsnref
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-						INNER JOIN stockmaster
-						ON woitems.stockid=stockmaster.stockid
-						WHERE woitems.stockid='" . $StockID . "'
-						AND woitems.wo ='" . $SelectedWO . "'";
+	$sql = "SELECT weberp_workorders.wo,
+							 weberp_workorders.loccode,
+							 weberp_locations.locationname,
+							 weberp_locations.deladd1,
+							 weberp_locations.deladd2,
+							 weberp_locations.deladd3,
+							 weberp_locations.deladd4,
+							 weberp_locations.deladd5,
+							 weberp_locations.deladd6,
+							 weberp_workorders.requiredby,
+							 weberp_workorders.startdate,
+							 weberp_workorders.closed,
+							 weberp_stockmaster.description,
+							 weberp_stockmaster.decimalplaces,
+							 weberp_stockmaster.units,
+							 weberp_stockmaster.controlled,
+							 weberp_woitems.stockid,
+							 weberp_woitems.qtyreqd,
+							 weberp_woitems.qtyrecd,
+							 weberp_woitems.comments,
+							 weberp_woitems.nextlotsnref
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						INNER JOIN weberp_stockmaster
+						ON weberp_woitems.stockid=weberp_stockmaster.stockid
+						WHERE weberp_woitems.stockid='" . $StockID . "'
+						AND weberp_woitems.wo ='" . $SelectedWO . "'";
 	$result = DB_query($sql, $ErrMsg);
 	if (DB_num_rows($result) == 0) {
 		/*There is no order header returned */
@@ -196,9 +196,9 @@ if (isset($SelectedWO) AND $SelectedWO != '' AND $SelectedWO > 0 AND $SelectedWO
 		$WOHeader = DB_fetch_array($result);
 		if ($WOHeader['controlled']==1) {
 			$sql = "SELECT serialno
-							FROM woserialnos
-							WHERE woserialnos.stockid='" . $StockID . "'
-							AND woserialnos.wo ='" . $SelectedWO . "'";
+							FROM weberp_woserialnos
+							WHERE weberp_woserialnos.stockid='" . $StockID . "'
+							AND weberp_woserialnos.wo ='" . $SelectedWO . "'";
 			$result = DB_query($sql, $ErrMsg);
 			if (DB_num_rows($result) > 0) {
 				$SerialNoArray=DB_fetch_array($result);
@@ -210,9 +210,9 @@ if (isset($SelectedWO) AND $SelectedWO != '' AND $SelectedWO > 0 AND $SelectedWO
 		} //controlled
 		$PackQty=0;
 		$sql = "SELECT value
-				FROM stockitemproperties
-				INNER JOIN stockcatproperties
-				ON stockcatproperties.stkcatpropid=stockitemproperties.stkcatpropid
+				FROM weberp_stockitemproperties
+				INNER JOIN weberp_stockcatproperties
+				ON weberp_stockcatproperties.stkcatpropid=weberp_stockitemproperties.stkcatpropid
 				WHERE stockid='" . $StockID . "'
 				AND label='PackQty'";
 		$result = DB_query($sql, $ErrMsg);
@@ -262,20 +262,20 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 
 	if ($SelectedWO != 'Preview') { // It is a real order
 		$ErrMsg = _('There was a problem retrieving the line details for order number') . ' ' . $SelectedWO . ' ' . _('from the database');
-		$RequirmentsResult = DB_query("SELECT worequirements.stockid,
-										stockmaster.description,
-										stockmaster.decimalplaces,
+		$RequirmentsResult = DB_query("SELECT weberp_worequirements.stockid,
+										weberp_stockmaster.description,
+										weberp_stockmaster.decimalplaces,
 										autoissue,
 										qtypu,
 										controlled
-									FROM worequirements INNER JOIN stockmaster
-									ON worequirements.stockid=stockmaster.stockid
+									FROM weberp_worequirements INNER JOIN weberp_stockmaster
+									ON weberp_worequirements.stockid=weberp_stockmaster.stockid
 									WHERE wo='" . $SelectedWO . "'
-									AND worequirements.parentstockid='" . $StockID . "'");
+									AND weberp_worequirements.parentstockid='" . $StockID . "'");
 		$IssuedAlreadyResult = DB_query("SELECT stockid,
 											SUM(-qty) AS total
-										FROM stockmoves
-										WHERE stockmoves.type=28
+										FROM weberp_stockmoves
+										WHERE weberp_stockmoves.type=28
 										AND reference='".$SelectedWO."'
 										GROUP BY stockid");
 		while ($IssuedRow = DB_fetch_array($IssuedAlreadyResult)){
@@ -310,7 +310,7 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 							description,
 							decimalplaces,
 							controlled
-					FROM stockmaster WHERE stockid IN ('".$AdditionalStocks."')";
+					FROM weberp_stockmaster WHERE stockid IN ('".$AdditionalStocks."')";
 			$RequirementsResult = DB_query($RequirementsSQL);
 			$AdditionalStocks = array();
 			while($myrow = DB_fetch_array($RequirementsResult)){
@@ -362,19 +362,19 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 
 			/*display already issued and available qty and lots where applicable*/
 
-			$IssuedAlreadyDetail = DB_query("SELECT stockmoves.stockid,
+			$IssuedAlreadyDetail = DB_query("SELECT weberp_stockmoves.stockid,
 													SUM(qty) as qty,
-													stockserialmoves.serialno,
-													sum(stockserialmoves.moveqty) as moveqty,
-													locations.locationname
-													FROM stockmoves LEFT OUTER JOIN stockserialmoves
-													ON stockmoves.stkmoveno= stockserialmoves.stockmoveno
-													INNER JOIN locations
-													ON stockmoves.loccode=locations.loccode
-													WHERE stockmoves.type=28
-													AND stockmoves.stockid = '".$WOLine[$i]['item']."'
+													weberp_stockserialmoves.serialno,
+													sum(weberp_stockserialmoves.moveqty) as moveqty,
+													weberp_locations.locationname
+													FROM weberp_stockmoves LEFT OUTER JOIN weberp_stockserialmoves
+													ON weberp_stockmoves.stkmoveno= weberp_stockserialmoves.stockmoveno
+													INNER JOIN weberp_locations
+													ON weberp_stockmoves.loccode=weberp_locations.loccode
+													WHERE weberp_stockmoves.type=28
+													AND weberp_stockmoves.stockid = '".$WOLine[$i]['item']."'
 													AND reference='".$SelectedWO."'
-													GROUP BY stockserialmoves.serialno");
+													GROUP BY weberp_stockserialmoves.serialno");
 			while ($IssuedRow = DB_fetch_array($IssuedAlreadyDetail)){
 				if ($WOLine[$i]['controlled']) {
 					$CurLot=$IssuedRow['serialno'];
@@ -395,15 +395,15 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 			}
 
 			if ($WOLine[$i]['issued'] <= $WOLine[$i]['qtyreqd']) {
-				$AvailQty = DB_query("SELECT locstock.loccode,
-											locstock.bin,
-											locstock.quantity,
+				$AvailQty = DB_query("SELECT weberp_locstock.loccode,
+											weberp_locstock.bin,
+											weberp_locstock.quantity,
 											serialno,
-											stockserialitems.quantity as qty
-											FROM locstock LEFT OUTER JOIN stockserialitems
-											ON locstock.loccode=stockserialitems.loccode AND locstock.stockid = stockserialitems.stockid
-											WHERE locstock.loccode='".$WOHeader['loccode']."'
-											AND locstock.stockid='".$WOLine[$i]['item']."'");
+											weberp_stockserialitems.quantity as qty
+											FROM weberp_locstock LEFT OUTER JOIN weberp_stockserialitems
+											ON weberp_locstock.loccode=weberp_stockserialitems.loccode AND weberp_locstock.stockid = weberp_stockserialitems.stockid
+											WHERE weberp_locstock.loccode='".$WOHeader['loccode']."'
+											AND weberp_locstock.stockid='".$WOLine[$i]['item']."'");
 				while ($ToIssue = DB_fetch_array($AvailQty)){
 					if ($WOLine[$i]['controlled']) {
 						$CurLot=$ToIssue['serialno'];
@@ -515,20 +515,20 @@ else {
 	include('includes/header.inc');
 
 	if (!isset($LabelItem)) {
-		$sql = "SELECT workorders.wo,
-						stockmaster.description,
-						stockmaster.decimalplaces,
-						stockmaster.units,
-						stockmaster.controlled,
-						woitems.stockid,
-						woitems.qtyreqd,
-						woitems.nextlotsnref
-						FROM workorders INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						INNER JOIN stockmaster
-						ON woitems.stockid=stockmaster.stockid
-						WHERE woitems.stockid='" . $StockID . "'
-                        AND woitems.wo ='" . $SelectedWO . "'";
+		$sql = "SELECT weberp_workorders.wo,
+						weberp_stockmaster.description,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.units,
+						weberp_stockmaster.controlled,
+						weberp_woitems.stockid,
+						weberp_woitems.qtyreqd,
+						weberp_woitems.nextlotsnref
+						FROM weberp_workorders INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						INNER JOIN weberp_stockmaster
+						ON weberp_woitems.stockid=weberp_stockmaster.stockid
+						WHERE weberp_woitems.stockid='" . $StockID . "'
+                        AND weberp_woitems.wo ='" . $SelectedWO . "'";
 
 		$result = DB_query($sql, $ErrMsg);
 		$Labels = DB_fetch_array($result);
@@ -536,9 +536,9 @@ else {
 		$LabelDesc=$Labels['description'];
 		$QtyPerBox=0;
 		$sql = "SELECT value
-				FROM stockitemproperties
-				INNER JOIN stockcatproperties
-				ON stockcatproperties.stkcatpropid=stockitemproperties.stkcatpropid
+				FROM weberp_stockitemproperties
+				INNER JOIN weberp_stockcatproperties
+				ON weberp_stockcatproperties.stkcatpropid=weberp_stockitemproperties.stkcatpropid
 				WHERE stockid='" . $StockID . "'
 				AND label='PackQty'";
 		$result = DB_query($sql, $ErrMsg);
@@ -554,9 +554,9 @@ else {
 		$LeftOverQty=locale_number_format($LeftOverQty, $Labels['decimalplaces']);
 		if ($Labels['controlled']==1) {
 			$sql = "SELECT serialno
-							FROM woserialnos
-							WHERE woserialnos.stockid='" . $StockID . "'
-							AND woserialnos.wo ='" . $SelectedWO . "'";
+							FROM weberp_woserialnos
+							WHERE weberp_woserialnos.stockid='" . $StockID . "'
+							AND weberp_woserialnos.wo ='" . $SelectedWO . "'";
 			$result = DB_query($sql, $ErrMsg);
 			if (DB_num_rows($result) > 0) {
 				$SerialNoArray=DB_fetch_array($result);
@@ -611,15 +611,15 @@ else {
 	if ($_POST['PrintOrEmail'] == 'Email') {
 		$ErrMsg = _('There was a problem retrieving the contact details for the location');
 
-		$SQL = "SELECT workorders.wo,
-						workorders.loccode,
-						locations.email
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						WHERE woitems.stockid='" . $StockID . "'
-						AND woitems.wo ='" . $SelectedWO . "'";
+		$SQL = "SELECT weberp_workorders.wo,
+						weberp_workorders.loccode,
+						weberp_locations.email
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						WHERE weberp_woitems.stockid='" . $StockID . "'
+						AND weberp_woitems.wo ='" . $SelectedWO . "'";
 		$ContactsResult = DB_query($SQL, $ErrMsg);
 		if (DB_num_rows($ContactsResult) > 0) {
 			echo '<tr><td>' . _('Email to') . ':</td><td><input name="EmailTo" value="';
@@ -680,15 +680,15 @@ else {
 			}
 		}
 		echo '</select></td></tr>';
-		$SQL = "SELECT workorders.wo,
-						workorders.loccode,
-						locations.email
-						FROM workorders INNER JOIN locations
-						ON workorders.loccode=locations.loccode
-						INNER JOIN woitems
-						ON workorders.wo=woitems.wo
-						WHERE woitems.stockid='" . $StockID . "'
-						AND woitems.wo ='" . $SelectedWO . "'";
+		$SQL = "SELECT weberp_workorders.wo,
+						weberp_workorders.loccode,
+						weberp_locations.email
+						FROM weberp_workorders INNER JOIN weberp_locations
+						ON weberp_workorders.loccode=weberp_locations.loccode
+						INNER JOIN weberp_woitems
+						ON weberp_workorders.wo=weberp_woitems.wo
+						WHERE weberp_woitems.stockid='" . $StockID . "'
+						AND weberp_woitems.wo ='" . $SelectedWO . "'";
 		$ContactsResult = DB_query($SQL, $ErrMsg);
 		if (DB_num_rows($ContactsResult) > 0) {
 			echo '<tr><td>' . _('Email to') . ':</td><td><input name="EmailTo" value="';

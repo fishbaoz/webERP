@@ -49,7 +49,7 @@ if (!isset($_POST['FromDate'])){
 				</select></td>
 		</tr>';
 
-	$sql = "SELECT locations.loccode, locationname FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+	$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 	$resultStkLocs = DB_query($sql);
 
 	echo '<tr>
@@ -90,46 +90,46 @@ if (!isset($_POST['FromDate'])){
 
 
 if ($_POST['StockLocation']=='All') {
-	$sql= "SELECT stockmoves.type,
-				stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				stockmoves.transno,
-				stockmoves.trandate,
-				stockmoves.qty,
-				stockmoves.reference,
-				stockmoves.narrative,
-				locations.locationname
-			FROM stockmoves
-			LEFT JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			LEFT JOIN locations
-			ON stockmoves.loccode=locations.loccode
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+	$sql= "SELECT weberp_stockmoves.type,
+				weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmoves.transno,
+				weberp_stockmoves.trandate,
+				weberp_stockmoves.qty,
+				weberp_stockmoves.reference,
+				weberp_stockmoves.narrative,
+				weberp_locations.locationname
+			FROM weberp_stockmoves
+			LEFT JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			LEFT JOIN weberp_locations
+			ON weberp_stockmoves.loccode=weberp_locations.loccode
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			WHERE type='" . $_POST['TransType'] . "'
 			AND date_format(trandate, '%Y-%m-%d')>='".FormatDateForSQL($_POST['FromDate'])."'
 			AND date_format(trandate, '%Y-%m-%d')<='".FormatDateForSQL($_POST['ToDate'])."'";
 } else {
-	$sql= "SELECT stockmoves.type,
-				stockmoves.stockid,
-				stockmaster.description,
-				stockmaster.decimalplaces,
-				stockmoves.transno,
-				stockmoves.trandate,
-				stockmoves.qty,
-				stockmoves.reference,
-				stockmoves.narrative,
-				locations.locationname
-			FROM stockmoves
-			LEFT JOIN stockmaster
-			ON stockmoves.stockid=stockmaster.stockid
-			LEFT JOIN locations
-			ON stockmoves.loccode=locations.loccode
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
+	$sql= "SELECT weberp_stockmoves.type,
+				weberp_stockmoves.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.decimalplaces,
+				weberp_stockmoves.transno,
+				weberp_stockmoves.trandate,
+				weberp_stockmoves.qty,
+				weberp_stockmoves.reference,
+				weberp_stockmoves.narrative,
+				weberp_locations.locationname
+			FROM weberp_stockmoves
+			LEFT JOIN weberp_stockmaster
+			ON weberp_stockmoves.stockid=weberp_stockmaster.stockid
+			LEFT JOIN weberp_locations
+			ON weberp_stockmoves.loccode=weberp_locations.loccode
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
 			WHERE type='" . $_POST['TransType'] . "'
 			AND date_format(trandate, '%Y-%m-%d')>='".FormatDateForSQL($_POST['FromDate'])."'
 			AND date_format(trandate, '%Y-%m-%d')<='".FormatDateForSQL($_POST['ToDate'])."'
-			AND stockmoves.loccode='" . $_POST['StockLocation'] . "'";
+			AND weberp_stockmoves.loccode='" . $_POST['StockLocation'] . "'";
 }
 $result=DB_query($sql,'','',false,false);
 

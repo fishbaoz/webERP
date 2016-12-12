@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: api_locations.php 6943 2014-10-27 07:06:42Z daintree $*/
 
 /*List all revisions
 //revision 1.2
@@ -13,7 +13,7 @@
 			$Errors[$i] = IncorrectLocationCodeLength;
 		}
 		$Searchsql = "SELECT count(loccode)
-						FROM locations
+						FROM weberp_locations
 						WHERE loccode='".$LocationCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -26,7 +26,7 @@
 /* Check that the Location Code exists*/
 	function VerifyLocationExists($LocationCode, $i, $Errors, $db) {
 		$Searchsql = "SELECT count(loccode)
-						FROM locations
+						FROM weberp_locations
 						WHERE loccode='".$LocationCode."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_array($SearchResult);
@@ -47,7 +47,7 @@
 /* Check that the tax province id is set up in the weberp database */
 	function VerifyTaxProvinceId($TaxProvinceId , $i, $Errors, $db) {
 		$Searchsql = "SELECT COUNT(taxprovinceid)
-						FROM taxprovinces
+						FROM weberp_taxprovinces
 						WHERE taxprovinceid='".$TaxProvinceId."'";
 		$SearchResult=DB_query($Searchsql);
 		$answer = DB_fetch_row($SearchResult);
@@ -69,7 +69,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT loccode FROM locations";
+		$sql = "SELECT loccode FROM weberp_locations";
 		$result = DB_query($sql);
 		$i=0;
 		while ($myrow=DB_fetch_array($result)) {
@@ -91,7 +91,7 @@
 			$Errors[0]=NoAuthorisation;
 			return $Errors;
 		}
-		$sql = "SELECT * FROM locations WHERE loccode='".$location."'";
+		$sql = "SELECT * FROM weberp_locations WHERE loccode='".$location."'";
 		$result = DB_query($sql);
 		return DB_fetch_array($result);
 	}
@@ -149,7 +149,7 @@
 			$FieldValues.='"'.$value.'", ';
 		}
 		if (sizeof($Errors)==0) {
-			$sql = "INSERT INTO locations (" . mb_substr($FieldNames,0,-2) . ")
+			$sql = "INSERT weberp_locations (" . mb_substr($FieldNames,0,-2) . ")
 						VALUES ('" . mb_substr($FieldValues,0,-2) . "') ";
 
 			$result = DB_Query($sql, $db);
@@ -208,7 +208,7 @@
 		if (isset($Location['contact'])){
 			$Errors=VerifyContactName($Location['contact'], sizeof($Errors), $Errors);
 		}
-		$sql="UPDATE locations SET ";
+		$sql="UPDATE weberp_locations SET ";
 		foreach ($Location as $key => $value) {
 			$sql .= $key."='" . $value."', ";
 		}

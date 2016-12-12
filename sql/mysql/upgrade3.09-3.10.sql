@@ -1,4 +1,4 @@
-CREATE TABLE `custcontacts` (
+CREATE TABLE `weberp_custcontacts` (
   `contid` int(11) NOT NULL auto_increment,
   `debtorno` varchar(10) NOT NULL,
   `contactname` varchar(40) NOT NULL,
@@ -8,9 +8,9 @@ CREATE TABLE `custcontacts` (
   PRIMARY KEY  (`contid`)
 ) ENGINE=InnoDB;
 
-ALTER TABLE suppliers ADD COLUMN `factorcompanyid` int(11) NOT NULL DEFAULT '1';
+ALTER TABLE weberp_suppliers ADD COLUMN `factorcompanyid` int(11) NOT NULL DEFAULT '1';
 
-CREATE TABLE IF NOT EXISTS `factorcompanies` (
+CREATE TABLE weberp_IF NOT EXISTS `factorcompanies` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `coyname` varchar(50) NOT NULL DEFAULT '',
   `address1` varchar(40) NOT NULL DEFAULT '',
@@ -27,27 +27,27 @@ CREATE TABLE IF NOT EXISTS `factorcompanies` (
   UNIQUE KEY `factor_name` (`coyname`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 ;
 
-ALTER TABLE `suppliers` ADD COLUMN `taxref` varchar(20) NOT NULL default '';
+ALTER TABLE `weberp_suppliers` ADD COLUMN `taxref` varchar(20) NOT NULL default '';
 
-CREATE TABLE `tags` (
+CREATE TABLE `weberp_tags` (
 `tagref` tinyint(4) NOT NULL auto_increment,
 `tagdescription` varchar(50) NOT NULL,
 PRIMARY KEY (`tagref`)
 ) ENGINE=InnoDB;
 
-ALTER TABLE `gltrans` ADD COLUMN `tag` tinyint(4) NOT NULL default '0' AFTER `jobref`;
+ALTER TABLE `weberp_gltrans` ADD COLUMN `tag` tinyint(4) NOT NULL default '0' AFTER `jobref`;
 
-ALTER TABLE `custbranch` DROP COLUMN `vtiger_accountid`;
-ALTER TABLE `salesorders` DROP COLUMN `vtiger_accountid`;
-ALTER TABLE `stockmaster` DROP COLUMN `vtiger_productid`;
+ALTER TABLE `weberp_custbranch` DROP COLUMN `vtiger_accountid`;
+ALTER TABLE `weberp_salesorders` DROP COLUMN `vtiger_accountid`;
+ALTER TABLE `weberp_stockmaster` DROP COLUMN `vtiger_productid`;
 DELETE FROM `config` WHERE `confname`='vtiger_integration';
 
-ALTER TABLE `custbranch` ADD `lat` FLOAT( 10, 6 ) NOT NULL AFTER `braddress6` ,
+ALTER TABLE `weberp_custbranch` ADD `lat` FLOAT( 10, 6 ) NOT NULL AFTER `braddress6` ,
 ADD `lng` FLOAT( 10, 6 ) NOT NULL AFTER `lat`;
-ALTER TABLE `suppliers` ADD `lat` FLOAT( 10, 6 ) NOT NULL AFTER `address6` ,
+ALTER TABLE `weberp_suppliers` ADD `lat` FLOAT( 10, 6 ) NOT NULL AFTER `address6` ,
 ADD `lng` FLOAT( 10, 6 ) NOT NULL AFTER `lat`;
 
-CREATE TABLE `geocode_param` (
+CREATE TABLE `weberp_geocode_param` (
  `geocodeid` varchar(4) NOT NULL default '',
  `geocode_key` varchar(200) NOT NULL default '',
  `center_long` varchar(20) NOT NULL default '',
@@ -57,23 +57,23 @@ CREATE TABLE `geocode_param` (
  `map_host` varchar(50) NOT NULL default ''
 ) ENGINE=InnoDB;
 
-INSERT INTO `config` ( `confname` , `confvalue` ) VALUES ('geocode_integration', '0');
+INSERT INTO `weberp_config` ( `confname` , `confvalue` ) VALUES ('geocode_integration', '0');
 
-INSERT INTO `config` ( `confname` , `confvalue` ) VALUES ('DefaultCustomerType', '1');
+INSERT INTO `weberp_config` ( `confname` , `confvalue` ) VALUES ('DefaultCustomerType', '1');
 
-CREATE TABLE `debtortype` (
+CREATE TABLE `weberp_debtortype` (
 `typeid` tinyint(4) NOT NULL auto_increment,
 `typename` varchar(100) NOT NULL,
 PRIMARY KEY (`typeid`)
 ) ENGINE=InnoDB;
 
-INSERT INTO `debtortype` ( `typeid` , `typename` ) VALUES (1, 'Default');
+INSERT INTO `weberp_debtortype` ( `typeid` , `typename` ) VALUES (1, 'Default');
 
-ALTER TABLE `debtorsmaster` ADD `typeid` tinyint(4) NOT NULL default '1';
-ALTER TABLE `debtorsmaster` ADD CONSTRAINT `debtorsmaster_ibfk_5` FOREIGN KEY (`typeid`) REFERENCES `debtortype` (`typeid`);
-ALTER TABLE `purchdata` ADD `effectivefrom` DATE NOT NULL;
+ALTER TABLE `weberp_debtorsmaster` ADD `typeid` tinyint(4) NOT NULL default '1';
+ALTER TABLE `weberp_debtorsmaster` ADD CONSTRAINT `debtorsmaster_ibfk_5` FOREIGN KEY (`typeid`) REFERENCES `debtortype` (`typeid`);
+ALTER TABLE `weberp_purchdata` ADD `effectivefrom` DATE NOT NULL;
 
-CREATE TABLE `debtortypenotes` (
+CREATE TABLE `weberp_debtortypenotes` (
 `noteid` tinyint(4) NOT NULL auto_increment,
 `typeid` tinyint(4) NOT NULL default '0',
 `href` varchar(100) NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE `debtortypenotes` (
 PRIMARY KEY (`noteid`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `custnotes` (
+CREATE TABLE `weberp_custnotes` (
 `noteid` tinyint(4) NOT NULL auto_increment,
 `debtorno` varchar(10) NOT NULL default '0',
 `href` varchar(100) NOT NULL,
@@ -93,9 +93,9 @@ CREATE TABLE `custnotes` (
 PRIMARY KEY (`noteid`)
 ) ENGINE=InnoDB;
 
-INSERT INTO `config` ( `confname` , `confvalue` ) VALUES ('Extended_CustomerInfo', '0');
-INSERT INTO `config` ( `confname` , `confvalue` ) VALUES ('Extended_SupplierInfo', '0');
+INSERT INTO `weberp_config` ( `confname` , `confvalue` ) VALUES ('Extended_CustomerInfo', '0');
+INSERT INTO `weberp_config` ( `confname` , `confvalue` ) VALUES ('Extended_SupplierInfo', '0');
 
-ALTER TABLE salesglpostings MODIFY COLUMN area VARCHAR(3) NOT NULL;
-ALTER TABLE salesanalysis MODIFY COLUMN area VARCHAR(3) NOT NULL;
-ALTER TABLE `debtortrans` CHANGE `trandate` `trandate` DATE NOT NULL DEFAULT '0000-00-00';
+ALTER TABLE weberp_salesglpostings MODIFY COLUMN area VARCHAR(3) NOT NULL;
+ALTER TABLE weberp_salesanalysis MODIFY COLUMN area VARCHAR(3) NOT NULL;
+ALTER TABLE `weberp_debtortrans` CHANGE `trandate` `trandate` DATE NOT NULL DEFAULT '0000-00-00';

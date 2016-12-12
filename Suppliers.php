@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: Suppliers.php 7088 2015-01-20 08:02:37Z exsonqu $ */
 
 include('includes/session.inc');
 $Title = _('Supplier Maintenance');
@@ -321,7 +321,7 @@ if (isset($_POST['submit'])) {
 	ie the page has called itself with some user input */
 
 	//first off validate inputs sensible
-	$sql="SELECT COUNT(supplierid) FROM suppliers WHERE supplierid='".$SupplierID."'";
+	$sql="SELECT COUNT(supplierid) FROM weberp_suppliers WHERE supplierid='".$SupplierID."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 	if ($myrow[0]>0 and isset($_POST['New'])) {
@@ -410,7 +410,7 @@ if (isset($_POST['submit'])) {
 		$longitude = 0;
 		if ($_SESSION['geocode_integration']==1 ) {
 			// Get the lat/long from our geocoding host
-			$sql = "SELECT * FROM geocode_param WHERE 1";
+			$sql = "SELECT * FROM weberp_geocode_param WHERE 1";
 			$ErrMsg = _('An error occurred in retrieving the information');
 			$resultgeo = DB_query($sql, $ErrMsg);
 			$row = DB_fetch_array($resultgeo);
@@ -456,19 +456,19 @@ if (isset($_POST['submit'])) {
 		if (!isset($_POST['New'])) {
 
 			$supptranssql = "SELECT supplierno
-							FROM supptrans
+							FROM weberp_supptrans
 							WHERE supplierno='".$SupplierID ."'";
 			$suppresult = DB_query($supptranssql);
 			$supptrans = DB_num_rows($suppresult);
 
 			$suppcurrssql = "SELECT currcode
-							FROM suppliers
+							FROM weberp_suppliers
 							WHERE supplierid='".$SupplierID ."'";
 			$currresult = DB_query($suppcurrssql);
 			$suppcurr = DB_fetch_row($currresult);
 
 			if ($supptrans == 0) {
-				$sql = "UPDATE suppliers SET suppname='" . $_POST['SuppName'] . "',
+				$sql = "UPDATE weberp_suppliers SET suppname='" . $_POST['SuppName'] . "',
 							address1='" . $_POST['Address1'] . "',
 							address2='" . $_POST['Address2'] . "',
 							address3='" . $_POST['Address3'] . "',
@@ -497,7 +497,7 @@ if (isset($_POST['submit'])) {
 				if ($suppcurr[0] != $_POST['CurrCode']) {
 					prnMsg( _('Cannot change currency code as transactions already exist'), 'info');
 				}
-				$sql = "UPDATE suppliers SET suppname='" . $_POST['SuppName'] . "',
+				$sql = "UPDATE weberp_suppliers SET suppname='" . $_POST['SuppName'] . "',
 							address1='" . $_POST['Address1'] . "',
 							address2='" . $_POST['Address2'] . "',
 							address3='" . $_POST['Address3'] . "',
@@ -535,7 +535,7 @@ if (isset($_POST['submit'])) {
 				/* system assigned, sequential, numeric */
 				$SupplierID = GetNextTransNo(600, $db);
 			}
-			$sql = "INSERT INTO suppliers (supplierid,
+			$sql = "INSERT INTO weberp_suppliers (supplierid,
 										suppname,
 										address1,
 										address2,
@@ -637,7 +637,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'SuppTrans' , PurchOrders, SupplierContacts
 
-	$sql= "SELECT COUNT(*) FROM supptrans WHERE supplierno='" . $SupplierID . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_supptrans WHERE supplierno='" . $SupplierID . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0] > 0) {
@@ -646,7 +646,7 @@ if (isset($_POST['submit'])) {
 		echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('transactions against this supplier');
 
 	} else {
-		$sql= "SELECT COUNT(*) FROM purchorders WHERE supplierno='" . $SupplierID . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_purchorders WHERE supplierno='" . $SupplierID . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0] > 0) {
@@ -654,7 +654,7 @@ if (isset($_POST['submit'])) {
 			prnMsg(_('Cannot delete the supplier record because purchase orders have been created against this supplier'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('orders against this supplier');
 		} else {
-			$sql= "SELECT COUNT(*) FROM suppliercontacts WHERE supplierid='" . $SupplierID . "'";
+			$sql= "SELECT COUNT(*) FROM weberp_suppliercontacts WHERE supplierid='" . $SupplierID . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			if ($myrow[0] > 0) {
@@ -667,7 +667,7 @@ if (isset($_POST['submit'])) {
 
 	}
 	if ($CancelDelete == 0) {
-		$sql="DELETE FROM suppliers WHERE supplierid='" . $SupplierID . "'";
+		$sql="DELETE FROM weberp_suppliers WHERE supplierid='" . $SupplierID . "'";
 		$result = DB_query($sql);
 		prnMsg(_('Supplier record for') . ' ' . $SupplierID . ' ' . _('has been deleted'),'success');
 		unset($SupplierID);
@@ -751,7 +751,7 @@ if (!isset($SupplierID)) {
 		<tr>
 			<td>' . _('Supplier Type') . ':</td>
 			<td><select name="SupplierType">';
-	$result=DB_query("SELECT typeid, typename FROM suppliertype");
+	$result=DB_query("SELECT typeid, typename FROM weberp_suppliertype");
 	while ($myrow = DB_fetch_array($result)) {
 		echo '<option value="' . $myrow['typeid'] . '">' . $myrow['typename'] . '</option>';
 	} //end while loop
@@ -775,7 +775,7 @@ if (!isset($SupplierID)) {
 			<td>' . _('Bank Account No') . ':</td>
 			<td><input type="text" placeholder="'._('Less than 30 characters').'" name="BankAct" size="31" maxlength="30" /></td></tr>';
 
-	$result=DB_query("SELECT terms, termsindicator FROM paymentterms");
+	$result=DB_query("SELECT terms, termsindicator FROM weberp_paymentterms");
 
 	echo '<tr>
 			<td>' . _('Payment Terms') . ':</td>
@@ -787,7 +787,7 @@ if (!isset($SupplierID)) {
 	DB_data_seek($result, 0);
 	echo '</select></td></tr>';
 
-	$result=DB_query("SELECT id, coyname FROM factorcompanies");
+	$result=DB_query("SELECT id, coyname FROM weberp_factorcompanies");
 
 	echo '<tr>
 			<td>' . _('Factor Company') . ':</td>
@@ -807,9 +807,9 @@ if (!isset($SupplierID)) {
 			<td>' . _('Tax Reference') . ':</td>
 			<td><input type="text" name="TaxRef" placehoder="'._('Within 20 characters').'" size="21" maxlength="20" /></td></tr>';
 
-	$result=DB_query("SELECT currency, currabrev FROM currencies");
+	$result=DB_query("SELECT currency, currabrev FROM weberp_currencies");
 	if (!isset($_POST['CurrCode'])) {
-		$CurrResult = DB_query("SELECT currencydefault FROM companies WHERE coycode=1");
+		$CurrResult = DB_query("SELECT currencydefault FROM weberp_companies WHERE coycode=1");
 		$myrow = DB_fetch_row($CurrResult);
 		$_POST['CurrCode'] = $myrow[0];
 	}
@@ -841,7 +841,7 @@ if (!isset($SupplierID)) {
 
 	DB_data_seek($result, 0);
 
-	$sql = "SELECT taxgroupid, taxgroupdescription FROM taxgroups";
+	$sql = "SELECT taxgroupid, taxgroupdescription FROM weberp_taxgroups";
 	$result = DB_query($sql);
 
 	while ($myrow = DB_fetch_array($result)) {
@@ -894,7 +894,7 @@ else {
 				taxgroupid,
 				factorcompanyid,
 				taxref
-			FROM suppliers
+			FROM weberp_suppliers
 			WHERE supplierid = '" . $SupplierID . "'";
 
 		$result = DB_query($sql);
@@ -995,7 +995,7 @@ else {
 		<tr>
 			<td>' . _('Supplier Type') . ':</td>
 			<td><select name="SupplierType">';
-	$result=DB_query("SELECT typeid, typename FROM suppliertype");
+	$result=DB_query("SELECT typeid, typename FROM weberp_suppliertype");
 	while ($myrow = DB_fetch_array($result)) {
 		if ($_POST['SupplierType']==$myrow['typeid']) {
 			echo '<option selected="selected" value="'. $myrow['typeid'] . '">' . $myrow['typename'] . '</option>';
@@ -1022,7 +1022,7 @@ else {
 			<td><input type="text" name="BankAct" size="31" maxlength="30" value="' . $_POST['BankAct'] . '" /></td>
 		</tr>';
 
-	$result=DB_query("SELECT terms, termsindicator FROM paymentterms");
+	$result=DB_query("SELECT terms, termsindicator FROM weberp_paymentterms");
 
 	echo '<tr>
 			<td>' . _('Payment Terms') . ':</td>
@@ -1038,7 +1038,7 @@ else {
 	DB_data_seek($result, 0);
 	echo '</select></td></tr>';
 
-	$result=DB_query("SELECT id, coyname FROM factorcompanies");
+	$result=DB_query("SELECT id, coyname FROM weberp_factorcompanies");
 
 	echo '<tr>
 			<td>' . _('Factor Company') . ':</td>
@@ -1058,7 +1058,7 @@ else {
 			<td><input type="text" name="TaxRef" size="21" maxlength="20" value="' . $_POST['TaxRef'] .'" /></td>
 		</tr>';
 
-	$result=DB_query("SELECT currency, currabrev FROM currencies");
+	$result=DB_query("SELECT currency, currabrev FROM weberp_currencies");
 
 	echo '<tr>
 			<td>' . _('Supplier Currency') . ':</td>
@@ -1095,7 +1095,7 @@ else {
 
 	DB_data_seek($result, 0);
 
-	$sql = "SELECT taxgroupid, taxgroupdescription FROM taxgroups";
+	$sql = "SELECT taxgroupid, taxgroupdescription FROM weberp_taxgroups";
 	$result = DB_query($sql);
 
 	while ($myrow = DB_fetch_array($result)) {

@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: index.php 7314 2015-05-27 05:19:30Z exsonqu $*/
 	ini_set('max_execution_time', "600");
 	session_name('weberp_installation');
 	session_start();
@@ -1279,7 +1279,7 @@ function DBUpdate($db,$DatabaseName,$DBConnectType,$AdminPasswd,$AdminEmail,$Adm
 	//select the database to connect
 	$Result = (!$MysqlExt) ? mysqli_select_db($db,$DatabaseName):mysql_select_db($DatabaseName,$db);
 
-	$sql = "UPDATE www_users
+	$sql = "UPDATE weberp_www_users
 				SET password = '".CryptPass($AdminPasswd)."',
 					email = '".$AdminEmail."',
 				        language = '".$AdminLanguage."'
@@ -1290,7 +1290,7 @@ function DBUpdate($db,$DatabaseName,$DBConnectType,$AdminPasswd,$AdminEmail,$Adm
 			prnMsg(_('Failed to update the email address and password of the administrator and the error is').((!$MysqlExt)?mysqli_error($db):mysql_error($db)),'error');
 	}
 
-	$sql = "UPDATE companies
+	$sql = "UPDATE weberp_companies
 			SET coyname = '". ((!$MysqlExt)?mysqli_real_escape_string($db, $CompanyName):mysql_real_escape_string($CompanyName,$db)) . "'
 			WHERE coycode = 1";
 	$Result = (!$MysqlExt)?mysqli_query($db,$sql):mysql_query($sql,$db);

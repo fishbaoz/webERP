@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: MRPCreateDemands.php 7362 2015-09-30 12:36:52Z tehonu $*/
 // MRPCreateDemands.php - Create mrpdemands based on sales order history
 
 include('includes/session.inc');
@@ -48,25 +48,25 @@ if (isset($_POST['submit'])) {
 
 	$WhereLocation = " ";
 	if ($_POST['Location']!='All') {
-		$WhereLocation = " AND salesorders.fromstkloc ='" . $_POST['Location'] . "' ";
+		$WhereLocation = " AND weberp_salesorders.fromstkloc ='" . $_POST['Location'] . "' ";
 	}
 
-	$sql= "SELECT salesorderdetails.stkcode,
-				  SUM(salesorderdetails.quantity) AS totqty,
-				  SUM(salesorderdetails.qtyinvoiced) AS totqtyinvoiced,
-				  SUM(salesorderdetails.quantity * salesorderdetails.unitprice ) AS totextqty
-			FROM salesorders INNER JOIN salesorderdetails
-				 ON salesorders.orderno = salesorderdetails.orderno
-			INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-			INNER JOIN stockmaster
-				 ON salesorderdetails.stkcode = stockmaster.stockid
+	$sql= "SELECT weberp_salesorderdetails.stkcode,
+				  SUM(weberp_salesorderdetails.quantity) AS totqty,
+				  SUM(weberp_salesorderdetails.qtyinvoiced) AS totqtyinvoiced,
+				  SUM(weberp_salesorderdetails.quantity * weberp_salesorderdetails.unitprice ) AS totextqty
+			FROM weberp_salesorders INNER JOIN weberp_salesorderdetails
+				 ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+			INNER JOIN weberp_stockmaster
+				 ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
 			WHERE orddate >='" . FormatDateForSQL($_POST['FromDate']) ."'
 			AND orddate <='" . FormatDateForSQL($_POST['ToDate']) .  "'
 			" . $WhereLocation . "
-			AND stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
-			AND stockmaster.discontinued = 0
-			AND salesorders.quotation=0
-			GROUP BY salesorderdetails.stkcode";
+			AND weberp_stockmaster.categoryid IN ('". implode("','",$_POST['Categories'])."')
+			AND weberp_stockmaster.discontinued = 0
+			AND weberp_salesorders.quotation=0
+			GROUP BY weberp_salesorderdetails.stkcode";
 	//echo "<br />$sql<br />";
 	$result = DB_query($sql);
 	// To get the quantity per period, get the whole number amount of the total quantity divided
@@ -106,10 +106,10 @@ if (isset($_POST['submit'])) {
 	$datearray[0] = $FormatedDistdate;
 	// Set first date to valid manufacturing date
 	$calendarsql = "SELECT COUNT(*),cal2.calendardate
-					  FROM mrpcalendar
-						LEFT JOIN mrpcalendar as cal2
-						  ON mrpcalendar.daynumber = cal2.daynumber
-					  WHERE mrpcalendar.calendardate = '".$datearray[0]."'
+					  FROM weberp_mrpcalendar
+						LEFT JOIN weberp_mrpcalendar as cal2
+						  ON weberp_mrpcalendar.daynumber = cal2.daynumber
+					  WHERE weberp_mrpcalendar.calendardate = '".$datearray[0]."'
 						AND cal2.manufacturingflag='1'
 						GROUP BY cal2.calendardate";
 	$resultdate = DB_query($calendarsql);
@@ -132,10 +132,10 @@ if (isset($_POST['submit'])) {
 		// for each daynumber, but there could be several non-manufacturing dates for the
 		// same daynumber. MRPCalendar.php maintains the manufacturing calendar.
 		$calendarsql = "SELECT COUNT(*),cal2.calendardate
-						  FROM mrpcalendar
-							LEFT JOIN mrpcalendar as cal2
-							  ON mrpcalendar.daynumber = cal2.daynumber
-						  WHERE mrpcalendar.calendardate = '".$datearray[$i]."'
+						  FROM weberp_mrpcalendar
+							LEFT JOIN weberp_mrpcalendar as cal2
+							  ON weberp_mrpcalendar.daynumber = cal2.daynumber
+						  WHERE weberp_mrpcalendar.calendardate = '".$datearray[$i]."'
 							AND cal2.manufacturingflag='1'
 							GROUP BY cal2.calendardate";
 		$resultdate = DB_query($calendarsql);
@@ -168,7 +168,7 @@ if (isset($_POST['submit'])) {
 
 			$i = 0;
 			foreach ($PeriodQty as $demandqty) {
-					$sql = "INSERT INTO mrpdemands (stockid,
+					$sql = "INSERT INTO weberp_mrpdemands (stockid,
 									mrpdemandtype,
 									quantity,
 									duedate)
@@ -200,7 +200,7 @@ echo '<table class="selection">
 		<td><select name="MRPDemandtype">';
 $sql = "SELECT mrpdemandtype,
 				description
-		FROM mrpdemandtypes";
+		FROM weberp_mrpdemandtypes";
 $result = DB_query($sql);
 while ($myrow = DB_fetch_array($result)) {
 	 echo '<option value="' . $myrow['mrpdemandtype'] . '">' . $myrow['mrpdemandtype'] . ' - ' .$myrow['description'] . '</option>';
@@ -211,7 +211,7 @@ echo '<tr>
 		<td>' . _('Inventory Categories') . ':</td>
 		<td><select autofocus="autofocus" required="required" minlength="1" size="12" name="Categories[]"multiple="multiple">';
 	$SQL = 'SELECT categoryid, categorydescription 
-			FROM stockcategory 
+			FROM weberp_stockcategory 
 			ORDER BY categorydescription';
 	$CatResult = DB_query($SQL);
 	while ($MyRow = DB_fetch_array($CatResult)) {
@@ -229,9 +229,9 @@ echo '<tr><td>' . _('Inventory Location') . ':</td>
 		<td><select name="Location">';
 echo '<option selected="selected" value="All">' . _('All Locations') . '</option>';
 
-$result= DB_query("SELECT locations.loccode,
+$result= DB_query("SELECT weberp_locations.loccode,
 						   locationname
-					FROM locations INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1");
+					FROM weberp_locations INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1");
 while ($myrow=DB_fetch_array($result)){
 	echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
 }

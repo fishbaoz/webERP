@@ -12,13 +12,13 @@ include('includes/SQL_CommonFunctions.inc');
 
 
 /*Get the last period depreciation (depn is transtype =44) was posted for */
-$result = DB_query("SELECT periods.lastdate_in_period,
-							max(fixedassettrans.periodno)
-					FROM fixedassettrans INNER JOIN periods
-					ON fixedassettrans.periodno=periods.periodno
+$result = DB_query("SELECT weberp_periods.lastdate_in_period,
+							max(weberp_fixedassettrans.periodno)
+					FROM weberp_fixedassettrans INNER JOIN weberp_periods
+					ON weberp_fixedassettrans.periodno=weberp_periods.periodno
 					WHERE transtype=44
-					GROUP BY periods.lastdate_in_period
-					ORDER BY periods.lastdate_in_period DESC");
+					GROUP BY weberp_periods.lastdate_in_period
+					ORDER BY weberp_periods.lastdate_in_period DESC");
 
 $LastDepnRun = DB_fetch_row($result);
 
@@ -44,32 +44,32 @@ if (DB_num_rows($result)==0) { //then depn has never been run yet?
 
 
 /* Get list of assets for journal */
-$sql="SELECT fixedassets.assetid,
-			fixedassets.description,
-			fixedassets.depntype,
-			fixedassets.depnrate,
-			fixedassets.datepurchased,
-			fixedassetcategories.accumdepnact,
-			fixedassetcategories.depnact,
-			fixedassetcategories.categorydescription,
-			SUM(CASE WHEN fixedassettrans.fixedassettranstype='cost' THEN fixedassettrans.amount ELSE 0 END) AS costtotal,
-			SUM(CASE WHEN fixedassettrans.fixedassettranstype='depn' THEN fixedassettrans.amount ELSE 0 END) AS depnbfwd
-		FROM fixedassets
-		INNER JOIN fixedassetcategories
-			ON fixedassets.assetcategoryid=fixedassetcategories.categoryid
-		INNER JOIN fixedassettrans
-			ON fixedassets.assetid=fixedassettrans.assetid
-		WHERE fixedassettrans.transdate<='" . FormatDateForSQL($_POST['ProcessDate']) . "'
-			AND fixedassets.datepurchased<='" . FormatDateForSQL($_POST['ProcessDate']) . "'
-			AND fixedassets.disposaldate = '0000-00-00'
-		GROUP BY fixedassets.assetid,
-			fixedassets.description,
-			fixedassets.depntype,
-			fixedassets.depnrate,
-			fixedassets.datepurchased,
-			fixedassetcategories.accumdepnact,
-			fixedassetcategories.depnact,
-			fixedassetcategories.categorydescription
+$sql="SELECT weberp_fixedassets.assetid,
+			weberp_fixedassets.description,
+			weberp_fixedassets.depntype,
+			weberp_fixedassets.depnrate,
+			weberp_fixedassets.datepurchased,
+			weberp_fixedassetcategories.accumdepnact,
+			weberp_fixedassetcategories.depnact,
+			weberp_fixedassetcategories.categorydescription,
+			SUM(CASE WHEN weberp_fixedassettrans.fixedassettranstype='cost' THEN weberp_fixedassettrans.amount ELSE 0 END) AS costtotal,
+			SUM(CASE WHEN weberp_fixedassettrans.fixedassettranstype='depn' THEN weberp_fixedassettrans.amount ELSE 0 END) AS depnbfwd
+		FROM weberp_fixedassets
+		INNER JOIN weberp_fixedassetcategories
+			ON weberp_fixedassets.assetcategoryid=weberp_fixedassetcategories.categoryid
+		INNER JOIN weberp_fixedassettrans
+			ON weberp_fixedassets.assetid=weberp_fixedassettrans.assetid
+		WHERE weberp_fixedassettrans.transdate<='" . FormatDateForSQL($_POST['ProcessDate']) . "'
+			AND weberp_fixedassets.datepurchased<='" . FormatDateForSQL($_POST['ProcessDate']) . "'
+			AND weberp_fixedassets.disposaldate = '0000-00-00'
+		GROUP BY weberp_fixedassets.assetid,
+			weberp_fixedassets.description,
+			weberp_fixedassets.depntype,
+			weberp_fixedassets.depnrate,
+			weberp_fixedassets.datepurchased,
+			weberp_fixedassetcategories.accumdepnact,
+			weberp_fixedassetcategories.depnact,
+			weberp_fixedassetcategories.categorydescription
 		ORDER BY assetcategoryid, assetid";
 
 $AssetsResult=DB_query($sql);
@@ -180,7 +180,7 @@ while ($AssetRow=DB_fetch_array($AssetsResult)) {
 		AND $InputError==false){
 
 		//debit depreciation expense
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -199,7 +199,7 @@ while ($AssetRow=DB_fetch_array($AssetsResult)) {
 		$DbgMsg = _('The SQL that failed to insert the GL Trans record was');
 		$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		$SQL = "INSERT INTO gltrans (type,
+		$SQL = "INSERT INTO weberp_gltrans (type,
 									typeno,
 									trandate,
 									periodno,
@@ -215,8 +215,8 @@ while ($AssetRow=DB_fetch_array($AssetsResult)) {
 								'" . -$NewDepreciation ."')";
 		$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		//insert the fixedassettrans record
-		$SQL = "INSERT INTO fixedassettrans (assetid,
+		//insert the weberp_fixedassettrans record
+		$SQL = "INSERT INTO weberp_fixedassettrans (assetid,
 											transtype,
 											transno,
 											transdate,
@@ -236,8 +236,8 @@ while ($AssetRow=DB_fetch_array($AssetsResult)) {
 		$DbgMsg = _('The SQL that failed to insert the fixed asset transaction record was');
 		$result = DB_query($SQL,$ErrMsg,$DbgMsg,true);
 
-		/*now update the accum depn in fixedassets */
-		$SQL = "UPDATE fixedassets SET accumdepn = accumdepn + " . $NewDepreciation  . "
+		/*now update the accum depn in weberp_fixedassets */
+		$SQL = "UPDATE weberp_fixedassets SET accumdepn = accumdepn + " . $NewDepreciation  . "
 				WHERE assetid = '" . $AssetRow['assetid'] . "'";
 		$ErrMsg = _('CRITICAL ERROR! NOTE DOWN THIS ERROR AND SEEK ASSISTANCE. The fixed asset accumulated depreciation could not be updated:');
 		$DbgMsg = _('The following SQL was used to attempt the update the accumulated depreciation of the asset was:');

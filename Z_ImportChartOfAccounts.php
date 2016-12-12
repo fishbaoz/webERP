@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_ImportChartOfAccounts.php 7125 2015-02-05 23:00:41Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Import Chart Of Accounts');
@@ -73,7 +73,7 @@ if (isset($_FILES['ChartFile']) and $_FILES['ChartFile']['name']) { //start file
 		}
 
 		//Then check that the account group actually exists
-		$sql = "SELECT COUNT(group_) FROM chartmaster WHERE group_='" . $myrow[2] . "'";
+		$sql = "SELECT COUNT(group_) FROM weberp_chartmaster WHERE group_='" . $myrow[2] . "'";
 		$result = DB_query($sql);
 		$testrow = DB_fetch_row($result);
 		if ($testrow[0] == 0) {
@@ -84,7 +84,7 @@ if (isset($_FILES['ChartFile']) and $_FILES['ChartFile']['name']) { //start file
 		if ($InputError !=1){
 
 			//Insert the chart record
-			$sql = "INSERT INTO chartmaster (accountcode,
+			$sql = "INSERT INTO weberp_chartmaster (accountcode,
 											accountname,
 											group_
 										) VALUES (
@@ -112,7 +112,7 @@ if (isset($_FILES['ChartFile']) and $_FILES['ChartFile']['name']) { //start file
 	}
 
 	fclose($FileHandle);
-	//Now create the chartdetails records as necessary for the new chartsmaster records
+	//Now create the weberp_chartdetails records as necessary for the new chartsmaster records
 	include('includes/GLPostings.inc');
 
 } else { //show file upload form

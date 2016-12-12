@@ -1,6 +1,6 @@
 <?php
 
-/*$Id$ */
+/*$Id: OutstandingGRNs.php 7157 2015-02-17 22:27:35Z agaluski $ */
 
 include('includes/session.inc');
 
@@ -12,31 +12,31 @@ if (isset($_POST['FromCriteria'])
 /*Now figure out the data to report for the criteria under review */
 
 	$SQL = "SELECT grnno,
-					purchorderdetails.orderno,
-					grns.supplierid,
-					suppliers.suppname,
-					grns.itemcode,
-					grns.itemdescription,
+					weberp_purchorderdetails.orderno,
+					weberp_grns.supplierid,
+					weberp_suppliers.suppname,
+					weberp_grns.itemcode,
+					weberp_grns.itemdescription,
 					qtyrecd,
 					quantityinv,
-					grns.stdcostunit,
+					weberp_grns.stdcostunit,
 					actprice,
 					unitprice,
-					suppliers.currcode,
-					currencies.rate,
-					currencies.decimalplaces as currdecimalplaces,
-					stockmaster.decimalplaces as itemdecimalplaces
-				FROM grns INNER JOIN purchorderdetails
-				ON grns.podetailitem = purchorderdetails.podetailitem
-				INNER JOIN suppliers
-				ON grns.supplierid=suppliers.supplierid
-				INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
-				LEFT JOIN stockmaster
-				ON grns.itemcode=stockmaster.stockid
+					weberp_suppliers.currcode,
+					weberp_currencies.rate,
+					weberp_currencies.decimalplaces as currdecimalplaces,
+					weberp_stockmaster.decimalplaces as itemdecimalplaces
+				FROM weberp_grns INNER JOIN weberp_purchorderdetails
+				ON weberp_grns.podetailitem = weberp_purchorderdetails.podetailitem
+				INNER JOIN weberp_suppliers
+				ON weberp_grns.supplierid=weberp_suppliers.supplierid
+				INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
+				LEFT JOIN weberp_stockmaster
+				ON weberp_grns.itemcode=weberp_stockmaster.stockid
 				WHERE qtyrecd-quantityinv>0
-				AND grns.supplierid >='" . $_POST['FromCriteria'] . "'
-				AND grns.supplierid <='" . $_POST['ToCriteria'] . "'
+				AND weberp_grns.supplierid >='" . $_POST['FromCriteria'] . "'
+				AND weberp_grns.supplierid <='" . $_POST['ToCriteria'] . "'
 				ORDER BY supplierid,
 					grnno";
 

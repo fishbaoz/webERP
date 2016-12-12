@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockSerialItems.php 6942 2014-10-27 02:48:29Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Stock Of Controlled Items');
@@ -30,7 +30,7 @@ $result = DB_query("SELECT description,
 							serialised,
 							controlled,
 							perishable
-						FROM stockmaster
+						FROM weberp_stockmaster
 						WHERE stockid='".$StockID."'",
 						_('Could not retrieve the requested item because'));
 
@@ -51,9 +51,9 @@ if ($myrow['mbflag']=='K' OR $myrow['mbflag']=='A' OR $myrow['mbflag']=='D'){
 }
 
 $result = DB_query("SELECT locationname
-						FROM locations
-						INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-						WHERE locations.loccode='" . $_GET['Location'] . "'",
+						FROM weberp_locations
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_locations.loccode='" . $_GET['Location'] . "'",
 						_('Could not retrieve the stock location of the item because'),
 						_('The SQL used to lookup the location was'));
 
@@ -62,9 +62,9 @@ $myrow = DB_fetch_row($result);
 $sql = "SELECT serialno,
 				quantity,
 				expirationdate
-			FROM stockserialitems
-			INNER JOIN locationusers ON locationusers.loccode=stockserialitems.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-			WHERE stockserialitems.loccode='" . $_GET['Location'] . "'
+			FROM weberp_stockserialitems
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockserialitems.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_stockserialitems.loccode='" . $_GET['Location'] . "'
 			AND stockid = '" . $StockID . "'
 			AND quantity <>0";
 

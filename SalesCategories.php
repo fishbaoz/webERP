@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: SalesCategories.php 7494 2016-04-25 09:53:53Z daintree $ */
 
 include('includes/session.inc');
 
@@ -108,7 +108,7 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 		would not run in this case cos submit is false of course  see the
 		Delete code below*/
 
-		$sql = "UPDATE salescat SET salescatname = '" . $_POST['SalesCatName'] . "',
+		$sql = "UPDATE weberp_salescat SET salescatname = '" . $_POST['SalesCatName'] . "',
 									active  = '" . $_POST['Active'] . "'
 				WHERE salescatid = '" .$SelectedCategory . "'";
 		$msg = _('The Sales category record has been updated');
@@ -116,7 +116,7 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 
 	/*Selected category is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new stock category form */
 
-		$sql = "INSERT INTO salescat (salescatname,
+		$sql = "INSERT INTO weberp_salescat (salescatname,
 									   parentcatid,
 									   active)
 						   VALUES (	'" . $_POST['SalesCatName'] . "',
@@ -138,22 +138,22 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 } elseif (isset($_GET['Delete']) AND isset($EditName)) {
 //the link to Delete a selected record was clicked instead of the submit button
 
-// PREVENT DELETES IF DEPENDENT RECORDS IN 'salescatprod'
+// PREVENT DELETES IF DEPENDENT RECORDS IN 'weberp_salescatprod'
 
-	$sql= "SELECT COUNT(*) FROM salescatprod WHERE salescatid='".$SelectedCategory . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_salescatprod WHERE salescatid='".$SelectedCategory . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this sales category because stock items have been added to this category') . '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('items under to this category'),'warn');
 
 	} else {
-		$sql = "SELECT COUNT(*) FROM salescat WHERE parentcatid='".$SelectedCategory."'";
+		$sql = "SELECT COUNT(*) FROM weberp_salescat WHERE parentcatid='".$SelectedCategory."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
 		prnMsg(_('Cannot delete this sales category because sub categories have been added to this category') . '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('sub categories'),'warn');
 		} else {
-			$sql="DELETE FROM salescat WHERE salescatid='".$SelectedCategory."'";
+			$sql="DELETE FROM weberp_salescat WHERE salescatid='".$SelectedCategory."'";
 			$result = DB_query($sql);
 			prnMsg(_('The sales category') . ' ' . $SelectedCategory . ' ' . _('has been deleted') .
 				' !','success');
@@ -175,7 +175,7 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 	unset($_GET['Delete']);
 	unset($EditName);
 } elseif( isset($_POST['submit']) AND isset($_POST['AddStockID']) AND $_POST['Brand']!='') {
-	$sql = "INSERT INTO salescatprod (stockid,
+	$sql = "INSERT INTO weberp_salescatprod (stockid,
 										salescatid,
 										manufacturers_id) 
 							VALUES ('". $_POST['AddStockID']."',
@@ -185,7 +185,7 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 	prnMsg(_('Item') . ' ' . $_POST['AddStockID'] . ' ' . _('has been added'),'success');
 	unset($_POST['AddStockID']);
 } elseif( isset($_GET['DelStockID']) ) {
-	$sql = "DELETE FROM salescatprod WHERE
+	$sql = "DELETE FROM weberp_salescatprod WHERE
 				stockid='". $_GET['DelStockID']."' 
 				AND salescatid".(isset($ParentCategory)?('='.$ParentCategory):(' IS NULL'));
 	$result = DB_query($sql);
@@ -193,9 +193,9 @@ if (isset($_POST['submit'])  AND isset($EditName) ) { // Creating or updating a 
 		' !','success');
 	unset($_GET['DelStockID']);
 } elseif ( isset($_GET['AddFeature'])){
-	$result = DB_query("UPDATE salescatprod SET featured=1 WHERE stockid='" . $_GET['StockID'] . "'");
+	$result = DB_query("UPDATE weberp_salescatprod SET featured=1 WHERE stockid='" . $_GET['StockID'] . "'");
 } elseif (isset($_GET['RemoveFeature'])){
-	$result = DB_query("UPDATE salescatprod SET featured=0 WHERE stockid='" . $_GET['StockID'] . "'");
+	$result = DB_query("UPDATE weberp_salescatprod SET featured=0 WHERE stockid='" . $_GET['StockID'] . "'");
 }
 
 // ----------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ $LastParentName = '';
 for($Busy = (isset($TmpParentID) AND ($TmpParentID != 0));
 	$Busy == true;
 	$Busy = (isset($TmpParentID) AND ($TmpParentID != 0)) ) {
-	$sql = "SELECT parentcatid, salescatname FROM salescat WHERE salescatid='".$TmpParentID."'";
+	$sql = "SELECT parentcatid, salescatname FROM weberp_salescat WHERE salescatid='".$TmpParentID."'";
 	$result = DB_query($sql);
 	if( $result ) {
 		if (DB_num_rows($result) > 0) {
@@ -256,7 +256,7 @@ or deletion of the records*/
 $sql = "SELECT salescatid,
 				salescatname,
 				active
-			FROM salescat
+			FROM weberp_salescat
 			WHERE parentcatid". (isset($ParentCategory)?('='.$ParentCategory):' =0') . "
 			ORDER BY salescatname";
 $result = DB_query($sql);
@@ -347,7 +347,7 @@ if (isset($SelectedCategory)) {
 				parentcatid, 
 				salescatname,
 				active
-			FROM salescat
+			FROM weberp_salescat
 			WHERE salescatid='". $SelectedCategory."'";
 
 	$result = DB_query($sql);
@@ -419,11 +419,11 @@ echo '</table>
 // ----------------------------------------------------------------------------------------
 // Always display Stock Select screen
 
-// $sql = "SELECT stockid, description FROM stockmaster ORDER BY stockid";
+// $sql = "SELECT stockid, description FROM weberp_stockmaster ORDER BY stockid";
 /*
-$sql = "SELECT sm.stockid, sm.description FROM stockmaster as sm
+$sql = "SELECT sm.stockid, sm.description FROM weberp_stockmaster as sm
 	WHERE NOT EXISTS
-		( SELECT scp.stockid FROM salescatprod as scp
+		( SELECT scp.stockid FROM weberp_salescatprod as scp
 			WHERE
 				scp.salescatid". (isset($ParentCategory)?('='.$ParentCategory):' IS NULL') ."
 			AND
@@ -435,7 +435,7 @@ $sql = "SELECT sm.stockid, sm.description FROM stockmaster as sm
 $StockIDs = array();
 $sql = "SELECT stockid,
 				manufacturers_id
-		FROM salescatprod
+		FROM weberp_salescatprod
 		WHERE salescatid". (isset($ParentCategory)?('='.$ParentCategory):' is NULL') . "
 		ORDER BY stockid";
 $result = DB_query($sql);
@@ -449,8 +449,8 @@ if($result AND DB_num_rows($result)) {
 // This query will return the stock that is available
 $sql = "SELECT stockid, 
 				description 
-		FROM stockmaster INNER JOIN stockcategory 
-		ON stockmaster.categoryid=stockcategory.categoryid 
+		FROM weberp_stockmaster INNER JOIN weberp_stockcategory 
+		ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid 
 		WHERE discontinued = 0
 		AND mbflag<>'G'
 		AND stocktype<>'M'
@@ -491,7 +491,7 @@ if($result AND DB_num_rows($result)) {
 			<td>' . _('Select Manufacturer/Brand') . ':</td>
 			<td><select name="Brand">
 			 <option value="">' . _('Select Brand') . '</option>';
-	$BrandResult = DB_query("SELECT manufacturers_id, manufacturers_name FROM manufacturers"); 
+	$BrandResult = DB_query("SELECT manufacturers_id, manufacturers_name FROM weberp_manufacturers"); 
 	while( $myrow = DB_fetch_array($BrandResult) ) {
 		echo '<option value="'.$myrow['manufacturers_id'].'">' .  $myrow['manufacturers_name'] . '</option>';
 	}
@@ -524,17 +524,17 @@ if (isset($ParentCategory)){
 } else {
 	$ShowSalesCategory = ' IS NULL';
 } 
-$sql = "SELECT salescatprod.stockid,
-				salescatprod.featured,
-				stockmaster.description,
+$sql = "SELECT weberp_salescatprod.stockid,
+				weberp_salescatprod.featured,
+				weberp_stockmaster.description,
 				manufacturers_name 
-		FROM salescatprod 
-		INNER JOIN stockmaster 
-			ON salescatprod.stockid=stockmaster.stockid
-		INNER JOIN manufacturers 
-			ON salescatprod.manufacturers_id=manufacturers.manufacturers_id
-		WHERE salescatprod.salescatid". $ShowSalesCategory . "
-		ORDER BY salescatprod.stockid";
+		FROM weberp_salescatprod 
+		INNER JOIN weberp_stockmaster 
+			ON weberp_salescatprod.stockid=weberp_stockmaster.stockid
+		INNER JOIN weberp_manufacturers 
+			ON weberp_salescatprod.manufacturers_id=weberp_manufacturers.manufacturers_id
+		WHERE weberp_salescatprod.salescatid". $ShowSalesCategory . "
+		ORDER BY weberp_salescatprod.stockid";
 
 $result = DB_query($sql);
 

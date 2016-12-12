@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectSupplier.php 7665 2016-11-08 15:51:11Z rchacon $*/
 /* Selects a supplier. A supplier is required to be selected before any AP transactions and before any maintenance or inquiry of the supplier */
 
 include('includes/session.inc');
@@ -18,16 +18,16 @@ if (isset($_GET['SupplierID'])) {
 }
 // only get geocode information if integration is on, and supplier has been selected
 if ($_SESSION['geocode_integration'] == 1 AND isset($_SESSION['SupplierID'])) {
-	$sql = "SELECT * FROM geocode_param WHERE 1";
+	$sql = "SELECT * FROM weberp_geocode_param WHERE 1";
 	$ErrMsg = _('An error occurred in retrieving the information');;
 	$result = DB_query($sql, $ErrMsg);
 	$myrow = DB_fetch_array($result);
-	$sql = "SELECT suppliers.supplierid,
-				suppliers.lat,
-				suppliers.lng
-			FROM suppliers
-			WHERE suppliers.supplierid = '" . $_SESSION['SupplierID'] . "'
-			ORDER BY suppliers.supplierid";
+	$sql = "SELECT weberp_suppliers.supplierid,
+				weberp_suppliers.lat,
+				weberp_suppliers.lng
+			FROM weberp_suppliers
+			WHERE weberp_suppliers.supplierid = '" . $_SESSION['SupplierID'] . "'
+			ORDER BY weberp_suppliers.supplierid";
 	$ErrMsg = _('An error occurred in retrieving the information');
 	$result2 = DB_query($sql, $ErrMsg);
 	$myrow2 = DB_fetch_array($result2);
@@ -96,7 +96,7 @@ if (isset($_POST['Search'])
 					telephone,
 					email,
 					url
-				FROM suppliers
+				FROM weberp_suppliers
 				ORDER BY suppname";
 	} else {
 		if (mb_strlen($_POST['Keywords']) > 0) {
@@ -113,7 +113,7 @@ if (isset($_POST['Search'])
 							telephone,
 							email,
 							url
-						FROM suppliers
+						FROM weberp_suppliers
 						WHERE suppname " . LIKE . " '" . $SearchString . "'
 						ORDER BY suppname";
 		} elseif (mb_strlen($_POST['SupplierCode']) > 0) {
@@ -128,7 +128,7 @@ if (isset($_POST['Search'])
 							telephone,
 							email,
 							url
-						FROM suppliers
+						FROM weberp_suppliers
 						WHERE supplierid " . LIKE . " '%" . $_POST['SupplierCode'] . "%'
 						ORDER BY supplierid";
 		}
@@ -150,9 +150,9 @@ if (isset($_POST['Search'])
 
 if (isset($_SESSION['SupplierID'])) {
 	$SupplierName = '';
-	$SQL = "SELECT suppliers.suppname
-			FROM suppliers
-			WHERE suppliers.supplierid ='" . $_SESSION['SupplierID'] . "'";
+	$SQL = "SELECT weberp_suppliers.suppname
+			FROM weberp_suppliers
+			WHERE weberp_suppliers.supplierid ='" . $_SESSION['SupplierID'] . "'";
 	$SupplierNameResult = DB_query($SQL);
 	if (DB_num_rows($SupplierNameResult) == 1) {
 		$myrow = DB_fetch_row($SupplierNameResult);
@@ -369,19 +369,19 @@ if (isset($_SESSION['SupplierID']) and $_SESSION['SupplierID'] != '') {
 	// Extended Info only if selected in Configuration
 	if ($_SESSION['Extended_SupplierInfo'] == 1) {
 		if ($_SESSION['SupplierID'] != '') {
-			$sql = "SELECT suppliers.suppname,
-							suppliers.lastpaid,
-							suppliers.lastpaiddate,
+			$sql = "SELECT weberp_suppliers.suppname,
+							weberp_suppliers.lastpaid,
+							weberp_suppliers.lastpaiddate,
 							suppliersince,
-							currencies.decimalplaces AS currdecimalplaces
-					FROM suppliers INNER JOIN currencies
-					ON suppliers.currcode=currencies.currabrev
-					WHERE suppliers.supplierid ='" . $_SESSION['SupplierID'] . "'";
+							weberp_currencies.decimalplaces AS currdecimalplaces
+					FROM weberp_suppliers INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode=weberp_currencies.currabrev
+					WHERE weberp_suppliers.supplierid ='" . $_SESSION['SupplierID'] . "'";
 			$ErrMsg = _('An error occurred in retrieving the information');
 			$DataResult = DB_query($sql, $ErrMsg);
 			$myrow = DB_fetch_array($DataResult);
 			// Select some more data about the supplier
-			$SQL = "SELECT SUM(ovamount) AS total FROM supptrans WHERE supplierno = '" . $_SESSION['SupplierID'] . "' AND (type = '20' OR type='21')";
+			$SQL = "SELECT SUM(ovamount) AS total FROM weberp_supptrans WHERE supplierno = '" . $_SESSION['SupplierID'] . "' AND (type = '20' OR type='21')";
 			$Total1Result = DB_query($SQL);
 			$row = DB_fetch_array($Total1Result);
 			echo '<br />';

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: StockQuantityByDate.php 6941 2014-10-26 23:18:08Z daintree $ */
 
 include('includes/session.inc');
 $Title = _('Stock On Hand By Date');
@@ -15,7 +15,7 @@ echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-$sql = "SELECT categoryid, categorydescription FROM stockcategory";
+$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
 $resultStkLocs = DB_query($sql);
 
 echo '<table class="selection">
@@ -37,8 +37,8 @@ while ($myrow=DB_fetch_array($resultStkLocs)){
 }
 echo '</select></td>';
 
-$sql = "SELECT locations.loccode, locationname FROM locations
-			INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1";
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 $resultStkLocs = DB_query($sql);
 
 echo '<td>' . _('For Stock Location') . ':</td>
@@ -83,13 +83,13 @@ if(isset($_POST['ShowStatus']) AND Is_Date($_POST['OnHandDate'])) {
                  $sql = "SELECT stockid,
                                  description,
                                  decimalplaces
-                         FROM stockmaster
+                         FROM weberp_stockmaster
                          WHERE (mbflag='M' OR mbflag='B')";
          } else {
                  $sql = "SELECT stockid,
                                  description,
                                  decimalplaces
-                         FROM stockmaster
+                         FROM weberp_stockmaster
                          WHERE categoryid = '" . $_POST['StockCategory'] . "'
                          AND (mbflag='M' OR mbflag='B')";
          }
@@ -115,8 +115,8 @@ if(isset($_POST['ShowStatus']) AND Is_Date($_POST['OnHandDate'])) {
 
 		$sql = "SELECT stockid,
 				newqoh
-				FROM stockmoves
-				WHERE stockmoves.trandate <= '". $SQLOnHandDate . "'
+				FROM weberp_stockmoves
+				WHERE weberp_stockmoves.trandate <= '". $SQLOnHandDate . "'
 				AND stockid = '" . $myrows['stockid'] . "'
 				AND loccode = '" . $_POST['StockLocation'] ."'
 				ORDER BY stkmoveno DESC LIMIT 1";

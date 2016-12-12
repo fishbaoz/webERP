@@ -160,13 +160,13 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid depreciation type:') . ' ' . $DepnType;
 			$InputError = true;
 		}
-		$result = DB_query("SELECT categoryid FROM fixedassetcategories WHERE categoryid='" . $AssetCategoryID . "'");
+		$result = DB_query("SELECT categoryid FROM weberp_fixedassetcategories WHERE categoryid='" . $AssetCategoryID . "'");
 		if (DB_num_rows($result)==0){
 			$InputError = true;
 			prnMsg(_('The asset category code entered must be exist in the assetcategories table'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid asset category:') . ' ' . $AssetCategoryID;
 		}
-		$result = DB_query("SELECT locationid FROM fixedassetlocations WHERE locationid='" . $AssetLocationCode . "'");
+		$result = DB_query("SELECT locationid FROM weberp_fixedassetlocations WHERE locationid='" . $AssetLocationCode . "'");
 		if (DB_num_rows($result)==0){
 			$InputError = true;
 			prnMsg(_('The asset location code entered must be exist in the asset locations table'),'error');
@@ -189,7 +189,7 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 			$PeriodNo = GetPeriod(ConvertSQLDate($_POST['DateToEnter']),$db);
 
 			//attempt to insert the stock item
-			$sql = "INSERT INTO fixedassets (description,
+			$sql = "INSERT INTO weberp_fixedassets (description,
 											longdescription,
 											assetcategoryid,
 											serialno,
@@ -216,11 +216,11 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 			$DbgMsg = _('The SQL that was used to add the asset and failed was');
 			$result = DB_query($sql, $ErrMsg, $DbgMsg);
 
-			if (DB_error_no() ==0) { //the insert of the new code worked so bang in the fixedassettrans records too
+			if (DB_error_no() ==0) { //the insert of the new code worked so bang in the weberp_fixedassettrans records too
 
 
-				$AssetID = DB_Last_Insert_ID($db, 'fixedassets','assetid');
-				$sql = "INSERT INTO fixedassettrans ( assetid,
+				$AssetID = DB_Last_Insert_ID($db, 'weberp_fixedassets','assetid');
+				$sql = "INSERT INTO weberp_fixedassettrans ( assetid,
 												transtype,
 												transno,
 												transdate,
@@ -241,7 +241,7 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 				$DbgMsg = _('The SQL that was used to add the fixedasset trans record that failed was');
 				$InsResult = DB_query($sql,$ErrMsg,$DbgMsg);
 
-				$sql = "INSERT INTO fixedassettrans ( assetid,
+				$sql = "INSERT INTO weberp_fixedassettrans ( assetid,
 													transtype,
 													transno,
 													transdate,
@@ -300,7 +300,7 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	echo '<table class="selection">
 					<tr><td>' . _('Select Date to Upload B/Fwd Assets To:') . '</td>
 							<td><select name="DateToEnter">';
-	$PeriodsResult = DB_query("SELECT lastdate_in_period FROM periods ORDER BY periodno");
+	$PeriodsResult = DB_query("SELECT lastdate_in_period FROM weberp_periods ORDER BY periodno");
 	while ($PeriodRow = DB_fetch_row($PeriodsResult)){
 		echo '<option value="' . $PeriodRow[0] . '">' . ConvertSQLDate($PeriodRow[0]) . '</option>';
 	}

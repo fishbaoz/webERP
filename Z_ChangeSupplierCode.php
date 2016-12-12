@@ -39,14 +39,14 @@ exit();
 function ProcessSupplier($oldCode, $newCode) {
 	global $db;
 	$table_key= array (
-		'grns' => 'supplierid',
-		'offers'=>'supplierid',
-		'purchdata'=>'supplierno',
-		'purchorders'=>'supplierno',
-		'shipments'=>'supplierid',
-		'suppliercontacts'=>'supplierid',
-		'supptrans'=>'supplierno',
-		'www_users'=>'supplierid');
+		'weberp_weberp_grns' => 'supplierid',
+		'weberp_offers'=>'supplierid',
+		'weberp_purchdata'=>'supplierno',
+		'weberp_purchorders'=>'supplierno',
+		'weberp_shipments'=>'supplierid',
+		'weberp_suppliercontacts'=>'supplierid',
+		'weberp_supptrans'=>'supplierno',
+		'weberp_www_users'=>'supplierid');
 
 	// First check the Supplier code exists
 	if (!checkSupplierExist($oldCode)) {
@@ -69,7 +69,7 @@ function ProcessSupplier($oldCode, $newCode) {
 	$result = DB_Txn_Begin();
 
 	prnMsg(_('Inserting the new supplier record'),'info');
-	$sql = "INSERT INTO suppliers (`supplierid`,
+	$sql = "INSERT INTO weberp_suppliers (`supplierid`,
 		`suppname`,  `address1`, `address2`, `address3`,
 		`address4`,  `address5`,  `address6`, `supptype`, `lat`, `lng`,
 		`currcode`,  `suppliersince`, `paymentterms`, `lastpaid`,
@@ -83,7 +83,7 @@ function ProcessSupplier($oldCode, $newCode) {
 		`lastpaiddate`, `bankact`, `bankref`, `bankpartics`,
 		`remittance`, `taxgroupid`, `factorcompanyid`, `taxref`,
 		`phn`, `port`, `email`, `fax`, `telephone`
-		FROM suppliers WHERE supplierid='" . $oldCode . "'";
+		FROM weberp_suppliers WHERE supplierid='" . $oldCode . "'";
 
 	$DbgMsg =_('The SQL that failed was');
 	$ErrMsg = _('The SQL to insert the new suppliers master record failed') . ', ' . _('the SQL statement was');
@@ -97,7 +97,7 @@ function ProcessSupplier($oldCode, $newCode) {
 	}
 
 	prnMsg(_('Deleting the supplier code from the suppliers master table'),'info');
-	$sql = "DELETE FROM suppliers WHERE supplierid='" . $oldCode . "'";
+	$sql = "DELETE FROM weberp_suppliers WHERE supplierid='" . $oldCode . "'";
 
 	$ErrMsg = _('The SQL to delete the old supplier record failed');
 	$result = DB_query($sql,$ErrMsg,$DbgMsg,true);
@@ -107,7 +107,7 @@ function ProcessSupplier($oldCode, $newCode) {
 
 function checkSupplierExist($codeSupplier) {
 	global $db;
-	$result=DB_query("SELECT supplierid FROM suppliers WHERE supplierid='" . $codeSupplier . "'");
+	$result=DB_query("SELECT supplierid FROM weberp_suppliers WHERE supplierid='" . $codeSupplier . "'");
 	if (DB_num_rows($result)==0) return false;
 	return true;
 }

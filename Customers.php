@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: Customers.php 6942 2014-10-27 02:48:29Z daintree $ */
 
 include('includes/session.inc');
 include('includes/CurrenciesArray.php'); // To get the currency name from the currency code.
@@ -44,7 +44,7 @@ if (isset($_POST['submit'])) {
 
 	$_POST['DebtorNo'] = mb_strtoupper($_POST['DebtorNo']);
 
-	$sql="SELECT COUNT(debtorno) FROM debtorsmaster WHERE debtorno='".$_POST['DebtorNo']."'";
+	$sql="SELECT COUNT(debtorno) FROM weberp_debtorsmaster WHERE debtorno='".$_POST['DebtorNo']."'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 	if ($myrow[0]>0 AND isset($_POST['New'])) {
@@ -136,13 +136,13 @@ if (isset($_POST['submit'])) {
 		if (!isset($_POST['New'])) {
 
 			$sql = "SELECT count(id)
-					  FROM debtortrans
+					  FROM weberp_debtortrans
 					where debtorno = '" . $_POST['DebtorNo'] . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_array($result);
 
 			if ($myrow[0] == 0) {
-			  $sql = "UPDATE debtorsmaster SET	name='" . $_POST['CustName'] . "',
+			  $sql = "UPDATE weberp_debtorsmaster SET	name='" . $_POST['CustName'] . "',
 												address1='" . $_POST['Address1'] . "',
 												address2='" . $_POST['Address2'] . "',
 												address3='" . $_POST['Address3'] ."',
@@ -167,13 +167,13 @@ if (isset($_POST['submit'])) {
 			} else {
 
 			  $CurrSQL = "SELECT currcode
-					  		FROM debtorsmaster
+					  		FROM weberp_debtorsmaster
 							where debtorno = '" . $_POST['DebtorNo'] . "'";
 			  $CurrResult = DB_query($CurrSQL);
 			  $CurrRow = DB_fetch_array($CurrResult);
 			  $OldCurrency = $CurrRow[0];
 
-			  $sql = "UPDATE debtorsmaster SET	name='" . $_POST['CustName'] . "',
+			  $sql = "UPDATE weberp_debtorsmaster SET	name='" . $_POST['CustName'] . "',
 												address1='" . $_POST['Address1'] . "',
 												address2='" . $_POST['Address2'] . "',
 												address3='" . $_POST['Address3'] ."',
@@ -215,7 +215,7 @@ if (isset($_POST['submit'])) {
 				}
 			}
 
-			$sql = "INSERT INTO debtorsmaster (
+			$sql = "INSERT INTO weberp_debtorsmaster (
 							debtorno,
 							name,
 							address1,
@@ -287,7 +287,7 @@ if (isset($_POST['submit'])) {
 
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'DebtorTrans'
 
-	$sql= "SELECT COUNT(*) FROM debtortrans WHERE debtorno='" . $_POST['DebtorNo'] . "'";
+	$sql= "SELECT COUNT(*) FROM weberp_debtortrans WHERE debtorno='" . $_POST['DebtorNo'] . "'";
 	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	if ($myrow[0]>0) {
@@ -296,7 +296,7 @@ if (isset($_POST['submit'])) {
 		echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('transactions against this customer');
 
 	} else {
-		$sql= "SELECT COUNT(*) FROM salesorders WHERE debtorno='" . $_POST['DebtorNo'] . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_salesorders WHERE debtorno='" . $_POST['DebtorNo'] . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if ($myrow[0]>0) {
@@ -304,7 +304,7 @@ if (isset($_POST['submit'])) {
 			prnMsg( _('Cannot delete the customer record because orders have been created against it'),'warn');
 			echo '<br /> ' . _('There are') . ' ' . $myrow[0] . ' ' . _('orders against this customer');
 		} else {
-			$sql= "SELECT COUNT(*) FROM salesanalysis WHERE cust='" . $_POST['DebtorNo'] . "'";
+			$sql= "SELECT COUNT(*) FROM weberp_salesanalysis WHERE cust='" . $_POST['DebtorNo'] . "'";
 			$result = DB_query($sql);
 			$myrow = DB_fetch_row($result);
 			if ($myrow[0]>0) {
@@ -314,7 +314,7 @@ if (isset($_POST['submit'])) {
 			} else {
 
 				// Check if there are any users that refer to this CUSTOMER code
-				$SQL= "SELECT COUNT(*) FROM www_users WHERE www_users.customerid = '" . $_POST['DebtorNo'] . "'";
+				$SQL= "SELECT COUNT(*) FROM weberp_www_users WHERE weberp_www_users.customerid = '" . $_POST['DebtorNo'] . "'";
 
 				$result = DB_query($SQL);
 				$myrow = DB_fetch_row($result);
@@ -324,7 +324,7 @@ if (isset($_POST['submit'])) {
 					echo '<br />' . _('There are') . ' ' . $myrow[0] . ' '._('users referring to this Branch/customer');
 				} else {
 						// Check if there are any contract that refer to this branch code
-					$SQL = "SELECT COUNT(*) FROM contracts WHERE contracts.debtorno = '" . $_POST['DebtorNo'] . "'";
+					$SQL = "SELECT COUNT(*) FROM weberp_contracts WHERE weberp_contracts.debtorno = '" . $_POST['DebtorNo'] . "'";
 
 					$result = DB_query($SQL);
 					$myrow = DB_fetch_row($result);
@@ -339,11 +339,11 @@ if (isset($_POST['submit'])) {
 
 	}
 	if ($CancelDelete==0) { //ie not cancelled the delete as a result of above tests
-		$SQL="DELETE FROM custbranch WHERE debtorno='" . $_POST['DebtorNo'] . "'";
+		$SQL="DELETE FROM weberp_custbranch WHERE debtorno='" . $_POST['DebtorNo'] . "'";
 		$result = DB_query($SQL,$ErrMsg);
-		$sql="DELETE FROM custcontacts WHERE debtorno='" . $_POST['DebtorNo'] . "'";
+		$sql="DELETE FROM weberp_custcontacts WHERE debtorno='" . $_POST['DebtorNo'] . "'";
 		$result = DB_query($sql);
-		$sql="DELETE FROM debtorsmaster WHERE debtorno='" . $_POST['DebtorNo'] . "'";
+		$sql="DELETE FROM weberp_debtorsmaster WHERE debtorno='" . $_POST['DebtorNo'] . "'";
 		$result = DB_query($sql);
 		prnMsg( _('Customer') . ' ' . $_POST['DebtorNo'] . ' ' . _('has been deleted - together with all the associated branches and contacts'),'success');
 		include('includes/footer.inc');
@@ -417,7 +417,7 @@ if (!isset($DebtorNo)) {
 
 	$SetupErrors=0; //Count errors
 	$sql="SELECT COUNT(typeabbrev)
-				FROM salestypes";
+				FROM weberp_salestypes";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 	if ($myrow[0]==0) {
@@ -426,7 +426,7 @@ if (!isset($DebtorNo)) {
 		$SetupErrors += 1;
 	}
 	$sql="SELECT COUNT(typeid)
-				FROM debtortype";
+				FROM weberp_debtortype";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_row($result);
 	if ($myrow[0]==0) {
@@ -502,7 +502,7 @@ if (!isset($DebtorNo)) {
 		</tr>';
 
 // Show Sales Type drop down list
-	$result=DB_query("SELECT typeabbrev, sales_type FROM salestypes ORDER BY sales_type");
+	$result=DB_query("SELECT typeabbrev, sales_type FROM weberp_salestypes ORDER BY sales_type");
 	if (DB_num_rows($result)==0){
 		$DataError =1;
 		echo '<tr>
@@ -522,7 +522,7 @@ if (!isset($DebtorNo)) {
 	}
 
 // Show Customer Type drop down list
-	$result=DB_query("SELECT typeid, typename FROM debtortype ORDER BY typename");
+	$result=DB_query("SELECT typeid, typename FROM weberp_debtortype ORDER BY typename");
 	if (DB_num_rows($result)==0){
 	   $DataError =1;
 	   echo '<a href="SalesTypes.php?" target="_parent">' . _('Setup Types') . '</a>';
@@ -571,7 +571,7 @@ if (!isset($DebtorNo)) {
 					<td><input tabindex="15" type="text" name="TaxRef" size="22" maxlength="20" /></td>
 				</tr>';
 
-	$result=DB_query("SELECT terms, termsindicator FROM paymentterms");
+	$result=DB_query("SELECT terms, termsindicator FROM weberp_paymentterms");
 	if (DB_num_rows($result)==0){
 		$DataError =1;
 		echo '<tr><td colspan="2">' . prnMsg(_('There are no payment terms currently defined - go to the setup tab of the main menu and set at least one up first'),'error') . '</td></tr>';
@@ -592,7 +592,7 @@ if (!isset($DebtorNo)) {
 			<td>' . _('Credit Status') . ':</td>
 			<td><select tabindex="16" name="HoldReason" required="required">';
 
-	$result=DB_query("SELECT reasoncode, reasondescription FROM holdreasons");
+	$result=DB_query("SELECT reasoncode, reasondescription FROM weberp_holdreasons");
 	if (DB_num_rows($result)==0){
 		$DataError =1;
 		echo '<tr>
@@ -606,7 +606,7 @@ if (!isset($DebtorNo)) {
 		echo '</select></td></tr>';
 	}
 
-	$result=DB_query("SELECT currency, currabrev FROM currencies");
+	$result=DB_query("SELECT currency, currabrev FROM weberp_currencies");
 	if (DB_num_rows($result)==0){
 		$DataError =1;
 		echo '<tr>
@@ -614,7 +614,7 @@ if (!isset($DebtorNo)) {
 			</tr>';
 	} else {
 		if (!isset($_POST['CurrCode'])){
-			$CurrResult = DB_query("SELECT currencydefault FROM companies WHERE coycode=1");
+			$CurrResult = DB_query("SELECT currencydefault FROM weberp_companies WHERE coycode=1");
 			$myrow = DB_fetch_row($CurrResult);
 			$_POST['CurrCode'] = $myrow[0];
 		}
@@ -714,7 +714,7 @@ if (!isset($DebtorNo)) {
 						customerpoline,
 						typeid,
 						language_id
-				FROM debtorsmaster
+				FROM weberp_debtorsmaster
 				WHERE debtorno = '" . $DebtorNo . "'";
 
 		$ErrMsg = _('The customer details could not be retrieved because');
@@ -839,13 +839,13 @@ if (!isset($DebtorNo)) {
 	}
 // Select sales types for drop down list
 	if (isset($_GET['Modify'])) {
-		$result=DB_query("SELECT sales_type FROM salestypes WHERE typeabbrev='".$_POST['SalesType']."'");
+		$result=DB_query("SELECT sales_type FROM weberp_salestypes WHERE typeabbrev='".$_POST['SalesType']."'");
 		$myrow=DB_fetch_array($result);
 		echo '<tr>
 				<td>' . _('Sales Type') . ':</td>
 				<td>' . $myrow['sales_type'] . '</td></tr>';
 	} else {
-		$result=DB_query("SELECT typeabbrev, sales_type FROM salestypes");
+		$result=DB_query("SELECT typeabbrev, sales_type FROM weberp_salestypes");
 		echo '<tr>
 				<td>' . _('Sales Type') . '/' . _('Price List') . ':</td>
 				<td><select name="SalesType" required="required">';
@@ -862,14 +862,14 @@ if (!isset($DebtorNo)) {
 
 // Select Customer types for drop down list for SELECT/UPDATE
 	if (isset($_GET['Modify'])) {
-		$result=DB_query("SELECT typename FROM debtortype WHERE typeid='".$_POST['typeid']."'");
+		$result=DB_query("SELECT typename FROM weberp_debtortype WHERE typeid='".$_POST['typeid']."'");
 		$myrow=DB_fetch_array($result);
 		echo '<tr>
 				<td>' . _('Customer Type') . ':</td>
 				<td>' . $myrow['typename'] . '</td>
 			</tr>';
 	} else {
-		$result=DB_query("SELECT typeid, typename FROM debtortype ORDER BY typename");
+		$result=DB_query("SELECT typeid, typename FROM weberp_debtortype ORDER BY typename");
 		echo '<tr>
 				<td>' . _('Customer Type') . ':</td>
 				<td><select name="typeid" required="required">';
@@ -944,14 +944,14 @@ if (!isset($DebtorNo)) {
 	}
 
 	if (isset($_GET['Modify'])) {
-		$result=DB_query("SELECT terms FROM paymentterms WHERE termsindicator='".$_POST['PaymentTerms']."'");
+		$result=DB_query("SELECT terms FROM weberp_paymentterms WHERE termsindicator='".$_POST['PaymentTerms']."'");
 		$myrow=DB_fetch_array($result);
 		echo '<tr>
 				<td>' . _('Payment Terms') . ':</td>
 				<td>' . $myrow['terms'] . '</td>
 			</tr>';
 	} else {
-		$result=DB_query("SELECT terms, termsindicator FROM paymentterms");
+		$result=DB_query("SELECT terms, termsindicator FROM weberp_paymentterms");
 		echo '<tr>
 				<td>' . _('Payment Terms') . ':</td>
 				<td><select name="PaymentTerms" required="required">';
@@ -968,14 +968,14 @@ if (!isset($DebtorNo)) {
 	}
 
 	if (isset($_GET['Modify'])) {
-		$result=DB_query("SELECT reasondescription FROM holdreasons WHERE reasoncode='".$_POST['HoldReason']."'");
+		$result=DB_query("SELECT reasondescription FROM weberp_holdreasons WHERE reasoncode='".$_POST['HoldReason']."'");
 		$myrow=DB_fetch_array($result);
 		echo '<tr>
 				<td>' . _('Credit Status') . ':</td>
 				<td>' . $myrow['reasondescription'] . '</td>
 			</tr>';
 	} else {
-		$result=DB_query("SELECT reasoncode, reasondescription FROM holdreasons");
+		$result=DB_query("SELECT reasoncode, reasondescription FROM weberp_holdreasons");
 		echo '<tr>
 				<td>' . _('Credit Status') . ':</td>
 				<td><select name="HoldReason" required="required">';
@@ -996,7 +996,7 @@ if (!isset($DebtorNo)) {
 				<td>' . _('Customer Currency') . ':</td>
 				<td>' . $CurrencyName[$_POST['CurrCode']] . '</td></tr>';
 	} else {
-		$result=DB_query("SELECT currency, currabrev FROM currencies");
+		$result=DB_query("SELECT currency, currabrev FROM weberp_currencies");
 		echo '<tr>
 				<td>' . _('Customer Currency') . ':</td>
 				<td><select name="CurrCode" required="required">';
@@ -1094,7 +1094,7 @@ if (!isset($DebtorNo)) {
 
 	if (isset($_GET['delete'])) { //User hit delete link on customer contacts
 		/*Process this first before showing remaining contacts */
-		$resultupcc = DB_query("DELETE FROM custcontacts
+		$resultupcc = DB_query("DELETE FROM weberp_custcontacts
 								WHERE debtorno='".$DebtorNo."'
 								AND contid='".$ID."'");
 		prnMsg(_('Contact Deleted'),'success');
@@ -1107,7 +1107,7 @@ if (!isset($DebtorNo)) {
 					phoneno,
 					notes,
 					email
-			FROM custcontacts
+			FROM weberp_custcontacts
 			WHERE debtorno='".$DebtorNo."'
 			ORDER BY contid";
 	$result = DB_query($sql);

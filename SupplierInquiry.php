@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SupplierInquiry.php 7660 2016-11-01 18:42:38Z rchacon $*/
 /* Inquiry showing invoices, credit notes and payments made to suppliers together with the amounts outstanding. */
 
 include('includes/session.inc');
@@ -34,46 +34,46 @@ if(!isset($_POST['TransAfterDate']) OR !Is_Date($_POST['TransAfterDate'])) {
 	$_POST['TransAfterDate'] = Date($_SESSION['DefaultDateFormat'],Mktime(0,0,0,Date('m')-12,Date('d'),Date('Y')));
 }
 
-$SQL = "SELECT suppliers.suppname,
-		suppliers.currcode,
-		currencies.currency,
-		currencies.decimalplaces AS currdecimalplaces,
-		paymentterms.terms,
-		SUM(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) AS balance,
-		SUM(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) >= paymentterms.daysbeforedue
-			THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+$SQL = "SELECT weberp_suppliers.suppname,
+		weberp_suppliers.currcode,
+		weberp_currencies.currency,
+		weberp_currencies.decimalplaces AS currdecimalplaces,
+		weberp_paymentterms.terms,
+		SUM(weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc) AS balance,
+		SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) >= weberp_paymentterms.daysbeforedue
+			THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= 0 THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= 0 THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		END) AS due,
-		SUM(CASE WHEN paymentterms.daysbeforedue > 0  THEN
-			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) > paymentterms.daysbeforedue
-					AND (TO_DAYS(Now()) - TO_DAYS(supptrans.trandate)) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
-			THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+		SUM(CASE WHEN weberp_paymentterms.daysbeforedue > 0  THEN
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) > weberp_paymentterms.daysbeforedue
+					AND (TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate)) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
+			THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= '" . $_SESSION['PastDueDays1'] . "'
-			THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= '" . $_SESSION['PastDueDays1'] . "'
+			THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		END) AS overdue1,
-		Sum(CASE WHEN paymentterms.daysbeforedue > 0 THEN
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
-			THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+		Sum(CASE WHEN weberp_paymentterms.daysbeforedue > 0 THEN
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) > weberp_paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(weberp_supptrans.trandate) >= (weberp_paymentterms.daysbeforedue + " . $_SESSION['PastDueDays2'] . ")
+			THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		ELSE
-			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(supptrans.trandate),paymentterms.dayinfollowingmonth)) >= '" . $_SESSION['PastDueDays2'] . "'
-			THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(ADDDATE(last_day(weberp_supptrans.trandate),weberp_paymentterms.dayinfollowingmonth)) >= '" . $_SESSION['PastDueDays2'] . "'
+			THEN weberp_supptrans.ovamount + weberp_supptrans.ovgst - weberp_supptrans.alloc ELSE 0 END
 		END ) AS overdue2
-		FROM suppliers INNER JOIN paymentterms
-		ON suppliers.paymentterms = paymentterms.termsindicator
-     	INNER JOIN currencies
-     	ON suppliers.currcode = currencies.currabrev
-     	INNER JOIN supptrans
-     	ON suppliers.supplierid = supptrans.supplierno
-		WHERE suppliers.supplierid = '" . $SupplierID . "'
-		GROUP BY suppliers.suppname,
-      			currencies.currency,
-      			currencies.decimalplaces,
-      			paymentterms.terms,
-      			paymentterms.daysbeforedue,
-      			paymentterms.dayinfollowingmonth";
+		FROM weberp_suppliers INNER JOIN weberp_paymentterms
+		ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+     	INNER JOIN weberp_currencies
+     	ON weberp_suppliers.currcode = weberp_currencies.currabrev
+     	INNER JOIN weberp_supptrans
+     	ON weberp_suppliers.supplierid = weberp_supptrans.supplierno
+		WHERE weberp_suppliers.supplierid = '" . $SupplierID . "'
+		GROUP BY weberp_suppliers.suppname,
+      			weberp_currencies.currency,
+      			weberp_currencies.decimalplaces,
+      			weberp_paymentterms.terms,
+      			weberp_paymentterms.daysbeforedue,
+      			weberp_paymentterms.dayinfollowingmonth";
 $ErrMsg = _('The supplier details could not be retrieved by the SQL because');
 $DbgMsg = _('The SQL that failed was');
 $SupplierResult = DB_query($SQL, $ErrMsg, $DbgMsg);
@@ -84,16 +84,16 @@ if(DB_num_rows($SupplierResult) == 0) {
 
 	$NIL_BALANCE = True;
 
-	$SQL = "SELECT suppliers.suppname,
-					suppliers.currcode,
-					currencies.currency,
-					currencies.decimalplaces AS currdecimalplaces,
-					paymentterms.terms
-			FROM suppliers INNER JOIN paymentterms
-		    ON suppliers.paymentterms = paymentterms.termsindicator
-		    INNER JOIN currencies
-		    ON suppliers.currcode = currencies.currabrev
-			WHERE suppliers.supplierid = '" . $SupplierID . "'";
+	$SQL = "SELECT weberp_suppliers.suppname,
+					weberp_suppliers.currcode,
+					weberp_currencies.currency,
+					weberp_currencies.decimalplaces AS currdecimalplaces,
+					weberp_paymentterms.terms
+			FROM weberp_suppliers INNER JOIN weberp_paymentterms
+		    ON weberp_suppliers.paymentterms = weberp_paymentterms.termsindicator
+		    INNER JOIN weberp_currencies
+		    ON weberp_suppliers.currcode = weberp_currencies.currabrev
+			WHERE weberp_suppliers.supplierid = '" . $SupplierID . "'";
 
 	$ErrMsg = _('The supplier details could not be retrieved by the SQL because');
 	$DbgMsg = _('The SQL that failed was');
@@ -123,11 +123,11 @@ echo '<p class="page_title_text"><img alt="" src="', $RootPath, '/css/', $Theme,
 
 if(isset($_GET['HoldType']) AND isset($_GET['HoldTrans'])) {
 	if($_GET['HoldStatus'] == _('Hold')) {
-		$SQL = "UPDATE supptrans SET hold=1
+		$SQL = "UPDATE weberp_supptrans SET hold=1
 				WHERE type='" . $_GET['HoldType'] . "'
 				AND transno='" . $_GET['HoldTrans'] . "'";
 	} elseif($_GET['HoldStatus'] == _('Release')) {
-		$SQL = "UPDATE supptrans SET hold=0
+		$SQL = "UPDATE weberp_supptrans SET hold=0
 				WHERE type='" . $_GET['HoldType'] . "'
 				AND transno='" . $_GET['HoldTrans'] . "'";
 	}
@@ -167,25 +167,25 @@ echo _('Show all transactions after') . ': '  . '<input type="text" class="date"
 echo '</div>';
 $DateAfterCriteria = FormatDateForSQL($_POST['TransAfterDate']);
 
-$SQL = "SELECT supptrans.id,
-			systypes.typename,
-			supptrans.type,
-			supptrans.transno,
-			supptrans.trandate,
-			supptrans.suppreference,
-			supptrans.rate,
-			(supptrans.ovamount + supptrans.ovgst) AS totalamount,
-			supptrans.alloc AS allocated,
-			supptrans.hold,
-			supptrans.settled,
-			supptrans.transtext,
-			supptrans.supplierno
-		FROM supptrans,
-			systypes
-		WHERE supptrans.type = systypes.typeid
-		AND supptrans.supplierno = '" . $SupplierID . "'
-		AND supptrans.trandate >= '" . $DateAfterCriteria . "'
-		ORDER BY supptrans.trandate";
+$SQL = "SELECT weberp_supptrans.id,
+			weberp_systypes.typename,
+			weberp_supptrans.type,
+			weberp_supptrans.transno,
+			weberp_supptrans.trandate,
+			weberp_supptrans.suppreference,
+			weberp_supptrans.rate,
+			(weberp_supptrans.ovamount + weberp_supptrans.ovgst) AS totalamount,
+			weberp_supptrans.alloc AS allocated,
+			weberp_supptrans.hold,
+			weberp_supptrans.settled,
+			weberp_supptrans.transtext,
+			weberp_supptrans.supplierno
+		FROM weberp_supptrans,
+			weberp_systypes
+		WHERE weberp_supptrans.type = weberp_systypes.typeid
+		AND weberp_supptrans.supplierno = '" . $SupplierID . "'
+		AND weberp_supptrans.trandate >= '" . $DateAfterCriteria . "'
+		ORDER BY weberp_supptrans.trandate";
 $ErrMsg = _('No transactions were returned by the SQL because');
 $DbgMsg = _('The SQL that failed was');
 $TransResult = DB_query($SQL, $ErrMsg, $DbgMsg);
@@ -215,7 +215,7 @@ echo '<table class="selection"><thead>
 	</thead><tbody>';
 
 $AuthSQL = "SELECT offhold
-			FROM purchorderauth
+			FROM weberp_purchorderauth
 			WHERE userid='" . $_SESSION['UserID'] . "'
 			AND currabrev='" . $SupplierRecord['currcode']."'";
 $AuthResult = DB_query($AuthSQL);

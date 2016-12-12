@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: SuppCreditGRNs.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*The supplier transaction uses the SuppTrans class to hold the information about the credit note
 the SuppTrans class contains an array of GRNs objects - containing details of GRNs for invoicing and also
@@ -143,24 +143,24 @@ if (!isset($_POST['Show_Since'])){
 }
 
 $SQL = "SELECT grnno,
-			purchorderdetails.orderno,
-			purchorderdetails.unitprice,
-			purchorderdetails.actprice,
-			grns.itemcode,
-			grns.deliverydate,
-			grns.itemdescription,
-			grns.qtyrecd,
-			grns.quantityinv,
-			purchorderdetails.stdcostunit,
-			purchorderdetails.assetid,
-			stockmaster.decimalplaces
-		FROM grns INNER JOIN purchorderdetails
-		ON grns.podetailitem=purchorderdetails.podetailitem
-		LEFT JOIN stockmaster
-		ON purchorderdetails.itemcode=stockmaster.stockid
-		WHERE grns.supplierid ='" . $_SESSION['SuppTrans']->SupplierID . "'
-		AND grns.deliverydate >= '" . FormatDateForSQL($_POST['Show_Since']) . "'
-		ORDER BY grns.grnno";
+			weberp_purchorderdetails.orderno,
+			weberp_purchorderdetails.unitprice,
+			weberp_purchorderdetails.actprice,
+			weberp_grns.itemcode,
+			weberp_grns.deliverydate,
+			weberp_grns.itemdescription,
+			weberp_grns.qtyrecd,
+			weberp_grns.quantityinv,
+			weberp_purchorderdetails.stdcostunit,
+			weberp_purchorderdetails.assetid,
+			weberp_stockmaster.decimalplaces
+		FROM weberp_grns INNER JOIN weberp_purchorderdetails
+		ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+		LEFT JOIN weberp_stockmaster
+		ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
+		WHERE weberp_grns.supplierid ='" . $_SESSION['SuppTrans']->SupplierID . "'
+		AND weberp_grns.deliverydate >= '" . FormatDateForSQL($_POST['Show_Since']) . "'
+		ORDER BY weberp_grns.grnno";
 $GRNResults = DB_query($SQL);
 
 if (DB_num_rows($GRNResults)==0){
@@ -252,30 +252,30 @@ if (DB_num_rows($GRNResults)>0){
 	if (isset($_POST['GRNNo']) AND $_POST['GRNNo']!=''){
 
 		$SQL = "SELECT grnno,
-						grns.grnbatch,
-						grns.podetailitem,
-						purchorderdetails.orderno,
-						purchorderdetails.unitprice,
-						purchorderdetails.actprice,
-						purchorderdetails.glcode,
-						grns.itemcode,
-						grns.deliverydate,
-						grns.itemdescription,
-						grns.quantityinv,
-						grns.qtyrecd,
-						grns.qtyrecd - grns.quantityinv
+						weberp_grns.grnbatch,
+						weberp_grns.podetailitem,
+						weberp_purchorderdetails.orderno,
+						weberp_purchorderdetails.unitprice,
+						weberp_purchorderdetails.actprice,
+						weberp_purchorderdetails.glcode,
+						weberp_grns.itemcode,
+						weberp_grns.deliverydate,
+						weberp_grns.itemdescription,
+						weberp_grns.quantityinv,
+						weberp_grns.qtyrecd,
+						weberp_grns.qtyrecd - weberp_grns.quantityinv
 						AS qtyostdg,
-						purchorderdetails.stdcostunit,
-						purchorderdetails.shiptref,
-						purchorderdetails.jobref,
-						shipments.closed,
-						purchorderdetails.assetid,
-						stockmaster.decimalplaces
-				FROM grns INNER JOIN purchorderdetails
-				ON grns.podetailitem=purchorderdetails.podetailitem
-				LEFT JOIN shipments ON purchorderdetails.shiptref=shipments.shiptref
-				LEFT JOIN stockmaster ON purchorderdetails.itemcode=stockmaster.stockid
-				WHERE grns.grnno='" .$_POST['GRNNo'] . "'";
+						weberp_purchorderdetails.stdcostunit,
+						weberp_purchorderdetails.shiptref,
+						weberp_purchorderdetails.jobref,
+						weberp_shipments.closed,
+						weberp_purchorderdetails.assetid,
+						weberp_stockmaster.decimalplaces
+				FROM weberp_grns INNER JOIN weberp_purchorderdetails
+				ON weberp_grns.podetailitem=weberp_purchorderdetails.podetailitem
+				LEFT JOIN weberp_shipments ON weberp_purchorderdetails.shiptref=weberp_shipments.shiptref
+				LEFT JOIN weberp_stockmaster ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
+				WHERE weberp_grns.grnno='" .$_POST['GRNNo'] . "'";
 
 		$GRNEntryResult = DB_query($SQL);
 		$myrow = DB_fetch_array($GRNEntryResult);

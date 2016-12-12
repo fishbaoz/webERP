@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: PO_AuthorisationLevels.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 
@@ -31,13 +31,13 @@ if (isset($_POST['Submit'])) {
 		$_POST['AuthLevel']=0;
 	}
 	$sql="SELECT COUNT(*)
-		FROM purchorderauth
+		FROM weberp_purchorderauth
 		WHERE userid='" . $_POST['UserID'] . "'
 		AND currabrev='" . $_POST['CurrCode'] . "'";
 	$result=DB_query($sql);
 	$myrow=DB_fetch_array($result);
 	if ($myrow[0]==0) {
-		$sql="INSERT INTO purchorderauth ( userid,
+		$sql="INSERT INTO weberp_purchorderauth ( userid,
 						currabrev,
 						cancreate,
 						offhold,
@@ -66,7 +66,7 @@ if (isset($_POST['Update'])) {
 	} else {
 		$OffHold=1;
 	}
-	$sql="UPDATE purchorderauth SET
+	$sql="UPDATE weberp_purchorderauth SET
 			cancreate='".$CanCreate."',
 			offhold='".$OffHold."',
 			authlevel='".filter_number_format($_POST['AuthLevel'])."'
@@ -78,7 +78,7 @@ if (isset($_POST['Update'])) {
 }
 
 if (isset($_GET['Delete'])) {
-	$sql="DELETE FROM purchorderauth
+	$sql="DELETE FROM weberp_purchorderauth
 		WHERE userid='".$_GET['UserID']."'
 		AND currabrev='".$_GET['Currency']."'";
 
@@ -90,7 +90,7 @@ if (isset($_GET['Edit'])) {
 	$sql="SELECT cancreate,
 				offhold,
 				authlevel
-			FROM purchorderauth
+			FROM weberp_purchorderauth
 			WHERE userid='".$_GET['UserID']."'
 			AND currabrev='".$_GET['Currency']."'";
 	$ErrMsg = _('The authentication details cannot be retrieved because');
@@ -103,18 +103,18 @@ if (isset($_GET['Edit'])) {
 	$AuthLevel=$myrow['authlevel'];
 }
 
-$sql="SELECT purchorderauth.userid,
-			www_users.realname,
-			currencies.currabrev,
-			currencies.currency,
-			currencies.decimalplaces,
-			purchorderauth.cancreate,
-			purchorderauth.offhold,
-			purchorderauth.authlevel
-	FROM purchorderauth INNER JOIN www_users
-		ON purchorderauth.userid=www_users.userid
-	INNER JOIN currencies
-		ON purchorderauth.currabrev=currencies.currabrev";
+$sql="SELECT weberp_purchorderauth.userid,
+			weberp_www_users.realname,
+			weberp_currencies.currabrev,
+			weberp_currencies.currency,
+			weberp_currencies.decimalplaces,
+			weberp_purchorderauth.cancreate,
+			weberp_purchorderauth.offhold,
+			weberp_purchorderauth.authlevel
+	FROM weberp_purchorderauth INNER JOIN weberp_www_users
+		ON weberp_purchorderauth.userid=weberp_www_users.userid
+	INNER JOIN weberp_currencies
+		ON weberp_purchorderauth.currabrev=weberp_currencies.currabrev";
 
 $ErrMsg = _('The authentication details cannot be retrieved because');
 $Result=DB_query($sql,$ErrMsg);
@@ -174,7 +174,7 @@ if (isset($_GET['Edit'])) {
 	echo '<input type="hidden" name="UserID" value="'.$_GET['UserID'].'" />';
 } else {
 	echo '<tr><td>' . _('User ID') . '</td><td><select name="UserID">';
-	$usersql="SELECT userid FROM www_users";
+	$usersql="SELECT userid FROM weberp_www_users";
 	$userresult=DB_query($usersql);
 	while ($myrow=DB_fetch_array($userresult)) {
 		if ($myrow['userid']==$UserID) {
@@ -192,10 +192,10 @@ if (isset($_GET['Edit'])) {
 				authlevel,
 				currency,
 				decimalplaces
-			FROM purchorderauth INNER JOIN currencies
-			ON purchorderauth.currabrev=currencies.currabrev
+			FROM weberp_purchorderauth INNER JOIN weberp_currencies
+			ON weberp_purchorderauth.currabrev=weberp_currencies.currabrev
 			WHERE userid='".$_GET['UserID']."'
-			AND purchorderauth.currabrev='".$_GET['Currency']."'";
+			AND weberp_purchorderauth.currabrev='".$_GET['Currency']."'";
 	$ErrMsg = _('The authentication details cannot be retrieved because');
 	$result=DB_query($sql,$ErrMsg);
 	$myrow=DB_fetch_array($result);
@@ -215,7 +215,7 @@ if (isset($_GET['Edit'])) {
 	echo '<tr>
 			<td>' . _('Currency') . '</td>
 			<td><select name="CurrCode">';
-	$currencysql="SELECT currabrev,currency FROM currencies";
+	$currencysql="SELECT currabrev,currency FROM weberp_currencies";
 	$currencyresult=DB_query($currencysql);
 	while ($myrow=DB_fetch_array($currencyresult)) {
 		if ($myrow['currabrev']==$Currency) {

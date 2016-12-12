@@ -20,7 +20,7 @@ if(isset($_POST['Enter'])){ //user has input a new value
 		include('includes/footer.inc');
 	}
 	if($InputError == 0){
-		$sql = "INSERT INTO mailgroups (groupname) VALUES ('".$MailGroup."')";
+		$sql = "INSERT INTO weberp_mailgroups (groupname) VALUES ('".$MailGroup."')";
 		$ErrMsg = _('Failed to add new mail group');
 		$result = DB_query($sql,$ErrMsg);
 		GetMailGroup();
@@ -52,7 +52,7 @@ if(isset($_GET['Add']) and isset($_GET['UserId'])){
 		include('includes/footer.inc');
 		exit;
 	}
-	$sql = "INSERT INTO mailgroupdetails (groupname, userid) VALUES ('".$GroupName."',
+	$sql = "INSERT INTO weberp_mailgroupdetails (groupname, userid) VALUES ('".$GroupName."',
 									'".$UserId."')";
 	$ErrMsg = _('Failed to add users to mail group');
 	$result = DB_query($sql,$ErrMsg);
@@ -63,7 +63,7 @@ if(isset($_GET['Add']) and isset($_GET['UserId'])){
 if(isset($_GET['Delete'])){
 	if(is_numeric($_GET['Id'])){
 		$id = (int)$_GET['Id'];
-		$sql = "DELETE FROM mailgroups WHERE id = '".$id."'";
+		$sql = "DELETE FROM weberp_mailgroups WHERE id = '".$id."'";
 		$ErrMsg = _('Failed to delete the mail group which id is '.$id);
 		$result = DB_query($sql,$ErrMsg);
 		GetMailGroup();
@@ -128,7 +128,7 @@ if(isset($_GET['Remove'])){
 		}
 
 	}
-	$sql = "DELETE FROM mailgroupdetails WHERE userid = '".$UserId."' AND groupname = '".$GroupName."'";
+	$sql = "DELETE FROM weberp_mailgroupdetails WHERE userid = '".$UserId."' AND groupname = '".$GroupName."'";
 	$ErrMsg = 'Failed to delete the userid '.$UserId.' from group '.$GroupName;
 	$result = DB_query($sql,$ErrMsg);
 	GetUsers($GroupId,$GroupName);
@@ -163,7 +163,7 @@ if(!isset($_GET['Edit'])){//display the input form
 function GetMailGroup () {
 global $db;
 //GET the mailing group data if there are any
-$sql = "SELECT groupname, id FROM mailgroups ORDER BY groupname";
+$sql = "SELECT groupname, id FROM weberp_mailgroups ORDER BY groupname";
 $ErrMsg = _('Failed to retrieve mail groups information');
 $result = DB_query($sql,$ErrMsg);
 if(DB_num_rows($result) != 0){
@@ -189,7 +189,7 @@ if(DB_num_rows($result) != 0){
 
 function GetUsers ($GroupId,$GroupName) {
 	global $db;
-	$sql = "SELECT userid FROM mailgroups INNER JOIN mailgroupdetails ON mailgroups.groupname=mailgroupdetails.groupname WHERE mailgroups.id = '".$GroupId."'";
+	$sql = "SELECT userid FROM weberp_mailgroups INNER JOIN weberp_mailgroupdetails ON weberp_mailgroups.groupname=weberp_mailgroupdetails.groupname WHERE weberp_mailgroups.id = '".$GroupId."'";
 	$ErrMsg = _('Failed to retrieve userid');
 	$result = DB_query($sql,$ErrMsg);
 	
@@ -202,7 +202,7 @@ function GetUsers ($GroupId,$GroupName) {
 		}
 	}
 		
-	$sql = "SELECT userid, realname, email FROM www_users ORDER BY realname";
+	$sql = "SELECT userid, realname, email FROM weberp_www_users ORDER BY realname";
 	$ErrMsg = _('Failed to retrieve user information');
 	$result = DB_query($sql,$ErrMsg);
 	if(DB_num_rows($result) != 0){

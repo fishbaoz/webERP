@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: Z_BottomUpCosts.php 6945 2014-10-27 07:20:48Z daintree $*/
 /* Script to update costs for all BOM items, from the bottom up */
 
 include('includes/session.inc');
@@ -14,12 +14,12 @@ if (isset($_GET['Run'])){
 }
 
 
-if (isset($Run)) { //start bom processing
+if (isset($Run)) { //start weberp_bom processing
 
 	// Get all bottom level components
 	$sql = "SELECT DISTINCT b1.component
-			FROM bom as b1
-			left join bom as b2 on b2.parent=b1.component
+			FROM weberp_bom as b1
+			left join weberp_bom as b2 on b2.parent=b1.component
 			WHERE b2.parent is null;" ;
 
 	$ErrMsg =  _('An error occurred selecting all bottom level components');

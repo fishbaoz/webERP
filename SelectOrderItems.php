@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: SelectOrderItems.php 7637 2016-09-25 10:38:47Z exsonqu $*/
 
 include('includes/DefineCartClass.php');
 
@@ -84,57 +84,57 @@ if (isset($_GET['ModifyOrderNumber'])
 
 /*read in all the guff from the selected order into the Items cart  */
 
-	$OrderHeaderSQL = "SELECT salesorders.debtorno,
-			 				  debtorsmaster.name,
-							  salesorders.branchcode,
-							  salesorders.customerref,
-							  salesorders.comments,
-							  salesorders.orddate,
-							  salesorders.ordertype,
-							  salestypes.sales_type,
-							  salesorders.shipvia,
-							  salesorders.deliverto,
-							  salesorders.deladd1,
-							  salesorders.deladd2,
-							  salesorders.deladd3,
-							  salesorders.deladd4,
-							  salesorders.deladd5,
-							  salesorders.deladd6,
-							  salesorders.contactphone,
-							  salesorders.contactemail,
-							  salesorders.salesperson,
-							  salesorders.freightcost,
-							  salesorders.deliverydate,
-							  debtorsmaster.currcode,
-							  currencies.decimalplaces,
-							  paymentterms.terms,
-							  salesorders.fromstkloc,
-							  salesorders.printedpackingslip,
-							  salesorders.datepackingslipprinted,
-							  salesorders.quotation,
-							  salesorders.quotedate,
-							  salesorders.confirmeddate,
-							  salesorders.deliverblind,
-							  debtorsmaster.customerpoline,
-							  locations.locationname,
-							  custbranch.estdeliverydays,
-							  custbranch.salesman
-						FROM salesorders
-						INNER JOIN debtorsmaster
-						ON salesorders.debtorno = debtorsmaster.debtorno
-						INNER JOIN salestypes
-						ON salesorders.ordertype=salestypes.typeabbrev
-						INNER JOIN custbranch
-						ON salesorders.debtorno = custbranch.debtorno
-						AND salesorders.branchcode = custbranch.branchcode
-						INNER JOIN paymentterms
-						ON debtorsmaster.paymentterms=paymentterms.termsindicator
-						INNER JOIN locations
-						ON locations.loccode=salesorders.fromstkloc
-						INNER JOIN currencies
-						ON debtorsmaster.currcode=currencies.currabrev
-						INNER JOIN locationusers ON locationusers.loccode=salesorders.fromstkloc AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canupd=1
-						WHERE salesorders.orderno = '" . $_GET['ModifyOrderNumber'] . "'";
+	$OrderHeaderSQL = "SELECT weberp_salesorders.debtorno,
+			 				  weberp_debtorsmaster.name,
+							  weberp_salesorders.branchcode,
+							  weberp_salesorders.customerref,
+							  weberp_salesorders.comments,
+							  weberp_salesorders.orddate,
+							  weberp_salesorders.ordertype,
+							  weberp_salestypes.sales_type,
+							  weberp_salesorders.shipvia,
+							  weberp_salesorders.deliverto,
+							  weberp_salesorders.deladd1,
+							  weberp_salesorders.deladd2,
+							  weberp_salesorders.deladd3,
+							  weberp_salesorders.deladd4,
+							  weberp_salesorders.deladd5,
+							  weberp_salesorders.deladd6,
+							  weberp_salesorders.contactphone,
+							  weberp_salesorders.contactemail,
+							  weberp_salesorders.salesperson,
+							  weberp_salesorders.freightcost,
+							  weberp_salesorders.deliverydate,
+							  weberp_debtorsmaster.currcode,
+							  weberp_currencies.decimalplaces,
+							  weberp_paymentterms.terms,
+							  weberp_salesorders.fromstkloc,
+							  weberp_salesorders.printedpackingslip,
+							  weberp_salesorders.datepackingslipprinted,
+							  weberp_salesorders.quotation,
+							  weberp_salesorders.quotedate,
+							  weberp_salesorders.confirmeddate,
+							  weberp_salesorders.deliverblind,
+							  weberp_debtorsmaster.customerpoline,
+							  weberp_locations.locationname,
+							  weberp_custbranch.estdeliverydays,
+							  weberp_custbranch.salesman
+						FROM weberp_salesorders
+						INNER JOIN weberp_debtorsmaster
+						ON weberp_salesorders.debtorno = weberp_debtorsmaster.debtorno
+						INNER JOIN weberp_salestypes
+						ON weberp_salesorders.ordertype=weberp_salestypes.typeabbrev
+						INNER JOIN weberp_custbranch
+						ON weberp_salesorders.debtorno = weberp_custbranch.debtorno
+						AND weberp_salesorders.branchcode = weberp_custbranch.branchcode
+						INNER JOIN weberp_paymentterms
+						ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+						INNER JOIN weberp_locations
+						ON weberp_locations.loccode=weberp_salesorders.fromstkloc
+						INNER JOIN weberp_currencies
+						ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
+						WHERE weberp_salesorders.orderno = '" . $_GET['ModifyOrderNumber'] . "'";
 
 	$ErrMsg =  _('The order cannot be retrieved because');
 	$GetOrdHdrResult = DB_query($OrderHeaderSQL,$ErrMsg);
@@ -188,7 +188,7 @@ if (isset($_GET['ModifyOrderNumber'])
 
 		//Get The exchange rate used for GPPercent calculations on adding or amending items
 		if ($_SESSION['Items'.$identifier]->DefaultCurrency != $_SESSION['CompanyRecord']['currencydefault']){
-			$ExRateResult = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
+			$ExRateResult = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
 			if (DB_num_rows($ExRateResult)>0){
 				$ExRateRow = DB_fetch_row($ExRateResult);
 				$ExRate = $ExRateRow[0];
@@ -201,36 +201,36 @@ if (isset($_GET['ModifyOrderNumber'])
 
 /*need to look up customer name from debtors master then populate the line items array with the sales order details records */
 
-			$LineItemsSQL = "SELECT salesorderdetails.orderlineno,
-									salesorderdetails.stkcode,
-									stockmaster.description,
-									stockmaster.longdescription,
-									stockmaster.volume,
-									stockmaster.grossweight,
-									stockmaster.units,
-									stockmaster.serialised,
-									stockmaster.nextserialno,
-									stockmaster.eoq,
-									salesorderdetails.unitprice,
-									salesorderdetails.quantity,
-									salesorderdetails.discountpercent,
-									salesorderdetails.actualdispatchdate,
-									salesorderdetails.qtyinvoiced,
-									salesorderdetails.narrative,
-									salesorderdetails.itemdue,
-									salesorderdetails.poline,
-									locstock.quantity as qohatloc,
-									stockmaster.mbflag,
-									stockmaster.discountcategory,
-									stockmaster.decimalplaces,
-									stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standardcost,
-									salesorderdetails.completed
-								FROM salesorderdetails INNER JOIN stockmaster
-								ON salesorderdetails.stkcode = stockmaster.stockid
-								INNER JOIN locstock ON locstock.stockid = stockmaster.stockid
-								WHERE  locstock.loccode = '" . $myrow['fromstkloc'] . "'
-								AND salesorderdetails.orderno ='" . $_GET['ModifyOrderNumber'] . "'
-								ORDER BY salesorderdetails.orderlineno";
+			$LineItemsSQL = "SELECT weberp_salesorderdetails.orderlineno,
+									weberp_salesorderdetails.stkcode,
+									weberp_stockmaster.description,
+									weberp_stockmaster.longdescription,
+									weberp_stockmaster.volume,
+									weberp_stockmaster.grossweight,
+									weberp_stockmaster.units,
+									weberp_stockmaster.serialised,
+									weberp_stockmaster.nextserialno,
+									weberp_stockmaster.eoq,
+									weberp_salesorderdetails.unitprice,
+									weberp_salesorderdetails.quantity,
+									weberp_salesorderdetails.discountpercent,
+									weberp_salesorderdetails.actualdispatchdate,
+									weberp_salesorderdetails.qtyinvoiced,
+									weberp_salesorderdetails.narrative,
+									weberp_salesorderdetails.itemdue,
+									weberp_salesorderdetails.poline,
+									weberp_locstock.quantity as qohatloc,
+									weberp_stockmaster.mbflag,
+									weberp_stockmaster.discountcategory,
+									weberp_stockmaster.decimalplaces,
+									weberp_stockmaster.materialcost+weberp_stockmaster.labourcost+weberp_stockmaster.overheadcost AS standardcost,
+									weberp_salesorderdetails.completed
+								FROM weberp_salesorderdetails INNER JOIN weberp_stockmaster
+								ON weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
+								INNER JOIN weberp_locstock ON weberp_locstock.stockid = weberp_stockmaster.stockid
+								WHERE  weberp_locstock.loccode = '" . $myrow['fromstkloc'] . "'
+								AND weberp_salesorderdetails.orderno ='" . $_GET['ModifyOrderNumber'] . "'
+								ORDER BY weberp_salesorderdetails.orderlineno";
 
 		$ErrMsg = _('The line items of the order cannot be retrieved because');
 		$LineItemsResult = DB_query($LineItemsSQL,$ErrMsg);
@@ -317,17 +317,17 @@ if (isset($_POST['SearchCust'])
 	AND $_SESSION['RequireCustomerSelection']==1
 	AND in_array($_SESSION['PageSecurityArray']['ConfirmDispatch_Invoice.php'], $_SESSION['AllowedPageSecurityTokens'])){
 
-		$SQL = "SELECT custbranch.brname,
-					custbranch.contactname,
-					custbranch.phoneno,
-					custbranch.faxno,
-					custbranch.branchcode,
-					custbranch.debtorno,
-					debtorsmaster.name
-				FROM custbranch
-				LEFT JOIN debtorsmaster
-				ON custbranch.debtorno=debtorsmaster.debtorno
-				WHERE custbranch.disabletrans=0 ";
+		$SQL = "SELECT weberp_custbranch.brname,
+					weberp_custbranch.contactname,
+					weberp_custbranch.phoneno,
+					weberp_custbranch.faxno,
+					weberp_custbranch.branchcode,
+					weberp_custbranch.debtorno,
+					weberp_debtorsmaster.name
+				FROM weberp_custbranch
+				LEFT JOIN weberp_debtorsmaster
+				ON weberp_custbranch.debtorno=weberp_debtorsmaster.debtorno
+				WHERE weberp_custbranch.disabletrans=0 ";
 
 	if (($_POST['CustKeywords']=='') AND ($_POST['CustCode']=='')  AND ($_POST['CustPhone']=='')) {
 		$SQL .= "";
@@ -336,16 +336,16 @@ if (isset($_POST['SearchCust'])
 		$_POST['CustKeywords'] = mb_strtoupper(trim($_POST['CustKeywords']));
 		$SearchString = str_replace(' ', '%', $_POST['CustKeywords']) ;
 
-		$SQL .= "AND custbranch.brname " . LIKE . " '%" . $SearchString . "%'
-				AND custbranch.branchcode " . LIKE . " '%" . mb_strtoupper(trim($_POST['CustCode'])) . "%'
-				AND custbranch.phoneno " . LIKE . " '%" . trim($_POST['CustPhone']) . "%'";
+		$SQL .= "AND weberp_custbranch.brname " . LIKE . " '%" . $SearchString . "%'
+				AND weberp_custbranch.branchcode " . LIKE . " '%" . mb_strtoupper(trim($_POST['CustCode'])) . "%'
+				AND weberp_custbranch.phoneno " . LIKE . " '%" . trim($_POST['CustPhone']) . "%'";
 
 	} /*one of keywords or custcode was more than a zero length string */
 	if ($_SESSION['SalesmanLogin']!=''){
-		$SQL .= " AND custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
+		$SQL .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 	}
-	$SQL .=	" ORDER BY custbranch.debtorno,
-					custbranch.branchcode";
+	$SQL .=	" ORDER BY weberp_custbranch.debtorno,
+					weberp_custbranch.branchcode";
 
 	$ErrMsg = _('The searched customer records requested cannot be retrieved because');
 	$result_CustSelect = DB_query($SQL,$ErrMsg);
@@ -383,23 +383,23 @@ if (isset($SelectedCustomer)) {
 	$_SESSION['Items'.$identifier]->Branch = trim($SelectedBranch);
 
 	// Now check to ensure this account is not on hold */
-	$sql = "SELECT debtorsmaster.name,
-					holdreasons.dissallowinvoices,
-					debtorsmaster.salestype,
-					salestypes.sales_type,
-					debtorsmaster.currcode,
-					debtorsmaster.customerpoline,
-					paymentterms.terms,
-					currencies.decimalplaces
-			FROM debtorsmaster INNER JOIN holdreasons
-			ON debtorsmaster.holdreason=holdreasons.reasoncode
-			INNER JOIN salestypes
-			ON debtorsmaster.salestype=salestypes.typeabbrev
-			INNER JOIN paymentterms
-			ON debtorsmaster.paymentterms=paymentterms.termsindicator
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo. "'";
+	$sql = "SELECT weberp_debtorsmaster.name,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_debtorsmaster.salestype,
+					weberp_salestypes.sales_type,
+					weberp_debtorsmaster.currcode,
+					weberp_debtorsmaster.customerpoline,
+					weberp_paymentterms.terms,
+					weberp_currencies.decimalplaces
+			FROM weberp_debtorsmaster INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason=weberp_holdreasons.reasoncode
+			INNER JOIN weberp_salestypes
+			ON weberp_debtorsmaster.salestype=weberp_salestypes.typeabbrev
+			INNER JOIN weberp_paymentterms
+			ON weberp_debtorsmaster.paymentterms=weberp_paymentterms.termsindicator
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo. "'";
 
 	$ErrMsg = _('The details of the customer selected') . ': ' .  $_SESSION['Items'.$identifier]->DebtorNo . ' ' . _('cannot be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the customer details and failed was') . ':';
@@ -491,18 +491,18 @@ if (isset($SelectedCustomer)) {
 #if the customer is placing own order, if this is the case then
 #DefaultSalesType will not have been set as above
 
-	$sql = "SELECT debtorsmaster.name,
-					holdreasons.dissallowinvoices,
-					debtorsmaster.salestype,
-					debtorsmaster.currcode,
-					currencies.decimalplaces,
-					debtorsmaster.customerpoline
-			FROM debtorsmaster
-			INNER JOIN holdreasons
-			ON debtorsmaster.holdreason=holdreasons.reasoncode
-			INNER JOIN currencies
-			ON debtorsmaster.currcode=currencies.currabrev
-			WHERE debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
+	$sql = "SELECT weberp_debtorsmaster.name,
+					weberp_holdreasons.dissallowinvoices,
+					weberp_debtorsmaster.salestype,
+					weberp_debtorsmaster.currcode,
+					weberp_currencies.decimalplaces,
+					weberp_debtorsmaster.customerpoline
+			FROM weberp_debtorsmaster
+			INNER JOIN weberp_holdreasons
+			ON weberp_debtorsmaster.holdreason=weberp_holdreasons.reasoncode
+			INNER JOIN weberp_currencies
+			ON weberp_debtorsmaster.currcode=weberp_currencies.currabrev
+			WHERE weberp_debtorsmaster.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
 
 	$ErrMsg = _('The details for the customer selected') . ': ' .$_SESSION['Items'.$identifier]->DebtorNo . ' ' . _('cannot be retrieved because');
 	$DbgMsg = _('SQL used to retrieve the customer details was') . ':<br />' . $sql;
@@ -638,7 +638,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 		if($_SESSION['ExistingOrder' . $identifier]!=0) { //need to check that not already dispatched
 
 			$sql = "SELECT qtyinvoiced
-					FROM salesorderdetails
+					FROM weberp_salesorderdetails
 					WHERE orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'
 					AND qtyinvoiced>0";
 
@@ -655,11 +655,11 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 		if ($OK_to_delete==1){
 			if($_SESSION['ExistingOrder' . $identifier]!=0){
 
-				$SQL = "DELETE FROM salesorderdetails WHERE salesorderdetails.orderno ='" . $_SESSION['ExistingOrder' . $identifier] . "'";
+				$SQL = "DELETE FROM weberp_salesorderdetails WHERE weberp_salesorderdetails.orderno ='" . $_SESSION['ExistingOrder' . $identifier] . "'";
 				$ErrMsg =_('The order detail lines could not be deleted because');
 				$DelResult=DB_query($SQL,$ErrMsg);
 
-				$SQL = "DELETE FROM salesorders WHERE salesorders.orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'";
+				$SQL = "DELETE FROM weberp_salesorders WHERE weberp_salesorders.orderno='" . $_SESSION['ExistingOrder' . $identifier] . "'";
 				$ErrMsg = _('The order header could not be deleted because');
 				$DelResult=DB_query($SQL,$ErrMsg);
 
@@ -701,16 +701,16 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 	$msg ='';
 	if (isset($_POST['Search']) OR isset($_POST['Next']) OR isset($_POST['Previous'])){
 		if(!empty($_POST['RawMaterialFlag'])){
-			$RawMaterialSellable = " OR stockcategory.stocktype='M'";
+			$RawMaterialSellable = " OR weberp_stockcategory.stocktype='M'";
 		}else{
 			$RawMaterialSellable = '';
 		}
 		if(!empty($_POST['CustItemFlag'])){
-			$IncludeCustItem = " INNER JOIN custitem ON custitem.stockid=stockmaster.stockid
-								AND custitem.debtorno='" .  $_SESSION['Items'.$identifier]->DebtorNo . "' ";
+			$IncludeCustItem = " INNER JOIN weberp_custitem ON weberp_custitem.stockid=weberp_stockmaster.stockid
+								AND weberp_custitem.debtorno='" .  $_SESSION['Items'.$identifier]->DebtorNo . "' ";
 		} else {
-			$IncludeCustItem = " LEFT OUTER JOIN custitem ON custitem.stockid=stockmaster.stockid
-								AND custitem.debtorno='" .  $_SESSION['Items'.$identifier]->DebtorNo . "' ";
+			$IncludeCustItem = " LEFT OUTER JOIN weberp_custitem ON weberp_custitem.stockid=weberp_stockmaster.stockid
+								AND weberp_custitem.debtorno='" .  $_SESSION['Items'.$identifier]->DebtorNo . "' ";
 		}
 
 		if ($_POST['Keywords']!='' AND $_POST['StockCode']=='') {
@@ -720,18 +720,18 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 		} elseif ($_POST['Keywords']=='' AND $_POST['StockCode']=='') {
 			$msg='<div class="page_help_text">' . _('Stock Category has been used in search') . '.</div>';
 		}
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.units,
-						custitem.cust_part,
-						custitem.cust_description
-				FROM stockmaster INNER JOIN stockcategory
-				ON stockmaster.categoryid=stockcategory.categoryid
+		$SQL = "SELECT weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.units,
+						weberp_custitem.cust_part,
+						weberp_custitem.cust_description
+				FROM weberp_stockmaster INNER JOIN weberp_stockcategory
+				ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
 				" . $IncludeCustItem . "
-				WHERE (stockcategory.stocktype='F' OR stockcategory.stocktype='D' OR stockcategory.stocktype='L' " . $RawMaterialSellable . ")
-				AND stockmaster.mbflag <>'G'
-				AND stockmaster.discontinued=0 ";
+				WHERE (weberp_stockcategory.stocktype='F' OR weberp_stockcategory.stocktype='D' OR weberp_stockcategory.stocktype='L' " . $RawMaterialSellable . ")
+				AND weberp_stockmaster.mbflag <>'G'
+				AND weberp_stockmaster.discontinued=0 ";
 
 		if (isset($_POST['Keywords']) AND mb_strlen($_POST['Keywords'])>0) {
 			//insert wildcard characters in spaces
@@ -739,12 +739,12 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
 			if ($_POST['StockCat']=='All'){
-				$SQL .= "AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-					ORDER BY stockmaster.stockid";
+				$SQL .= "AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+					ORDER BY weberp_stockmaster.stockid";
 			} else {
-				$SQL .= "AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-					AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY stockmaster.stockid";
+				$SQL .= "AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+					AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_stockmaster.stockid";
 			}
 
 		} elseif (mb_strlen($_POST['StockCode'])>0){
@@ -753,20 +753,20 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			$SearchString = '%' . $_POST['StockCode'] . '%';
 
 			if ($_POST['StockCat']=='All'){
-				$SQL .= "AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-					ORDER BY stockmaster.stockid";
+				$SQL .= "AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+					ORDER BY weberp_stockmaster.stockid";
 			} else {
-				$SQL .= "AND stockmaster.stockid " . LIKE . " '" . $SearchString . "'
-					 AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					 ORDER BY stockmaster.stockid";
+				$SQL .= "AND weberp_stockmaster.stockid " . LIKE . " '" . $SearchString . "'
+					 AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					 ORDER BY weberp_stockmaster.stockid";
 			}
 
 		} else {
 			if ($_POST['StockCat']=='All'){
-				$SQL .= "ORDER BY stockmaster.stockid";
+				$SQL .= "ORDER BY weberp_stockmaster.stockid";
 			} else {
-				$SQL .= "AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					 ORDER BY stockmaster.stockid";
+				$SQL .= "AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					 ORDER BY weberp_stockmaster.stockid";
 			  }
 		}
 
@@ -808,7 +808,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 
 //Get The exchange rate used for GPPercent calculations on adding or amending items
 	if ($_SESSION['Items'.$identifier]->DefaultCurrency != $_SESSION['CompanyRecord']['currencydefault']){
-		$ExRateResult = DB_query("SELECT rate FROM currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
+		$ExRateResult = DB_query("SELECT rate FROM weberp_currencies WHERE currabrev='" . $_SESSION['Items'.$identifier]->DefaultCurrency . "'");
 		if (DB_num_rows($ExRateResult)>0){
 			$ExRateRow = DB_fetch_row($ExRateResult);
 			$ExRate = $ExRateRow[0];
@@ -868,9 +868,9 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 				$NewItemDue = DateAdd (Date($_SESSION['DefaultDateFormat']),'d', $_SESSION['Items'.$identifier]->DeliveryDays);
 			}
 			/*Now figure out if the item is a kit set - the field MBFlag='K'*/
-			$sql = "SELECT stockmaster.mbflag
-					FROM stockmaster
-					WHERE stockmaster.stockid='". $NewItem ."'";
+			$sql = "SELECT weberp_stockmaster.mbflag
+					FROM weberp_stockmaster
+					WHERE weberp_stockmaster.stockid='". $NewItem ."'";
 
 			$ErrMsg = _('Could not determine if the part being ordered was a kitset or not because');
 			$DbgMsg = _('The sql that was used to determine if the part being ordered was a kitset or not was ');
@@ -881,12 +881,12 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 				prnMsg( _('The item code') . ' ' . $NewItem . ' ' . _('could not be retrieved from the database and has not been added to the order'),'warn');
 			} elseif ($myrow=DB_fetch_array($KitResult)){
 				if ($myrow['mbflag']=='K'){	/*It is a kit set item */
-					$sql = "SELECT bom.component,
-							bom.quantity
-							FROM bom
-							WHERE bom.parent='" . $NewItem . "'
-                            AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                            AND bom.effectiveto > '" . date('Y-m-d') . "'";
+					$sql = "SELECT weberp_bom.component,
+							weberp_bom.quantity
+							FROM weberp_bom
+							WHERE weberp_bom.parent='" . $NewItem . "'
+                            AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                            AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 					$ErrMsg =  _('Could not retrieve kitset components from the database because') . ' ';
 					$KitResult = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -916,24 +916,24 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			/*First need to create a stock ID to hold the asset and record the sale - as only stock items can be sold
 			 * 		and before that we need to add a disposal stock category - if not already created
 			 * 		first off get the details about the asset being disposed of */
-			 $AssetDetailsResult = DB_query("SELECT  fixedassets.description,
-													fixedassets.longdescription,
-													fixedassets.barcode,
-													fixedassetcategories.costact,
-													fixedassets.cost-fixedassets.accumdepn AS nbv
-											FROM fixedassetcategories INNER JOIN fixedassets
-											ON fixedassetcategories.categoryid=fixedassets.assetcategoryid
-											WHERE fixedassets.assetid='" . $_POST['AssetToDisposeOf'] . "'");
+			 $AssetDetailsResult = DB_query("SELECT  weberp_fixedassets.description,
+													weberp_fixedassets.longdescription,
+													weberp_fixedassets.barcode,
+													weberp_fixedassetcategories.costact,
+													weberp_fixedassets.cost-weberp_fixedassets.accumdepn AS nbv
+											FROM weberp_fixedassetcategories INNER JOIN weberp_fixedassets
+											ON weberp_fixedassetcategories.categoryid=weberp_fixedassets.assetcategoryid
+											WHERE weberp_fixedassets.assetid='" . $_POST['AssetToDisposeOf'] . "'");
 			$AssetRow = DB_fetch_array($AssetDetailsResult);
 
 			/* Check that the stock category for disposal "ASSETS" is defined already */
-			$AssetCategoryResult = DB_query("SELECT categoryid FROM stockcategory WHERE categoryid='ASSETS'");
+			$AssetCategoryResult = DB_query("SELECT categoryid FROM weberp_stockcategory WHERE categoryid='ASSETS'");
 			if (DB_num_rows($AssetCategoryResult)==0){
 				/*Although asset GL posting will come from the asset category - we should set the GL codes to something sensible
 				 * based on the category of the asset under review at the moment - this may well change for any other assets sold subsequentely */
 
 				/*OK now we can insert the stock category for this asset */
-				$InsertAssetStockCatResult = DB_query("INSERT INTO stockcategory ( categoryid,
+				$InsertAssetStockCatResult = DB_query("INSERT INTO weberp_stockcategory ( categoryid,
 																				categorydescription,
 																				stockact)
 														VALUES ('ASSETS',
@@ -944,13 +944,13 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			/*First check to see that it doesn't exist already assets are of the format "ASSET-" . $AssetID
 			 */
 			 $TestAssetExistsAlreadyResult = DB_query("SELECT stockid
-														FROM stockmaster
+														FROM weberp_stockmaster
 														WHERE stockid ='ASSET-" . $_POST['AssetToDisposeOf']  . "'");
 			 $j=0;
 			while (DB_num_rows($TestAssetExistsAlreadyResult)==1) { //then it exists already ... bum
 				$j++;
 				$TestAssetExistsAlreadyResult = DB_query("SELECT stockid
-														FROM stockmaster
+														FROM weberp_stockmaster
 														WHERE stockid ='ASSET-" . $_POST['AssetToDisposeOf']  . '-' . $j . "'");
 			}
 			if ($j>0){
@@ -964,7 +964,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 				$NBV = $AssetRow['nbv'];
 			}
 			/*OK now we can insert the item for this asset */
-			$InsertAssetAsStockItemResult = DB_query("INSERT INTO stockmaster ( stockid,
+			$InsertAssetAsStockItemResult = DB_query("INSERT INTO weberp_stockmaster ( stockid,
 																				description,
 																				longdescription,
 																				categoryid,
@@ -983,10 +983,10 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 												'" . $_SESSION['DefaultTaxCategory'] . "',
 												'". $NBV . "')");
 			/*not forgetting the location records too */
-			$InsertStkLocRecsResult = DB_query("INSERT INTO locstock (loccode,
+			$InsertStkLocRecsResult = DB_query("INSERT INTO weberp_locstock (loccode,
 																	stockid)
 												SELECT loccode, '" . $AssetStockID . "'
-												FROM locations");
+												FROM weberp_locations");
 			/*Now the asset has been added to the stock master we can add it to the sales order */
 			$NewItemDue = date($_SESSION['DefaultDateFormat']);
 			if (isset($_POST['POLine'])){
@@ -1125,7 +1125,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 					}
 				}
 				$result = DB_query("SELECT MAX(discountrate) AS discount
-									FROM discountmatrix
+									FROM weberp_discountmatrix
 									WHERE salestype='" .  $_SESSION['Items'.$identifier]->DefaultSalesType . "'
 									AND discountcategory ='" . $OrderLine->DiscCat . "'
 									AND quantitybreak <= '" . $QuantityOfDiscCat ."'");
@@ -1157,9 +1157,9 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 	if (isset($NewItem)){
 /* get the item details from the database and hold them in the cart object make the quantity 1 by default then add it to the cart */
 /*Now figure out if the item is a kit set - the field MBFlag='K'*/
-		$sql = "SELECT stockmaster.mbflag
-		   		FROM stockmaster
-				WHERE stockmaster.stockid='". $NewItem ."'";
+		$sql = "SELECT weberp_stockmaster.mbflag
+		   		FROM weberp_stockmaster
+				WHERE weberp_stockmaster.stockid='". $NewItem ."'";
 
 		$ErrMsg =  _('Could not determine if the part being ordered was a kitset or not because');
 
@@ -1170,12 +1170,12 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 
 		if ($myrow=DB_fetch_array($KitResult)){
 		   	if ($myrow['mbflag']=='K'){	/*It is a kit set item */
-				$sql = "SELECT bom.component,
-							bom.quantity
-						FROM bom
-						WHERE bom.parent='" . $NewItem . "'
-                        AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                        AND bom.effectiveto > '" . date('Y-m-d') . "'";
+				$sql = "SELECT weberp_bom.component,
+							weberp_bom.quantity
+						FROM weberp_bom
+						WHERE weberp_bom.parent='" . $NewItem . "'
+                        AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                        AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 				$ErrMsg = _('Could not retrieve kitset components from the database because');
 				$KitResult = DB_query($sql,$ErrMsg);
@@ -1206,9 +1206,9 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 		$AlreadyWarnedAboutCredit = false;
 		foreach($NewItemArray as $NewItem => $NewItemQty) {
 			if($NewItemQty > 0)	{
-				$sql = "SELECT stockmaster.mbflag
-						FROM stockmaster
-						WHERE stockmaster.stockid='". $NewItem ."'";
+				$sql = "SELECT weberp_stockmaster.mbflag
+						FROM weberp_stockmaster
+						WHERE weberp_stockmaster.stockid='". $NewItem ."'";
 
 				$ErrMsg =  _('Could not determine if the part being ordered was a kitset or not because');
 
@@ -1219,12 +1219,12 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 
 				if ($myrow=DB_fetch_array($KitResult)){
 					if ($myrow['mbflag']=='K'){	/*It is a kit set item */
-						$sql = "SELECT bom.component,
-										bom.quantity
-								FROM bom
-								WHERE bom.parent='" . $NewItem . "'
-                                AND bom.effectiveafter <= '" . date('Y-m-d') . "'
-                                AND bom.effectiveto > '" . date('Y-m-d') . "'";
+						$sql = "SELECT weberp_bom.component,
+										weberp_bom.quantity
+								FROM weberp_bom
+								WHERE weberp_bom.parent='" . $NewItem . "'
+                                AND weberp_bom.effectiveafter <= '" . date('Y-m-d') . "'
+                                AND weberp_bom.effectiveto > '" . date('Y-m-d') . "'";
 
 						$ErrMsg = _('Could not retrieve kitset components from the database because');
 						$KitResult = DB_query($sql,$ErrMsg);
@@ -1264,7 +1264,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 				}
 			}
 			$result = DB_query("SELECT MAX(discountrate) AS discount
-								FROM discountmatrix
+								FROM weberp_discountmatrix
 								WHERE salestype='" .  $_SESSION['Items'.$identifier]->DefaultSalesType . "'
 								AND discountcategory ='" . $OrderLine->DiscCat . "'
 								AND quantitybreak <= '" . $QuantityOfDiscCat . "'");
@@ -1454,14 +1454,14 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 // Select the most recently ordered items for quick select
 			$SixMonthsAgo = DateAdd (Date($_SESSION['DefaultDateFormat']),'m',-6);
 
-			$SQL="SELECT stockmaster.units,
-						stockmaster.description,
-						stockmaster.longdescription,
-						stockmaster.stockid,
-						salesorderdetails.stkcode,
+			$SQL="SELECT weberp_stockmaster.units,
+						weberp_stockmaster.description,
+						weberp_stockmaster.longdescription,
+						weberp_stockmaster.stockid,
+						weberp_salesorderdetails.stkcode,
 						SUM(qtyinvoiced) salesqty
-					FROM `salesorderdetails`INNER JOIN `stockmaster`
-					ON  salesorderdetails.stkcode = stockmaster.stockid
+					FROM `weberp_salesorderdetails`INNER JOIN `stockmaster`
+					ON  weberp_salesorderdetails.stkcode = weberp_stockmaster.stockid
 					WHERE ActualDispatchDate >= '" . FormatDateForSQL($SixMonthsAgo) . "'
 					GROUP BY stkcode
 					ORDER BY salesqty DESC
@@ -1495,22 +1495,22 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 // This code needs sorting out, but until then :
 				$ImageSource = _('No Image');
 // Find the quantity in stock at location
-				$QOHSQL = "SELECT sum(locstock.quantity) AS qoh,decimalplaces
-							FROM locstock INNER JOIN stockmaster ON stockmaster.stockid=locstock.stockid
-							WHERE locstock.stockid='" .$myrow['stockid'] . "'
+				$QOHSQL = "SELECT sum(weberp_locstock.quantity) AS qoh,decimalplaces
+							FROM weberp_locstock INNER JOIN weberp_stockmaster ON weberp_stockmaster.stockid=weberp_locstock.stockid
+							WHERE weberp_locstock.stockid='" .$myrow['stockid'] . "'
 							AND loccode = '" . $_SESSION['Items'.$identifier]->Location . "'";
 				$QOHResult =  DB_query($QOHSQL);
 				$QOHRow = DB_fetch_array($QOHResult);
 				$QOH = $QOHRow['qoh'];
 
 				// Find the quantity on outstanding sales orders
-				$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-						FROM salesorderdetails INNER JOIN salesorders
-						ON salesorders.orderno = salesorderdetails.orderno
-						WHERE salesorders.fromstkloc='" . $_SESSION['Items'.$identifier]->Location . "'
-						AND salesorderdetails.completed=0
-						AND salesorders.quotation=0
-						AND salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
+				$sql = "SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+						FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+						ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						WHERE weberp_salesorders.fromstkloc='" . $_SESSION['Items'.$identifier]->Location . "'
+						AND weberp_salesorderdetails.completed=0
+						AND weberp_salesorders.quotation=0
+						AND weberp_salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
 
 				$ErrMsg = _('The demand for this product from') . ' ' . $_SESSION['Items'.$identifier]->Location . ' ' .
 					 _('cannot be retrieved because');
@@ -1584,7 +1584,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 		}
 		$SQL="SELECT categoryid,
 						categorydescription
-				FROM stockcategory
+				FROM weberp_stockcategory
 				WHERE stocktype='F' OR stocktype='D' OR stocktype='L'
 				ORDER BY categorydescription";
 
@@ -1658,23 +1658,23 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 
 				// Find the quantity in stock at location
 				$QOHSQL = "SELECT quantity AS qoh,
-									stockmaster.decimalplaces
-							   FROM locstock INNER JOIN stockmaster
-							   ON locstock.stockid = stockmaster.stockid
-							   WHERE locstock.stockid='" .$myrow['stockid'] . "' AND
+									weberp_stockmaster.decimalplaces
+							   FROM weberp_locstock INNER JOIN weberp_stockmaster
+							   ON weberp_locstock.stockid = weberp_stockmaster.stockid
+							   WHERE weberp_locstock.stockid='" .$myrow['stockid'] . "' AND
 							   loccode = '" . $_SESSION['Items'.$identifier]->Location . "'";
 				$QOHResult =  DB_query($QOHSQL);
 				$QOHRow = DB_fetch_array($QOHResult);
 				$QOH = $QOHRow['qoh'];
 
 				// Find the quantity on outstanding sales orders
-				$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-						FROM salesorderdetails INNER JOIN salesorders
-						ON salesorders.orderno = salesorderdetails.orderno
-						 WHERE  salesorders.fromstkloc='" . $_SESSION['Items'.$identifier]->Location . "'
-						 AND salesorderdetails.completed=0
-						 AND salesorders.quotation=0
-						 AND salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
+				$sql = "SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+						FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+						ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+						 WHERE  weberp_salesorders.fromstkloc='" . $_SESSION['Items'.$identifier]->Location . "'
+						 AND weberp_salesorderdetails.completed=0
+						 AND weberp_salesorders.quotation=0
+						 AND weberp_salesorderdetails.stkcode='" . $myrow['stockid'] . "'";
 
 				$ErrMsg = _('The demand for this product from') . ' ' . $_SESSION['Items'.$identifier]->Location . ' ' . _('cannot be retrieved because');
 				$DemandResult = DB_query($sql,$ErrMsg);
@@ -1792,7 +1792,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			echo '<tr>
 					<td>' . _('Asset to Dispose Of') . ':</td>
 					<td><select name="AssetToDisposeOf">';
-			$AssetsResult = DB_query("SELECT assetid, description FROM fixedassets WHERE disposaldate='0000-00-00'");
+			$AssetsResult = DB_query("SELECT assetid, description FROM weberp_fixedassets WHERE disposaldate='0000-00-00'");
 			echo '<option selected="selected" value="NoAssetSelected">' . _('Select Asset To Dispose of From the List Below') . '</option>';
 			while ($AssetRow = DB_fetch_array($AssetsResult)){
 				echo '<option value="' . $AssetRow['assetid'] . '">' . $AssetRow['assetid'] . ' - ' . $AssetRow['description'] . '</option>';
@@ -1827,28 +1827,28 @@ include('includes/footer.inc');
 
 function GetCustBranchDetails($identifier) {
 		global $db;
-		$sql = "SELECT custbranch.brname,
-						custbranch.branchcode,
-						custbranch.braddress1,
-						custbranch.braddress2,
-						custbranch.braddress3,
-						custbranch.braddress4,
-						custbranch.braddress5,
-						custbranch.braddress6,
-						custbranch.phoneno,
-						custbranch.email,
-						custbranch.defaultlocation,
-						custbranch.defaultshipvia,
-						custbranch.deliverblind,
-						custbranch.specialinstructions,
-						custbranch.estdeliverydays,
-						locations.locationname,
-						custbranch.salesman
-					FROM custbranch
-					INNER JOIN locations
-					ON custbranch.defaultlocation=locations.loccode
-					WHERE custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'
-					AND custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
+		$sql = "SELECT weberp_custbranch.brname,
+						weberp_custbranch.branchcode,
+						weberp_custbranch.braddress1,
+						weberp_custbranch.braddress2,
+						weberp_custbranch.braddress3,
+						weberp_custbranch.braddress4,
+						weberp_custbranch.braddress5,
+						weberp_custbranch.braddress6,
+						weberp_custbranch.phoneno,
+						weberp_custbranch.email,
+						weberp_custbranch.defaultlocation,
+						weberp_custbranch.defaultshipvia,
+						weberp_custbranch.deliverblind,
+						weberp_custbranch.specialinstructions,
+						weberp_custbranch.estdeliverydays,
+						weberp_locations.locationname,
+						weberp_custbranch.salesman
+					FROM weberp_custbranch
+					INNER JOIN weberp_locations
+					ON weberp_custbranch.defaultlocation=weberp_locations.loccode
+					WHERE weberp_custbranch.branchcode='" . $_SESSION['Items'.$identifier]->Branch . "'
+					AND weberp_custbranch.debtorno = '" . $_SESSION['Items'.$identifier]->DebtorNo . "'";
 
 		$ErrMsg = _('The customer branch record of the customer selected') . ': ' . $_SESSION['Items'.$identifier]->DebtorNo . ' ' . _('cannot be retrieved because');
 		$DbgMsg = _('SQL used to retrieve the branch details was') . ':';

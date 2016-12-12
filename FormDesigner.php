@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: FormDesigner.php 7470 2016-03-09 08:09:37Z daintree $ */
 
 /*	Form Designer notes:
 	- All measurements are in PostScript points (72 points = 25,4 mm).

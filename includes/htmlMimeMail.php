@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: htmlMimeMail.php 6592 2014-03-02 08:41:40Z daintree $*/
 /**
 * Filename.......: class.html.mime.mail.inc
 * Project........: HTML Mime mail class

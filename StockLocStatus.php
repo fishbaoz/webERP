@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: StockLocStatus.php 7356 2015-09-21 17:30:10Z rchacon $*/
 /* Shows the stock on hand together with outstanding sales orders and outstanding purchase orders by stock location for all items in the selected stock category */
 
 include('includes/session.inc');
@@ -25,9 +25,9 @@ echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-$sql = "SELECT locations.loccode, locationname
-	FROM locations
-	INNER JOIN locationusers ON locationusers.loccode=locations.loccode AND locationusers.userid='" . $_SESSION['UserID'] . "' AND locationusers.canview=1";
+$sql = "SELECT weberp_locations.loccode, locationname
+	FROM weberp_locations
+	INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" . $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
 $resultStkLocs = DB_query($sql);
 
 echo '<table class="selection">
@@ -54,7 +54,7 @@ echo '</select></td>
 
 $SQL="SELECT categoryid,
 				categorydescription
-		FROM stockcategory
+		FROM weberp_stockcategory
 		ORDER BY categorydescription";
 $result1 = DB_query($SQL);
 if(DB_num_rows($result1)==0) {
@@ -123,44 +123,44 @@ echo '<br />
 if(isset($_POST['ShowStatus'])) {
 
 	if($_POST['StockCat']=='All') {
-		$sql = "SELECT locstock.stockid,
-						stockmaster.description,
-						locstock.loccode,
-						locstock.bin,
-						locations.locationname,
-						locstock.quantity,
-						locstock.reorderlevel,
-						stockmaster.decimalplaces,
-						stockmaster.serialised,
-						stockmaster.controlled
-					FROM locstock,
-						stockmaster,
-						locations
-					WHERE locstock.stockid=stockmaster.stockid
-						AND locstock.loccode = '".$_POST['StockLocation']."'
-						AND locstock.loccode=locations.loccode
-						AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M')
-					ORDER BY locstock.stockid";
+		$sql = "SELECT weberp_locstock.stockid,
+						weberp_stockmaster.description,
+						weberp_locstock.loccode,
+						weberp_locstock.bin,
+						weberp_locations.locationname,
+						weberp_locstock.quantity,
+						weberp_locstock.reorderlevel,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.serialised,
+						weberp_stockmaster.controlled
+					FROM weberp_locstock,
+						weberp_stockmaster,
+						weberp_locations
+					WHERE weberp_locstock.stockid=weberp_stockmaster.stockid
+						AND weberp_locstock.loccode = '".$_POST['StockLocation']."'
+						AND weberp_locstock.loccode=weberp_locations.loccode
+						AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M')
+					ORDER BY weberp_locstock.stockid";
 	} else {
-		$sql = "SELECT locstock.stockid,
-						stockmaster.description,
-						locstock.loccode,
-						locstock.bin,
-						locations.locationname,
-						locstock.quantity,
-						locstock.reorderlevel,
-						stockmaster.decimalplaces,
-						stockmaster.serialised,
-						stockmaster.controlled
-					FROM locstock,
-						stockmaster,
-						locations
-					WHERE locstock.stockid=stockmaster.stockid
-						AND locstock.loccode = '" . $_POST['StockLocation'] . "'
-						AND locstock.loccode=locations.loccode
-						AND (stockmaster.mbflag='B' OR stockmaster.mbflag='M')
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					ORDER BY locstock.stockid";
+		$sql = "SELECT weberp_locstock.stockid,
+						weberp_stockmaster.description,
+						weberp_locstock.loccode,
+						weberp_locstock.bin,
+						weberp_locations.locationname,
+						weberp_locstock.quantity,
+						weberp_locstock.reorderlevel,
+						weberp_stockmaster.decimalplaces,
+						weberp_stockmaster.serialised,
+						weberp_stockmaster.controlled
+					FROM weberp_locstock,
+						weberp_stockmaster,
+						weberp_locations
+					WHERE weberp_locstock.stockid=weberp_stockmaster.stockid
+						AND weberp_locstock.loccode = '" . $_POST['StockLocation'] . "'
+						AND weberp_locstock.loccode=weberp_locations.loccode
+						AND (weberp_stockmaster.mbflag='B' OR weberp_stockmaster.mbflag='M')
+						AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'
+					ORDER BY weberp_locstock.stockid";
 	}
 
 	$ErrMsg = _('The stock held at each location cannot be retrieved because');
@@ -187,13 +187,13 @@ if(isset($_POST['ShowStatus'])) {
 
 		$StockID = $myrow['stockid'];
 
-		$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
-				FROM salesorderdetails INNER JOIN salesorders
-				ON salesorders.orderno = salesorderdetails.orderno
-				WHERE salesorders.fromstkloc='" . $myrow['loccode'] . "'
-				AND salesorderdetails.completed=0
-				AND salesorderdetails.stkcode='" . $StockID . "'
-				AND salesorders.quotation=0";
+		$sql = "SELECT SUM(weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced) AS dem
+				FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+				ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				WHERE weberp_salesorders.fromstkloc='" . $myrow['loccode'] . "'
+				AND weberp_salesorderdetails.completed=0
+				AND weberp_salesorderdetails.stkcode='" . $StockID . "'
+				AND weberp_salesorders.quotation=0";
 
 		$ErrMsg = _('The demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 		$DemandResult = DB_query($sql,$ErrMsg);
@@ -206,18 +206,18 @@ if(isset($_POST['ShowStatus'])) {
 		}
 
 		//Also need to add in the demand as a component of an assembly items if this items has any assembly parents.
-		$sql = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
-				FROM salesorderdetails INNER JOIN salesorders
-					ON salesorders.orderno = salesorderdetails.orderno
-				INNER JOIN bom
-					ON salesorderdetails.stkcode=bom.parent
-				INNER JOIN stockmaster
-					ON stockmaster.stockid=bom.parent
-				WHERE salesorders.fromstkloc='" . $myrow['loccode'] . "'
-				AND salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0
-				AND bom.component='" . $StockID . "'
-				AND stockmaster.mbflag='A'
-				AND salesorders.quotation=0";
+		$sql = "SELECT SUM((weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced)*weberp_bom.quantity) AS dem
+				FROM weberp_salesorderdetails INNER JOIN weberp_salesorders
+					ON weberp_salesorders.orderno = weberp_salesorderdetails.orderno
+				INNER JOIN weberp_bom
+					ON weberp_salesorderdetails.stkcode=weberp_bom.parent
+				INNER JOIN weberp_stockmaster
+					ON weberp_stockmaster.stockid=weberp_bom.parent
+				WHERE weberp_salesorders.fromstkloc='" . $myrow['loccode'] . "'
+				AND weberp_salesorderdetails.quantity-weberp_salesorderdetails.qtyinvoiced > 0
+				AND weberp_bom.component='" . $StockID . "'
+				AND weberp_stockmaster.mbflag='A'
+				AND weberp_salesorders.quotation=0";
 
 		$ErrMsg = _('The demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 		$DemandResult = DB_query($sql, $ErrMsg);
@@ -226,14 +226,14 @@ if(isset($_POST['ShowStatus'])) {
 			$DemandRow = DB_fetch_row($DemandResult);
 			$DemandQty += $DemandRow[0];
 		}
-		$sql = "SELECT SUM((woitems.qtyreqd-woitems.qtyrecd)*bom.quantity) AS dem
-				FROM workorders INNER JOIN woitems
-					ON woitems.wo = workorders.wo
-				INNER JOIN bom
-					ON woitems.stockid = bom.parent
-				WHERE workorders.closed=0
-				AND bom.component = '". $StockID . "'
-				AND workorders.loccode='". $myrow['loccode'] ."'";
+		$sql = "SELECT SUM((weberp_woitems.qtyreqd-weberp_woitems.qtyrecd)*weberp_bom.quantity) AS dem
+				FROM weberp_workorders INNER JOIN weberp_woitems
+					ON weberp_woitems.wo = weberp_workorders.wo
+				INNER JOIN weberp_bom
+					ON weberp_woitems.stockid = weberp_bom.parent
+				WHERE weberp_workorders.closed=0
+				AND weberp_bom.component = '". $StockID . "'
+				AND weberp_workorders.loccode='". $myrow['loccode'] ."'";
 		$DemandResult = DB_query($sql, $ErrMsg);
 
 		if(DB_num_rows($DemandResult)==1) {

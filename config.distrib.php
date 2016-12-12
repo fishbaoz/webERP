@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$ */
+/* $Id: config.distrib.php 7326 2015-06-28 01:09:00Z daintree $ */
 
 // User configurable variables
 //---------------------------------------------------

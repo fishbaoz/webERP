@@ -1,8 +1,8 @@
 <?php
-/* $Id$*/
+/* $Id: StockUsageGraph.php 6944 2014-10-27 07:15:34Z daintree $*/
 
 include('includes/session.inc');
-$result = DB_query("SELECT description FROM stockmaster WHERE stockid='" . trim(mb_strtoupper($_GET['StockID'])) . "'");
+$result = DB_query("SELECT description FROM weberp_stockmaster WHERE stockid='" . trim(mb_strtoupper($_GET['StockID'])) . "'");
 $myrow = DB_fetch_row($result);
 
 include('includes/phplot/phplot.php');
@@ -19,31 +19,31 @@ $graph->SetMarginsPixels(40,40,40,40);
 $graph->SetDataType('text-data');
 
 if($_GET['StockLocation']=='All'){
-	$sql = "SELECT periods.periodno,
-			periods.lastdate_in_period,
-			SUM(-stockmoves.qty) AS qtyused
-		FROM stockmoves INNER JOIN periods
-			ON stockmoves.prd=periods.periodno
-		INNER JOIN locationusers ON locationusers.loccode=stockmoves.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE (stockmoves.type=10 OR stockmoves.type=11 OR stockmoves.type=28)
-		AND stockmoves.hidemovt=0
-		AND stockmoves.stockid = '" . trim(mb_strtoupper($_GET['StockID'])) . "'
-		GROUP BY periods.periodno,
-			periods.lastdate_in_period
+	$sql = "SELECT weberp_periods.periodno,
+			weberp_periods.lastdate_in_period,
+			SUM(-weberp_stockmoves.qty) AS qtyused
+		FROM weberp_stockmoves INNER JOIN weberp_periods
+			ON weberp_stockmoves.prd=weberp_periods.periodno
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE (weberp_stockmoves.type=10 OR weberp_stockmoves.type=11 OR weberp_stockmoves.type=28)
+		AND weberp_stockmoves.hidemovt=0
+		AND weberp_stockmoves.stockid = '" . trim(mb_strtoupper($_GET['StockID'])) . "'
+		GROUP BY weberp_periods.periodno,
+			weberp_periods.lastdate_in_period
 		ORDER BY periodno  LIMIT 24";
 } else {
-	$sql = "SELECT periods.periodno,
-			periods.lastdate_in_period,
-			SUM(-stockmoves.qty) AS qtyused
-		FROM stockmoves INNER JOIN periods
-			ON stockmoves.prd=periods.periodno
-		INNER JOIN locationusers ON locationusers.loccode=stockmoves.loccode AND locationusers.userid='" .  $_SESSION['UserID'] . "' AND locationusers.canview=1
-		WHERE (stockmoves.type=10 Or stockmoves.type=11 OR stockmoves.type=28)
-		AND stockmoves.hidemovt=0
-		AND stockmoves.loccode='" . $_GET['StockLocation'] . "'
-		AND stockmoves.stockid = '" . trim(mb_strtoupper($_GET['StockID'])) . "'
-		GROUP BY periods.periodno,
-			periods.lastdate_in_period
+	$sql = "SELECT weberp_periods.periodno,
+			weberp_periods.lastdate_in_period,
+			SUM(-weberp_stockmoves.qty) AS qtyused
+		FROM weberp_stockmoves INNER JOIN weberp_periods
+			ON weberp_stockmoves.prd=weberp_periods.periodno
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+		WHERE (weberp_stockmoves.type=10 Or weberp_stockmoves.type=11 OR weberp_stockmoves.type=28)
+		AND weberp_stockmoves.hidemovt=0
+		AND weberp_stockmoves.loccode='" . $_GET['StockLocation'] . "'
+		AND weberp_stockmoves.stockid = '" . trim(mb_strtoupper($_GET['StockID'])) . "'
+		GROUP BY weberp_periods.periodno,
+			weberp_periods.lastdate_in_period
 		ORDER BY periodno  LIMIT 24";
 }
 $MovtsResult = DB_query($sql);

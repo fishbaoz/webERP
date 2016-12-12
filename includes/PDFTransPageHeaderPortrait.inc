@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: PDFTransPageHeaderPortrait.inc 7551 2016-06-06 15:28:31Z rchacon $ */
 
 /*	Please note that addTextWrap() prints a font-size-height further down than
 	addText() and other functions. Use addText() instead of addTextWrap() to

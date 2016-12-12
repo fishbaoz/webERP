@@ -31,7 +31,7 @@ $ItemDescriptionLanguagesArray = explode(',',$_SESSION['ItemDescriptionLanguages
 
 if (isset($_POST['StockID']) && !empty($_POST['StockID']) && !isset($_POST['UpdateCategories'])) {
 	$sql = "SELECT COUNT(stockid)
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid='".$_POST['StockID']."'
 			GROUP BY stockid";
 
@@ -281,7 +281,7 @@ if (isset($_POST['submit'])) {
 		if ($_POST['New'] !=0) { //it is a NEW CLONED part
 			//but lets be really sure here
 			$result = DB_query("SELECT stockid
-								FROM stockmaster
+								FROM weberp_stockmaster
 								WHERE stockid='" . $_POST['StockID'] ."'");
 			if (DB_num_rows($result)==1){
 				prnMsg(_('The stock code entered is already in the database - duplicate stock codes are prohibited by the system. Try choosing an alternative stock code'),'error');
@@ -289,7 +289,7 @@ if (isset($_POST['submit'])) {
 				//exit;
 			} else {
     			DB_Txn_Begin();
-				$sql = "INSERT INTO stockmaster (stockid,
+				$sql = "INSERT INTO weberp_stockmaster (stockid,
 												description,
 												longdescription,
 												categoryid,
@@ -340,7 +340,7 @@ if (isset($_POST['submit'])) {
 					if (count($ItemDescriptionLanguagesArray)>0){
 						foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 							if ($LanguageId!=''){
-								$result = DB_query("INSERT INTO stockdescriptiontranslations (stockid,
+								$result = DB_query("INSERT INTO weberp_stockdescriptiontranslations (stockid,
 																							language_id,
 																							descriptiontranslation,
 																							longdescriptiontranslation)
@@ -369,7 +369,7 @@ if (isset($_POST['submit'])) {
 							$_POST['PropValue' . $i]=$_POST['PropValue' . $i];
 						}
 
-					$result = DB_query("INSERT INTO stockitemproperties (stockid,
+					$result = DB_query("INSERT INTO weberp_stockitemproperties (stockid,
 													stkcatpropid,
 													value)
 													VALUES ('" . $_POST['StockID'] . "',
@@ -380,38 +380,38 @@ if (isset($_POST['submit'])) {
 										true);
 					} //end of loop around properties defined for the category
 
-					//Add data to locstock
+					//Add data to weberp_locstock
 
-					$sql = "INSERT INTO locstock (loccode,
+					$sql = "INSERT INTO weberp_locstock (loccode,
 													stockid)
-										SELECT locations.loccode,
+										SELECT weberp_locations.loccode,
 										'" . $_POST['StockID'] . "'
-										FROM locations";
+										FROM weberp_locations";
 
 					$ErrMsg =  _('The locations for the item') . ' ' . $_POST['StockID'] .  ' ' . _('could not be added because');
 					$DbgMsg = _('NB Locations records can be added by opening the utility page') . ' <i>Z_MakeStockLocns.php</i> ' . _('The SQL that was used to add the location records that failed was');
 					$InsResult = DB_query($sql,$ErrMsg,$DbgMsg);
                     DB_Txn_Commit();
                     //check for any purchase data
-                    $sql = "SELECT purchdata.supplierno,
-                                suppliers.suppname,
-                                purchdata.price,
-                                suppliers.currcode,
-                                purchdata.effectivefrom,
-                                purchdata.suppliersuom,
-                                purchdata.supplierdescription,
-                                purchdata.leadtime,
-                                purchdata.suppliers_partno,
-                                purchdata.minorderqty,
-                                purchdata.preferred,
-                                purchdata.conversionfactor,
-                                currencies.decimalplaces AS currdecimalplaces
-                            FROM purchdata INNER JOIN suppliers
-                                ON purchdata.supplierno=suppliers.supplierid
-                            INNER JOIN currencies
-                                ON suppliers.currcode=currencies.currabrev
-                            WHERE purchdata.stockid = '" . $_POST['OldStockID'] . "'
-                            ORDER BY purchdata.effectivefrom DESC";
+                    $sql = "SELECT weberp_purchdata.supplierno,
+                                weberp_suppliers.suppname,
+                                weberp_purchdata.price,
+                                weberp_suppliers.currcode,
+                                weberp_purchdata.effectivefrom,
+                                weberp_purchdata.suppliersuom,
+                                weberp_purchdata.supplierdescription,
+                                weberp_purchdata.leadtime,
+                                weberp_purchdata.suppliers_partno,
+                                weberp_purchdata.minorderqty,
+                                weberp_purchdata.preferred,
+                                weberp_purchdata.conversionfactor,
+                                weberp_currencies.decimalplaces AS currdecimalplaces
+                            FROM weberp_purchdata INNER JOIN weberp_suppliers
+                                ON weberp_purchdata.supplierno=weberp_suppliers.supplierid
+                            INNER JOIN weberp_currencies
+                                ON weberp_suppliers.currcode=weberp_currencies.currabrev
+                            WHERE weberp_purchdata.stockid = '" . $_POST['OldStockID'] . "'
+                            ORDER BY weberp_purchdata.effectivefrom DESC";
                     $ErrMsg = _('The supplier purchasing details for the selected part could not be retrieved because');
                     $PurchDataResult = DB_query($sql, $ErrMsg);
                     if (DB_num_rows($PurchDataResult) == 0 and $_POST['OldStockID'] != '') {
@@ -420,7 +420,7 @@ if (isset($_POST['submit'])) {
                     } else {
                         while ($myrow = DB_fetch_array($PurchDataResult)) { //clone the purchase data
 
-                            $sql = "INSERT INTO purchdata (supplierno,
+                            $sql = "INSERT INTO weberp_purchdata (supplierno,
 										stockid,
 										price,
 										effectivefrom,
@@ -450,35 +450,35 @@ if (isset($_POST['submit'])) {
 
                     //For both the following - assume the data taken from the tables has already been validated.
                     //check for price data
-                    $sql = "SELECT currencies.currency,
-                                salestypes.sales_type,
-                            prices.price,
-                            prices.stockid,
-                            prices.typeabbrev,
-                            prices.currabrev,
-                            prices.startdate,
-                            prices.enddate,
-                            prices.debtorno,
-                            currencies.decimalplaces AS currdecimalplaces
-                        FROM prices
-                        INNER JOIN salestypes
-                            ON prices.typeabbrev = salestypes.typeabbrev
-                        INNER JOIN currencies
-                            ON prices.currabrev=currencies.currabrev
-                        WHERE prices.stockid='".$_POST['OldStockID']."'
+                    $sql = "SELECT weberp_currencies.currency,
+                                weberp_salestypes.sales_type,
+                            weberp_prices.price,
+                            weberp_prices.stockid,
+                            weberp_prices.typeabbrev,
+                            weberp_prices.currabrev,
+                            weberp_prices.startdate,
+                            weberp_prices.enddate,
+                            weberp_prices.debtorno,
+                            weberp_currencies.decimalplaces AS currdecimalplaces
+                        FROM weberp_prices
+                        INNER JOIN weberp_salestypes
+                            ON weberp_prices.typeabbrev = weberp_salestypes.typeabbrev
+                        INNER JOIN weberp_currencies
+                            ON weberp_prices.currabrev=weberp_currencies.currabrev
+                        WHERE weberp_prices.stockid='".$_POST['OldStockID']."'
 
-                        ORDER BY prices.currabrev,
-                            prices.typeabbrev,
-                            prices.startdate";
+                        ORDER BY weberp_prices.currabrev,
+                            weberp_prices.typeabbrev,
+                            weberp_prices.startdate";
 
                     $PricingDataResult = DB_query($sql);
-                        //AND prices.debtorno=''
+                        //AND weberp_prices.debtorno=''
                     if (DB_num_rows($PricingDataResult) == 0 and $_POST['OldStockID'] != '') {
                         prnMsg(_('There is no purchasing data set up for the part selected'), 'info');
                         $NoPricingData=1;
                     } else {
                         while ($myrow = DB_fetch_array($PricingDataResult)) { //clone the purchase data
-                            $sql = "INSERT INTO prices (stockid,
+                            $sql = "INSERT INTO weberp_prices (stockid,
                                         typeabbrev,
                                         currabrev,
                                         debtorno,
@@ -502,15 +502,15 @@ if (isset($_POST['submit'])) {
 									labourcost,
 									overheadcost,
 									lastcost
-							FROM stockmaster
-							WHERE stockmaster.stockid='".$_POST['OldStockID']."'";
+							FROM weberp_stockmaster
+							WHERE weberp_stockmaster.stockid='".$_POST['OldStockID']."'";
                         $ErrMsg = _('The entered item code does not exist');
                         $OldResult = DB_query($sql,$ErrMsg);
                         $OldRow = DB_fetch_array($OldResult);
 
                     //now update cloned item costs
                         $Result = DB_Txn_Begin();
-                        $SQL = "UPDATE stockmaster SET	materialcost='" . $OldRow['materialcost'] . "',
+                        $SQL = "UPDATE weberp_stockmaster SET	materialcost='" . $OldRow['materialcost'] . "',
 										labourcost     ='" . $OldRow['labourcost'] . "',
 										overheadcost   ='" . $OldRow['overheadcost'] . "',
 										lastcost       ='" . $OldRow['lastcost'] . "',
@@ -628,7 +628,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
 					nextserialno,
 					pansize,
 					shrinkfactor
-			FROM stockmaster
+			FROM weberp_stockmaster
 			WHERE stockid = '".$selectedStockID."'";
 
 	$result = DB_query($sql);
@@ -658,7 +658,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
 	$sql = "SELECT descriptiontranslation,
 					longdescriptiontranslation,
 					language_id
-			FROM stockdescriptiontranslations
+			FROM weberp_stockdescriptiontranslations
 			WHERE stockid='" . $selectedStockID . "' AND (";
 	foreach ($ItemDescriptionLanguagesArray as $LanguageId) {
 		$sql .= "language_id='" . $LanguageId ."' OR ";
@@ -761,7 +761,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
             <td>' . _('Category') . ':</td>
             <td><select name="CategoryID" onchange="ReloadForm(ItemForm.UpdateCategories)">';
 
-    $sql = "SELECT categoryid, categorydescription FROM stockcategory";
+    $sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
     $ErrMsg = _('The stock categories could not be retrieved because');
     $DbgMsg = _('The SQL used to retrieve stock categories and failed was');
     $result = DB_query($sql,$ErrMsg,$DbgMsg);
@@ -839,7 +839,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
             <td>' . _('Units of Measure') . ':</td>
             <td><select ' . (in_array('Description',$Errors) ?  'class="selecterror"' : '' ) .'  name="Units">';
 
-    $sql = "SELECT unitname FROM unitsofmeasure ORDER by unitname";
+    $sql = "SELECT unitname FROM weberp_unitsofmeasure ORDER by unitname";
     $UOMResult = DB_query($sql);
 
     if (!isset($_POST['Units'])) {
@@ -994,7 +994,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
     echo '<tr>
             <td>' . _('Tax Category') . ':</td>
             <td><select name="TaxCat">';
-    $sql = "SELECT taxcatid, taxcatname FROM taxcategories ORDER BY taxcatname";
+    $sql = "SELECT taxcatid, taxcatname FROM weberp_taxcategories ORDER BY taxcatname";
     $result = DB_query($sql);
 
     if (!isset($_POST['TaxCat'])){
@@ -1035,7 +1035,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
                     numericvalue,
                     minimumvalue,
                     maximumvalue
-            FROM stockcatproperties
+            FROM weberp_stockcatproperties
             WHERE categoryid ='" . $_POST['CategoryID'] . "'
             AND reqatsalesorder =0
             ORDER BY stkcatpropid";
@@ -1055,7 +1055,7 @@ if ( (!isset($_POST['UpdateCategories']) AND ($InputError!=1))  OR $_POST['New']
 
             if (isset($_POST['StockID']) && !empty($_POST['StockID'])) {
                 $PropValResult = DB_query("SELECT value FROM
-                                            stockitemproperties
+                                            weberp_stockitemproperties
                                             WHERE stockid='" . $_POST['StockID'] . "'
                                             AND stkcatpropid ='" . $PropertyRow['stkcatpropid']."'");
                 $PropValRow = DB_fetch_row($PropValResult);

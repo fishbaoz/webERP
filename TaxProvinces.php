@@ -1,5 +1,5 @@
 <?php
-/* $Id$*/
+/* $Id: TaxProvinces.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Dispatch Tax Provinces');
@@ -40,7 +40,7 @@ if(isset($_POST['submit'])) {
 
 		/*SelectedTaxProvince could also exist if submit had not been clicked this code would not run in this case cos submit is false of course  see the delete code below*/
 		// Check the name does not clash
-		$sql = "SELECT count(*) FROM taxprovinces
+		$sql = "SELECT count(*) FROM weberp_taxprovinces
 				WHERE taxprovinceid <> '" . $SelectedTaxProvince ."'
 				AND taxprovincename " . LIKE . " '" . $_POST['TaxProvinceName'] . "'";
 		$result = DB_query($sql);
@@ -50,14 +50,14 @@ if(isset($_POST['submit'])) {
 			prnMsg( _('The tax province cannot be renamed because another with the same name already exists.'),'error');
 		} else {
 			// Get the old name and check that the record still exists
-			$sql = "SELECT taxprovincename FROM taxprovinces
+			$sql = "SELECT taxprovincename FROM weberp_taxprovinces
 						WHERE taxprovinceid = '" . $SelectedTaxProvince . "'";
 			$result = DB_query($sql);
 			if( DB_num_rows($result) != 0 ) {
 				// This is probably the safest way there is
 				$myrow = DB_fetch_row($result);
 				$OldTaxProvinceName = $myrow[0];
-				$sql = "UPDATE taxprovinces
+				$sql = "UPDATE weberp_taxprovinces
 					SET taxprovincename='" . $_POST['TaxProvinceName'] . "'
 					WHERE taxprovincename ".LIKE." '".$OldTaxProvinceName."'";
 				$ErrMsg = _('Could not update tax province');
@@ -72,7 +72,7 @@ if(isset($_POST['submit'])) {
 		}
 	} elseif($InputError !=1) {
 		/*SelectedTaxProvince is null cos no item selected on first time round so must be adding a record*/
-		$sql = "SELECT count(*) FROM taxprovinces
+		$sql = "SELECT count(*) FROM weberp_taxprovinces
 				WHERE taxprovincename " .LIKE. " '".$_POST['TaxProvinceName'] ."'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
@@ -84,16 +84,16 @@ if(isset($_POST['submit'])) {
 
 		} else {
 
-			$sql = "INSERT INTO taxprovinces (taxprovincename )
+			$sql = "INSERT INTO weberp_taxprovinces (taxprovincename )
 					VALUES ('" . $_POST['TaxProvinceName'] ."')";
 
 			$ErrMsg = _('Could not add tax province');
 			$result = DB_query($sql, $ErrMsg);
 
-			$TaxProvinceID = DB_Last_Insert_ID($db, 'taxprovinces', 'taxprovinceid');
-			$sql = "INSERT INTO taxauthrates (taxauthority, dispatchtaxprovince, taxcatid)
-					SELECT taxauthorities.taxid, '" . $TaxProvinceID . "', taxcategories.taxcatid
-					FROM taxauthorities CROSS JOIN taxcategories";
+			$TaxProvinceID = DB_Last_Insert_ID($db, 'weberp_taxprovinces', 'taxprovinceid');
+			$sql = "INSERT INTO weberp_taxauthrates (taxauthority, dispatchtaxprovince, taxcatid)
+					SELECT weberp_taxauthorities.taxid, '" . $TaxProvinceID . "', weberp_taxcategories.taxcatid
+					FROM weberp_taxauthorities CROSS JOIN weberp_taxcategories";
 			$ErrMsg = _('Could not add tax authority rates for the new dispatch tax province. The rates of tax will not be able to be added - manual database interaction will be required to use this dispatch tax province');
 			$result = DB_query($sql, $ErrMsg);
 		}
@@ -112,7 +112,7 @@ if(isset($_POST['submit'])) {
 //the link to delete a selected record was clicked instead of the submit button
 // PREVENT DELETES IF DEPENDENT RECORDS IN 'stockmaster'
 	// Get the original name of the tax province the ID is just a secure way to find the tax province
-	$sql = "SELECT taxprovincename FROM taxprovinces
+	$sql = "SELECT taxprovincename FROM weberp_taxprovinces
 		WHERE taxprovinceid = '" . $SelectedTaxProvince . "'";
 	$result = DB_query($sql);
 	if( DB_num_rows($result) == 0 ) {
@@ -121,16 +121,16 @@ if(isset($_POST['submit'])) {
 	} else {
 		$myrow = DB_fetch_row($result);
 		$OldTaxProvinceName = $myrow[0];
-		$sql= "SELECT COUNT(*) FROM locations WHERE taxprovinceid = '" . $SelectedTaxProvince . "'";
+		$sql= "SELECT COUNT(*) FROM weberp_locations WHERE taxprovinceid = '" . $SelectedTaxProvince . "'";
 		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
 		if($myrow[0]>0) {
 			prnMsg( _('Cannot delete this tax province because at least one stock location is defined to be inside this province'),'warn');
 			echo '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('stock locations that refer to this tax province') . '</font>';
 		} else {
-			$sql = "DELETE FROM taxauthrates WHERE dispatchtaxprovince = '" . $SelectedTaxProvince . "'";
+			$sql = "DELETE FROM weberp_taxauthrates WHERE dispatchtaxprovince = '" . $SelectedTaxProvince . "'";
 			$result = DB_query($sql);
-			$sql = "DELETE FROM taxprovinces WHERE taxprovinceid = '" .$SelectedTaxProvince . "'";
+			$sql = "DELETE FROM weberp_taxprovinces WHERE taxprovinceid = '" .$SelectedTaxProvince . "'";
 			$result = DB_query($sql);
 			prnMsg( $OldTaxProvinceName . ' ' . _('tax province and any tax rates set for it have been deleted'),'success');
 		}
@@ -154,7 +154,7 @@ or deletion of the records*/
 
 	$sql = "SELECT taxprovinceid,
 			taxprovincename
-			FROM taxprovinces
+			FROM weberp_taxprovinces
 			ORDER BY taxprovinceid";
 
 	$ErrMsg = _('Could not get tax categories because');
@@ -203,7 +203,7 @@ echo '<div>';
 
 		$sql = "SELECT taxprovinceid,
 				taxprovincename
-				FROM taxprovinces
+				FROM weberp_taxprovinces
 				WHERE taxprovinceid='" . $SelectedTaxProvince . "'";
 
 		$result = DB_query($sql);

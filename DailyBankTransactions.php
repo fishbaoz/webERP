@@ -10,14 +10,14 @@ include('includes/header.inc');
 
 if (!isset($_POST['Show'])) {
 	$SQL = "SELECT 	bankaccountname,
-					bankaccounts.accountcode,
-					bankaccounts.currcode
-			FROM bankaccounts,
-				chartmaster,
-				bankaccountusers
-			WHERE bankaccounts.accountcode=chartmaster.accountcode
-				AND bankaccounts.accountcode=bankaccountusers.accountcode
-			AND bankaccountusers.userid = '" . $_SESSION['UserID'] ."'";
+					weberp_bankaccounts.accountcode,
+					weberp_bankaccounts.currcode
+			FROM weberp_bankaccounts,
+				weberp_chartmaster,
+				weberp_bankaccountusers
+			WHERE weberp_bankaccounts.accountcode=weberp_chartmaster.accountcode
+				AND weberp_bankaccounts.accountcode=weberp_bankaccountusers.accountcode
+			AND weberp_bankaccountusers.userid = '" . $_SESSION['UserID'] ."'";
 
 	$ErrMsg = _('The bank accounts could not be retrieved because');
 	$DbgMsg = _('The SQL used to retrieve the bank accounts was');
@@ -83,39 +83,39 @@ if (!isset($_POST['Show'])) {
 		</form>';
 } else {
 	$SQL = "SELECT 	bankaccountname,
-					bankaccounts.currcode,
-					currencies.decimalplaces
-			FROM bankaccounts
-			INNER JOIN currencies
-				ON bankaccounts.currcode = currencies.currabrev
-			WHERE bankaccounts.accountcode='" . $_POST['BankAccount'] . "'";
+					weberp_bankaccounts.currcode,
+					weberp_currencies.decimalplaces
+			FROM weberp_bankaccounts
+			INNER JOIN weberp_currencies
+				ON weberp_bankaccounts.currcode = weberp_currencies.currabrev
+			WHERE weberp_bankaccounts.accountcode='" . $_POST['BankAccount'] . "'";
 	$BankResult = DB_query($SQL,_('Could not retrieve the bank account details'));
 
 
-	$sql="SELECT (SELECT sum(banktrans.amount) FROM banktrans
+	$sql="SELECT (SELECT sum(weberp_banktrans.amount) FROM weberp_banktrans
 				WHERE transdate < '" . FormatDateForSQL($_POST['FromTransDate']) . "'
 				AND bankact='" . $_POST['BankAccount'] ."') AS prebalance,
-					banktrans.currcode,
-					banktrans.amount,
-					banktrans.amountcleared,
-					banktrans.functionalexrate,
-					banktrans.exrate,
-					banktrans.banktranstype,
-					banktrans.transdate,
-					banktrans.transno,
-					banktrans.ref,
-					bankaccounts.bankaccountname,
-					systypes.typename,
-					systypes.typeid
-				FROM banktrans
-				INNER JOIN bankaccounts
-				ON banktrans.bankact=bankaccounts.accountcode
-				INNER JOIN systypes
-				ON banktrans.type=systypes.typeid
+					weberp_banktrans.currcode,
+					weberp_banktrans.amount,
+					weberp_banktrans.amountcleared,
+					weberp_banktrans.functionalexrate,
+					weberp_banktrans.exrate,
+					weberp_banktrans.banktranstype,
+					weberp_banktrans.transdate,
+					weberp_banktrans.transno,
+					weberp_banktrans.ref,
+					weberp_bankaccounts.bankaccountname,
+					weberp_systypes.typename,
+					weberp_systypes.typeid
+				FROM weberp_banktrans
+				INNER JOIN weberp_bankaccounts
+				ON weberp_banktrans.bankact=weberp_bankaccounts.accountcode
+				INNER JOIN weberp_systypes
+				ON weberp_banktrans.type=weberp_systypes.typeid
 				WHERE bankact='".$_POST['BankAccount']."'
 					AND transdate>='" . FormatDateForSQL($_POST['FromTransDate']) . "'
 					AND transdate<='" . FormatDateForSQL($_POST['ToTransDate']) . "'
-				ORDER BY banktrans.transdate ASC, banktrans.banktransid ASC";
+				ORDER BY weberp_banktrans.transdate ASC, weberp_banktrans.banktransid ASC";
 	$result = DB_query($sql);
 
 	$BankDetailRow = DB_fetch_array($BankResult);
@@ -126,7 +126,7 @@ if (!isset($_POST['Show'])) {
 		_('Bank Transactions Inquiry') . '</p>';// Page title.
 		prnMsg(_('There are no transactions for this account in the date range selected'), 'info');
 
-		$sql = "SELECT sum(banktrans.amount) FROM banktrans WHERE bankact='" . $_POST['BankAccount'] . "'";
+		$sql = "SELECT sum(weberp_banktrans.amount) FROM weberp_banktrans WHERE bankact='" . $_POST['BankAccount'] . "'";
 		$ErrMsg = _('Failed to retrive balance data');
 		$balresult = DB_query($sql,$ErrMsg);
 		if (DB_num_rows($balresult)>0) {
@@ -198,7 +198,7 @@ if (!isset($_POST['Show'])) {
 				$myrow['typeid'] = 1;
 				$myrow['transno'] = substr($myrow['ref'],1,strpos($myrow['ref'],' ')-1);
 			}
-			$sql = "SELECT narrative FROM gltrans WHERE type='" . $myrow['typeid'] . "' AND typeno='" . $myrow['transno'] . "'";
+			$sql = "SELECT narrative FROM weberp_gltrans WHERE type='" . $myrow['typeid'] . "' AND typeno='" . $myrow['transno'] . "'";
 			$ErrMsg = _('Failed to retrieve gl narrative');
 			$glresult = DB_query($sql,$ErrMsg);
 			if (DB_num_rows($glresult)>0) {

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id$*/
+/* $Id: GLTags.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Maintain General Ledger Tags');
@@ -14,19 +14,19 @@ if (isset($_GET['SelectedTag'])) {
 	if($_GET['Action']=='delete'){
 		//first off test there are no transactions created with this tag
 		$Result = DB_query("SELECT counterindex
-							FROM gltrans
+							FROM weberp_gltrans
 							WHERE tag='" . $_GET['SelectedTag'] . "'",$db);
 		if (DB_num_rows($Result)>0){
 			prnMsg(_('This tag cannot be deleted since there are already general ledger transactions created using it.'),'error');
 		} else	{
-			$Result = DB_query("DELETE FROM tags WHERE tagref='" . $_GET['SelectedTag'] . "'");
+			$Result = DB_query("DELETE FROM weberp_tags WHERE tagref='" . $_GET['SelectedTag'] . "'");
 			prnMsg(_('The selected tag has been deleted'),'success');
 		}
 		$Description='';
 	} else {
 		$sql="SELECT tagref,
 					tagdescription
-				FROM tags
+				FROM weberp_tags
 				WHERE tagref='".$_GET['SelectedTag']."'";
 
 		$result= DB_query($sql);
@@ -40,12 +40,12 @@ if (isset($_GET['SelectedTag'])) {
 }
 
 if (isset($_POST['submit'])) {
-	$sql = "INSERT INTO tags values(NULL, '" . $_POST['Description'] . "')";
+	$sql = "INSERT INTO weberp_tags values(NULL, '" . $_POST['Description'] . "')";
 	$result= DB_query($sql);
 }
 
 if (isset($_POST['update'])) {
-	$sql = "UPDATE tags SET tagdescription='" . $_POST['Description'] . "'
+	$sql = "UPDATE weberp_tags SET tagdescription='" . $_POST['Description'] . "'
 		WHERE tagref='".$_POST['reference']."'";
 	$result= DB_query($sql);
 }
@@ -84,7 +84,7 @@ echo '</td>
 
 $sql="SELECT tagref,
 			tagdescription
-		FROM tags
+		FROM weberp_tags
 		ORDER BY tagref";
 
 $result= DB_query($sql);

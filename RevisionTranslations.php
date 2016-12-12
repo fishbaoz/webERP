@@ -20,7 +20,7 @@ if(isset($_POST['Submit'])) {
 	for ($i=1;$i<count($_POST);$i++) { //loop through the returned translations
 
 		if(isset($_POST['Revised' . $i]) AND ($_POST['Revised' . $i] == '1')) {
-			$sqlUpdate="UPDATE stockdescriptiontranslations
+			$sqlUpdate="UPDATE weberp_stockdescriptiontranslations
 						SET needsrevision = '0',
 							descriptiontranslation = '". $_POST['DescriptionTranslation' .$i] ."',
 							longdescriptiontranslation = '". $_POST['LongDescriptionTranslation' .$i] ."'
@@ -41,17 +41,17 @@ echo '<table class="selection">
 			<th colspan="7">' . _('Translations to revise') .'</th>
 		</tr>';
 
-$sql = "SELECT stockdescriptiontranslations.stockid,
-				stockmaster.description,
-				stockmaster.longdescription,
-				stockdescriptiontranslations.language_id,
-				stockdescriptiontranslations.descriptiontranslation,
-				stockdescriptiontranslations.longdescriptiontranslation
-		FROM stockdescriptiontranslations, stockmaster
-		WHERE stockdescriptiontranslations.stockid = stockmaster.stockid
-			AND stockdescriptiontranslations.needsrevision = '1'
-		ORDER BY stockdescriptiontranslations.stockid,
-				stockdescriptiontranslations.language_id";
+$sql = "SELECT weberp_stockdescriptiontranslations.stockid,
+				weberp_stockmaster.description,
+				weberp_stockmaster.longdescription,
+				weberp_stockdescriptiontranslations.language_id,
+				weberp_stockdescriptiontranslations.descriptiontranslation,
+				weberp_stockdescriptiontranslations.longdescriptiontranslation
+		FROM weberp_stockdescriptiontranslations, weberp_stockmaster
+		WHERE weberp_stockdescriptiontranslations.stockid = weberp_stockmaster.stockid
+			AND weberp_stockdescriptiontranslations.needsrevision = '1'
+		ORDER BY weberp_stockdescriptiontranslations.stockid,
+				weberp_stockdescriptiontranslations.language_id";
 
 $result = DB_query($sql);
 
