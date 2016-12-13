@@ -1,12 +1,13 @@
 <?php
+/* $Id: PricesByCost.php 6941 2014-10-26 23:18:08Z daintree $ */
 
-include('includes/session.inc');
+include ('includes/session.inc');
 $Title = _('Update of Prices By A Multiple Of Cost');
-include('includes/header.inc');
+include ('includes/header.inc');
 
-echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/inventory.png" title="' . _('Inventory') . '" alt="" />' . ' ' . _('Update Price By Cost') . '</p>';
+echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/inventory.png" title="' . _('Inventory') . '" alt="" />' . ' ' . _('Update Price By Cost') . '</p>';
 
-if (isset($_POST['submit']) or isset($_POST['update'])) {
+if (isset($_POST['submit']) OR isset($_POST['update'])) {
 	if ($_POST['Margin'] == '') {
 		header('Location: PricesByCost.php');
 	}
@@ -14,94 +15,92 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 		$Comparator = '<=';
 	} else {
 		$Comparator = '>=';
-	}
-	/*end of else Comparator */
+	} /*end of else Comparator */
 	if ($_POST['StockCat'] != 'all') {
-		$Category = " AND stockmaster.categoryid = '" . $_POST['StockCat'] . "'";
+		$Category = " AND weberp_stockmaster.categoryid = '" . $_POST['StockCat'] . "'";
 	} else {
-		$Category = '';
-	}
-	/*end of else StockCat */
+		$Category ='';
+	}/*end of else StockCat */
 
-	$sql = "SELECT 	stockmaster.stockid,
-					stockmaster.description,
-					prices.debtorno,
-					prices.branchcode,
-					(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) as cost,
-					prices.price as price,
-					prices.debtorno AS customer,
-					prices.branchcode AS branch,
-					prices.startdate,
-					prices.enddate,
-					currencies.decimalplaces,
-					currencies.rate
-				FROM stockmaster INNER JOIN prices
-				ON stockmaster.stockid=prices.stockid
-				INNER JOIN currencies
-				ON prices.currabrev=currencies.currabrev
-				WHERE stockmaster.discontinued = 0
+	$sql = "SELECT 	weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_prices.debtorno,
+					weberp_prices.branchcode,
+					(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) as cost,
+					weberp_prices.price as price,
+					weberp_prices.debtorno AS customer,
+					weberp_prices.branchcode AS branch,
+					weberp_prices.startdate,
+					weberp_prices.enddate,
+					weberp_currencies.decimalplaces,
+					weberp_currencies.rate
+				FROM weberp_stockmaster INNER JOIN weberp_prices
+				ON weberp_stockmaster.stockid=weberp_prices.stockid
+				INNER JOIN weberp_currencies
+				ON weberp_prices.currabrev=weberp_currencies.currabrev
+				WHERE weberp_stockmaster.discontinued = 0
 				" . $Category . "
-				AND   prices.price" . $Comparator . "(stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost) * '" . filter_number_format($_POST['Margin']) . "'
-				AND prices.typeabbrev ='" . $_POST['SalesType'] . "'
-				AND prices.currabrev ='" . $_POST['CurrCode'] . "'
-				AND (prices.enddate>='" . Date('Y-m-d') . "' OR prices.enddate='0000-00-00')";
-	$result = DB_query($sql, $db);
+				AND   weberp_prices.price" . $Comparator . "(weberp_stockmaster.materialcost + weberp_stockmaster.labourcost + weberp_stockmaster.overheadcost) * '" . filter_number_format($_POST['Margin']) . "'
+				AND weberp_prices.typeabbrev ='" . $_POST['SalesType'] . "'
+				AND weberp_prices.currabrev ='" . $_POST['CurrCode'] . "'
+				AND (weberp_prices.enddate>='" . Date('Y-m-d') . "' OR weberp_prices.enddate='0000-00-00')";
+	$result = DB_query($sql);
 	$numrow = DB_num_rows($result);
 
 	if ($_POST['submit'] == 'Update') {
-		//Update Prices
-		$PriceCounter = 0;
+			//Update Prices
+		$PriceCounter =0;
 		while ($myrow = DB_fetch_array($result)) {
 			/*The logic here goes like this:
 			 * 1. If the price at the same start and end date already exists then do nowt!!
 			 * 2. If not then check if a price with the start date of today already exists - then we should be updating it
 			 * 3. If not either of the above then insert the new price
-			 */
-			$SQLTestExists = "SELECT price FROM prices
+			*/
+			$SQLTestExists = "SELECT price FROM weberp_prices
 								WHERE stockid = '" . $_POST['StockID_' . $PriceCounter] . "'
-								AND prices.typeabbrev ='" . $_POST['SalesType'] . "'
-								AND prices.currabrev ='" . $_POST['CurrCode'] . "'
-								AND prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
-								AND prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
-								AND prices.startdate ='" . $_POST['StartDate_' . $PriceCounter] . "'
-								AND prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'
-								AND prices.price ='" . filter_number_format($_POST['Price_' . $PriceCounter]) . "'";
-			$TestExistsResult = DB_query($SQLTestExists, $db);
-			if (DB_num_rows($TestExistsResult) == 0) { //the price doesn't currently exist
+								AND weberp_prices.typeabbrev ='" . $_POST['SalesType'] . "'
+		                    	AND weberp_prices.currabrev ='" . $_POST['CurrCode'] . "'
+								AND weberp_prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
+								AND weberp_prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
+								AND weberp_prices.startdate ='" . $_POST['StartDate_' . $PriceCounter] . "'
+								AND weberp_prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'
+								AND weberp_prices.price ='" . filter_number_format($_POST['Price_' . $PriceCounter]) . "'";
+			$TestExistsResult = DB_query($SQLTestExists);
+			if (DB_num_rows($TestExistsResult)==0){ //the price doesn't currently exist
 				//now check to see if a new price has already been created from start date of today
 
-				$SQLTestExists = "SELECT price FROM prices
+				$SQLTestExists = "SELECT price FROM weberp_prices
 									WHERE stockid = '" . $_POST['StockID_' . $PriceCounter] . "'
-									AND prices.typeabbrev ='" . $_POST['SalesType'] . "'
-									AND prices.currabrev ='" . $_POST['CurrCode'] . "'
-									AND prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
-									AND prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
-									AND prices.startdate ='CURRENT_DATE'";
-				$TestExistsResult = DB_query($SQLTestExists, $db);
-				if (DB_num_rows($TestExistsResult) == 1) {
-					//then we are updating
-					$SQLUpdate = "UPDATE prices	SET price = '" . filter_number_format($_POST['Price_' . $PriceCounter]) . "'
+									AND weberp_prices.typeabbrev ='" . $_POST['SalesType'] . "'
+			                    	AND weberp_prices.currabrev ='" . $_POST['CurrCode'] . "'
+									AND weberp_prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
+									AND weberp_prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
+									AND weberp_prices.startdate ='" . date('Y-m-d') . "'";
+				$TestExistsResult = DB_query($SQLTestExists);
+				if (DB_num_rows($TestExistsResult)==1){
+	                 //then we are updating
+					$SQLUpdate = "UPDATE weberp_prices	SET price = '" . filter_number_format($_POST['Price_' . $PriceCounter]) . "'
 									WHERE stockid = '" . $_POST['StockID_' . $PriceCounter] . "'
-									AND prices.typeabbrev ='" . $_POST['SalesType'] . "'
-									AND prices.currabrev ='" . $_POST['CurrCode'] . "'
-									AND prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
-									AND prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
-									AND prices.startdate ='CURRENT_DATE'
-									AND prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'";
-					$ResultUpdate = DB_query($SQLUpdate, $db);
+									AND weberp_prices.typeabbrev ='" . $_POST['SalesType'] . "'
+									AND weberp_prices.currabrev ='" . $_POST['CurrCode'] . "'
+									AND weberp_prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
+									AND weberp_prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
+									AND weberp_prices.startdate ='" . date('Y-m-d') . "'
+									AND weberp_prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'";
+				$ResultUpdate = DB_query($SQLUpdate);
 				} else { //there is not a price already starting today so need to create one
 					//update the old price to have an end date of yesterday too
-					$SQLUpdate = "UPDATE prices	SET enddate = '" . FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']), 'd', -1)) . "'
+					$SQLUpdate = "UPDATE weberp_prices	SET enddate = '" . FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']),'d',-1)) . "'
 									WHERE stockid = '" . $_POST['StockID_' . $PriceCounter] . "'
-									AND prices.typeabbrev ='" . $_POST['SalesType'] . "'
-									AND prices.currabrev ='" . $_POST['CurrCode'] . "'
-									AND prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
-									AND prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
-									AND prices.startdate ='" . $_POST['StartDate_' . $PriceCounter] . "'
-									AND prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'";
-					$Result = DB_query($SQLUpdate, $db);
+									AND weberp_prices.typeabbrev ='" . $_POST['SalesType'] . "'
+									AND weberp_prices.currabrev ='" . $_POST['CurrCode'] . "'
+									AND weberp_prices.debtorno ='" . $_POST['DebtorNo_' . $PriceCounter] . "'
+									AND weberp_prices.branchcode ='" . $_POST['BranchCode_' . $PriceCounter] . "'
+									AND weberp_prices.startdate ='" . $_POST['StartDate_' . $PriceCounter] . "'
+									AND weberp_prices.enddate ='" . $_POST['EndDate_' . $PriceCounter] . "'";
+					$Result = DB_query($SQLUpdate);
 					//we need to add a new price from today
-					$SQLInsert = "INSERT INTO prices (	stockid,
+					$SQLInsert = "INSERT INTO weberp_prices (	stockid,
 														price,
 														typeabbrev,
 														currabrev,
@@ -115,63 +114,63 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 														'" . $_POST['CurrCode'] . "',
 														'" . $_POST['DebtorNo_' . $PriceCounter] . "',
 														'" . $_POST['BranchCode_' . $PriceCounter] . "',
-														'CURRENT_DATE'
+														'" . date('Y-m-d') . "'
 													)";
-					$ResultInsert = DB_query($SQLInsert, $db);
+					$ResultInsert = DB_query($SQLInsert);
 				}
 			}
 			$PriceCounter++;
-		} //end while loop
+		}//end while loop
 		DB_free_result($result); //clear the old result
-		$result = DB_query($sql, $db); //re-run the query with the updated prices
+		$result = DB_query($sql); //re-run the query with the updated prices
 		$numrow = DB_num_rows($result); // get the new number - should be the same!!
 	}
 
 	$sqlcat = "SELECT categorydescription
-				FROM stockcategory
+				FROM weberp_stockcategory
 				WHERE categoryid='" . $_POST['StockCat'] . "'";
-	$ResultCat = DB_query($sqlcat, $db);
+	$ResultCat = DB_query($sqlcat);
 	$CategoryRow = DB_fetch_array($ResultCat);
 
 	$sqltype = "SELECT sales_type
-				FROM salestypes
+				FROM weberp_salestypes
 				WHERE typeabbrev='" . $_POST['SalesType'] . "'";
-	$ResultType = DB_query($sqltype, $db);
+	$ResultType = DB_query($sqltype);
 	$SalesTypeRow = DB_fetch_array($ResultType);
 
 	if (isset($CategoryRow['categorgdescription'])) {
 		$CategoryText = $CategoryRow['categorgdescription'] . ' ' . _('category');
 	} else {
 		$CategoryText = _('all Categories');
-	}
-	/*end of else Category */
+	} /*end of else Category */
 
-	echo '<div class="page_help_text noPrint">' . _('Items in') . ' ' . $CategoryText . ' ' . _('With Prices') . ' ' . $Comparator . '' . $_POST['Margin'] . ' ' . _('times') . ' ' . _('Cost in Price List') . ' ' . $SalesTypeRow['sales_type'] . '</div><br /><br />';
+	echo '<div class="page_help_text">' . _('Items in') . ' ' . $CategoryText . ' ' . _('With Prices') . ' ' . $Comparator . '' . $_POST['Margin'] . ' ' . _('times') . ' ' . _('Cost in Price List') . ' ' . $SalesTypeRow['sales_type'] . '</div><br /><br />';
 
 	if ($numrow > 0) { //the number of prices returned from the main prices query is
-		echo '<table class="selection">';
-		echo '<tr><th>' . _('Code') . '</th>
-				<th>' . _('Description') . '</th>
-				<th>' . _('Customer') . '</th>
-				<th>' . _('Branch') . '</th>
-				<th>' . _('Start Date') . '</th>
-				<th>' . _('End Date') . '</th>
-				<th>' . _('Cost') . '</th>
-				<th>' . _('GP %') . '</th>
-				<th>' . _('Price Proposed') . '</th>
-				<th>' . _('List Price') . '</th>
-			<tr>';
+		echo '<table class="selection">
+				<tr>
+					<th class="ascending">' . _('Code') . '</th>
+					<th class="ascending">' . _('Description') . '</th>
+					<th class="ascending">' . _('Customer') . '</th>
+					<th class="ascending">' . _('Branch') . '</th>
+					<th class="ascending">' . _('Start Date') . '</th>
+					<th class="ascending">' . _('End Date') . '</th>
+					<th class="ascending">' . _('Cost') . '</th>
+					<th class="ascending">' . _('GP %') . '</th>
+					<th class="ascending">' . _('Price Proposed') . '</th>
+					<th class="ascending">' . _('List Price') . '</th>
+				<tr>';
 		$k = 0; //row colour counter
-		echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint" id="update">';
-		echo '<div>';
+		echo '<form action="' .htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') .'" method="post" id="update">';
+        echo '<div>';
 		echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-		echo '<input type="hidden" value="' . $_POST['StockCat'] . '" name="StockCat" />
+		echo'<input type="hidden" value="' . $_POST['StockCat'] . '" name="StockCat" />
 			<input type="hidden" value="' . $_POST['Margin'] . '" name="Margin" />
 			<input type="hidden" value="' . $_POST['CurrCode'] . '" name="CurrCode" />
 			<input type="hidden" value="' . $_POST['Comparator'] . '" name="Comparator" />
 			<input type="hidden" value="' . $_POST['SalesType'] . '" name="SalesType" />';
 
-		$PriceCounter = 0;
+		$PriceCounter =0;
 		while ($myrow = DB_fetch_array($result)) {
 
 			if ($k == 1) {
@@ -186,29 +185,28 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 				$Cost = 0;
 			} else {
 				$Cost = $myrow['cost'];
-			}
-			/*end of else Cost */
+			} /*end of else Cost */
 
 			//variables for update
-			echo '<input type="hidden" value="' . $myrow['stockid'] . '" name="StockID_' . $PriceCounter . '" />
-				<input type="hidden" value="' . $myrow['debtorno'] . '" name="DebtorNo_' . $PriceCounter . '" />
-				<input type="hidden" value="' . $myrow['branchcode'] . '" name="BranchCode_' . $PriceCounter . '" />
-				<input type="hidden" value="' . $myrow['startdate'] . '" name="StartDate_' . $PriceCounter . '" />
-				<input type="hidden" value="' . $myrow['enddate'] . '" name="EndDate_' . $PriceCounter . '" />';
+			echo '<input type="hidden" value="' . $myrow['stockid'] . '" name="StockID_' . $PriceCounter .'" />
+				<input type="hidden" value="' . $myrow['debtorno'] . '" name="DebtorNo_' . $PriceCounter .'" />
+				<input type="hidden" value="' . $myrow['branchcode'] . '" name="BranchCode_' . $PriceCounter .'" />
+				<input type="hidden" value="' . $myrow['startdate'] . '" name="StartDate_' . $PriceCounter .'" />
+				<input type="hidden" value="' . $myrow['enddate'] . '" name="EndDate_' . $PriceCounter .'" />';
 			//variable for current margin
-			if ($myrow['price'] != 0) {
-				$CurrentGP = (($myrow['price'] / $myrow['rate']) - $Cost) * 100 / ($myrow['price'] / $myrow['rate']);
+			if ($myrow['price'] != 0){
+				$CurrentGP = (($myrow['price']/$myrow['rate'])-$Cost)*100 / ($myrow['price']/$myrow['rate']);
 			} else {
 				$CurrentGP = 0;
 			}
 			//variable for proposed
 			$ProposedPrice = $Cost * filter_number_format($_POST['Margin']);
-			if ($myrow['enddate'] == '0000-00-00') {
+			if ($myrow['enddate']=='0000-00-00'){
 				$EndDateDisplay = _('No End Date');
 			} else {
 				$EndDateDisplay = ConvertSQLDate($myrow['enddate']);
 			}
-			echo '  <td>' . $myrow['stockid'] . '</td>
+			echo '   <td>' . $myrow['stockid'] . '</td>
 					<td>' . $myrow['description'] . '</td>
 					<td>' . $myrow['customer'] . '</td>
 					<td>' . $myrow['branch'] . '</td>
@@ -217,36 +215,35 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 					<td class="number">' . locale_number_format($Cost, $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
 					<td class="number">' . locale_number_format($CurrentGP, 1) . '%</td>
 					<td class="number">' . locale_number_format($ProposedPrice, $myrow['decimalplaces']) . '</td>
-					<td><input type="text" class="number" name="Price_' . $PriceCounter . '" required="required" minlength="1" maxlength="14" size="10" value="' . locale_number_format($myrow['price'], $myrow['decimalplaces']) . '" /></td>
+					<td><input type="text" class="number" name="Price_' . $PriceCounter . '" maxlength="14" size="10" value="' . locale_number_format($myrow['price'],$myrow['decimalplaces']) . '" /></td>
 				</tr> ';
 			$PriceCounter++;
 		} //end of looping
 		echo '<tr>
-			<td style="text-align:right" colspan="4"><input type="submit" name="submit" value="' . _('Update') . '" onclick="return MakeConfirm(\'' . _('If the prices above do not have a commencement date as today, this will create new prices with commencement date of today at the entered figures and update the existing prices with historical start dates to have an end date of yesterday. Are You Sure?') . '\');" /></td>
-			<td style="text-align:left" colspan="3"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '"><input type="submit" value="' . _('Back') . '" /></a></td>
+			<td style="text-align:right" colspan="4"><input type="submit" name="submit" value="' . _('Update') . '" onclick="return confirm(\'' . _('If the prices above do not have a commencement date as today, this will create new prices with commencement date of today at the entered figures and update the existing prices with historical start dates to have an end date of yesterday. Are You Sure?') . '\');" /></td>
+			<td style="text-align:left" colspan="3"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '"><input type="submit" value="' . _('Back') . '" /></a></td>
 			 </tr>
-			 </div>
-			 </form>';
+             </div>
+             </form>';
 	} else {
-		prnMsg(_('There were no prices meeting the criteria specified to review'), 'info');
-		echo '<br /><div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">' . _('Back') . '<a/></div>';
+		prnMsg(_('There were no prices meeting the criteria specified to review'),'info');
+		echo '<br /><div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">' . _('Back') . '<a/></div>';
 	}
-} else {
-	/*The option to submit was not hit so display form */
-	echo '<div class="page_help_text noPrint">' . _('Prices can be displayed based on their relation to cost') . '</div><br />';
+} else { /*The option to submit was not hit so display form */
+	echo '<div class="page_help_text">' . _('Prices can be displayed based on their relation to cost') . '</div><br />';
 	echo '<br />
-		  <form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">';
-	echo '<div>';
-	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	echo '<table class="selection">';
+          <form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">';
+    echo '<div>';
+    echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+    echo '<table class="selection">';
 
 	$SQL = "SELECT categoryid, categorydescription
-			  FROM stockcategory
+		      FROM weberp_stockcategory
 			  ORDER BY categorydescription";
-	$result1 = DB_query($SQL, $db);
+	$result1 = DB_query($SQL);
 	echo '<tr>
 			<td>' . _('Category') . ':</td>
-			<td><select required="required" minlength="1" name="StockCat">';
+			<td><select name="StockCat">';
 	echo '<option value="all">' . _('All Categories') . '</option>';
 	while ($myrow1 = DB_fetch_array($result1)) {
 		echo '<option value="' . $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
@@ -254,22 +251,22 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 	echo '</select></td></tr>';
 	echo '<tr>
 			<td>' . _('Price') . '
-				<select required="required" minlength="1" name="Comparator">
-					<option value="1">' . _('Less than or equal to') . '</option>
-					<option value="2">' . _('Greater than or equal to') . '</option>';
-	if ($_SESSION['WeightedAverageCosting'] == 1) {
-		echo '</select>' . ' ' . _('Average Cost') . ' x </td>';
+				<select name="Comparator">
+                <option value="1">' . _('Less than or equal to') . '</option>
+                <option value="2">' . _('Greater than or equal to') . '</option>';
+	if ($_SESSION['WeightedAverageCosting']==1) {
+		echo '</select>' . ' '. _('Average Cost') . ' x </td>';
 	} else {
-		echo '</select>' . ' ' . _('Standard Cost') . ' x </td>';
+		echo '</select>' . ' '. _('Standard Cost') . ' x </td>';
 	}
-	if (!isset($_POST['Margin'])) {
-		$_POST['Margin'] = 1;
+	if (!isset($_POST['Margin'])){
+		$_POST['Margin']=1;
 	}
-	echo '<td><input type="text" class="number" name="Margin" required="required" minlength="1" maxlength="8" size="8" value="' . $_POST['Margin'] . '" /></td></tr>';
-	$result = DB_query("SELECT typeabbrev, sales_type FROM salestypes", $db);
-	echo '<tr>
-			<td>' . _('Sales Type') . '/' . _('Price List') . ':</td>
-			<td><select required="required" minlength="1" name="SalesType">';
+	echo '<td><input type="text" class="number" name="Margin" maxlength="8" size="8" value="' .$_POST['Margin'] . '" /></td>
+		</tr>';
+	$result = DB_query("SELECT typeabbrev, sales_type FROM weberp_salestypes");
+	echo '<tr><td>' . _('Sales Type') . '/' . _('Price List') . ':</td>
+		<td><select name="SalesType">';
 	while ($myrow = DB_fetch_array($result)) {
 		if ($_POST['SalesType'] == $myrow['typeabbrev']) {
 			echo '<option selected="selected" value="' . $myrow['typeabbrev'] . '">' . $myrow['sales_type'] . '</option>';
@@ -278,12 +275,12 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 		}
 	} //end while loop
 	DB_data_seek($result, 0);
-	$result = DB_query("SELECT currency, currabrev FROM currencies", $db);
-	echo '</select>
-			</td></tr>';
-	echo '<tr>
+	$result = DB_query("SELECT currency, currabrev FROM weberp_currencies");
+	echo '</select></td>
+		</tr>
+		<tr>
 			<td>' . _('Currency') . ':</td>
-			<td><select required="required" minlength="1" name="CurrCode">';
+			<td><select name="CurrCode">';
 	while ($myrow = DB_fetch_array($result)) {
 		if (isset($_POST['CurrCode']) and $_POST['CurrCode'] == $myrow['currabrev']) {
 			echo '<option selected="selected" value="' . $myrow['currabrev'] . '">' . $myrow['currency'] . '</option>';
@@ -294,10 +291,10 @@ if (isset($_POST['submit']) or isset($_POST['update'])) {
 	DB_data_seek($result, 0);
 	echo '</select></td></tr>';
 	echo '</table>
-		<br /><div class="centre"><input type="submit" name="submit" value="' . _('Submit') . '" /></div>';
-	echo '</div>
-		  </form>';
-}
-/*end of else not submit */
-include('includes/footer.inc');
+		<br />
+			<div class="centre"><input type="submit" name="submit" value="' . _('Submit') . '" /></div>
+		</div>
+	</form>';
+} /*end of else not submit */
+include ('includes/footer.inc');
 ?>

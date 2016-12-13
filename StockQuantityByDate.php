@@ -1,111 +1,103 @@
 <?php
 
+/* $Id: StockQuantityByDate.php 6941 2014-10-26 23:18:08Z daintree $ */
+
 include('includes/session.inc');
 $Title = _('Stock On Hand By Date');
 include('includes/header.inc');
 
-echo '<p class="page_title_text noPrint" >
-		<img src="' . $RootPath . '/css/' . $Theme . '/images/inventory.png" title="' . _('Inventory') . '" alt="" /><b>' . $Title . '</b>
+echo '<p class="page_title_text">
+		<img src="'.$RootPath.'/css/'.$Theme.'/images/inventory.png" title="' . _('Inventory') .
+'" alt="" /><b>' . $Title. '</b>
 	</p>';
 
-echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">';
+echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">';
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-$sql = "SELECT categoryid, categorydescription FROM stockcategory";
-$resultStkLocs = DB_query($sql, $db);
+$sql = "SELECT categoryid, categorydescription FROM weberp_stockcategory";
+$resultStkLocs = DB_query($sql);
 
 echo '<table class="selection">
 	<tr>
 		<td>' . _('For Stock Category') . ':</td>
-		<td>
-			<select required="required" minlength="1" name="StockCategory">
-				<option value="All">' . _('All') . '</option>';
+		<td><select name="StockCategory">
+			<option value="All">' . _('All') . '</option>';
 
-while ($myrow = DB_fetch_array($resultStkLocs)) {
-	if (isset($_POST['StockCategory']) and $_POST['StockCategory'] != 'All') {
-		if ($myrow['categoryid'] == $_POST['StockCategory']) {
-			echo '<option selected="selected" value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
+while ($myrow=DB_fetch_array($resultStkLocs)){
+	if (isset($_POST['StockCategory']) AND $_POST['StockCategory']!='All'){
+		if ($myrow['categoryid'] == $_POST['StockCategory']){
+		     echo '<option selected="selected" value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
 		} else {
-			echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
+		     echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
 		}
-	} else {
-		echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
+	}else {
+		 echo '<option value="' . $myrow['categoryid'] . '">' . $myrow['categorydescription'] . '</option>';
 	}
 }
 echo '</select></td>';
 
-if ($_SESSION['RestrictLocations'] == 0) {
-	$sql = "SELECT locationname,
-					loccode
-				FROM locations";
-} else {
-	$sql = "SELECT locationname,
-					loccode
-				FROM locations
-				INNER JOIN www_users
-					ON locations.loccode=www_users.defaultlocation
-				WHERE www_users.userid='" . $_SESSION['UserID'] . "'";
-}
-$resultStkLocs = DB_query($sql, $db);
+$sql = "SELECT weberp_locations.loccode, locationname FROM weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
+$resultStkLocs = DB_query($sql);
 
 echo '<td>' . _('For Stock Location') . ':</td>
-	<td><select required="required" minlength="1" name="StockLocation"> ';
+	<td><select name="StockLocation"> ';
 
-while ($myrow = DB_fetch_array($resultStkLocs)) {
-	if (isset($_POST['StockLocation']) and $_POST['StockLocation'] != 'All') {
-		if ($myrow['loccode'] == $_POST['StockLocation']) {
-			echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+while ($myrow=DB_fetch_array($resultStkLocs)){
+	if (isset($_POST['StockLocation']) AND $_POST['StockLocation']!='All'){
+		if ($myrow['loccode'] == $_POST['StockLocation']){
+		     echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
 		} else {
-			echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+		     echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
 		}
-	} elseif ($myrow['loccode'] == $_SESSION['UserStockLocation']) {
-		echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
-		$_POST['StockLocation'] = $myrow['loccode'];
+	} elseif ($myrow['loccode']==$_SESSION['UserStockLocation']){
+		 echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+		 $_POST['StockLocation']=$myrow['loccode'];
 	} else {
-		echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+		 echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
 	}
 }
 echo '</select></td>';
 
-if (!isset($_POST['OnHandDate'])) {
-	$_POST['OnHandDate'] = Date($_SESSION['DefaultDateFormat'], Mktime(0, 0, 0, Date('m'), 0, Date('y')));
+if (!isset($_POST['OnHandDate'])){
+	$_POST['OnHandDate'] = Date($_SESSION['DefaultDateFormat'], Mktime(0,0,0,Date('m'),0,Date('y')));
 }
 
 echo '<td>' . _('On-Hand On Date') . ':</td>
-	<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] . '" name="OnHandDate" size="12" required="required" minlength="1" maxlength="10" value="' . $_POST['OnHandDate'] . '" /></td></tr>';
+	<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] . '" name="OnHandDate" size="12" maxlength="12" value="' . $_POST['OnHandDate'] . '" /></td></tr>';
 echo '<tr>
 		<td colspan="6">
 		<div class="centre">
-		<input type="submit" name="ShowStatus" value="' . _('Show Stock Status') . '" />
+		<input type="submit" name="ShowStatus" value="' . _('Show Stock Status') .'" />
 		</div></td>
 	</tr>
 	</table>
-	</div>
+    </div>
 	</form>';
 
 $TotalQuantity = 0;
 
-if (isset($_POST['ShowStatus']) and Is_Date($_POST['OnHandDate'])) {
-	if ($_POST['StockCategory'] == 'All') {
-		$sql = "SELECT stockid,
-						 description,
-						 decimalplaces
-					 FROM stockmaster
-					 WHERE (mbflag='M' OR mbflag='B')";
-	} else {
-		$sql = "SELECT stockid,
-						description,
-						decimalplaces
-					 FROM stockmaster
-					 WHERE categoryid = '" . $_POST['StockCategory'] . "'
-					 AND (mbflag='M' OR mbflag='B')";
-	}
+if(isset($_POST['ShowStatus']) AND Is_Date($_POST['OnHandDate'])) {
+        if ($_POST['StockCategory']=='All') {
+                 $sql = "SELECT stockid,
+                                 description,
+                                 decimalplaces
+                         FROM weberp_stockmaster
+                         WHERE (mbflag='M' OR mbflag='B')";
+         } else {
+                 $sql = "SELECT stockid,
+                                 description,
+                                 decimalplaces
+                         FROM weberp_stockmaster
+                         WHERE categoryid = '" . $_POST['StockCategory'] . "'
+                         AND (mbflag='M' OR mbflag='B')";
+         }
 
 	$ErrMsg = _('The stock items in the category selected cannot be retrieved because');
 	$DbgMsg = _('The SQL that failed was');
 
-	$StockResult = DB_query($sql, $db, $ErrMsg, $DbgMsg);
+	$StockResult = DB_query($sql, $ErrMsg, $DbgMsg);
 
 	$SQLOnHandDate = FormatDateForSQL($_POST['OnHandDate']);
 
@@ -119,55 +111,63 @@ if (isset($_POST['ShowStatus']) and Is_Date($_POST['OnHandDate'])) {
 					</tr>';
 	echo $tableheader;
 
-	while ($myrows = DB_fetch_array($StockResult)) {
+	while ($myrows=DB_fetch_array($StockResult)) {
 
 		$sql = "SELECT stockid,
 				newqoh
-				FROM stockmoves
-				WHERE stockmoves.trandate <= '" . $SQLOnHandDate . "'
+				FROM weberp_stockmoves
+				WHERE weberp_stockmoves.trandate <= '". $SQLOnHandDate . "'
 				AND stockid = '" . $myrows['stockid'] . "'
-				AND loccode = '" . $_POST['StockLocation'] . "'
+				AND loccode = '" . $_POST['StockLocation'] ."'
 				ORDER BY stkmoveno DESC LIMIT 1";
 
-		$ErrMsg = _('The stock held as at') . ' ' . $_POST['OnHandDate'] . ' ' . _('could not be retrieved because');
+		$ErrMsg =  _('The stock held as at') . ' ' . $_POST['OnHandDate'] . ' ' . _('could not be retrieved because');
 
-		$LocStockResult = DB_query($sql, $db, $ErrMsg);
+		$LocStockResult = DB_query($sql, $ErrMsg);
 
 		$NumRows = DB_num_rows($LocStockResult, $db);
 
 		$j = 1;
-		$k = 0; //row colour counter
+		$k=0; //row colour counter
 
-		while ($LocQtyRow = DB_fetch_array($LocStockResult)) {
+		while ($LocQtyRow=DB_fetch_array($LocStockResult)) {
 
-			if ($k == 1) {
+			if ($k==1){
 				echo '<tr class="OddTableRows">';
-				$k = 0;
+				$k=0;
 			} else {
 				echo '<tr class="EvenTableRows">';
-				$k = 1;
+				$k=1;
 			}
 
-			if ($NumRows == 0) {
+			if($NumRows == 0){
 				printf('<td><a target="_blank" href="' . $RootPath . '/StockStatus.php?%s">%s</a></td>
 						<td>%s</td>
-						<td class="number">%s</td></tr>', 'StockID=' . mb_strtoupper($myrows['stockid']), mb_strtoupper($myrows['stockid']), $myrows['description'], 0);
+						<td class="number">%s</td></tr>',
+						'StockID=' . mb_strtoupper($myrows['stockid']),
+						mb_strtoupper($myrows['stockid']),
+						$myrows['description'],
+						0);
 			} else {
 				printf('<td><a target="_blank" href="' . $RootPath . '/StockStatus.php?%s">%s</a></td>
 					<td>%s</td>
-					<td class="number">%s</td></tr>', 'StockID=' . mb_strtoupper($myrows['stockid']), mb_strtoupper($myrows['stockid']), $myrows['description'], locale_number_format($LocQtyRow['newqoh'], $myrows['decimalplaces']));
+					<td class="number">%s</td></tr>',
+					'StockID=' . mb_strtoupper($myrows['stockid']),
+					mb_strtoupper($myrows['stockid']),
+					$myrows['description'],
+					locale_number_format($LocQtyRow['newqoh'],$myrows['decimalplaces']));
 
 				$TotalQuantity += $LocQtyRow['newqoh'];
 			}
 			$j++;
-			if ($j == 12) {
-				$j = 1;
+			if ($j == 12){
+				$j=1;
 				echo $tableheader;
 			}
-			//end of page full new headings if
+		//end of page full new headings if
 		}
 
-	} //end of while loop
+	}//end of while loop
 	echo '<tr>
 			<td>' . _('Total Quantity') . ': ' . $TotalQuantity . '</td>
 		</tr>

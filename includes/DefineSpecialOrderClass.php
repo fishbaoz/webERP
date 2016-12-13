@@ -1,12 +1,11 @@
 <?php
-
+/* $Id: DefineSpecialOrderClass.php 5768 2012-12-20 08:38:22Z daintree $*/
 /* Definition of the SpecialOrder class to hold all the information for a special quote/order and delivery
- */
+*/
 
-class SpecialOrder {
+Class SpecialOrder {
 
-	var $LineItems;
-	/*array of objects of class LineDetails using the product id as the pointer */
+	var $LineItems; /*array of objects of class LineDetails using the product id as the pointer */
 	var $Initiator;
 	var $QuotationRef;
 	var $Comments;
@@ -29,40 +28,39 @@ class SpecialOrder {
 	var $Status;
 	var $AllowPrintPO;
 
-	function SpecialOrder() {
-		/*Constructor function initialises a new special order object */
+	function SpecialOrder(){
+	/*Constructor function initialises a new special order object */
 		$this->LineItems = array();
-		$this->total = 0;
-		$this->LinesOnOrder = 0;
-		$this->AllowPrintPO = 0;
+		$this->total=0;
+		$this->LinesOnOrder=0;
+		$this->AllowPrintPO=0;
 	}
 
-	function add_to_order($LineNo, $Qty, $ItemDescr, $Price, $Cost, $StkCat, $ReqDelDate) {
-		if ($Qty != 0 and isset($Qty)) {
+	function add_to_order($LineNo, $Qty, $ItemDescr, $Price, $Cost, $StkCat, $ReqDelDate){
+		if ($Qty!=0 AND isset($Qty)){
 			$this->LineItems[$LineNo] = new LineDetails($LineNo, $Qty, $ItemDescr, $Price, $Cost, $StkCat, $ReqDelDate);
 			$this->LinesOnOrder++;
-			return 1;
+			Return 1;
 		}
-		return 0;
+		Return 0;
 	}
 
 
-	function remove_from_order(&$LineNo) {
-		unset($this->LineItems[$LineNo]);
+	function remove_from_order(&$LineNo){
+		 unset($this->LineItems[$LineNo]);
 	}
 
 	function Order_Value() {
-		$TotalValue = 0;
+		$TotalValue=0;
 		foreach ($this->LineItems as $OrderedItems) {
-			$TotalValue += ($OrderedItems->Price) * ($OrderedItems->Quantity);
+			$TotalValue += ($OrderedItems->Price)*($OrderedItems->Quantity);
 		}
 		return $TotalValue;
 	}
 
-}
-/* end of class defintion */
+} /* end of class defintion */
 
-class LineDetails {
+Class LineDetails {
 
 	var $LineNo;
 	var $ItemDescription;
@@ -73,9 +71,9 @@ class LineDetails {
 	var $ReqDelDate;
 	var $PartCode;
 
-	function LineDetails($LineNo, $Qty, $ItemDescr, $Price, $Cost, $StkCat, $ReqDelDate) {
+	function LineDetails ($LineNo, $Qty, $ItemDescr, $Price, $Cost, $StkCat, $ReqDelDate){
 
-		/* Constructor function to add a new LineDetail object with passed params */
+	/* Constructor function to add a new LineDetail object with passed params */
 		$this->LineNo = $LineNo;
 		$this->ItemDescription = $ItemDescr;
 		$this->Quantity = $Qty;

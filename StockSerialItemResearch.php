@@ -1,13 +1,14 @@
 <?php
-/* $Id$*/
+/* $Id: StockSerialItemResearch.php 6941 2014-10-26 23:18:08Z daintree $*/
 
 include('includes/session.inc');
 $Title = _('Serial Item Research');
 include('includes/header.inc');
 
-echo '<p class="page_title_text noPrint" >
+echo '<p class="page_title_text">
 		<img src="'.$RootPath.'/css/'.$Theme.'/images/inventory.png" title="' . _('Inventory') . '" alt="" /><b>' . $Title. '</b>
 	  </p>';
+
 
 //validate the submission
 if (isset($_POST['serialno'])) {
@@ -18,13 +19,15 @@ if (isset($_POST['serialno'])) {
 	$SerialNo = '';
 }
 
+
+
 echo '<div class="centre">
 <br />
-<form onSubmit="return VerifyForm(this);" id="SerialNoResearch" method="post" class="noPrint" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') .'">';
+<form id="SerialNoResearch" method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') .'">';
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
-echo  _('Serial Number') .': <input id="serialno" type="text" name="serialno" size="21" required="required" minlength="1" maxlength="20" value="'. $SerialNo . '" /> &nbsp;<input type="submit" name="submit" value="' . _('Search') . '" />
+echo  _('Serial Number') .': <input id="serialno" type="text" name="serialno" size="21" maxlength="20" value="'. $SerialNo . '" /> &nbsp;<input type="submit" name="submit" value="' . _('Search') . '" />
 <br />
 </div>
 </form>';
@@ -33,7 +36,8 @@ echo '<script  type="text/javascript">
 		document.getElementById("serialno").focus();
 	</script>';
 
-if ($SerialNo != '') {
+
+if ($SerialNo!='') {
 	//the point here is to allow a semi fuzzy search, but still keep someone from killing the db server
 	if (mb_strstr($SerialNo,'%')){
 		while(mb_strstr($SerialNo,'%%'))	{
@@ -44,72 +48,29 @@ if ($SerialNo != '') {
 			prnMsg('You can not use LIKE with short numbers. It has been removed.','warn');
 		}
 	}
-	if ($_SESSION['RestrictLocations']==0) {
-		$SQL = "SELECT stockserialitems.serialno,
-						stockserialitems.stockid,
-						stockserialitems.quantity AS CurInvQty,
-						stockserialmoves.moveqty,
-						stockmoves.type,
-						systypes.typename,
-						stockmoves.transno,
-						stockmoves.loccode,
-						locations.locationname,
-						stockmoves.trandate,
-						stockmoves.debtorno,
-						stockmoves.branchcode,
-						stockmoves.reference,
-						stockmoves.qty AS TotalMoveQty
-					FROM stockserialitems
-					INNER JOIN stockserialmoves
-						ON stockserialitems.serialno = stockserialmoves.serialno
-						AND stockserialitems.stockid=stockserialmoves.stockid
-					INNER JOIN stockmoves
-						ON stockserialmoves.stockmoveno = stockmoves.stkmoveno
-						AND stockserialitems.loccode=stockmoves.loccode
-					INNER JOIN systypes
-						ON stockmoves.type=systypes.typeid
-					INNER JOIN locations
-						on stockmoves.loccode = locations.loccode
-					WHERE stockserialitems.serialno " . LIKE . " '" . $SerialNo . "'
-					ORDER BY stkmoveno";
-	} else {
-		$SQL = "SELECT stockserialitems.serialno,
-						stockserialitems.stockid,
-						stockserialitems.quantity AS CurInvQty,
-						stockserialmoves.moveqty,
-						stockmoves.type,
-						systypes.typename,
-						stockmoves.transno,
-						stockmoves.loccode,
-						locations.locationname,
-						stockmoves.trandate,
-						stockmoves.debtorno,
-						stockmoves.branchcode,
-						stockmoves.reference,
-						stockmoves.qty AS TotalMoveQty
-					FROM stockserialitems
-					INNER JOIN stockserialmoves
-						ON stockserialitems.serialno = stockserialmoves.serialno
-						AND stockserialitems.stockid=stockserialmoves.stockid
-					INNER JOIN stockmoves
-						ON stockserialmoves.stockmoveno = stockmoves.stkmoveno
-						AND stockserialitems.loccode=stockmoves.loccode
-					INNER JOIN systypes
-						ON stockmoves.type=systypes.typeid
-					INNER JOIN locations
-						ON stockmoves.loccode = locations.loccode
-					INNER JOIN www_users
-						ON locations.loccode=www_users.defaultlocation
-					WHERE stockserialitems.serialno " . LIKE . " '" . $SerialNo . "'
-						AND www_users.userid='" . $_SESSION['UserID'] . "'
-					ORDER BY stkmoveno";
-	}
-	$result = DB_query($SQL,$db);
+	$SQL = "SELECT ssi.serialno,
+			ssi.stockid, ssi.quantity CurInvQty,
+			ssm.moveqty,
+			sm.type, st.typename,
+			sm.transno, sm.loccode, l.locationname, sm.trandate, sm.debtorno, sm.branchcode, sm.reference, sm.qty TotalMoveQty
+			FROM weberp_stockserialitems ssi INNER JOIN weberp_stockserialmoves ssm
+				ON ssi.serialno = ssm.serialno AND ssi.stockid=ssm.stockid
+			INNER JOIN weberp_stockmoves sm
+				ON ssm.stockmoveno = sm.stkmoveno and ssi.loccode=sm.loccode
+			INNER JOIN weberp_systypes st
+				ON sm.type=st.typeid
+			INNER JOIN weberp_locations l
+				on sm.loccode = l.loccode
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=l.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE ssi.serialno " . LIKE . " '" . $SerialNo . "'
+			ORDER BY stkmoveno";
+
+	$result = DB_query($SQL);
 
 	if (DB_num_rows($result) == 0){
-		prnMsg( _('No History found for Serial Number'). ': <b>'.$SerialNo.'</b>' , 'warn');
+		prnMsg( _('No History found for Serial Number'). ': <b>' . $SerialNo . '</b>' , 'warn');
 	} else {
-		echo '<h4>'. _('Details for Serial Item').': <b>'.$SerialNo.'</b><br />'. _('Length').'='.mb_strlen($SerialNo).'</h4>';
+		echo '<h4>' .  _('Details for Serial Item').': <b>' . $SerialNo . '</b><br />' .  _('Length').'='.mb_strlen($SerialNo) . '</h4>';
 		echo '<table class="selection">';
 		echo '<tr>
 				<th>' . _('StockID') . '</th>

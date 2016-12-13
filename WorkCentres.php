@@ -1,13 +1,17 @@
 <?php
+/* $Id: WorkCentres.php 7490 2016-04-11 02:00:42Z rchacon $*/
+/* Defines the various centres of work within a manufacturing company. Also the overhead and labour rates applicable to the work centre and its standard capacity */
 
 include('includes/session.inc');
 $Title = _('Work Centres');
+$ViewTopic = 'Manufacturing';
+$BookMark = 'WorkCentres';
 include('includes/header.inc');
 
-if (isset($_POST['SelectedWC'])) {
-	$SelectedWC = $_POST['SelectedWC'];
-} elseif (isset($_GET['SelectedWC'])) {
-	$SelectedWC = $_GET['SelectedWC'];
+if (isset($_POST['SelectedWC'])){
+	$SelectedWC =$_POST['SelectedWC'];
+} elseif (isset($_GET['SelectedWC'])){
+	$SelectedWC =$_GET['SelectedWC'];
 }
 
 if (isset($_POST['submit'])) {
@@ -22,34 +26,34 @@ if (isset($_POST['submit'])) {
 
 	if (mb_strlen($_POST['Code']) < 2) {
 		$InputError = 1;
-		prnMsg(_('The Work Centre code must be at least 2 characters long'), 'error');
+		prnMsg(_('The Work Centre code must be at least 2 characters long'),'error');
 	}
-	if (mb_strlen($_POST['Description']) < 3) {
+	if (mb_strlen($_POST['Description'])<3) {
 		$InputError = 1;
-		prnMsg(_('The Work Centre description must be at least 3 characters long'), 'error');
+		prnMsg(_('The Work Centre description must be at least 3 characters long'),'error');
 	}
-	if (mb_strstr($_POST['Code'], ' ') or ContainsIllegalCharacters($_POST['Code'])) {
+	if (mb_strstr($_POST['Code'],' ') OR ContainsIllegalCharacters($_POST['Code']) ) {
 		$InputError = 1;
-		prnMsg(_('The work centre code cannot contain any of the following characters') . " - ' &amp; + \" \\ " . _('or a space'), 'error');
+		prnMsg(_('The work centre code cannot contain any of the following characters') . " - ' &amp; + \" \\ " . _('or a space'),'error');
 	}
 
-	if (isset($SelectedWC) and $InputError != 1) {
+	if (isset($SelectedWC) AND $InputError !=1) {
 
 		/*SelectedWC could also exist if submit had not been clicked this code
 		would not run in this case cos submit is false of course  see the
 		delete code below*/
 
-		$sql = "UPDATE workcentres SET location = '" . $_POST['Location'] . "',
+		$sql = "UPDATE weberp_workcentres SET location = '" . $_POST['Location'] . "',
 						description = '" . $_POST['Description'] . "',
 						overheadrecoveryact ='" . $_POST['OverheadRecoveryAct'] . "',
 						overheadperhour = '" . $_POST['OverheadPerHour'] . "'
 				WHERE code = '" . $SelectedWC . "'";
 		$msg = _('The work centre record has been updated');
-	} elseif ($InputError != 1) {
+	} elseif ($InputError !=1) {
 
-		/*Selected work centre is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new work centre form */
+	/*Selected work centre is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new work centre form */
 
-		$sql = "INSERT INTO workcentres (code,
+		$sql = "INSERT INTO weberp_workcentres (code,
 										location,
 										description,
 										overheadrecoveryact,
@@ -64,81 +68,70 @@ if (isset($_POST['submit'])) {
 	}
 	//run the SQL from either of the above possibilites
 
-	if ($InputError != 1) {
-		$result = DB_query($sql, $db, _('The update/addition of the work centre failed because'));
-		prnMsg($msg, 'success');
-		unset($_POST['Location']);
-		unset($_POST['Description']);
-		unset($_POST['Code']);
-		unset($_POST['OverheadRecoveryAct']);
-		unset($_POST['OverheadPerHour']);
-		unset($SelectedWC);
+	if ($InputError !=1){
+		$result = DB_query($sql,_('The update/addition of the work centre failed because'));
+		prnMsg($msg,'success');
+		unset ($_POST['Location']);
+		unset ($_POST['Description']);
+		unset ($_POST['Code']);
+		unset ($_POST['OverheadRecoveryAct']);
+		unset ($_POST['OverheadPerHour']);
+		unset ($SelectedWC);
 	}
 
 } elseif (isset($_GET['delete'])) {
-	//the link to delete a selected record was clicked instead of the submit button
+//the link to delete a selected record was clicked instead of the submit button
 
-	// PREVENT DELETES IF DEPENDENT RECORDS IN 'BOM'
+// PREVENT DELETES IF DEPENDENT RECORDS IN 'BOM'
 
-	$sql = "SELECT COUNT(*) FROM bom WHERE bom.workcentreadded='" . $SelectedWC . "'";
-	$result = DB_query($sql, $db);
+	$sql= "SELECT COUNT(*) FROM weberp_bom WHERE weberp_bom.workcentreadded='" . $SelectedWC . "'";
+	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
-	if ($myrow[0] > 0) {
-		prnMsg(_('Cannot delete this work centre because bills of material have been created requiring components to be added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('BOM items referring to this work centre code'), 'warn');
-	} else {
-		$sql = "SELECT COUNT(*) FROM contractbom WHERE contractbom.workcentreadded='" . $SelectedWC . "'";
-		$result = DB_query($sql, $db);
+	if ($myrow[0]>0) {
+		prnMsg(_('Cannot delete this work centre because bills of material have been created requiring components to be added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' ._('BOM items referring to this work centre code'),'warn');
+	}  else {
+		$sql= "SELECT COUNT(*) FROM weberp_contractbom WHERE weberp_contractbom.workcentreadded='" . $SelectedWC . "'";
+		$result = DB_query($sql);
 		$myrow = DB_fetch_row($result);
-		if ($myrow[0] > 0) {
-			prnMsg(_('Cannot delete this work centre because contract bills of material have been created having components added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('Contract BOM items referring to this work centre code'), 'warn');
+		if ($myrow[0]>0) {
+			prnMsg(_('Cannot delete this work centre because contract bills of material have been created having components added at this work center') . '<br />' . _('There are') . ' ' . $myrow[0] . ' ' . _('Contract BOM items referring to this work centre code'),'warn');
 		} else {
-			$sql = "DELETE FROM workcentres WHERE code='" . $SelectedWC . "'";
-			$result = DB_query($sql, $db);
-			prnMsg(_('The selected work centre record has been deleted'), 'succes');
+			$sql="DELETE FROM weberp_workcentres WHERE code='" . $SelectedWC . "'";
+			$result = DB_query($sql);
+			prnMsg(_('The selected work centre record has been deleted'),'succes');
 		} // end of Contract BOM test
 	} // end of BOM test
 }
 
 if (!isset($SelectedWC)) {
 
-	/* It could still be the second time the page has been run and a record has been selected for modification - SelectedWC will exist because it was sent with the new call. If its the first time the page has been displayed with no parameters
-	then none of the above are true and the list of work centres will be displayed with
-	links to delete or edit each. These will call the same page again and allow update/input
-	or deletion of the records*/
-	echo '<p class="page_title_text noPrint" >
-			<img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '
+/* It could still be the second time the page has been run and a record has been selected for modification - SelectedWC will exist because it was sent with the new call. If its the first time the page has been displayed with no parameters
+then none of the above are true and the list of work centres will be displayed with
+links to delete or edit each. These will call the same page again and allow update/input
+or deletion of the records*/
+	echo '<p class="page_title_text">
+			<img src="'.$RootPath.'/css/'.$Theme.'/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '
 		</p>';
 
-	if ($_SESSION['RestrictLocations'] == 0) {
-		$sql = "SELECT workcentres.code,
-						workcentres.description,
-						locations.locationname,
-						workcentres.overheadrecoveryact,
-						workcentres.overheadperhour
-					FROM workcentres
-					INNER JOIN locations
-						ON workcentres.location = locations.loccode";
-	} else {
-		$sql = "SELECT workcentres.code,
-						workcentres.description,
-						locations.locationname,
-						workcentres.overheadrecoveryact,
-						workcentres.overheadperhour
-					FROM workcentres
-					INNER JOIN locations
-						ON workcentres.location = locations.loccode
-					INNER JOIN  www_users
-						ON locations.loccode=www_users.defaultlocation
-					WHERE www_users.userid='" . $_SESSION['UserID'] . "'";
-	}
-	$result = DB_query($sql, $db);
+	$sql = "SELECT weberp_workcentres.code,
+				weberp_workcentres.description,
+				weberp_locations.locationname,
+				weberp_workcentres.overheadrecoveryact,
+				weberp_workcentres.overheadperhour
+			FROM weberp_workcentres,
+				weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			WHERE weberp_workcentres.location = weberp_locations.loccode";
+
+	$result = DB_query($sql);
 	echo '<table class="selection">
 			<tr>
-				<th>' . _('WC Code') . '</th>
-				<th>' . _('Description') . '</th>
-				<th>' . _('Location') . '</th>
-				<th>' . _('Overhead GL Account') . '</th>
-				<th>' . _('Overhead Per Hour') . '</th>
+				<th class="ascending">', _('WC Code'), '</th>
+				<th class="ascending">', _('Description'), '</th>
+				<th class="ascending">', _('Location'), '</th>
+				<th class="ascending">', _('Overhead GL Account'), '</th>
+				<th class="ascending">', _('Overhead Per Hour'), '</th>
+				<th colspan="2">&nbsp;</th>
 			</tr>';
 
 	while ($myrow = DB_fetch_array($result)) {
@@ -150,8 +143,17 @@ if (!isset($SelectedWC)) {
 					<td>%s</td>
 					<td class="number">%s</td>
 					<td><a href="%s&amp;SelectedWC=%s">' . _('Edit') . '</a></td>
-					<td><a href="%s&amp;SelectedWC=%s&amp;delete=yes" onclick="return MakeConfirm(\'' . _('Are you sure you wish to delete this work centre?') . '\', \'Confirm Delete\', this);">' . _('Delete') . '</a></td>
-				</tr>', $myrow['code'], $myrow['description'], $myrow['locationname'], $myrow['overheadrecoveryact'], $myrow['overheadperhour'], htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '?', $myrow['code'], htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '?', $myrow['code']);
+					<td><a href="%s&amp;SelectedWC=%s&amp;delete=yes" onclick="return confirm(\'' . _('Are you sure you wish to delete this work centre?') . '\');">' . _('Delete')  . '</a></td>
+				</tr>',
+				$myrow['code'],
+				$myrow['description'],
+				$myrow['locationname'],
+				$myrow['overheadrecoveryact'],
+				$myrow['overheadperhour'],
+				htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?',
+				$myrow['code'],
+				htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?',
+				$myrow['code']);
 	}
 
 	//END WHILE LIST LOOP
@@ -161,12 +163,15 @@ if (!isset($SelectedWC)) {
 //end of ifs and buts!
 
 if (isset($SelectedWC)) {
-	echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/maintenance.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>';
-	echo '<div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">' . _('Show all Work Centres') . '</a></div>';
+	echo '<p class="page_title_text"><img alt="" src="', $RootPath, '/css/', $Theme,
+		'/images/maintenance.png" title="',// Icon image.
+		$Title, '" /> ',// Icon title.
+		$Title, '</p>';// Page title.
+	echo '<div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">' . _('Show all Work Centres') . '</a></div>';
 }
 
 echo '<br />
-	<form onSubmit="return VerifyForm(this);" method="post" class="noPrint" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
+	<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
 echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
@@ -178,23 +183,24 @@ if (isset($SelectedWC)) {
 					description,
 					overheadrecoveryact,
 					overheadperhour
-			FROM workcentres
+			FROM weberp_workcentres
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_workcentres.location AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 			WHERE code='" . $SelectedWC . "'";
 
-	$result = DB_query($sql, $db);
+	$result = DB_query($sql);
 	$myrow = DB_fetch_array($result);
 
 	$_POST['Code'] = $myrow['code'];
 	$_POST['Location'] = $myrow['location'];
 	$_POST['Description'] = $myrow['description'];
-	$_POST['OverheadRecoveryAct'] = $myrow['overheadrecoveryact'];
-	$_POST['OverheadPerHour'] = $myrow['overheadperhour'];
+	$_POST['OverheadRecoveryAct']  = $myrow['overheadrecoveryact'];
+	$_POST['OverheadPerHour']  = $myrow['overheadperhour'];
 
 	echo '<input type="hidden" name="SelectedWC" value="' . $SelectedWC . '" />
 		<input type="hidden" name="Code" value="' . $_POST['Code'] . '" />
 		<table class="selection">
 			<tr>
-				<td>' . _('Work Centre Code') . ':</td>
+				<td>' ._('Work Centre Code') . ':</td>
 				<td>' . $_POST['Code'] . '</td>
 			</tr>';
 
@@ -205,36 +211,29 @@ if (isset($SelectedWC)) {
 	echo '<table class="selection">
 			<tr>
 				<td>' . _('Work Centre Code') . ':</td>
-				<td><input type="text" name="Code" size="6" required="required" minlength="1" maxlength="5" value="' . $_POST['Code'] . '" /></td>
+				<td><input type="text" name="Code" pattern="[^&+-]{2,}" required="required" autofocus="autofocus" title="'._('The code should be at least 2 characters and no illegal characters allowed').'"  size="6" maxlength="5" value="' . $_POST['Code'] . '" placeholder="'._('More than 2 legal characters').'" /></td>
 			</tr>';
 }
 
-if ($_SESSION['RestrictLocations'] == 0) {
-	$sql = "SELECT locationname,
-					loccode
-				FROM locations";
-} else {
-	$sql = "SELECT locationname,
-					loccode
-				FROM locations
-				INNER JOIN www_users
-					ON locations.loccode=www_users.defaultlocation
-				WHERE www_users.userid='" . $_SESSION['UserID'] . "'";
-}
-$result = DB_query($sql, $db);
+$SQL = "SELECT locationname,
+				weberp_locations.loccode
+		FROM weberp_locations
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1";
+$result = DB_query($SQL);
 
 if (!isset($_POST['Description'])) {
 	$_POST['Description'] = '';
 }
 echo '<tr>
 		<td>' . _('Work Centre Description') . ':</td>
-		<td><input type="text" name="Description" size="21" required="required" minlength="1" maxlength="20" value="' . $_POST['Description'] . '" /></td>
+		<td><input type="text" pattern="[^&+-]{3,}" required="required" title="'._('The Work Center should be more than 3 characters and no illegal characters allowed').'" name="Description" ' . (isset($SelectedWC)? 'autofocus="autofocus"': '') . ' size="21" maxlength="20" value="' . $_POST['Description'] . '" placeholder="'._('More than 3 legal characters').'" /></td>
 	</tr>
-	<tr><td>' . _('Location') . ':</td>
-		<td><select required="required" minlength="1" name="Location">';
+	<tr>
+		<td>' . _('Location') . ':</td>
+		<td><select name="Location">';
 
 while ($myrow = DB_fetch_array($result)) {
-	if (isset($_POST['Location']) and $myrow['loccode'] == $_POST['Location']) {
+	if (isset($_POST['Location']) and $myrow['loccode']==$_POST['Location']) {
 		echo '<option selected="selected" value="';
 	} else {
 		echo '<option value="';
@@ -250,20 +249,20 @@ echo '</select></td>
 	</tr>
 	<tr>
 		<td>' . _('Overhead Recovery GL Account') . ':</td>
-		<td><select required="required" minlength="1" name="OverheadRecoveryAct">';
+		<td><select name="OverheadRecoveryAct">';
 
 //SQL to poulate account selection boxes
 $SQL = "SELECT accountcode,
 				accountname
-		FROM chartmaster INNER JOIN accountgroups
-			ON chartmaster.group_=accountgroups.groupname
-		WHERE accountgroups.pandl!=0
+		FROM weberp_chartmaster INNER JOIN weberp_accountgroups
+			ON weberp_chartmaster.group_=weberp_accountgroups.groupname
+		WHERE weberp_accountgroups.pandl!=0
 		ORDER BY accountcode";
 
-$result = DB_query($SQL, $db);
+$result = DB_query($SQL);
 
 while ($myrow = DB_fetch_array($result)) {
-	if (isset($_POST['OverheadRecoveryAct']) and $myrow['accountcode'] == $_POST['OverheadRecoveryAct']) {
+	if (isset($_POST['OverheadRecoveryAct']) and $myrow['accountcode']==$_POST['OverheadRecoveryAct']) {
 		echo '<option selected="selected" value="';
 	} else {
 		echo '<option value="';
@@ -274,30 +273,22 @@ while ($myrow = DB_fetch_array($result)) {
 DB_free_result($result);
 
 if (!isset($_POST['OverheadPerHour'])) {
-	$_POST['OverheadPerHour'] = 0;
+	$_POST['OverheadPerHour']=0;
 }
 
 echo '</select></td></tr>';
 echo '<tr>
 		<td>' . _('Overhead Per Hour') . ':</td>
-		<td><input type="text" class="number" name="OverheadPerHour" size="6" required="required" minlength="1" maxlength="6" value="' . $_POST['OverheadPerHour'] . '" />';
+		<td><input type="text" class="number" name="OverheadPerHour" size="6" title="'._('The input must be numeric').'" maxlength="6" value="'.$_POST['OverheadPerHour'].'" />';
 
 echo '</td>
 	</tr>
-	</table>';
-
-echo '<br />
+	</table>
+	<br />
 	<div class="centre">
 		<input type="submit" name="submit" value="' . _('Enter Information') . '" />
-	</div>';
-
-if (!isset($_GET['SelectedWC']) or $_GET['SelectedWC'] == '') {
-	echo '<script  type="text/javascript">defaultControl(document.forms[0].Code);</script>';
-} else {
-	echo '<script  type="text/javascript">defaultControl(document.forms[0].Description);</script>';
-}
-
-echo '</div>
-	  </form>';
+	</div>
+	</div>
+      </form>';
 include('includes/footer.inc');
 ?>

@@ -65,7 +65,7 @@ class barcode {
 
 		// Module size check
 		$moduleSize = (int) $moduleSize;
-		if($moduleSize >= self::MIN_MODULE_SIZE and $moduleSize <= self::MAX_MODULE_SIZE) {
+		if($moduleSize >= self::MIN_MODULE_SIZE && $moduleSize <= self::MAX_MODULE_SIZE) {
 			$this->moduleSize = $moduleSize;
 		} else {
 			throw new Exception('Module size have to be in range '.self::MIN_MODULE_SIZE.' - '.self::MAX_MODULE_SIZE.'.', E_MODULE_SIZE);

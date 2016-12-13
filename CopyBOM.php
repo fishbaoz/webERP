@@ -1,9 +1,10 @@
 <?php
-/*
+/**
  * Author: Ashish Shukla <gmail.com!wahjava>
  *
  * Script to duplicate BoMs.
  */
+/* $Id: CopyBOM.php 7691 2016-12-02 07:56:18Z exsonqu $*/
 
 include('includes/session.inc');
 
@@ -13,27 +14,27 @@ include('includes/header.inc');
 
 include('includes/SQL_CommonFunctions.inc');
 
-if (isset($_POST['Submit'])) {
+if(isset($_POST['Submit'])) {
 	$StockID = $_POST['StockID'];
 	$NewOrExisting = $_POST['NewOrExisting'];
 	$NewStockID = '';
 	$InputError = 0; //assume the best
 
-	if ($NewOrExisting == 'N') {
+	if($NewOrExisting == 'N') {
 		$NewStockID = $_POST['ToStockID'];
-		if (mb_strlen($NewStockID) == 0 or $NewStockID == '') {
+		if (mb_strlen($NewStockID)==0 OR $NewStockID==''){
 			$InputError = 1;
-			prnMsg(_('The new item code cannot be blank. Enter a new code for the item to copy the BOM to'), 'error');
+			prnMsg(_('The new item code cannot be blank. Enter a new code for the item to copy the BOM to'),'error');
 		}
 	} else {
 		$NewStockID = $_POST['ExStockID'];
 	}
-	if ($InputError == 0) {
-		$result = DB_Txn_Begin($db);
+	if ($InputError==0){
+		$result = DB_Txn_Begin();
 
-		if ($NewOrExisting == 'N') {
-			/* duplicate rows into stockmaster */
-			$sql = "INSERT INTO stockmaster( stockid,
+		if($NewOrExisting == 'N') {
+	      /* duplicate rows into stockmaster */
+			$sql = "INSERT INTO weberp_stockmaster( stockid,
 									categoryid,
 									description,
 									longdescription,
@@ -56,12 +57,12 @@ if (isset($_POST['Submit'])) {
 									serialised,
 									appendfile,
 									perishable,
-									decimalplaces,
+									digitals,
 									nextserialno,
 									pansize,
 									shrinkfactor,
 									netweight )
-							SELECT '" . $NewStockID . "' AS stockid,
+							SELECT '".$NewStockID."' AS stockid,
 									categoryid,
 									description,
 									longdescription,
@@ -84,14 +85,14 @@ if (isset($_POST['Submit'])) {
 									serialised,
 									appendfile,
 									perishable,
-									decimalplaces,
+									digitals,
 									nextserialno,
 									pansize,
 									shrinkfactor,
 									netweight
-							FROM stockmaster
-							WHERE stockid='" . $StockID . "';";
-			$result = DB_query($sql, $db);
+							FROM weberp_stockmaster
+							WHERE stockid='".$StockID."';";
+			$result = DB_query($sql);
 		} else {
 			$sql = "SELECT lastcostupdate,
 							actualcost,
@@ -100,103 +101,113 @@ if (isset($_POST['Submit'])) {
 							labourcost,
 							overheadcost,
 							lowestlevel
-						FROM stockmaster
-						WHERE stockid='" . $StockID . "';";
-			$result = DB_query($sql, $db);
+						FROM weberp_stockmaster
+						WHERE stockid='".$StockID."';";
+			$result = DB_query($sql);
 
 			$myrow = DB_fetch_row($result);
 
-			$sql = "UPDATE stockmaster set
-					lastcostupdate  = " . $myrow[0] . ",
+			$sql = "UPDATE weberp_stockmaster set
+					lastcostupdate  = '" . $myrow[0] . "',
 					actualcost      = " . $myrow[1] . ",
 					lastcost        = " . $myrow[2] . ",
 					materialcost    = " . $myrow[3] . ",
 					labourcost      = " . $myrow[4] . ",
 					overheadcost    = " . $myrow[5] . ",
 					lowestlevel     = " . $myrow[6] . "
-					WHERE stockid='" . $NewStockID . "';";
-			$result = DB_query($sql, $db);
+					WHERE stockid='".$NewStockID."';";
+			$result = DB_query($sql);
 		}
 
-		$sql = "INSERT INTO bom
-					SELECT '" . $NewStockID . "' AS parent,
+		$sql = "INSERT INTO weberp_bom
+					SELECT '".$NewStockID."' AS parent,
+					        sequence,
 							component,
 							workcentreadded,
 							loccode,
 							effectiveafter,
 							effectiveto,
 							quantity,
-							autoissue
-					FROM bom
-					WHERE parent='" . $StockID . "';";
-		$result = DB_query($sql, $db);
+							autoissue,
+							remark,
+							digitals,
+							digitals
+					FROM weberp_bom
+					WHERE parent='".$StockID."';";
+		$result = DB_query($sql);
 
-		if ($NewOrExisting == 'N') {
-			$sql = "INSERT INTO locstock
-			  SELECT loccode,
-					'" . $NewStockID . "' AS stockid,
-					0 AS quantity,
-					reorderlevel
-				FROM locstock
-				WHERE stockid='" . $StockID . "'";
+		if($NewOrExisting == 'N') {
+			$sql = "INSERT INTO weberp_locstock (loccode,
+								            stockid,
+								            quantity,
+								            reorderlevel,
+								            bin )
+				      SELECT loccode,
+							'".$NewStockID."' AS stockid,
+							0 AS quantity,
+							reorderlevel,
+							bin
+						FROM weberp_locstock
+						WHERE stockid='".$StockID."'";
 
-			$result = DB_query($sql, $db);
+			$result = DB_query($sql);
 		}
 
-		$result = DB_Txn_Commit($db);
+		$result = DB_Txn_Commit();
 
 		UpdateCost($db, $NewStockID);
 
-		header('Location: BOMs.php?Select=' . $NewStockID);
+		header('Location: BOMs.php?Select='.$NewStockID);
 		ob_end_flush();
 	} //end  if there is no input error
 } else {
 
-	echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/inventory.png" title="' . _('Contract') . '" alt="" />' . ' ' . $Title . '</p>';
+	echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/inventory.png" title="' . _('Contract') . '" alt="" />' . ' ' . $Title . '</p>';
 
-	echo '<form onSubmit="return VerifyForm(this);" method="post" class="noPrint" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
+	echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
+    echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 	$sql = "SELECT stockid,
 					description
-				FROM stockmaster
-				WHERE stockid IN (SELECT DISTINCT parent FROM bom)
+				FROM weberp_stockmaster
+				WHERE stockid IN (SELECT DISTINCT parent FROM weberp_bom)
 				AND  mbflag IN ('M', 'A', 'K', 'G');";
-	$result = DB_query($sql, $db);
+	$result = DB_query($sql);
 
 	echo '<table class="selection">
 			<tr>
 				<td>' . _('From Stock ID') . '</td>';
-	echo '<td><select minlength="0" name="StockID">';
-	while ($myrow = DB_fetch_row($result)) {
-		echo '<option value="' . $myrow[0] . '">' . $myrow[0] . ' -- ' . $myrow[1] . '</option>';
+	echo '<td><select name="StockID">';
+	while($myrow = DB_fetch_row($result)) {
+		echo '<option value="'.$myrow[0].'">' . $myrow[0].' -- '.$myrow[1] . '</option>';
 	}
 	echo '</select></td>
 			</tr>';
 	echo '<tr>
 			<td><input type="radio" name="NewOrExisting" value="N" />' . _(' To New Stock ID') . '</td>';
-	echo '<td><input type="text" required="required" minlength="1" maxlength="20" name="ToStockID" /></td></tr>';
+	echo '<td><input type="text" maxlength="20" autofocus="autofocus" pattern="[a-zA-Z0-9_\-]*" name="ToStockID" title="' . _('Enter a new item code to copy the existing item and its bill of material to. Item codes can contain only alpha-numeric characters, underscore or hyphens.') . '" /></td></tr>';
 
 	$sql = "SELECT stockid,
 					description
-				FROM stockmaster
-				WHERE stockid NOT IN (SELECT DISTINCT parent FROM bom)
+				FROM weberp_stockmaster
+				WHERE stockid NOT IN (SELECT DISTINCT parent FROM weberp_bom)
 				AND mbflag IN ('M', 'A', 'K', 'G');";
-	$result = DB_query($sql, $db);
+	$result = DB_query($sql);
 
 	if (DB_num_rows($result) > 0) {
 		echo '<tr>
-				<td><input type="radio" name="NewOrExisting" value="E" />' . _('To Existing Stock ID') . '</td><td>';
-		echo '<select minlength="0" name="ExStockID">';
-		while ($myrow = DB_fetch_row($result)) {
-			echo '<option value="' . $myrow[0] . '">' . $myrow[0] . ' -- ' . $myrow[1] . '</option>';
+				<td><input type="radio" name="NewOrExisting" checked="checked" value="E" />' . _('To Existing Stock ID') . '</td><td>';
+		echo '<select name="ExStockID">';
+		while($myrow = DB_fetch_row($result)) {
+			echo '<option value="'.$myrow[0].'">' . $myrow[0].' -- '.$myrow[1] . '</option>';
 		}
 		echo '</select></td></tr>';
 	}
 	echo '</table>';
 	echo '<br /><div class="centre"><input type="submit" name="Submit" value="Submit" /></div>
-		  </div>
-		  </form>';
+          </div>
+          </form>';
 
 	include('includes/footer.inc');
 }

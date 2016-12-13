@@ -1,38 +1,48 @@
 <?php
 
-include('includes/session.inc');
+
+/* $Id: GLAccountCSV.php 4492 2011-02-18 09:56:52Z daintree $ */
+
+include ('includes/session.inc');
 $Title = _('General Ledger Account Report');
-$ViewTopic = "GeneralLedger";
-$BookMark = "GLAccountCSV";
+
+$ViewTopic= 'GeneralLedger';
+$BookMark = 'GLAccountCSV';
+
 include('includes/header.inc');
 include('includes/GLPostings.inc');
 
-if (isset($_POST['Period'])) {
+if (isset($_POST['Period'])){
 	$SelectedPeriod = $_POST['Period'];
-} elseif (isset($_GET['Period'])) {
+} elseif (isset($_GET['Period'])){
 	$SelectedPeriod = $_GET['Period'];
 }
 
-echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/transactions.png" title="' . _('General Ledger Account Inquiry') . '" alt="' . _('General Ledger Account Inquiry') . '" />' . ' ' . _('General Ledger Account Report') . '</p>';
+echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/transactions.png" title="' . _('General Ledger Account Inquiry') . '" alt="" />' . ' ' . _('General Ledger Account Report') . '</p>';
 
-echo '<div class="page_help_text noPrint">' . _('Use the keyboard Shift key to select multiple accounts and periods') . '</div><br />';
+echo '<div class="page_help_text">' . _('Use the keyboard Shift key to select multiple accounts and periods') . '</div><br />';
 
-echo '<form onSubmit="return VerifyForm(this);" method="post" class="noPrint" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
+echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">';
+echo '<div>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 /*Dates in SQL format for the last day of last month*/
-$DefaultPeriodDate = Date('Y-m-d', Mktime(0, 0, 0, Date('m'), 0, Date('Y')));
+$DefaultPeriodDate = Date ('Y-m-d', Mktime(0,0,0,Date('m'),0,Date('Y')));
 
 /*Show a form to allow input of criteria for the report */
-echo '<table class="selection" summary="' . _('Criteria for report') . '">
-			<tr>
-			 <td>' . _('Selected Accounts') . ':</td>
-			 <td><select minlength="0" name="Account[]" size="12" multiple="multiple">';
-$sql = "SELECT accountcode, accountname FROM chartmaster ORDER BY accountcode";
-$AccountsResult = DB_query($sql, $db);
-$i = 0;
-while ($myrow = DB_fetch_array($AccountsResult, $db)) {
-	if (isset($_POST['Account'][$i]) and $myrow['accountcode'] == $_POST['Account'][$i]) {
+echo '<table>
+	        <tr>
+	         <td>' . _('Selected Accounts') . ':</td>
+	         <td><select name="Account[]" size="12" multiple="multiple">';
+$sql = "SELECT weberp_chartmaster.accountcode, 
+			   weberp_chartmaster.accountname
+		FROM weberp_chartmaster 
+		INNER JOIN weberp_glaccountusers ON weberp_glaccountusers.accountcode=weberp_chartmaster.accountcode AND weberp_glaccountusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_glaccountusers.canview=1
+		ORDER BY weberp_chartmaster.accountcode";
+$AccountsResult = DB_query($sql);
+$i=0;
+while ($myrow=DB_fetch_array($AccountsResult,$db)){
+	if(isset($_POST['Account'][$i]) AND $myrow['accountcode'] == $_POST['Account'][$i]){
 		echo '<option selected="selected" value="' . $myrow['accountcode'] . '">' . $myrow['accountcode'] . ' ' . htmlspecialchars($myrow['accountname'], ENT_QUOTES, 'UTF-8', false) . '</option>';
 		$i++;
 	} else {
@@ -41,14 +51,14 @@ while ($myrow = DB_fetch_array($AccountsResult, $db)) {
 }
 echo '</select></td>';
 
-echo '<td>' . _('For Period range') . ':</td>
-		<td><select minlength="0" name="Period[]" size="12" multiple="multiple">';
-$sql = "SELECT periodno, lastdate_in_period FROM periods ORDER BY periodno DESC";
-$Periods = DB_query($sql, $db);
-$id = 0;
+echo '<td>' . _('For Period range').':</td>
+		<td><select name="Period[]" size="12" multiple="multiple">';
+$sql = "SELECT periodno, lastdate_in_period FROM weberp_periods ORDER BY periodno DESC";
+$Periods = DB_query($sql);
+$id=0;
 
-while ($myrow = DB_fetch_array($Periods, $db)) {
-	if (isset($SelectedPeriod[$id]) and $myrow['periodno'] == $SelectedPeriod[$id]) {
+while ($myrow=DB_fetch_array($Periods,$db)){
+	if (isset($SelectedPeriod[$id]) and $myrow['periodno'] == $SelectedPeriod[$id]){
 		echo '<option selected="selected" value="' . $myrow['periodno'] . '">' . _(MonthAndYearFromSQLDate($myrow['lastdate_in_period'])) . '</option>';
 		$id++;
 	} else {
@@ -58,165 +68,164 @@ while ($myrow = DB_fetch_array($Periods, $db)) {
 echo '</select></td></tr>';
 
 //Select the tag
-echo '<tr><td>' . _('Select Tag') . ':</td><td><select minlength="0" name="tag">';
+echo '<tr><td>' . _('Select Tag') . ':</td><td><select name="tag">';
 
 $SQL = "SELECT tagref,
-		   tagdescription
-		FROM tags
+	       tagdescription
+		FROM weberp_tags
 		ORDER BY tagref";
 
-$result = DB_query($SQL, $db);
+$result=DB_query($SQL);
 echo '<option value="0">0 - ' . _('All tags') . '</option>';
-while ($myrow = DB_fetch_array($result)) {
-	if (isset($_POST['tag']) and $_POST['tag'] == $myrow['tagref']) {
-		echo '<option selected="selected" value="' . $myrow['tagref'] . '">' . $myrow['tagref'] . ' - ' . $myrow['tagdescription'] . '</option>';
+while ($myrow=DB_fetch_array($result)){
+	if (isset($_POST['tag']) and $_POST['tag']==$myrow['tagref']){
+	   echo '<option selected="selected" value="' . $myrow['tagref'] . '">' . $myrow['tagref'].' - ' .$myrow['tagdescription'] . '</option>';
 	} else {
-		echo '<option value="' . $myrow['tagref'] . '">' . $myrow['tagref'] . ' - ' . $myrow['tagdescription'] . '</option>';
+	   echo '<option value="' . $myrow['tagref'] . '">' . $myrow['tagref'].' - ' .$myrow['tagdescription'] . '</option>';
 	}
 }
 echo '</select></td></tr>';
 // End select tag
 
 echo '</table><br />
-		<div class="centre"><input type="submit" name="MakeCSV" value="' . _('Make CSV File') . '" /></div>
-	</div>
+		<div class="centre"><input type="submit" name="MakeCSV" value="'._('Make CSV File').'" /></div>
+    </div>
 	</form>';
 
 /* End of the Form  rest of script is what happens if the show button is hit*/
 
-if (isset($_POST['MakeCSV'])) {
+if (isset($_POST['MakeCSV'])){
 
-	if (!isset($SelectedPeriod)) {
-		prnMsg(_('A period or range of periods must be selected from the list box'), 'info');
+	if (!isset($SelectedPeriod)){
+		prnMsg(_('A period or range of periods must be selected from the list box'),'info');
 		include('includes/footer.inc');
 		exit;
 	}
-	if (!isset($_POST['Account'])) {
-		prnMsg(_('An account or range of accounts must be selected from the list box'), 'info');
+	if (!isset($_POST['Account'])){
+		prnMsg(_('An account or range of accounts must be selected from the list box'),'info');
 		include('includes/footer.inc');
 		exit;
 	}
 
-	if (!file_exists($_SESSION['reports_dir'])) {
+	if (!file_exists($_SESSION['reports_dir'])){
 		$Result = mkdir('./' . $_SESSION['reports_dir']);
 	}
 
-	$FileName = $_SESSION['reports_dir'] . '/Accounts_Listing_' . Date('Y-m-d') . '.csv';
+	$FileName = $_SESSION['reports_dir'] . '/Accounts_Listing_' . Date('Y-m-d') .'.csv';
 
-	$fp = fopen($FileName, 'w');
+	$fp = fopen($FileName,'w');
 
-	if ($fp == FALSE) {
-		prnMsg(_('Could not open or create the file under') . ' ' . $FileName, 'error');
+	if ($fp==FALSE){
+		prnMsg(_('Could not open or create the file under') . ' ' . $FileName,'error');
 		include('includes/footer.inc');
 		exit;
 	}
 
-	foreach ($_POST['Account'] as $SelectedAccount) {
+	foreach ($_POST['Account'] as $SelectedAccount){
 		/*Is the account a balance sheet or a profit and loss account */
-		$SQL = "SELECT chartmaster.accountname,
-								accountgroups.pandl
-								FROM accountgroups
-								INNER JOIN chartmaster ON accountgroups.groupname=chartmaster.group_
-								WHERE chartmaster.accountcode='" . $SelectedAccount . "'";
-		$result = DB_query($SQL, $db);
+		$SQL = "SELECT weberp_chartmaster.accountname,
+								weberp_accountgroups.pandl
+							    FROM weberp_accountgroups
+							    INNER JOIN weberp_chartmaster ON weberp_accountgroups.groupname=weberp_chartmaster.group_
+							    WHERE weberp_chartmaster.accountcode='" . $SelectedAccount . "'";
+		$result = DB_query($SQL);
 		$AccountDetailRow = DB_fetch_row($result);
 		$AccountName = $AccountDetailRow[1];
-		if ($AccountDetailRow[1] == 1) {
+		if ($AccountDetailRow[1]==1){
 			$PandLAccount = True;
-		} else {
-			$PandLAccount = False;
-			/*its a balance sheet account */
+		}else{
+			$PandLAccount = False; /*its a balance sheet account */
 		}
 
 		$FirstPeriodSelected = min($SelectedPeriod);
 		$LastPeriodSelected = max($SelectedPeriod);
 
-		if ($_POST['tag'] == 0) {
-			$sql = "SELECT type,
-					  typename,
-					  gltrans.typeno,
-					  gltrans.trandate,
-					  gltrans.narrative,
-		  				  gltrans.amount,
-					  gltrans.periodno,
-					  gltrans.tag
-				FROM gltrans, systypes
-				WHERE gltrans.account = '" . $SelectedAccount . "'
-				AND systypes.typeid=gltrans.type
+		if ($_POST['tag']==0) {
+	 		$sql= "SELECT type,
+				      typename,
+				      weberp_gltrans.typeno,
+				      weberp_gltrans.trandate,
+				      weberp_gltrans.narrative,
+          			      weberp_gltrans.amount,
+				      weberp_gltrans.periodno,
+				      weberp_gltrans.tag
+				FROM weberp_gltrans, weberp_systypes
+				WHERE weberp_gltrans.account = '" . $SelectedAccount . "'
+				AND weberp_systypes.typeid=weberp_gltrans.type
 				AND posted=1
 				AND periodno>='" . $FirstPeriodSelected . "'
 				AND periodno<='" . $LastPeriodSelected . "'
-				ORDER BY periodno, gltrans.trandate, counterindex";
+				ORDER BY periodno, weberp_gltrans.trandate, counterindex";
 
 		} else {
-			$sql = "SELECT gltrans.type,
-						gltrans.typename,
-						gltrans.typeno,
-						gltrans.trandate,
-						gltrans.narrative,
-						gltrans.amount,
-						gltrans.periodno,
-						gltrans.tag
-					FROM gltrans, systypes
-					WHERE gltrans.account = '" . $SelectedAccount . "'
-					AND systypes.typeid=gltrans.type
+	 		$sql= "SELECT weberp_gltrans.type,
+						weberp_gltrans.typename,
+						weberp_gltrans.typeno,
+						weberp_gltrans.trandate,
+						weberp_gltrans.narrative,
+						weberp_gltrans.amount,
+						weberp_gltrans.periodno,
+						weberp_gltrans.tag
+					FROM weberp_gltrans, weberp_systypes
+					WHERE weberp_gltrans.account = '" . $SelectedAccount . "'
+					AND weberp_systypes.typeid=weberp_gltrans.type
 					AND posted=1
 					AND periodno>='" . $FirstPeriodSelected . "'
 					AND periodno<='" . $LastPeriodSelected . "'
-					AND tag='" . $_POST['tag'] . "'
-					ORDER BY periodno, gltrans.trandate, counterindex";
+					AND tag='".$_POST['tag']."'
+					ORDER BY periodno, weberp_gltrans.trandate, counterindex";
 		}
 
-		$ErrMsg = _('The transactions for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved because');
-		$TransResult = DB_query($sql, $db, $ErrMsg);
+		$ErrMsg = _('The transactions for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved because') ;
+		$TransResult = DB_query($sql,$ErrMsg);
 
-		fwrite($fp, $SelectedAccount . ' - ' . $AccountName . ' ' . _('for period') . ' ' . $FirstPeriodSelected . ' ' . _('to') . ' ' . $LastPeriodSelected . "\n");
-		if ($PandLAccount == True) {
+		fwrite($fp, $SelectedAccount . ' - ' . $AccountName . ' ' . _('for period'). ' ' . $FirstPeriodSelected . ' ' . _('to') . ' ' . $LastPeriodSelected . "\n");
+		if ($PandLAccount==True) {
 			$RunningTotal = 0;
 		} else {
 			$sql = "SELECT bfwd,
 					actual,
 					period
-				FROM chartdetails
-				WHERE chartdetails.accountcode= '" . $SelectedAccount . "'
-				AND chartdetails.period='" . $FirstPeriodSelected . "'";
+				FROM weberp_chartdetails
+				WHERE weberp_chartdetails.accountcode= '" . $SelectedAccount . "'
+				AND weberp_chartdetails.period='" . $FirstPeriodSelected . "'";
 
 			$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
-			$ChartDetailsResult = DB_query($sql, $db, $ErrMsg);
+			$ChartDetailsResult = DB_query($sql,$ErrMsg);
 			$ChartDetailRow = DB_fetch_array($ChartDetailsResult);
 
-			$RunningTotal = $ChartDetailRow['bfwd'];
-			if ($RunningTotal < 0) {
-				fwrite($fp, $SelectedAccount . ', ' . $FirstPeriodSelected . ', ' . _('Brought Forward Balance') . ',,,,' . -$RunningTotal . "\n");
+			$RunningTotal =$ChartDetailRow['bfwd'];
+			if ($RunningTotal < 0 ){
+				fwrite($fp,$SelectedAccount . ', '  .$FirstPeriodSelected . ', ' . _('Brought Forward Balance') . ',,,,' . -$RunningTotal . "\n");
 			} else {
-				fwrite($fp, $SelectedAccount . ', ' . $FirstPeriodSelected . ', ' . _('Brought Forward Balance') . ',,,' . $RunningTotal . "\n");
+				fwrite($fp,$SelectedAccount . ', '  .$FirstPeriodSelected . ', ' . _('Brought Forward Balance') . ',,,' . $RunningTotal . "\n");
 			}
 		}
 		$PeriodTotal = 0;
 		$PeriodNo = -9999;
 
 		$j = 1;
-		$k = 0; //row colour counter
+		$k=0; //row colour counter
 
-		while ($myrow = DB_fetch_array($TransResult)) {
+		while ($myrow=DB_fetch_array($TransResult)) {
 
-			if ($myrow['periodno'] != $PeriodNo) {
-				if ($PeriodNo != -9999) { //ie its not the first time around
+			if ($myrow['periodno']!=$PeriodNo){
+				if ($PeriodNo!=-9999){ //ie its not the first time around
 					/*Get the ChartDetails balance b/fwd and the actual movement in the account for the period as recorded in the chart details - need to ensure integrity of transactions to the chart detail movements. Also, for a balance sheet account it is the balance carried forward that is important, not just the transactions*/
 					$sql = "SELECT bfwd,
 									actual,
 									period
-							FROM chartdetails
-							WHERE chartdetails.accountcode= '" . $SelectedAccount . "'
-							AND chartdetails.period='" . $PeriodNo . "'";
+							FROM weberp_chartdetails
+							WHERE weberp_chartdetails.accountcode= '" . $SelectedAccount . "'
+							AND weberp_chartdetails.period='" . $PeriodNo . "'";
 
 					$ErrMsg = _('The chart details for account') . ' ' . $SelectedAccount . ' ' . _('could not be retrieved');
-					$ChartDetailsResult = DB_query($sql, $db, $ErrMsg);
+					$ChartDetailsResult = DB_query($sql,$ErrMsg);
 					$ChartDetailRow = DB_fetch_array($ChartDetailsResult);
 					if ($PeriodTotal < 0) {
-						fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,,' . -$PeriodTotal . "\n");
+						fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,,' . -$PeriodTotal. "\n");
 					} else {
-						fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,' . $PeriodTotal . "\n");
+						fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,' . $PeriodTotal. "\n");
 					}
 				}
 				$PeriodNo = $myrow['periodno'];
@@ -228,43 +237,40 @@ if (isset($_POST['MakeCSV'])) {
 
 			$FormatedTranDate = ConvertSQLDate($myrow['trandate']);
 
-			$tagsql = "SELECT tagdescription FROM tags WHERE tagref='" . $myrow['tag'] . "'";
-			$tagresult = DB_query($tagsql, $db);
+			$tagsql="SELECT tagdescription FROM weberp_tags WHERE tagref='".$myrow['tag'] . "'";
+			$tagresult=DB_query($tagsql);
 			$tagrow = DB_fetch_array($tagresult);
-			if ($myrow['amount'] < 0) {
-				fwrite($fp, $SelectedAccount . ',' . $myrow['periodno'] . ', ' . $myrow['typename'] . ',' . $myrow['typeno'] . ',' . $FormatedTranDate . ',,' . -$myrow['amount'] . ',' . $myrow['narrative'] . ',' . $tagrow['tagdescription'] . "\n");
+			if ($myrow['amount']<0){
+				fwrite($fp, $SelectedAccount . ',' . $myrow['periodno'] . ', ' . $myrow['typename'] . ',' . $myrow['typeno'] . ',' . $FormatedTranDate . ',,' . -$myrow['amount'] . ',' . $myrow['narrative'] . ',' . $tagrow['tagdescription']. "\n");
 			} else {
-				fwrite($fp, $SelectedAccount . ',' . $myrow['periodno'] . ', ' . $myrow['typename'] . ',' . $myrow['typeno'] . ',' . $FormatedTranDate . ',' . $myrow['amount'] . ',,' . $myrow['narrative'] . ',' . $tagrow['tagdescription'] . "\n");
+				fwrite($fp, $SelectedAccount . ',' . $myrow['periodno'] . ', ' . $myrow['typename'] . ',' . $myrow['typeno'] . ',' . $FormatedTranDate . ',' . $myrow['amount'] . ',,' . $myrow['narrative'] . ',' . $tagrow['tagdescription']. "\n");
 			}
 		} //end loop around GLtrans
-		if ($PeriodTotal <> 0) {
-			if ($PeriodTotal < 0) {
-				fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,,' . -$PeriodTotal . "\n");
+		if ($PeriodTotal <>0){
+			if ($PeriodTotal < 0){
+				fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,,' . -$PeriodTotal. "\n");
 			} else {
-				fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,' . $PeriodTotal . "\n");
+				fwrite($fp, $SelectedAccount . ', ' . $PeriodNo . ', ' . _('Period Total') . ',,,' . $PeriodTotal. "\n");
 			}
 		}
-		if ($PandLAccount == True) {
-			if ($RunningTotal < 0) {
+		if ($PandLAccount==True){
+			if ($RunningTotal < 0){
 				fwrite($fp, $SelectedAccount . ',' . $LastPeriodSelected . ', ' . _('Total Period Movement') . ',,,,' . -$RunningTotal . "\n");
 			} else {
 				fwrite($fp, $SelectedAccount . ',' . $LastPeriodSelected . ', ' . _('Total Period Movement') . ',,,' . $RunningTotal . "\n");
 			}
-		} else {
-			/*its a balance sheet account*/
-			if ($RunningTotal < 0) {
+		} else { /*its a balance sheet account*/
+			if ($RunningTotal < 0){
 				fwrite($fp, $SelectedAccount . ',' . $LastPeriodSelected . ', ' . _('Balance C/Fwd') . ',,,,' . -$RunningTotal . "\n");
 			} else {
 				fwrite($fp, $SelectedAccount . ',' . $LastPeriodSelected . ', ' . _('Balance C/Fwd') . ',,,' . $RunningTotal . "\n");
 			}
 		}
 
-	}
-	/*end for each SelectedAccount */
+	} /*end for each SelectedAccount */
 	fclose($fp);
-	echo '<p><a href="' . $FileName . '">' . _('click here') . '</a> ' . _('to view the file') . '<br />';
-}
-/* end of if CreateCSV button hit */
+	echo '<p><a href="' .  $FileName . '">' . _('click here') . '</a> ' . _('to view the file') . '<br />';
+} /* end of if CreateCSV button hit */
 
 include('includes/footer.inc');
 ?>

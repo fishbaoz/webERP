@@ -397,7 +397,7 @@ class qrCode extends barcode {
 			$this->matrix = $this->addFormatInformation($this->matrix, $formatInformation);
 
 			// Version info
-			if($this->version>=7 and $this->version<=40) {
+			if($this->version>=7 && $this->version<=40) {
 				$versionInformation = $this->versionInformation($this->version);
 				$this->matrix = $this->addVersionInformation($this->matrix, $versionInformation);
 			}
@@ -452,7 +452,7 @@ class qrCode extends barcode {
 
 
 		if($version) {
-			if($findversion<=$version and $version <= 40) {
+			if($findversion<=$version && $version <= 40) {
 				return $version;
 			} else {
 				throw new Exception('Selected version can not be choosen.', E_BAD_VERSION);
@@ -492,41 +492,41 @@ class qrCode extends barcode {
 				$matrix[$y][$x] = 0; // White as default
 
 				// Vertical synch.
-				if ($y == 6 and $x % 2 == 0) {
+				if ($y == 6 && $x % 2 == 0) {
 					$matrix[$y][$x] = 1;
 				}
 				// Hor. synch
-				if ($x == 6 and $y % 2 == 0) {
+				if ($x == 6 && $y % 2 == 0) {
 					$matrix[$y][$x] = 1;
 				}
 
 				// Mask synch. patterns
-				if ($y == 6 or $x == 6) {
+				if ($y == 6 || $x == 6) {
 					$maskedMatrix[$y][$x] = 1;
 				}
 
 
 				// Format and version mask
 				// all versions
-				if($x==8 and ($y<=8 or $y>=($this->matrixSize-8))) {
+				if($x==8 && ($y<=8 || $y>=($this->matrixSize-8))) {
 					$maskedMatrix[$y][$x] = 1;
 				}
-				if($y==8 and ($x<=8 or $x>=($this->matrixSize-8))) {
+				if($y==8 && ($x<=8 || $x>=($this->matrixSize-8))) {
 					$maskedMatrix[$y][$x] = 1;
 				}
 				// Version >= 7
 				if($this->version >= 7) {
-					if($y<=5 and $x>=$this->matrixSize-11 and $x<=$this->matrixSize-9) {
+					if($y<=5 && $x>=$this->matrixSize-11 && $x<=$this->matrixSize-9) {
 						$maskedMatrix[$y][$x] = 1;
 					}
-					if($x<=5 and $y>=$this->matrixSize-11 and $y<=$this->matrixSize-9) {
+					if($x<=5 && $y>=$this->matrixSize-11 && $y<=$this->matrixSize-9) {
 						$maskedMatrix[$y][$x] = 1;
 					}
 				}
 
 
 				// left top position pattern
-				if ($y <= 6 and $x <= 6) {
+				if ($y <= 6 && $x <= 6) {
 					$shift = $y * 7 + $x;
 					$matrix[$y][$x] = $this->positionPattern[$shift];
 
@@ -534,7 +534,7 @@ class qrCode extends barcode {
 					$maskedMatrix[$y+1][$x+1] = 1; // mask. separatoru
 				}
 				// left bottom position pattern
-				if ($y < 7 and $x < $this->matrixSize and $x > ($this->matrixSize - 8)) {
+				if ($y < 7 && $x < $this->matrixSize && $x > ($this->matrixSize - 8)) {
 					$shift = $y * 7 + ($this->matrixSize - $x - 1);
 					$matrix[$y][$x] = $this->positionPattern[$shift];
 
@@ -542,7 +542,7 @@ class qrCode extends barcode {
 					$maskedMatrix[$y+1][$x-1] = 1;
 				}
 				// right top position pattern
-				if ($x < 7 and $y < $this->matrixSize and $y > ($this->matrixSize - 8)) {
+				if ($x < 7 && $y < $this->matrixSize && $y > ($this->matrixSize - 8)) {
 					$shift = $x + ($this->matrixSize - $y - 1) * 7;
 					$matrix[$y][$x] = $this->positionPattern[$shift];
 
@@ -556,7 +556,7 @@ class qrCode extends barcode {
 		if (count($this->alignmentPatternCoordinate[$this->version]) > 0) {
 			foreach ($this->alignmentPatternCoordinate[$this->version] as $y) {
 				foreach ($this->alignmentPatternCoordinate[$this->version] as $x) {
-					if (!(($x < 7 and $y < 7) or ($y > ($this->matrixSize - 8) and $x < 7) or ($x > ($this->matrixSize - 8) and $y < 7))) {
+					if (!(($x < 7 && $y < 7) || ($y > ($this->matrixSize - 8) && $x < 7) || ($x > ($this->matrixSize - 8) && $y < 7))) {
 						for ($i = 0; $i < 5; $i++) {
 							for ($j = 0; $j < 5; $j++) {
 								$xCoor = $x - $i + 2;
@@ -1051,7 +1051,7 @@ class qrCode extends barcode {
 	private function versionInformation($version)
 	{
 		$verson = intval($version);
-		if($version >=7 and $version<=40) {
+		if($version >=7 && $version<=40) {
 			return $this->versionInformationStream[$version];
 		} else {
 			throw new Exception('Selected version can not be choosen', E_BAD_VERSION);
@@ -1067,7 +1067,7 @@ class qrCode extends barcode {
 	 */
 	private function addVersionInformation($matrix, $versionInformation)
 	{
-		if($this->version>=7 and $this->version <=40) {
+		if($this->version>=7 && $this->version <=40) {
 			// left bottom
 			$counter = 0;
 			for($i=0;$i<6;$i++) {

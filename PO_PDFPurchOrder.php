@@ -1,10 +1,12 @@
 <?php
 
+/* $Id: PO_PDFPurchOrder.php 6941 2014-10-26 23:18:08Z daintree $*/
+
 include('includes/session.inc');
 include('includes/SQL_CommonFunctions.inc');
 include('includes/DefinePOClass.php');
 
-if (!isset($_GET['OrderNo']) and !isset($_POST['OrderNo'])) {
+if (!isset($_GET['OrderNo']) AND !isset($_POST['OrderNo'])) {
 	$Title = _('Select a Purchase Order');
 	include('includes/header.inc');
 	echo '<div class="centre"><br /><br /><br />';
@@ -28,31 +30,31 @@ if (!isset($_GET['OrderNo']) and !isset($_POST['OrderNo'])) {
 	echo '<div class="centre"><br /><br /><br />' . _('This page must be called with a purchase order number to print');
 	echo '<br /><a href="' . $RootPath . '/index.php">' . _('Back to the menu') . '</a></div>';
 	exit;
-} //!isset($_GET['OrderNo']) and !isset($_POST['OrderNo'])
+}
 if (isset($_GET['OrderNo'])) {
 	$OrderNo = $_GET['OrderNo'];
-} //isset($_GET['OrderNo'])
+}
 elseif (isset($_POST['OrderNo'])) {
 	$OrderNo = $_POST['OrderNo'];
-} //isset($_POST['OrderNo'])
+}
 $Title = _('Print Purchase Order Number') . ' ' . $OrderNo;
 
-if (isset($_POST['PrintOrEmail']) and isset($_POST['EmailTo'])) {
-	if ($_POST['PrintOrEmail'] == 'Email' and !IsEmailAddress($_POST['EmailTo'])) {
+if (isset($_POST['PrintOrEmail']) AND isset($_POST['EmailTo'])) {
+	if ($_POST['PrintOrEmail'] == 'Email' AND !IsEmailAddress($_POST['EmailTo'])) {
 		include('includes/header.inc');
 		prnMsg(_('The email address entered does not appear to be valid. No emails have been sent.'), 'warn');
 		include('includes/footer.inc');
 		exit;
-	} //$_POST['PrintOrEmail'] == 'Email' and !IsEmailAddress($_POST['EmailTo'])
-} //isset($_POST['PrintOrEmail']) and isset($_POST['EmailTo'])
+	}
+}
 $ViewingOnly = 0;
 
-if (isset($_GET['ViewingOnly']) and $_GET['ViewingOnly'] != '') {
+if (isset($_GET['ViewingOnly']) AND $_GET['ViewingOnly'] != '') {
 	$ViewingOnly = $_GET['ViewingOnly'];
-} //isset($_GET['ViewingOnly']) and $_GET['ViewingOnly'] != ''
-elseif (isset($_POST['ViewingOnly']) and $_POST['ViewingOnly'] != '') {
+}
+elseif (isset($_POST['ViewingOnly']) AND $_POST['ViewingOnly'] != '') {
 	$ViewingOnly = $_POST['ViewingOnly'];
-} //isset($_POST['ViewingOnly']) and $_POST['ViewingOnly'] != ''
+}
 
 /* If we are previewing the order then we dont want to email it */
 if ($OrderNo == 'Preview') { //OrderNo is set to 'Preview' when just looking at the format of the printed order
@@ -63,52 +65,52 @@ if ($OrderNo == 'Preview') { //OrderNo is set to 'Preview' when just looking at 
 	$MakePDFThenDisplayIt = True;
 } //$OrderNo == 'Preview'
 
-if (isset($_POST['DoIt']) and ($_POST['PrintOrEmail'] == 'Print' or $ViewingOnly == 1)) {
+if (isset($_POST['DoIt']) AND ($_POST['PrintOrEmail'] == 'Print' OR $ViewingOnly == 1)) {
 	$MakePDFThenDisplayIt = True;
 	$MakePDFThenEmailIt = False;
-} //isset($_POST['DoIt']) and ($_POST['PrintOrEmail'] == 'Print' or $ViewingOnly == 1)
-elseif (isset($_POST['DoIt']) and $_POST['PrintOrEmail'] == 'Email' and isset($_POST['EmailTo'])) {
+} elseif (isset($_POST['DoIt']) AND $_POST['PrintOrEmail'] == 'Email' AND isset($_POST['EmailTo'])) {
 	$MakePDFThenEmailIt = True;
 	$MakePDFThenDisplayIt = False;
-} //isset($_POST['DoIt']) and $_POST['PrintOrEmail'] == 'Email' and isset($_POST['EmailTo'])
+}
 
-if (isset($OrderNo) and $OrderNo != '' and $OrderNo > 0 and $OrderNo != 'Preview') {
+if (isset($OrderNo) AND $OrderNo != '' AND $OrderNo > 0 AND $OrderNo != 'Preview') {
 	/*retrieve the order details from the database to print */
 	$ErrMsg = _('There was a problem retrieving the purchase order header details for Order Number') . ' ' . $OrderNo . ' ' . _('from the database');
-	$sql = "SELECT	purchorders.supplierno,
-					suppliers.suppname,
-					suppliers.address1,
-					suppliers.address2,
-					suppliers.address3,
-					suppliers.address4,
-					suppliers.address5,
-					suppliers.address6,
-					purchorders.comments,
-					purchorders.orddate,
-					purchorders.rate,
-					purchorders.dateprinted,
-					purchorders.deladd1,
-					purchorders.deladd2,
-					purchorders.deladd3,
-					purchorders.deladd4,
-					purchorders.deladd5,
-					purchorders.deladd6,
-					purchorders.allowprint,
-					purchorders.requisitionno,
-					www_users.realname as initiator,
-					purchorders.paymentterms,
-					suppliers.currcode,
-					purchorders.status,
-					purchorders.stat_comment,
-					currencies.decimalplaces AS currdecimalplaces
-				FROM purchorders INNER JOIN suppliers
-					ON purchorders.supplierno = suppliers.supplierid
-				INNER JOIN currencies
-					ON suppliers.currcode=currencies.currabrev
-				INNER JOIN www_users
-					ON purchorders.initiator=www_users.userid
-				WHERE purchorders.orderno='" . $OrderNo . "'";
-	$result = DB_query($sql, $db, $ErrMsg);
+	$sql = "SELECT	weberp_purchorders.supplierno,
+					weberp_suppliers.suppname,
+					weberp_suppliers.address1,
+					weberp_suppliers.address2,
+					weberp_suppliers.address3,
+					weberp_suppliers.address4,
+					weberp_suppliers.address5,
+					weberp_suppliers.address6,
+					weberp_purchorders.comments,
+					weberp_purchorders.orddate,
+					weberp_purchorders.rate,
+					weberp_purchorders.dateprinted,
+					weberp_purchorders.deladd1,
+					weberp_purchorders.deladd2,
+					weberp_purchorders.deladd3,
+					weberp_purchorders.deladd4,
+					weberp_purchorders.deladd5,
+					weberp_purchorders.deladd6,
+					weberp_purchorders.allowprint,
+					weberp_purchorders.requisitionno,
+					weberp_www_users.realname as initiator,
+					weberp_purchorders.paymentterms,
+					weberp_suppliers.currcode,
+					weberp_purchorders.status,
+					weberp_purchorders.stat_comment,
+					weberp_currencies.decimalplaces AS currdecimalplaces
+				FROM weberp_purchorders INNER JOIN weberp_suppliers
+					ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+				INNER JOIN weberp_currencies
+					ON weberp_suppliers.currcode=weberp_currencies.currabrev
+				INNER JOIN weberp_www_users
+					ON weberp_purchorders.initiator=weberp_www_users.userid
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_purchorders.orderno='" . $OrderNo . "'";
+	$result = DB_query($sql, $ErrMsg);
 	if (DB_num_rows($result) == 0) {
 		/*There is no order header returned */
 		$Title = _('Print Purchase Order Error');
@@ -128,18 +130,17 @@ if (isset($OrderNo) and $OrderNo != '' and $OrderNo > 0 and $OrderNo != 'Preview
 			</div><br /><br /><br />';
 		include('includes/footer.inc');
 		exit();
-	} //DB_num_rows($result) == 0
-	elseif (DB_num_rows($result) == 1) {
+	} elseif (DB_num_rows($result) == 1) {
 		/*There is only one order header returned  (as it should be!)*/
 
 		$POHeader = DB_fetch_array($result);
 
-		if ($POHeader['status'] != 'Authorised' and $POHeader['status'] != 'Printed') {
+		if ($POHeader['status'] != 'Authorised' AND $POHeader['status'] != 'Printed') {
 			include('includes/header.inc');
 			prnMsg(_('Purchase orders can only be printed once they have been authorised') . '. ' . _('This order is currently at a status of') . ' ' . _($POHeader['status']), 'warn');
 			include('includes/footer.inc');
 			exit;
-		} //$POHeader['status'] != 'Authorised' and $POHeader['status'] != 'Printed'
+		}
 
 		if ($ViewingOnly == 0) {
 			if ($POHeader['allowprint'] == 0) {
@@ -192,8 +193,7 @@ else if ($OrderNo == 'Preview') { // We are previewing the order
 if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 	if ($OrderNo == 'Preview') {
 		$FormDesign = simplexml_load_file(sys_get_temp_dir() . '/PurchaseOrder.xml');
-	} //$OrderNo == 'Preview'
-	else {
+	} else {
 		$FormDesign = simplexml_load_file($PathPrefix . 'companies/' . $_SESSION['DatabaseName'] . '/FormDesigns/PurchaseOrder.xml');
 	}
 	// Set the paper size/orintation
@@ -216,19 +216,18 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 						decimalplaces,
 						conversionfactor,
 						suppliers_partno
-				FROM purchorderdetails LEFT JOIN stockmaster
-					ON purchorderdetails.itemcode=stockmaster.stockid
+				FROM weberp_purchorderdetails LEFT JOIN weberp_stockmaster
+					ON weberp_purchorderdetails.itemcode=weberp_stockmaster.stockid
 				WHERE orderno ='" . $OrderNo . "'
-				ORDER BY itemcode";
-		/*- ADDED: Sort by our item code -*/
-		$result = DB_query($sql, $db);
-	} //$OrderNo != 'Preview'
+				ORDER BY itemcode";	/*- ADDED: Sort by our item code -*/
+		$result = DB_query($sql);
+	}
 	if ($OrderNo == 'Preview' or DB_num_rows($result) > 0) {
 		/*Yes there are line items to start the ball rolling with a page header */
 		include('includes/PO_PDFOrderPageHeader.inc');
 		$YPos = $Page_Height - $FormDesign->Data->y;
 		$OrderTotal = 0;
-		while ((isset($OrderNo) and $OrderNo == 'Preview') or (isset($result) and !is_bool($result) and $POLine = DB_fetch_array($result))) {
+		while ((isset($OrderNo) AND $OrderNo == 'Preview') OR (isset($result) AND !is_bool($result) AND $POLine = DB_fetch_array($result))) {
 			/* If we are previewing the order then fill the
 			 * order line with dummy data */
 			if ($OrderNo == 'Preview') {
@@ -241,33 +240,35 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 				$POLine['quantityord'] = 9999.99;
 				$POLine['conversionfactor'] = 1;
 				$POLine['decimalplaces'] = 2;
-			} //$OrderNo == 'Preview'
+			}
 			if ($POLine['decimalplaces'] != NULL) {
 				$DecimalPlaces = $POLine['decimalplaces'];
-			} //$POLine['decimalplaces'] != NULL
+			}
 			else {
 				$DecimalPlaces = 2;
 			}
 			$DisplayQty = locale_number_format($POLine['quantityord'] / $POLine['conversionfactor'], $DecimalPlaces);
 			if ($_POST['ShowAmounts'] == 'Yes') {
 				$DisplayPrice = locale_number_format($POLine['unitprice'] * $POLine['conversionfactor'], $POHeader['currdecimalplaces']);
-			} //$_POST['ShowAmounts'] == 'Yes'
-			else {
+			} else {
 				$DisplayPrice = '----';
 			}
 			$DisplayDelDate = ConvertSQLDate($POLine['deliverydate']);
 			if ($_POST['ShowAmounts'] == 'Yes') {
 				$DisplayLineTotal = locale_number_format($POLine['unitprice'] * $POLine['quantityord'], $POHeader['currdecimalplaces']);
-			} //$_POST['ShowAmounts'] == 'Yes'
-			else {
+			} else {
 				$DisplayLineTotal = '----';
 			}
-			$Desc = $POLine['itemdescription'];
-
+			/* If the supplier item code is set then use this to display on the PO rather than the businesses item code */
+			if (mb_strlen($POLine['suppliers_partno'])>0){
+				$ItemCode = $POLine['suppliers_partno'];
+			} else {
+				$ItemCode = $POLine['itemcode'];
+			}
 			$OrderTotal += ($POLine['unitprice'] * $POLine['quantityord']);
 
-			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length, $FormDesign->Data->Column1->FontSize, $POLine['itemcode'], 'left');
-			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $Desc, 'left');
+			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length, $FormDesign->Data->Column1->FontSize, $ItemCode, 'left');
+			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $POLine['itemdescription'], 'left');
 			while (mb_strlen($LeftOvers) > 1) {
 				$YPos -= $line_height;
 				if ($YPos - $line_height <= $Bottom_Margin) {
@@ -286,7 +287,7 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 			if (mb_strlen($LeftOvers) > 1) {
 				$LeftOvers = $pdf->addTextWrap($Left_Margin + 1 + 94, $YPos - $line_height, 270, $FontSize, $LeftOvers, 'left');
 				$YPos -= $line_height;
-			} //mb_strlen($LeftOvers) > 1
+			}
 			if ($YPos - $line_height <= $Bottom_Margin) {
 				/* We reached the end of the page so finsih off the page and start a newy */
 				$PageNumber++;
@@ -308,22 +309,18 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 		} //end if need a new page headed up
 		if ($_POST['ShowAmounts'] == 'Yes') {
 			$DisplayOrderTotal = locale_number_format($OrderTotal, $POHeader['currdecimalplaces']);
-		} //$_POST['ShowAmounts'] == 'Yes'
-		else {
+		} else {
 			$DisplayOrderTotal = '----';
 		}
 		$pdf->addText($FormDesign->OrderTotalCaption->x, $Page_Height - $FormDesign->OrderTotalCaption->y, $FormDesign->OrderTotalCaption->FontSize, _('Order Total - excl tax') . ' ' . $POHeader['currcode']);
 		$LeftOvers = $pdf->addTextWrap($FormDesign->OrderTotal->x, $Page_Height - $FormDesign->OrderTotal->y, $FormDesign->OrderTotal->Length, $FormDesign->OrderTotal->FontSize, $DisplayOrderTotal, 'right');
-	} //$OrderNo == 'Preview' or DB_num_rows($result) > 0
-
-	/*end if there are order details to show on the order - or its a preview*/
+	} /*end if there are order details to show on the order - or its a preview*/
 
 	$Success = 1; //assume the best and email goes - has to be set to 1 to allow update status
 	if ($MakePDFThenDisplayIt) {
 		$pdf->OutputD($_SESSION['DatabaseName'] . '_PurchaseOrder_' . $OrderNo . '_' . date('Y-m-d') . '.pdf');
 		$pdf->__destruct();
-	} //$MakePDFThenDisplayIt
-	else {
+	} else {
 		/* must be MakingPDF to email it */
 
 		$PdfFileName = $_SESSION['DatabaseName'] . '_PurchaseOrder_' . $OrderNo . '_' . date('Y-m-d') . '.pdf';
@@ -336,44 +333,41 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 		$mail->setSubject(_('Purchase Order Number') . ' ' . $OrderNo);
 		$mail->addAttachment($attachment, $PdfFileName, 'application/pdf');
 		//since sometime the mail server required to verify the users, so must set this information.
-		if ($_SESSION['SmtpSetting'] == 0) { //use the mail service provice by the server.
+		if($_SESSION['SmtpSetting'] == 0){//use the mail service provice by the server.
 			$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . '<' . $_SESSION['CompanyRecord']['email'] . '>');
-			$Success = $mail->send(array(
-				$_POST['EmailTo']
-			));
-		} else if ($_SESSION['SmtpSetting'] == 1) {
-			$Success = SendmailBySmtp($mail, array(
-				$_POST['EmailTo']
-			));
-		} else {
-			prnMsg(_('The SMTP settings are wrong, please ask administrator for help'), 'error');
+			$Success = $mail->send(array($_POST['EmailTo']));
+		}else if($_SESSION['SmtpSetting'] == 1) {
+			$Success = SendmailBySmtp($mail,array($_POST['EmailTo']));
+
+		}else{
+			prnMsg(_('The SMTP settings are wrong, please ask administrator for help'),'error');
 			exit;
 			include('includes/footer.inc');
 		}
+
 		if ($Success == 1) {
 			$Title = _('Email a Purchase Order');
 			include('includes/header.inc');
 			echo '<div class="centre"><br /><br /><br />';
 			prnMsg(_('Purchase Order') . ' ' . $OrderNo . ' ' . _('has been emailed to') . ' ' . $_POST['EmailTo'] . ' ' . _('as directed'), 'success');
 
-		} //$Success == 1
-		else { //email failed
+		} else { //email failed
 			$Title = _('Email a Purchase Order');
 			include('includes/header.inc');
 			echo '<div class="centre"><br /><br /><br />';
 			prnMsg(_('Emailing Purchase order') . ' ' . $OrderNo . ' ' . _('to') . ' ' . $_POST['EmailTo'] . ' ' . _('failed'), 'error');
 		}
 	}
-	if ($ViewingOnly == 0 and $Success == 1) {
+	if ($ViewingOnly == 0 AND $Success == 1) {
 		$StatusComment = date($_SESSION['DefaultDateFormat']) . ' - ' . _('Printed by') . ' <a href="mailto:' . $_SESSION['UserEmail'] . '">' . $_SESSION['UsersRealName'] . '</a><br />' . html_entity_decode($POHeader['stat_comment'], ENT_QUOTES, 'UTF-8');
 
-		$sql = "UPDATE purchorders	SET	allowprint =  0,
+		$sql = "UPDATE weberp_purchorders	SET	allowprint =  0,
 										dateprinted  = '" . Date('Y-m-d') . "',
 										status = 'Printed',
 										stat_comment = '" . htmlspecialchars($StatusComment, ENT_QUOTES, 'UTF-8') . "'
-				WHERE purchorders.orderno = '" . $OrderNo . "'";
-		$result = DB_query($sql, $db);
-	} //$ViewingOnly == 0 and $Success == 1
+				WHERE weberp_purchorders.orderno = '" . $OrderNo . "'";
+		$result = DB_query($sql);
+	}
 	include('includes/footer.inc');
 } //isset($MakePDFThenDisplayIt) OR isset($MakePDFThenEmailIt)
 
@@ -381,7 +375,7 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 else {
 	/*the user has just gone into the page need to ask the question whether to print the order or email it to the supplier */
 	include('includes/header.inc');
-	echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">';
+	echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post">';
 	echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 	if ($ViewingOnly == 1) {
@@ -390,79 +384,73 @@ else {
 	echo '<br /><br />';
 	echo '<input type="hidden" name="OrderNo" value="' . $OrderNo . '" />';
 	echo '<table>
-		 <tr>
-			 <td>' . _('Print or Email the Order') . '</td>
-			 <td><select required="required" minlength="1" name="PrintOrEmail">';
+         <tr>
+             <td>' . _('Print or Email the Order') . '</td>
+             <td><select name="PrintOrEmail">';
 
 	if (!isset($_POST['PrintOrEmail'])) {
 		$_POST['PrintOrEmail'] = 'Print';
-	} //!isset($_POST['PrintOrEmail'])
+	}
 	if ($ViewingOnly != 0) {
 		echo '<option selected="selected" value="Print">' . _('Print') . '</option>';
-	} //$ViewingOnly != 0
+	}
 	else {
 		if ($_POST['PrintOrEmail'] == 'Print') {
 			echo '<option selected="selected" value="Print">' . _('Print') . '</option>';
 			echo '<option value="Email">' . _('Email') . '</option>';
-		} //$_POST['PrintOrEmail'] == 'Print'
-		else {
+		} else {
 			echo '<option value="Print">' . _('Print') . '</option>';
 			echo '<option selected="selected" value="Email">' . _('Email') . '</option>';
 		}
 	}
 	echo '</select></td></tr>';
-	echo '<tr>
-			<td>' . _('Show Amounts on the Order') . '</td>
-			<td><select required="required" minlength="1" name="ShowAmounts">';
+	echo '<tr><td>' . _('Show Amounts on the Order') . '</td><td>
+		<select name="ShowAmounts">';
 	if (!isset($_POST['ShowAmounts'])) {
 		$_POST['ShowAmounts'] = 'Yes';
-	} //!isset($_POST['ShowAmounts'])
+	}
 	if ($_POST['ShowAmounts'] == 'Yes') {
 		echo '<option selected="selected" value="Yes">' . _('Yes') . '</option>';
 		echo '<option value="No">' . _('No') . '</option>';
-	} //$_POST['ShowAmounts'] == 'Yes'
-	else {
+	} else {
 		echo '<option value="Yes">' . _('Yes') . '</option>';
 		echo '<option selected="selected" value="No">' . _('No') . '</option>';
 	}
 	echo '</select></td></tr>';
 	if ($_POST['PrintOrEmail'] == 'Email') {
 		$ErrMsg = _('There was a problem retrieving the contact details for the supplier');
-		$SQL = "SELECT suppliercontacts.contact,
-						suppliercontacts.email
-				FROM suppliercontacts INNER JOIN purchorders
-				ON suppliercontacts.supplierid=purchorders.supplierno
-				WHERE purchorders.orderno='" . $OrderNo . "'";
-		$ContactsResult = DB_query($SQL, $db, $ErrMsg);
+		$SQL = "SELECT weberp_suppliercontacts.contact,
+						weberp_suppliercontacts.email
+				FROM weberp_suppliercontacts INNER JOIN weberp_purchorders
+				ON weberp_suppliercontacts.supplierid=weberp_purchorders.supplierno
+				WHERE weberp_purchorders.orderno='" . $OrderNo . "'";
+		$ContactsResult = DB_query($SQL, $ErrMsg);
 		if (DB_num_rows($ContactsResult) > 0) {
-			echo '<tr><td>' . _('Email to') . ':</td><td><select minlength="0" name="EmailTo">';
+			echo '<tr><td>' . _('Email to') . ':</td><td><select name="EmailTo">';
 			while ($ContactDetails = DB_fetch_array($ContactsResult)) {
-				if (mb_strlen($ContactDetails['email']) > 2 and mb_strpos($ContactDetails['email'], '@') > 0) {
+				if (mb_strlen($ContactDetails['email']) > 2 AND mb_strpos($ContactDetails['email'], '@') > 0) {
 					if ($_POST['EmailTo'] == $ContactDetails['email']) {
 						echo '<option selected="selected" value="' . $ContactDetails['email'] . '">' . $ContactDetails['Contact'] . ' - ' . $ContactDetails['email'] . '</option>';
-					} //$_POST['EmailTo'] == $ContactDetails['email']
-					else {
+					} else {
 						echo '<option value="' . $ContactDetails['email'] . '">' . $ContactDetails['contact'] . ' - ' . $ContactDetails['email'] . '</option>';
 					}
-				} //mb_strlen($ContactDetails['email']) > 2 and mb_strpos($ContactDetails['email'], '@') > 0
-			} //$ContactDetails = DB_fetch_array($ContactsResult)
+				}
+			}
 			echo '</select></td></tr></table>';
-		} //DB_num_rows($ContactsResult) > 0
-		else {
+		} else {
 			echo '</table><br />';
 			prnMsg(_('There are no contacts defined for the supplier of this order') . '. ' . _('You must first set up supplier contacts before emailing an order'), 'error');
 			echo '<br />';
 		}
-	} //$_POST['PrintOrEmail'] == 'Email'
-	else {
+	} else {
 		echo '</table>';
 	}
 	echo '<br />
-		 <div class="centre">
-			  <input type="submit" name="DoIt" value="' . _('OK') . '" />
-		 </div>
-		 </div>
-		 </form>';
+         <div class="centre">
+              <input type="submit" name="DoIt" value="' . _('OK') . '" />
+         </div>
+         </div>
+         </form>';
 
 	include('includes/footer.inc');
 }

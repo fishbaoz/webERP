@@ -1,4 +1,5 @@
 <?php
+/* $Id: EDIconfig.inc 6941 2014-10-26 23:18:08Z daintree $*/
 
 /*EDI configuration variables definition */
 
@@ -9,7 +10,7 @@ $EDIHeaderMsgId = 'D:01B:UN:EAN010';
 
 /*EDI Reference of the company */
 
-$EDIReference = 'KWAMOJA';
+$EDIReference = 'WEBERP';
 
 /* EDI Messages for sending directory */
 
@@ -22,10 +23,10 @@ $EDI_MsgSent = 'EDI_Sent';
 
 
 //Testing variables
-include('includes/session.inc');
-include('includes/header.inc');
-$PartnerCode = 'WALMON';
-$MessageType = 'INVOIC';
+include ('includes/session.inc');
+include ('includes/header.inc');
+$PartnerCode='WALMON';
+$MessageType ='INVOIC';
 
 
 
@@ -33,7 +34,7 @@ $MessageType = 'INVOIC';
 
 include('includes/SQL_CommonFunctions.inc');
 
-$EDITrans = GetNextTransNo(99, $db);
+$EDITrans = GetNextTransNo(99,$db);
 
 /* Get the message lines for the heading
 replace variable names with data
@@ -43,45 +44,45 @@ Need code of supplier or customer and the type of message INVOIC or ORDERS*/
 
 $sql = "SELECT section,
 		linetext
-	FROM edimessageformat
+	FROM weberp_edimessageformat
 	WHERE partnercode='" . $PartnerCode . "'
 	AND messagetype='" . $MessageType . "'
 	ORDER BY sequenceno";
 
-$MessageLinesResult = DB_query($sql, $db);
+$MessageLinesResult = DB_query($sql);
 
-$fp = fopen($EDI_Pending . '/EDI_' . $MessageType . '_' . $EDITrans, 'w');
+$fp = fopen( $EDI_Pending . '/EDI_' . $MessageType . '_' . $EDITrans , 'w');
 
-while ($LineDetails = DB_fetch_array($MessageLinesResult)) {
+while ($LineDetails = DB_fetch_array($MessageLinesResult)){
 
 	$PoistionPointer = 0;
-	$NewLineText = '';
+	$NewLineText ='';
 	/* now get each occurence of [ in the line */
-	while (mb_strpos($LineDetails['linetext'], '[', $PoistionPointer) != False) {
+	while (mb_strpos ($LineDetails['linetext'],'[',$PoistionPointer)!=False){
 		$LastPositionPointer = $PoistionPointer;
-		$PositionPointer = mb_strpos($LineDetails['linetext'], '[', $PoistionPointer);
+		$PositionPointer = mb_strpos ($LineDetails['linetext'],'[',$PoistionPointer);
 
-		$NewLineText = $NewLineText . mb_substr($LineDetails['linetext'], $LastPositionPointer, $PoistionPointer - $LastPositionPointer);
+		$NewLineText = $NewLineText .  mb_substr($LineDetails['linetext'],$LastPositionPointer,$PoistionPointer-$LastPositionPointer);
 
 		$LastPositionPointer = $PoistionPointer;
-		$PositionPointer = mb_strpos($LineDetails['linetext'], ']', $PoistionPointer);
+		$PositionPointer = mb_strpos ($LineDetails['linetext'],']',$PoistionPointer);
 
-		$VariableName = mb_substr($LineDetails['linetext'], $LastPositionPointer, $PoistionPointer - $LastPositionPointer);
+		$VariableName = mb_substr($LineDetails['linetext'],$LastPositionPointer,$PoistionPointer-$LastPositionPointer);
 
 		$NewLineText = $NewLineText . $$VariableName;
 
 	}
 	/* now add the text from the last ] to the end of the line */
 	$LastPositionPointer = $PoistionPointer;
-	$NewLineText = $NewLineText . mb_substr($LineDetails['linetext'], $LastPositionPointer);
+	$NewLineText = $NewLineText .  mb_substr($LineDetails['linetext'],$LastPositionPointer);
 
 	echo "<BR>$NewLineText";
 
-	fputs($fp, $NewLineText . "\n");
+	fputs($fp, $NewLineText ."\n");
 }
 
 fclose($fp);
 
-include('includes/footer.inc');
+include ('includes/footer.inc');
 
 ?>

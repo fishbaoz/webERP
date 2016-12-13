@@ -1,24 +1,40 @@
 <?php
+/* $Id: index.php 7314 2015-05-27 05:19:30Z exsonqu $*/
 	ini_set('max_execution_time', "600");
-	session_name('kwamoja_installation');
+	session_name('weberp_installation');
 	session_start();
+if(!extension_loaded('mbstring')){
+	echo 'The php-mbstring extension has not been installed or loaded, please correct your php configuration first';
+	exit;
+}
+
+/*
+ * Web ERP Installer
+ * Step 1: Licence acknowledgement and Choose Language
+ * Step 2: Check requirements
+ * Step 3: Database connection
+ * Step 4: Company details
+ * Step 5: Administrator account details
+ * Step 6: Finalise
+**/
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-			"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html>
-	<head>
-	<meta http-equiv="Content-Type" content="application/html; charset=utf-8" />
-	<link rel="stylesheet" type="text/css" href="../css/aguapop/default.css" />
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>WebERP Installation Wizard</title>
+    <link rel="stylesheet" type="text/css" href="installer.css" />
 </head>
 <body>
+<div id="CanvasDiv">
 	<?php
 	error_reporting(1);
 
 	//get the php-gettext function
 	//When users have not select the language, we guess user's language via the http header information.
-	//once the user has select their lanugage, use the language user selected
+	//once the user has selected their language, use the language user selected
 	if(!isset($_POST['Language'])){
 		if(!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){//get users preferred language
 			$ClientLang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'],0,2);
@@ -117,6 +133,10 @@
 			$Language = 'en_US.utf8';
 			$DefaultLanguage = 'en_US.utf8';
 		}
+		//This is the first step - let us initialise some variables (esp. important if installer is rerun)
+		$DatabaseName = '';
+		$DefaultDatabase = '';
+
 	}else{
 
 		$Language = $_POST['Language'];
@@ -127,22 +147,18 @@
 
 		}
 
-
-
-
 	$PathPrefix = '../';//To make the LanguageSetup.php script run properly
 	include('../includes/LanguageSetup.php');
 	include('../includes/MiscFunctions.php');
+	$DefaultTheme = 'xenos';
 
-	//prevent the installation file from running again
-
+	// Prevent the installation file from running again:
 	if(file_exists('../config.php') or file_exists('../Config.php')){
-		prnMsg(_('It seems that the system has been already installed, if you want to installed again, please remove the config.php file first'),'error');
+		prnMsg(_('It seems that the system has been already installed. If you want to install again, please remove the config.php file first'),'error');
 		exit;
 	}
-
 	if(isset($_POST['Install'])){//confirm the final install data, the last validation step before we submit the data
-		//first do necessary validation first
+		//first do necessary validation
 		//Since user may have changed the DatabaseName so we need check it again
 		$InputError = 0;
 		if(!empty($_POST['CompanyName'])){
@@ -150,12 +166,29 @@
 			//The mysql database name cannot contains illegal characters such as "/","\","." etc
 			//and it should not contains illegal characters as file name such as "?""%"<"">"" " etc
 
-			if(preg_match(',[/\\\?%:\|<>\.\s"]+,',$_POST['CompanyName'])){
+			if(!preg_match(',^[^/\\\?%:\|<>\"]+$,',$_POST['CompanyName'])){
 				$InputError = 1;
-				prnMsg(_('The database name should not contains illegal characters such as "/\?%:|<>" blank etc'),'error');
+				prnMsg(_('The Company names cannot contain illegal characters such as /\?%:|<>"'),'error');
 
 			}
-			$DatabaseName = $_POST['CompanyName'];
+			$CompanyName= $_POST['CompanyName'];
+		}else{
+				$InputError = 1;
+				prnMsg(_('The Company Name name should not be empty'),'error');
+		}
+		//provision for differing database post inputs - need to review and make these consistent
+		if ( (isset($_POST['DatabaseName'])  && !empty($_POST['DatabaseName'])) && (!isset($_POST['Database']) || empty($_POST['Database']))) $_POST['Database'] = $_POST['DatabaseName'];
+		if(!empty($_POST['Database'])){
+			//validate the Database name setting
+			//The mysql database name cannot contains illegal characters such as "/","\","." etc
+			//and it should not contains illegal characters as file name such as "?""%"<"">"" " etc
+
+			if(!preg_match(',[a-zA-Z0-9_\&\-\ ]*,',$_POST['Database'])){
+				$InputError = 1;
+				prnMsg(_('The database name should not contains illegal characters such as "/\?%:|<>" etc'),'error');
+
+			}
+			$DatabaseName = strtolower($_POST['Database']);
 		}else{
 				$InputError = 1;
 				prnMsg(_('The database name should not be empty'),'error');
@@ -168,14 +201,17 @@
 				prnMsg(_('The timezone must be legal'),'error');
 			}
 		}
+		$OnlyDemo = 0;
+		$DualCompany = 0;
+		$NewCompany = 0;
 		if(!empty($_POST['Demo']) and $_POST['Demo'] == 'on'){
-			if(strtolower($DatabaseName) == 'kwamojademo'){//user select to install the kwamojademo
+			if(strtolower($DatabaseName) === 'weberpdemo'){//user select to install the weberpdemo
 				$OnlyDemo = 1;
 
 			}else{
 				$DualCompany = 1; //user choose to install the demo company and production environment
 			}
-		}else{//user only choose to install the new kwamoja company
+		}else{//user only choose to install the new weberp company
 			$NewCompany = 1;
 		}
 		if(!empty($_POST['Email']) and IsEmailAddress($_POST['Email'])){
@@ -183,13 +219,13 @@
 
 		}else{
 			$InputError = 1;
-			prnMsg(_('The email address of adminstrator must be input and should be valid'),'error');
+			prnMsg(_('You must enter a valid email address for the Administrator.'),'error');
 		}
-		if(!empty($_POST['KwaMojaPassword']) and !empty($_POST['PasswordConfirm']) and $_POST['KwaMojaPassword'] == $_POST['PasswordConfirm']){
-			$AdminPassword = $_POST['KwaMojaPassword'];
+		if(!empty($_POST['webERPPassword']) and !empty($_POST['PasswordConfirm']) and $_POST['webERPPassword'] == $_POST['PasswordConfirm']){
+			$AdminPassword = $_POST['webERPPassword'];
 		}else{
 			$InputError = 1;
-			prnMsg(_('Please correct the password, the problem is either password is empty or not match each other'),'error');
+			prnMsg(_('Please correct the password. The password is either blank, or the password check does not match.'),'error');
 
 		}
 		if(!empty($_POST['HostName'])){
@@ -201,20 +237,19 @@
 			if($HostValid){
 				$HostName = $_POST['HostName'];
 			}else{
-				prnMsg(_('The Host Name is illegal'),'error');
+				prnMsg(_('The Host Name is not a valid name.'),'error');
 				exit;
 			}
 
-
 		}else{
 			$InputError = 1;
-			prnMsg(_('The Host Name should not be empty'),'error');
+			prnMsg(_('The Host Name must not be empty.'),'error');
 		}
 		if(!empty($_POST['UserName']) and strlen($_POST['UserName'])<=16){//mysql database user
 			$UserName = $_POST['UserName'];
 		}else{
 			$InputError = 1;
-			prnMsg(_('The user name should not empty or length is over 16'),'error');
+			prnMsg(_('The user name cannot be empty and length must not be over 16 characters.'),'error');
 		}
 		if(isset($_POST['Password'])){//mysql database password
 			$Password = $_POST['Password'];
@@ -237,13 +272,11 @@
 			if($_FILES['LogoFile']['error'] == UPLOAD_ERR_INI_SIZE || $_FILES['LogoFile']['error'] == UPLOAD_ERR_FORM_SIZE){//the file is over the php.ini limit or over the from limit
 				$InputError = 1;
 				if(upload_max_filesize < 0.01){
-					prnMsg(_('The logo file failed to upload due to its size over the upload_max_filesize in php.ini configuration'),'error');
+					prnMsg(_('The company logo file failed to upload due to it\'s size. The file was over the upload_max_filesize set in your php.ini configuration.'),'error');
 
 				}else{
-					prnMsg(_('The logo file failed to upload due to it size over 10KB'),'error');
+					prnMsg(_('The logo file failed to upload as it was over 10KB size limit.'),'error');
 				}
-
-
 
 			}elseif($_FILES['LogoFile']['error'] == UPLOAD_ERR_OK){//The file has been successfully uploaded
 				$File_Temp_Name = $_FILES['LogoFile']['tmp_name'];
@@ -251,18 +284,17 @@
 				$File_To_Copy = 1;
 			}
 
-
 		}
-		if(!empty($_POST['COA'])){
-			if(preg_match('/[a-zA-Z_-]+(\.sql)/',$_POST['COA'])){
-				$COA = $_POST['COA'];
+		if(!empty($_POST['CountrySQL'])){
+			if(preg_match('/[a-zA-Z_-]+(\.sql)/',$_POST['CountrySQL'])){
+				$CountrySQL = $_POST['CountrySQL'];
 			}else{
 				$InputError = 1;
-				prnMsg(_('The coa file name must only contain letters,"-","_"'),'error');
+				prnMsg(_('The country SQL file name must only contain letters,"-","_"'),'error');
 			}
 		}else{
 				$InputError = 1;
-				prnMsg(_('The COA file not selected, please select the file first'),'error');
+				prnMsg(_('There is no country SQL file selected. Please select a file.'),'error');
 
 		}
 		if($InputError == 1){//return to the company configuration stage
@@ -272,14 +304,14 @@
 				CompanySetup($UserLanguage,$HostName,$UserName,$Password,$DatabaseName,1);
 			}
 
-		}else{//start to installation
-
-
+		}else{
+		    //start to installation
+		    $CompanyList = array();
 			$Path_To_Root = '..';
 			$Config_File = $Path_To_Root . '/config.php';
 			if((isset($DualCompany) and $DualCompany == 1) or (isset($NewCompany) and $NewCompany == 1)){
 				$CompanyDir = $Path_To_Root . '/companies/' . $DatabaseName;
-			        $Result = mkdir($CompanyDir);
+			    $Result = mkdir($CompanyDir);
 				$Result = mkdir($CompanyDir . '/part_pics');
 				$Result = mkdir($CompanyDir . '/EDI_Incoming_Orders');
 				$Result = mkdir($CompanyDir . '/reports');
@@ -288,10 +320,10 @@
 				$Result = mkdir($CompanyDir . '/reportwriter');
 				$Result = mkdir($CompanyDir . '/pdf_append');
 				$Result = mkdir($CompanyDir . '/FormDesigns');
-				copy ($Path_To_Root . '/companies/kwamojademo/FormDesigns/GoodsReceived.xml', $CompanyDir . '/FormDesigns/GoodsReceived.xml');
-				copy ($Path_To_Root . '/companies/kwamojademo/FormDesigns/PickingList.xml', $CompanyDir . '/FormDesigns/PickingList.xml');
-				copy ($Path_To_Root . '/companies/kwamojademo/FormDesigns/PurchaseOrder.xml', $CompanyDir . '/FormDesigns/PurchaseOrder.xml');
-				copy ($Path_To_Root . '/companies/kwamojademo/FormDesigns/Journal.xml', $CompanyDir . '/FormDesigns/GoodsReceived.xml');
+				copy ($Path_To_Root . '/companies/weberpdemo/FormDesigns/GoodsReceived.xml', $CompanyDir . '/FormDesigns/GoodsReceived.xml');
+				copy ($Path_To_Root . '/companies/weberpdemo/FormDesigns/PickingList.xml', $CompanyDir . '/FormDesigns/PickingList.xml');
+				copy ($Path_To_Root . '/companies/weberpdemo/FormDesigns/PurchaseOrder.xml', $CompanyDir . '/FormDesigns/PurchaseOrder.xml');
+				copy ($Path_To_Root . '/companies/weberpdemo/FormDesigns/Journal.xml', $CompanyDir . '/FormDesigns/Journal.xml');
 				if(isset($File_Temp_Name)){
 					$Result = move_uploaded_file($File_Temp_Name, $CompanyDir . '/logo.jpg');
 
@@ -299,12 +331,24 @@
 					$Result = copy ($Path_To_Root . '/logo_server.jpg',$CompanyDir.'/logo.jpg');
 				}
 			}
+			if ( isset($NewCompany) and ($NewCompany == 1)) {
+			    $CompanyList[] = array('database' => $DatabaseName, 'company' => $CompanyName);
+			} elseif (isset($DualCompany) and $DualCompany == 1) {
+			    $CompanyList[] = array('database' => $DatabaseName, 'company' => $CompanyName);
+			    $CompanyList[] = array('database' => 'weberpdemo', 'company' => _('WebERP Demo Company'));
+			} else {
+			    //make sure we have at least the demo
+			    $CompanyList[] = array('database' => 'weberpdemo', 'company' => _('WebERP Demo Company'));
+			}
+
 			//$msg holds the text of the new config.php file
 			$msg = "<?php\n\n";
 			$msg .= "// User configurable variables\n";
 			$msg .= "//---------------------------------------------------\n\n";
-			$msg .= "//DefaultLanguage to use for the login screen and the setup of new users\n";
+			$msg .= "// Default language to use for the login screen and the setup of new users.\n";
 			$msg .= "\$DefaultLanguage = '" . $UserLanguage . "';\n\n";
+			$msg .= "// Default theme to use for the login screen and the setup of new users.\n";
+			$msg .= "\$DefaultTheme = '" . $DefaultTheme . "';\n\n";
 			$msg .= "// Whether to display the demo login and password or not on the login screen\n";
 			$msg .= "\$AllowDemoMode = FALSE;\n\n";
 			$msg .= "// Connection information for the database\n";
@@ -321,17 +365,16 @@
 			$msg .= "putenv('TZ=" . $TimeZone ."');\n";
 			$msg .= "\$AllowCompanySelectionBox = 'ShowSelectionBox';\n";
 			$msg .= "//The system administrator name use the user input mail;\n";
-			if(strtolower($AdminEmail) != 'admin@kwamoja.com'){
+			if(strtolower($AdminEmail) != 'admin@weberp.org'){
 			$msg .= "\$SysAdminEmail = '".$AdminEmail."';\n";
 			}
 			if(isset($NewCompany)){
-				$msg .= "\$DefaultCompany = '".$DatabaseName."';\n";
+				$msg .= "\$DefaultDatabase = '".$DatabaseName."';\n";
 			}else{
-				$msg .= "\$DefaultCompany = '".$DatabaseName."';\n";
+				$msg .= "\$DefaultDatabase = 'weberpdemo';\n";
 			}
 			$msg .= "\$SessionLifeTime = 3600;\n";
 			$msg .= "\$MaximumExecutionTime = 120;\n";
-			$msg .= "\$CryptFunction = 'sha1';\n";
 			$msg .= "\$DefaultClock = 12;\n";
 			$msg .= "\$RootPath = dirname(htmlspecialchars(\$_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'));\n";
 			$msg .= "if (isset(\$DirectoryLevelsDeep)){\n";
@@ -343,7 +386,14 @@
 			$msg .= "if (\$RootPath == '/' OR \$RootPath == '\\\') {\n";
 			$msg .= "	\$RootPath = '';\n";
 			$msg .= "}\n";
-			$msg .= "error_reporting (E_ALL & ~E_NOTICE);\n";
+			$msg .= "error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);\n";
+			$msg .=  "//Installed companies \n";
+			foreach ($CompanyList as $k=>$compinfo)
+			{
+		        $msg .= "\$CompanyList[".$k."] = array('database'=>'".$compinfo['database']."' ,'company'=>'".addslashes($compinfo['company'])."' );\n"; //simpler to manipulate this way
+            }
+            $msg .=  "//End Installed companies-do not change this line\n";
+            $msg .= "/* Make sure there is nothing - not even spaces after this last ?> */\n";
 			$msg .= "?>";
 
 			//write the config.php file since we have test the writability of the root path and companies,
@@ -359,7 +409,7 @@
 				fclose($zp);
 			}
 			//Now it is the time to create the mysql data
-			//Just get the data from $COA and read data from this file
+			//Just get the data from $CountrySQL and read data from this file
 			//At the mean time, we should check the user need demo database or not
 			if($DBConnectType == 'mysqli'){
 				$Db = mysqli_connect($HostName,$UserName,$Password);
@@ -368,42 +418,40 @@
 			}
 			}elseif($DBConnectType == 'mysql'){
 				$Db = mysql_connect($HostName,$UserName,$Password);
-
-
-			if(!$Db){
-				prnMsg(_('Failed to connect the database, the error is ').mysql_connect_error(),'error');
+                if(!$Db){
+                    prnMsg(_('Failed to connect the database, the error is ').mysql_connect_error(),'error');
+                }
 			}
-			}
-			$NewSQLFile = $Path_To_Root.'/sql/mysql/coa/'.$COA;
-			$DemoSQLFile = $Path_To_Root.'/sql/mysql/coa/kwamoja-demo.sql';
+			$NewSQLFile = $Path_To_Root.'/sql/mysql/country_sql/'.$CountrySQL;
+			$DemoSQLFile = $Path_To_Root.'/sql/mysql/country_sql/demo.sql';
 			if(!empty($DualCompany) and $DualCompany == 1){
 				//we should install the production data and demo data
 				$sql = 'CREATE DATABASE IF NOT EXISTS `'.$DatabaseName.'`';
 				$result = ($DBConnectType == 'mysqli') ? mysqli_query($Db,$sql) : mysql_query($sql,$Db);
 				if(!$result){
 					if($DBConnectType == 'mysqli'){
-						prnMsg(_('Failed to create database '.' '.$DatabaseName.' and the error is '.' '.mysqli_error($Db)),'error');
+						prnMsg(_('Failed to create database '.$DatabaseName.' and the error is '.' '.mysqli_error($Db)),'error');
 					}else{
-						prnMsg(_('Failed to create database '.' '.$DatabaseName.' and the error is '.' '.mysql_error($Db)),'error');
+						prnMsg(_('Failed to create database '.$DatabaseName.' and the error is '.' '.mysql_error($Db)),'error');
 
 					}
 				}
-				$sql = 'CREATE DATABASE IF NOT EXISTS `kwamojademo`';
+				$sql = 'CREATE DATABASE IF NOT EXISTS `weberpdemo`';
 				$result = ($DBConnectType == 'mysqli') ? mysqli_query($Db,$sql) : mysql_query($sql,$Db);
 				if(!$result){
 					if($DBConnectType == 'mysqli'){
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysqli_error($Db)),'error');
+						prnMsg(_('Failed to create database weberpdemo and the error is '.' '.mysqli_error($Db)),'error');
 					}else{
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysql_error($Db)),'error');
+						prnMsg(_('Failed to create database weberpdemo and the error is '.' '.mysql_error($Db)),'error');
 
 					}
 
 
 				}
 				PopulateSQLData($NewSQLFile,false,$Db,$DBConnectType,$DatabaseName);
-				DBUpdate($Db,$DatabaseName,$DBConnectType,$AdminPassword,$Email,$UserLanguage,$DatabaseName);
-				PopulateSQLData(false,$DemoSQLFile,$Db,$DBConnectType,'kwamojademo');
-				DBUpdate($Db,'kwamojademo',$DBConnectType,$AdminPassword,$Email,$UserLanguage,'kwamojademo');
+				DBUpdate($Db,$DatabaseName,$DBConnectType,$AdminPassword,$Email,$UserLanguage,$CompanyName);
+				PopulateSQLData(false,$DemoSQLFile,$Db,$DBConnectType,'weberpdemo');
+				DBUpdate($Db,'weberpdemo',$DBConnectType,$AdminPassword,$Email,$UserLanguage,'weberpdemo');
 
 			}elseif(!empty($NewCompany) and $NewCompany == 1){//only install the production data
 
@@ -411,39 +459,36 @@
 				$result = ($DBConnectType == 'mysqli')? mysqli_query($Db,$sql) : mysql_query($sql,$Db);
 				if(!$result){
 					if($DBConnectType == 'mysqli'){
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysqli_error($Db)),'error');
+						prnMsg(_('Failed to create database '.$DatabaseName.'  and the error is '.' '.mysqli_error($Db)),'error');
 					}else{
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysql_error($Db)),'error');
+						prnMsg(_('Failed to create database '.$DatabaseName.'  and the error is '.' '.mysql_error($Db)),'error');
 
 					}
-
-
 				}
 				PopulateSQLData($NewSQLFile,false,$Db,$DBConnectType,$DatabaseName);
-				DBUpdate($Db,$DatabaseName,$DBConnectType,$AdminPassword,$Email,$UserLanguage,$DatabaseName);
+				DBUpdate($Db,$DatabaseName,$DBConnectType,$AdminPassword,$Email,$UserLanguage,$CompanyName);
 
-			}elseif(!empty($OnlyDemo) and $OnlyDemo == 1){//only install the demo data
-				$sql = 'CREATE DATABASE IF NOT EXISTS `kwamojademo`';
+			}else { //if(!empty($OnlyDemo) and $OnlyDemo == 1){//only install the demo data
+				$sql = 'CREATE DATABASE IF NOT EXISTS `weberpdemo`';
 				$result = ($DBConnectType == 'mysqli') ? mysqli_query($Db,$sql) : mysql_query($sql,$Db);
 				if(!$result){
 					if($DBConnectType == 'mysqli'){
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysqli_error($Db)),'error');
+						prnMsg(_('Failed to create database weberpdemo and the error is '.' '.mysqli_error($Db)),'error');
 					}else{
-						prnMsg(_('Failed to create database kwamojademo and the error is '.' '.mysql_error($Db)),'error');
+						prnMsg(_('Failed to create database weberpdemo and the error is '.' '.mysql_error($Db)),'error');
 
 					}
 
-
 				}
-				PopulateSQLData(false,$DemoSQLFile,$Db,$DBConnectType,'kwamojademo');
-				DBUpdate($Db,'kwamojademo',$DBConnectType,$AdminPassword,$Email,$UserLanguage,'kwamojademo');
+				PopulateSQLData(false,$DemoSQLFile,$Db,$DBConnectType,'weberpdemo');
+				DBUpdate($Db,'weberpdemo',$DBConnectType,$AdminPassword,$Email,$UserLanguage,'weberpdemo');
 
 			}
 			session_unset();
 			session_destroy();
 
 			header('Location: ' . $Path_To_Root . '/index.php?newDb=1');
-			ini_set('max_execution_time', '60');
+			ini_set('max_execution_time', '120');
 			echo '<META HTTP-EQUIV="Refresh" CONTENT="0; URL=' . $Path_To_Root . '/index.php">';
 
 
@@ -451,9 +496,6 @@
 		}//end of the installation
 
 		exit;
-
-
-
 	}
 	//Handle the database configuration data. We'd like to check if the database information has been input correctly
 	//First try mysqli configuration
@@ -488,9 +530,9 @@
 			if(!empty($_POST['Prefix'])){
 				$_POST['Database'] = $_POST['Prefix'].$_POST['Database'];
 			}
-			if(preg_match(',[/\\\?%:\|<>\.\s"]+,',$_POST['Database'])){
+			if(preg_match(',[/\\\?%:\|<>\."]+,',$_POST['Database'])){
 				$InputError = 1;
-				prnMsg(_('The database name should not contains illegal characters such as "/\?%:|<>" blank etc'),'error');
+				prnMsg(_('The database name should be lower case and not contains illegal characters such as "/\?%:|<>"'),'error');
 
 			}
 			$DatabaseName = $_POST['Database'];
@@ -518,7 +560,7 @@
 			}
 			exit;
 		}else{
-			prnMsg(_('Please correct above error first'),'error');
+			prnMsg(_('Please correct the displayed error first'),'error');
 			if(!empty($_POST['MysqlExt'])){
 				DbConfig($_POST['UserLanguage'],$_POST['MysqlExt']);
 			}else{
@@ -532,9 +574,9 @@
 
 	?>
 
-	<h1 style="text-align:center;"><?php echo _('Welcome to KwaMoja Installation Wizard'); ?></h1>
+    <h1><?php echo _('webERP Installation Wizard'); ?></h1>
 	<?php
-    	    if(!isset($_POST['LanguageSet'])){
+    	if(!isset($_POST['LanguageSet'])){
 		 Installation($DefaultLanguage);
 	    } else {//The locale has been set, it's time to check the settings item.
 		    $ErrMsg = '';
@@ -549,67 +591,67 @@
 		    //Check if the browser has been set properly
 		    if(!isset($_SESSION['CookieAllowed']) or !($_SESSION['CookieAllowed'] == 1)){
 			    $InputError = 1;
-			    $ErrMsg .= _('The cookie should be set allowed in your browers, otherwise KwaMoja cannot run properly').'<br/>';
+			    $ErrMsg .= '<p>' . _('Please set Cookies allowed in your web brower, otherwise webERP cannot run properly') . '</p>';
 
 		    }
 		    //Check the situation of php safe mode
 		    if(!empty($_POST['SafeModeWarning'])){
 			    if(!ContainsIllegalCharacters($_POST['SafeModeWarning'])){
 				    $InputWarn = 1;
-				    $WarnMsg .= _($_POST['SafeModeWarning']).'<br/>';
+				    $WarnMsg .= '<p>' . _($_POST['SafeModeWarning']) . '</p>';
 			    }else{//Something must be wrong since this messages have been defined.
-				    prnMsg(_('There should not be illegal contained, please see your admistrator for help'),'error');
+				    prnMsg(_('Illegal characters or data has been identified, please see your admistrator for help'),'error');
 				    exit;
 
 			    }
 		    }
 		    //check the php version
 		    if(empty($_POST['PHPVersion'])){
-			    	  $InputError = 1;
-				  $ErrMsg .= _('You PHP version should be greater than 5.1').'<br/>';
+				$InputError = 1;
+				$ErrMsg .= '<p>' . _('Although webERP should work with PHP version 5.1 onwards, a PHP version greater than 5.2 is strongly recommended') . '</p>';
 		    }
 		    //check the directory access authority of rootpath and companies
 		    if(empty($_POST['ConfigFile'])){
 			    $InputError = 1;
-			    //get the directory where kwamoja live
-			    $KwaMojaHome = dirname(dirname(__FILE__));
-			    $ErrMsg .= '<br/>'._('The directory').' '.$KwaMojaHome.' '._('should be writable by web server').'<br/>';
+			    //get the directory where weberp live
+			    $WebERPHome = dirname(dirname(__FILE__));
+			    $ErrMsg .= '<p>' . _('The directory').' '.$WebERPHome.' '._('must be writable by web server') . '</p>';
 		    }
 		    if(empty($_POST['CompaniesCreate'])){
 			    $InputError = 1;
-			    $KwaMojaHome = dirname(dirname(__FILE__));
-			    $ErrMsg .= '<br/>'._('The directory').' '.$KwaMojaHome.'/companies/'.' '.('should be writable by web server').'<br/>';
+			    $WebERPHome = dirname(dirname(__FILE__));
+			    $ErrMsg .= '<p>' . _('The directory').' '.$WebERPHome.'/companies/'.' '.('must be writable by web server') . '</p>';
 		    }
 		    //check the necessary php extensions
 		    if(empty($_POST['MbstringExt']) or $_POST['MbstringExt'] != 1){
 			    $InputError = 1;
-			    $ErrMsg .= _('The php extension of mbstring is not availble').'<br/>';
+			    $ErrMsg .= '<p>' . _('The mbstring extension is not availble in your PHP') . '</p>';
 		    }
 		    //check if the libxml is exist
 		    if(empty($_POST['LibxmlExt']) or $_POST['LibxmlExt'] != 1){
 			    $InputError = 1;
-			    $ErrMsg .= _('The php extension of libxml is not available').'<br/>';
+			    $ErrMsg .='<p>' . _('The libxml extension is not available in your PHP') . '</p>';
 
 		    }
 		    //check if the mysqli or mysql is exist
 		    if(!empty($_POST['NosqlExt']) and $_POST['NosqlExt'] == 1){
 			    $InputError = 1;
-			    $ErrMsg .= _('There is no mysqli extension or mysql available').'<br/>';
+			    $ErrMsg .= '<p>' . _('There is no MySQL or MySQL extension available') . '</p>';
 		    }
 		    if(!empty($_POST['MysqlExt']) and $_POST['MysqlExt'] == 1 and empty($_POST['PHP55'])){
 
 			    $InputWarn = 1;
 			    $MysqlExt = 1;
-			    $WarnMsg .= _('The php extension of mysqli is recommend and mysql extension has been deprecated since 5.5').'<br/>';
+			    $WarnMsg .= _('The PHP MySQLI extension is recommend as MySQL extension has been deprecated since PHP 5.5') . '<br/>';
 
 		    }elseif(!empty($_POST['MysqlExt']) and $_POST['MysqlExt'] ==1 and !empty($_POST['PHP55'])){
 			    $InputError = 1;
-			    $ErrMsg .=_('The mysql extension has been deprecated since 5.5 so you have to initiate your mysqli extention or downgrade you php version lower than 5.5').'<br/>';
+			    $ErrMsg .='<p>' . _('The MySQL extension has been deprecated since 5.5. You should install the MySQLI extension or downgrade you PHP version to  one prior to 5.5') . '</p>';
 		    }
 		    //Check if the GD extension is available
 		    if(empty($_POST['GdExt']) or $_POST['GdExt'] != 1){
 			    $InputWarn = 1;
-			    $WarnMsg .= _('The GD extension should be initiate in php configuration').'<br/>';
+			    $WarnMsg .='<p>' .  _('The GD extension should be installed in your PHP configuration') . '</p>';
 
 		    }
 
@@ -637,200 +679,218 @@
 	?>
 
 
-
-
-
-
-
-
-
-
 <?php
 //This function used to display the first screen for users to select they preferred langauage
 //And at the mean time to check if the php configuration has meet requirements.
-function Installation($DefaultLanguage){
-		//Check if the cookie is allowed
+function Installation($DefaultLanguage)
+{
+    //Check if the cookie is allowed
 
-		$_SESSION['CookieAllowed'] = 1;
+    $_SESSION['CookieAllowed'] = 1;
 
-		//Check if it's in safe model, safe mode has been deprecated at 5.3.0 and removed at 5.4
-		//Please refer to here for more details http://hk2.php.net/manual/en/features.safe-mode.php
-		if(ini_get('safe_mode')){
-			$SafeModeWarning = 'You php is running in safe mode, it will leads to the execution time within 30 seconds, sometime in windows system, this will lead to installation cannot be completed in time, You would better to turn this function off';
-		}
+    //Check if it's in safe model, safe mode has been deprecated at 5.3.0 and removed at 5.4
+    //Please refer to here for more details http://hk2.php.net/manual/en/features.safe-mode.php
+    if(ini_get('safe_mode')){
+        $SafeModeWarning = 'You php is running in safe mode, it will leads to the execution time within 30 seconds, sometime in windows system, this will lead to installation cannot be completed in time, You would better to turn this function off';
+    }
 
-		//It's time to check the php version. The version should be run greater than 5.1
-		if(version_compare(PHP_VERSION,'5.1.0')>=0){
-			$PHPVersion = 1;
-		}
-		if(version_compare(PHP_VERSION,'5.5.0')>=0){
-			$PHP55 = 1;
-		}
-		//Check the writability of the root path and companies path
-		$RootPath = '..';
-		$Companies = $RootPath.'/companies';
-		if(is_writable($RootPath)){
-			$ConfigFile = 1;
-		}else{
-			clearstatcache();
-		}
-		if(is_writable($Companies)){
-			$CompaniesCreate = 1;
-		}else{
-			clearstatcache();
-		}
-		//check the necessary extensions
-		$Extensions = get_loaded_extensions();
+    //It's time to check the php version. The version should be run greater than 5.1
+    if(version_compare(PHP_VERSION,'5.1.0')>=0){
+        $PHPVersion = 1;
+    }
+    if(version_compare(PHP_VERSION,'5.5.0')>=0){
+        $PHP55 = 1;
+    }
+    //Check the writability of the root path and companies path
+    $RootPath = '..';
+    $Companies = $RootPath.'/companies';
+    if(is_writable($RootPath)){
+        $ConfigFile = 1;
+    }else{
+        clearstatcache();
+    }
+    if(is_writable($Companies)){
+        $CompaniesCreate = 1;
+    }else{
+        clearstatcache();
+    }
+    //check the necessary extensions
+    $Extensions = get_loaded_extensions();
 
-		//First check the gd module
-		if(in_array('gd',$Extensions)){
-			$GDExt = 1;
-		}
-		//Check the gettext module, it's a selectable
-		if(in_array('gettext',$Extensions)){
-			$GettextExt = 1;
-		}
-		//Check the mbstring module, it must be exist
-		if(in_array('mbstring',$Extensions)){
-			$MbstringExt = 1;
-		}
-		//Check the libxml module
-		if(in_array('libxml',$Extensions)){
-			$LibxmlExt = 1;
-		}
-		//Check if mysqli is exist
-		//usually when it's not exist, there is some warning and cannot contiue in before version
-		//We should adjust show a warning to the users if the users still use the mysql, then we should modify the config.php
-		//to make use can still continue the installation. It's just performance lost
-		if(in_array('mysqli',$Extensions)){
-			$MysqliExt = '1';
-		}elseif(in_array('mysql',$Extensions)){//if only mysql has been installed
-			$MysqlExt = '1';
-		}else{
-			$NosqlExt = '1';//There is no sql available
-		}
+    //First check the gd module
+    if(in_array('gd',$Extensions)){
+        $GDExt = 1;
+    }
+    //Check the gettext module, it's a selectable
+    if(in_array('gettext',$Extensions)){
+        $GettextExt = 1;
+    }
+    //Check the mbstring module, it must be exist
+    if(in_array('mbstring',$Extensions)){
+        $MbstringExt = 1;
+    }
+    //Check the libxml module
+    if(in_array('libxml',$Extensions)){
+        $LibxmlExt = 1;
+    }
+    //Check if mysqli is exist
+    //usually when it's not exist, there is some warning and cannot contiue in before version
+    //We should adjust show a warning to the users if the users still use the mysql, then we should modify the config.php
+    //to make use can still continue the installation. It's just performance lost
+    if(in_array('mysqli',$Extensions)){
+        $MysqliExt = '1';
+    }elseif(in_array('mysql',$Extensions)){//if only mysql has been installed
+        $MysqlExt = '1';
+    }else{
+        $NosqlExt = '1';//There is no sql available
+    }
 
-	?>
-	<form id="installation" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'); ?>" method="POST">
-	<div class="page_help_text" style="background:lightgrey"><?php echo _('Please select the installation language that you need'); ?></div>
-	<?php include('../includes/LanguagesArray.php'); ?>
-	<br/>
-	<div style="margin:0px auto; text-align: center">
-	<label for="Language"><?php echo _('Language').'&nbsp;&nbsp;'; ?></label><select style="width:100" type="text" name="Language">
+    ?>
+
+    <form id="installation" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'); ?>" method="post">
+    <fieldset>
+        <legend><?php echo _('Welcome to the webERP Installation Wizard'); ?></legend>
+        <div class="page_help_text">
+            <?php echo '
+            <ul>
+                 <li>' . _('During installation you may see different status messages.') . '</li>
+                <li>' . _('When there is an error message you must correct the error to continue.') . '</li>
+                <li>' . _('If you see a warning message you should take notice before you proceed.') . '</li>
+                <li>' . _('If you are unsure of an option value, you may keep the default setting.') . '</li>
+            </ul>';
+            ?>
+
+        </div>
+    </fieldset>
+    <fieldset>
+            <legend><?php echo _('Select your language'); ?></legend>
+
+            <div class="page_help_text" >
+                <p><?php echo _('The installer will try and guess your language from your browser, but may get it wrong. Please select you preferred language below.'); ?></p>
+            </div>
+            <ul>
+            <?php include('../includes/LanguagesArray.php'); ?>
+                <li><label for="Language"><?php echo _('Language:'); ?>&#160;</label>
+                <select id="Language" name="Language">
+            <?php
+                if(substr($DefaultLanguage,0,2) !='en'){//ensure that the bilingual only display when the language is not english
+                    foreach($LanguagesArray as $Key => $Language1){//since we only use the first 2 characters to separate the language, there are some
+                                            //chance that different locale but use same first 2 letters.
+                        if(!isset($SelectedKey) and substr($DefaultLanguage,0,2) == substr($Key,0,2)){
+                            $SelectedKey = $Key;
+                            echo '<option value="'.$Key.'" selected="selected">' . $Language1['LanguageName'].' - '.$Language1['WindowsLocale'] . '</option>';
+                        }
+                        if(!isset($SelectedKey) or (isset($SelectedKey) and $Key != $SelectedKey)){
+                            echo '<option value="'.$Key.'" >' . $Language1['LanguageName'].' - '.$Language1['WindowsLocale'] . '</option>';
+                        }
+                    }
+                }else{
+                    foreach($LanguagesArray as $Key => $Language1){
+                        if(!isset($SelectedKey) and substr($Key,0,2) == 'en'){
+                            $SelectedKey = $Key;
+                            echo '<option value="'.$Key.'" selected="selected">' . $Language1['LanguageName'] . '</option>';
+                        }
+                        if(!isset($SelectedKey) or (isset($SelectedKey) and $SelectedKey != $Key)){
+
+                            echo '<option value="'.$Key.'" >' . $Language1['LanguageName'] . '</option>';
+                        }
+                    }
+                }
+
+                ?>
+                    </select>
+                </li>
+            </ul>
+            <script>
+                function tz(){
+                document.getElementById('DefaultTimeZone').value = jstz.determine().name();
+                }
+            </script>
+                <input type="hidden" name="DefaultTimeZone" id="DefaultTimeZone" />
+        <?php
+        if(!empty($SafeModeWarning)){
+        ?>
+        <input type="hidden" name="SafeModeWarning" value="<?php echo $SafeModeWarning; ?>" />
+        <?php
+        }
+        if(!empty($PHPVersion)){//
+        ?>
+        <input type="hidden" name="PHPVersion" value="1" />
+        <?php
+        }
+        if(!empty($ConfigFile)){
+        ?>
+        <input type="hidden" name="ConfigFile" value="1" />
+        <?php
+        }
+        if(!empty($CompaniesCreate)){
+        ?>
+        <input type="hidden" name="CompaniesCreate" value="1" />
+        <?php
+        }
+        if(!empty($GDExt)){
+        ?>
+        <input type="hidden" name="GdExt" value="1" />
+        <?php
+        }
+        if(!empty($GettextExt)){
+        ?>
+        <input type="hidden" name="GettextExt" value="1" />
+
+        <?php
+        }
+        if(!empty($MbstringExt)){
+        ?>
+        <input type="hidden" name="MbstringExt" value="1" />
+        <?php
+        }
+        if(!empty($LibxmlExt)){
+        ?>
+        <input type="hidden" name="LibxmlExt" value="1" />
+        <?php
+        }
+        if(!empty($MysqliExt)){
+        ?>
+        <input type="hidden" name="MysqliExt" value="1" />
+        <?php
+        }
+        if(!empty($MysqlExt)){
+        ?>
+        <input type="hidden" name="MysqlExt" value="1" />
+        <?php
+        }
+
+        if(!empty($NosqlExt)){
+        ?>
+        <input type="hidden" name="NosqlExt" value="1" />
+        <?php
+        }
+        if(!empty($PHP55)){
+        ?>
+        <input type="hidden" name="PHP55" value="1" />
+        <?php
+        }
+        ?>
+
+        </fieldset>
+        <fieldset>
+            <input type="hidden" name="LanguageSet" value="1" />
+            <button type="submit" ><?php echo _('Next Step'); ?></button>
+        </fieldset>
+
+
+        <?php echo '
+        <div class="page_help_text">
+            <p>' .  _('webERP is an open source application licenced under GPL V2 and absolutely free to download.<br /> By installing webERP you acknowledge you have read <a href="http://www.gnu.org/licenses/gpl-2.0.html#SEC1" target="_blank">the licence</a>. <br />Please visit the official webERP website for more information.').'
+            </p>
+            <p><img src="../css/webERPsm.gif" title="webERP" alt="webERP" />&#160; <a href="http://www.weberp.org">http://www.weberp.org</a></p>
+        </div>';
+        ?>
+
+    </form>
+</div>
+
 <?php
-		if(substr($DefaultLanguage,0,2) !='en'){//ensure that the bilingual only display when the language is not english
-			foreach($LanguagesArray as $Key => $Language1){//since we only use the first 2 characters to separate the language, there are some
-									//chance that different locale but use same first 2 letters.
-				if(!isset($SelectedKey) and substr($DefaultLanugage,0,2) == substr($Key,0,2)){
-					$SelectedKey = $Key;
-					echo '<optioin length="10" value="'.$Key.'" selected="selected">'.$Language1['LanguageName'].$Language1['WindowsLocale'].'</option>';
-				}
-				if(!isset($SelectedKey) or (isset($SelectedKey) and $Key != $SelectedKey)){
-					echo '<option length="10" value="'.$Key.'" >'.$Language1['LanguageName'].$Language1['WindowsLocale'].'</option>';
-				}
-			}
-		}else{
-			foreach($LanguagesArray as $Key => $Language1){
-				if(!isset($SelectedKey) and substr($Key,0,2) == 'en'){
-					$SelectedKey = $Key;
-					echo '<option length="10" value="'.$Key.'" selected="selected">'.$Language1['LanguageName'].'</option>';
-				}
-				if(!isset($SelectedKey) or (isset($SelectedKey) and $SelectedKey != $Key)){
-
-					echo '<option length="10" value="'.$Key.'" >'.$Language1['LanguageName'].'</option>';
-				}
-			}
-		}
-
-		?>
-	</select>
-	<script>
-		function tz(){
-		document.getElementById('DefaultTimeZone').value = jstz.determine().name();
-		}
-	</script>
-	<input type="hidden" name="DefaultTimeZone" id="DefaultTimeZone" />
-	<?php
-	if(!empty($SafeModeWarning)){
-	?>
-	<input type="hidden" name="SafeModeWarning" value="<?php echo $SafeModeWarning; ?>" />
-	<?php
-	}
-	if(!empty($PHPVersion)){//
-	?>
-	<input type="hidden" name="PHPVersion" value="1" />
-	<?php
-	}
-	if(!empty($ConfigFile)){
-	?>
-	<input type="hidden" name="ConfigFile" value="1" />
-	<?php
-	}
-	if(!empty($CompaniesCreate)){
-	?>
-	<input type="hidden" name="CompaniesCreate" value="1" />
-	<?php
-	}
-	if(!empty($GDExt)){
-	?>
-	<input type="hidden" name="GdExt" value="1" />
-	<?php
-	}
-	if(!empty($GettextExt)){
-	?>
-	<input type="hidden" name="GettextExt" value="1" />
-
-	<?php
-	}
-	if(!empty($MbstringExt)){
-	?>
-	<input type="hidden" name="MbstringExt" value="1" />
-	<?php
-	}
-	if(!empty($LibxmlExt)){
-	?>
-	<input type="hidden" name="LibxmlExt" value="1" />
-	<?php
-	}
-	if(!empty($MysqliExt)){
-	?>
-	<input type="hidden" name="MysqliExt" value="1" />
-	<?php
-	}
-	if(!empty($MysqlExt)){
-	?>
-	<input type="hidden" name="MysqlExt" value="1" />
-	<?php
-	}
-
-	if(!empty($NosqlExt)){
-	?>
-	<input type="hidden" name="NosqlExt" value="1" />
-	<?php
-	}
-	if(!empty($PHP55)){
-	?>
-	<input type="hidden" name="PHP55" value="1" />
-	<?php
-	}
-	?>
-
-	<input type="hidden" name="LanguageSet" value="1" />
-	<br/><br/>
-	<input type="submit" value="<?php echo _('Next Step'); ?>" />
-	</div>
-
-	</form>
-	<br/>
-
-	<div class="page_help_text"><?php echo '
-	<li style="float:center;text-align:left;list-style:none;">'.'&nbsp;&nbsp;&nbsp;&nbsp;'._('The installer guess your language via your browser. Please select you preferred language').'</li><div style="clear:both;"></div>
-	<li style="float:center;text-align:left;list-style:none;">'.'&nbsp;&nbsp;&nbsp;&nbsp;'._('When there is an error message, the error must be corrected').'</li><div style="clear:both;"></div>
-	<li style="float:center;text-align:left;list-style:none;">'.'&nbsp;&nbsp;&nbsp;&nbsp;'._('When you see warn messages in later pages, you can ignore it').'</li><div style="clear:both;"></div>
-	<li style="float:center;text-align:left;list-style:none;">'.'&nbsp;&nbsp;&nbsp;&nbsp;'._('For those items you do not understand, just keep the default setting').'</li><div style="clear:both;"></div>'.'<br/>'. _('KwaMoja is a open source application and absolutely free to download Please visit the official website for more information').'<br/>'; ?><div style="clear:both;"></div></div>
-	<br/>
-	<div class="page_help_text"><a href="http://www.kwamoja.org"><?php echo 'www.kwamoja.org'; ?></a></div>
-	<?php
 }
 
 //@para Language used to determine user's preferred language
@@ -838,36 +898,62 @@ function Installation($DefaultLanguage){
 //The function used to provide a screen for users to input mysql server parameters data
 function DbConfig($Language,$MysqlExt = FALSE){//The screen for users to input mysql database information
 	?>
-	<div class="page_help_text"> <?php echo _('Please Enter MySQL Database information below, the database name will use it as the company name later'); ?></div>
-	<br/>
 	<form id="DatabaseConfig" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'); ?>" method="post">
-	<fieldset>
-	<legend style="color:blue;font-size:13pt;"><?php echo _('Database setting'); ?></legend>
+        <fieldset>
+            <legend><?php echo _('Database settings'); ?></legend>
+            <div class="page_help_text">
+                <p>
+                    <?php echo _('Please enter your MySQL Database information below.'); ?><br />
+                    <span><?php echo _('* Denotes required field'); ?></span>
+                </p>
+            </div>
+            <ul>
+                <li>
+                    <label for="HostName"><?php echo _('Host Name'); ?>: </label>
+                    <input type="text" name="HostName" id="HostName" required="true" value="localhost" placeholder="<?php echo _('Enter database host name'); ?>" />
+                    <span><?php echo _('Commonly: localhost or 127.0.0.1'); ?></span>
+                </li>
+                <li>
+                    <label for="Database"><?php echo _('Database Name'); ?>: </label>
+                    <input type="text" name="Database" id="Database" required="true" pattern="^[a-zA-Z0-9_\&\-\ ]+$" value="weberp" maxlength="16" placeholder="<?php echo _('The database name'); ?>" />
+                    <span><?php echo _('The database must have a valid name'); ?></span>
+                </li>
+                <li>
+                    <label for="Prefix"><?php echo _('Database Prefix'); ?>: </label>
+                    <input type="text" name="Prefix" size="25" placeholder="<?php echo _('Useful with shared hosting'); ?>" pattern="^[A-Za-z0-9$]+_$" />&#160;
+                    <span><?php echo _('Optional: in the form of prefix_'); ?></span>
+                </li>
+                <li>
+                    <label for="UserName"><?php echo _('Database User Name'); ?>: </label>
+                    <input type="text" name="UserName" id="UserName" value="root" placeholder="<?php echo _('A valid database user name'); ?>" maxlength="16" required="true" />&#160;
+                    <span><?php echo _('Must be a user that has permission to create a database'); ?></span>
+                </li>
+                <li>
+                    <label for="Password"><?php echo _('Password'); ?>: </label>
+                    <input type="password" name="Password" placeholder="<?php echo _('mySQL user password'); ?>"  />
+                    <span><?php echo _('Enter the user password if one exists'); ?></span>
+                </li>
+            </ul>
+        </fieldset>
+        <input type="hidden" name="UserLanguage" value="<?php echo $Language; ?>" />
+        <input type="hidden" name="Language" value="<?php echo $Language; ?>" />
+        <?php
+        if($MysqlExt){
+        ?>
+            <input type="hidden" name="MysqlExt" value="1" />
+        <?php
+        }else{
+        ?>
+            <input type="hidden" name="MysqliExt" value="1" />
+        <?php
+        }
+        ?>
 
-	<label for="HostName"><?php echo _('Host Name'); ?></label><input type="text" name="HostName" size="10" value="localhost" required="true" title="<?php echo _('Enter Host name'); ?>" />
-	<label for="Database"><?php echo _('Database Name'); ?></label><input type="text" name="Database" size="10" required="true" value="kwamoja" placeholder="<?php echo _('must fill in database name'); ?>" />
-
-	<label for="Prefix"><?php echo _('Database Prefix?'); ?></label><input type="text" name="Prefix" size="25" placeholder="<?php echo _('maybe necessary for shared host'); ?>" />
-	<label for="UserName"><?php echo _('User Name'); ?></label><input type="text" name="UserName" value="root" size="10" maxlength="16" required="true" />
-	<label for="Password"><?php echo _('Password'); ?></label><input type="password" name="Password" placeholder="<?php echo _('mysql user password'); ?>" />
-	</fieldset>
-	<input type="hidden" name="UserLanguage" value="<?php echo $Language; ?>" />
-	<input type="hidden" name="Language" value="<?php echo $Language; ?>" />
-	<?php
-	if($MysqlExt){
-	?>
-	<input type="hidden" name="MysqlExt" value="1" />
-	<?php
-	}else{
-	?>
-	<input type="hidden" name="MysqliExt" value="1" />
-	<?php
-	}
-	?>
-	<br/>
-	<div style="text-align:center;">
-	<input type="submit" name="DbConfig" value="<?php echo _('Next Step'); ?>" />
-	</div>
+        <fieldset>
+            <button type="submit" name="DbConfig"><?php echo _('Next Step'); ?></button>
+        </fieldset>
+    </form>
+</div>
 
 	<?php
 }
@@ -875,8 +961,10 @@ function DbConfig($Language,$MysqlExt = FALSE){//The screen for users to input m
 //The function is used by users to return to start page
 function Recheck(){
 	?>
-		<form id="refresh" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');?>" method="post">
-		<input type="submit" value="<?php echo _('Check Again'); ?>" />
+	<form id="refresh" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8');?>" method="post">
+	    <fieldset>
+    		<button type="submit"><?php echo _('Check Again'); ?></button>
+	    </fieldset>
 	<?php
 }
 
@@ -884,7 +972,7 @@ function Recheck(){
 //@para $HostName is the Host of mysql server
 //@para $UserName is the name of the mysql user
 //@para $Password is the user's password which is stored in plain text in config.php
-//@DatabaseName is the database used by kwamoja
+//@DatabaseName is the database used by weberp
 //@$MysqlExt to check if it's use mysql extension in php instead of mysqli
 //The function used to check if mysql parameters have been set correctly and can connect correctly
 
@@ -896,8 +984,8 @@ function DbCheck($UserLanguage,$HostName,$UserName,$Password,$DatabaseName,$Mysq
 			$Con = mysqli_connect($HostName,$UserName,$Password);
 		}
 		if(!$Con){
-			echo '<h1 style="text-align:center;">'._('Welcome KwaMoja Installation Wizard').'</h1>';
-			prnMsg(_('Failed to connect the database, Please correct the following error and input correct data').'<br/>'.mysqli_connect_error().' '.('usually it is caused by the wrong passward or wrong user setting'),'error');
+			echo '<h1>' . _('webERP Installation Wizard') . '</h1>';
+			prnMsg(_('Failed to connect to the database. Please correct the following error:') . '<br/>' . mysqli_connect_error() . '<br/> '.('This error is usually caused by entry of an incorrect database password or user name.'),'error');
 			if($MysqlExt){
 				DbConfig($UserLanguage,$MysqlExt);
 			}else{
@@ -917,87 +1005,119 @@ function DbCheck($UserLanguage,$HostName,$UserName,$Password,$DatabaseName,$Mysq
 //@para $HostName is the host for mysql server
 //@para $UserName is the name of mysql user
 //@para $Password is the password for mysql server
-//@para $DatabaseName is the name of the database of KwaMoja and also the same name of company
+//@para $DatabaseName is the name of the database of webERP and also the same name of company
 //@para $MysqlEx is refer to the php mysql extention if it's false, it means the php configuration only support mysql instead of mysqli
 //The purpose of this function is to display the final screen for users to input company, admin user accounts etc informatioin
 function CompanySetup($UserLanguage,$HostName,$UserName,$Password,$DatabaseName,$MysqlExt = FALSE){//display the company setup for users
-
+	$CompanyName = $DatabaseName;
 ?>
-		<h1 style="text-align:center;"><?php echo _('Welcome to KwaMoja Installation Wizard'); ?></h1>
-		<!--<p style="text-align:center;"><?php echo _("Please enter the company name and please pay attention the company will be as same as the database name"); ?></p>-->
-		<form id="companyset" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'); ?>" method="post" enctype="multipart/form-data">
-		<fieldset>
-		<legend><span style="color:blue;font-size:13pt;"><?php echo _('Company Setting'); ?></span></legend>
-		<div>
-		<label for="CompanyName"><?php echo _("Company Name"); ?></label> <input type="text" name="CompanyName"  value="<?php echo $DatabaseName; ?>" length="50" />
-		<label for="COA"><?php echo _("Chart of Accounts"); ?></label>
-		<select name="COA">
-		<?php
-			$COAs = scandir('../sql/mysql/coa');
-			$COAs = array_diff($COAs,array('.','..'));
-			if(!empty($COAs)){
-				foreach($COAs as $Value){
-					if($Value == 'kwamoja-new.sql'){
-						echo '<option value="'.$Value.'" selected="true">'.$Value.'</option>';
-					}else{
-						echo '<option value="'.$Value.'">'.$Value.'</option>';
-					}
-				}
-			}else{
-				echo '<option value="1">'._('Default').'</option>';
-			}
-		?>
-		</select>
-		<label for="TimeZone"><?php echo _("Time Zone"); ?></label><select name="TimeZone"><?php include('timezone.php'); ?></select>
-		</div>
-		<br/>
-		<div class="page_help_text" style="float:left;text-align:left;"><?php echo '&nbsp;&nbsp;&nbsp;&nbsp;'._('You can choose to use your own company logo here. The file size should not be over 10*1024. Or just leave it as is'); ?></div>
-		<div style="clear:both;">
-		<label for="Logo"><?php echo _('Company logo image file'); ?></label><input type="file" size="50" name="LogoFile" title="<?php echo _('LogoFile'); ?>" />
-		</div>
-		</fieldset>
-		<fieldset>
-		<legend><span style="color:blue;font-size:13pt;"><?php echo _('Installation setting'); ?></span></legend>
+    <h1><?php echo _('webERP Installation Wizard'); ?></h1>
+    <!--<p style="text-align:center;"><?php echo _("Please enter the company name and please pay attention the company will be as same as the database name"); ?></p>-->
+    <form id="companyset" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8'); ?>" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <legend><?php echo _('Company Settings'); ?></legend>
+             <div class="page_help_text">
+                <p><span><?php echo _('* Denotes required field'); ?></span></p>
+            </div>
+            <ul>
+                <li>
+                    <label for="CompanyName"><?php echo _("Company Name"); ?>: </label>
+                    <input type="text" name="CompanyName" required="true" pattern='[^|/\\\?%:\<>"]+' value="<?php echo $CompanyName; ?>" maxlength="50" />
+                    <span><?php echo _('The name of your company should not contain characters such as |\?%:<>"'); ?></span>
+                </li>
+                <li>
+                    <label for="CountrySQL"><?php echo _("Chart of Accounts"); ?>: </label>
+                    <select name="CountrySQL">
+                    <?php
+                        $CountrySQLs = scandir('../sql/mysql/country_sql');
+                        $CountrySQLs = array_diff($CountrySQLs,array('.','..'));
+                        if(!empty($CountrySQLs)){
+                            foreach($CountrySQLs as $Value){
+                                if($Value == 'default.sql'){
+                                    echo '<option value="'.$Value.'" selected="true">' . $Value . '</option>';
+                                }elseif($Value != 'demo.sql'){// the demo sql selection is not necessary so not allowed
+                                    echo '<option value="'.$Value.'">' . $Value . '</option>';
+                                }
+                            }
+                        }else{
+                            echo '<option value="1">' . _('Default') . '</option>';
+                        }
+                    ?>
+                    </select>
+                    <span><?php echo _('A starter Chart of Accounts (use default.sql if having empty db problems)'); ?> </span>
+                </li>
+                <li>
+                    <label for="TimeZone"><?php echo _("Time Zone"); ?>: </label>
+                    <select name="TimeZone"><?php include('timezone.php'); ?></select>
+                </li>
+                <li>
+                    <label for="Logo"><?php echo _('Company logo file'); ?>: </label>
+                    <input type="file" accept="image/jpg" name="LogoFile" title="<?php echo _('A jpg file up to 10k, and not greater than 170px x 80px'); ?>" />
+                    <span><?php echo _("jpg file to 10k, not greater than 170px x 80px"); ?></span>
+                </li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend><?php echo _('Installation option'); ?></legend>
+            <ul>
+                <li>
+                    <label for="InstallDemo"><?php echo _('Install the demo data?'); ?> </label><input type="checkbox" name="Demo" checked="checked"  />
+                    <span><?php echo _("WebERPDemo site and data will be installed"); ?></span>
+                </li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend><?php echo _('Administrator account settings'); ?></legend>
+                <div class="page_help_text">
+                    <ul>
+                        <li>
+                            <?php echo _('The default user name is \'admin\' and it cannot be changed.'); ?>
+                        </li>
+                        <li>
+                            <?php echo _('The default password is \'weberp\' which you can change below.'); ?>
+                        </li>
+                    </ul>
+                </div>
+                <ul>
+                    <li>
+                        <label for="adminaccount"><?php echo _('webERP Admin Account'); ?>: </label>
+                        <input type="text" name="adminaccount" value="admin" disabled="disabled" />
+                    </li>
+                    <li>
+                        <label for="Email"><?php echo _('Email address'); ?>: </label>
+                        <input type="text" name="Email" required="true" placeholder="admin@yoursite.com" value="admin@weberp.org" pattern="[a-z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-z0-9-]+(\.[a-z0-9-]+)*" />
+                        <span> <?php echo _('For example: admin@yourcompany.com'); ?></span>
+                    </li>
+                    <li>
+                        <label for="webERPPassword"><?php echo _('webERP Password'); ?>: </label>
+                        <input type="password" name="webERPPassword" value="weberp" required="true" />
+                    </li>
+                    <li>
+                        <label for="PasswordConfirm"><?php echo _('Re-enter Password'); ?>: </label>
+                        <input type="password" required="true" value="weberp" name="PasswordConfirm" />
+                    </li>
+                </ul>
 
-		<!--<label for="InstallTable"><?php echo _('Install the table'); ?><input type="checkbox" name="Table" value="1" />-->
-		<!--<label for="InstallTable"><?php echo _('Without table'); ?><input type="radio" name="Table" value="0" />-->
-		<label for="InstallDemo"><?php echo _('Install the demo company'); ?><input type="checkbox" name="Demo" checked="checked"  />
-		<!--<label for="InstallDemo"><?php echo _('Without demo'); ?><input type="radio" name="Demo" value="0" />-->
-		</fieldset>
-		<fieldset>
-		<legend><span style="color:blue;font-size:13pt;"><?php echo _('Administrator account setting'); ?></span></legend>
-		<div style="float:left;"><?php echo _('KwaMoja User Account'); ?></div><div style="float:left;color:red;font-size:13pt">&nbsp;&nbsp;&nbsp;&nbsp;admin&nbsp;&nbsp;</div>
+            </fieldset>
+            <input type="hidden" name="HostName" value="<?php echo $HostName; ?>" />
+            <input type="hidden" name="UserName" value="<?php echo $UserName; ?>" />
+            <input type="hidden" name="DatabaseName" value="<?php echo $DatabaseName; ?>" />
+            <input type="hidden" name="Password" value="<?php echo $Password; ?>" />
+            <input type="hidden" name="MysqlExt" value="<?php echo $MysqlExt; ?>" />
+            <input type="hidden" name="UserLanguage" value="<?php echo $UserLanguage; ?>" />
+            <input type="hidden" name="MAX_FILE_SIZE" value="10240" />
 
-		<label for="Email"><?php echo _('Email address'); ?></label><input type="email" name="Email" value="admin@kwamoja.org" required="true" />
-
-		<label for="KwaMojaPassword"><?php echo _('KwaMoja Password'); ?></label><input type="password" name="KwaMojaPassword" value="kwamoja" required="true" />
-		<label for="PasswordConfirm"><?php echo _('Re-Password'); ?></label><input type="password" required="true" value="kwamoja" name="PasswordConfirm" />
-		</div>
-		<div style="color:purple;"><?php echo _('The default user is').' '.'admin'.' '.('and the default password is kwamoja, you can NOT change the default user'); ?></div>
-		</fieldset>
-		<input type="hidden" name="HostName" value="<?php echo $HostName; ?>" />
-		<input type="hidden" name="UserName" value="<?php echo $UserName; ?>" />
-
-		<input type="hidden" name="Password" value="<?php echo $Password; ?>" />
-		<input type="hidden" name="MysqlExt" value="<?php echo $MysqlExt; ?>" />
-		</div>
-		<input type="hidden" name="UserLanguage" value="<?php echo $UserLanguage; ?>" />
-		<input type="hidden" name="MAX_FILE_SIZE" value="10240" />
-		<br/>
-		<div style="margin:0px auto; text-align:center;">
-		<input type="submit" name="Install" value="<?php echo _('Install'); ?>" />
-		</div>
-
+            <fieldset>
+              <button type="submit" name="Install"><?php echo _('Install'); ?></button>
+            </fieldset>
+    </form>
+</div>
 
 <?php
 
-
-
-
-
 }
-//@para $NewSQL is the kwamoja new sql file which contains the COA file
-//@para $Demo is the kwamoja demo sql file
+//@para $NewSQL is the weberp new sql file which contains the CountrySQL file
+//@para $Demo is the weberp demo sql file
 //@para $db refer to the database connection reference
 //@para $DBType refer to the database connection type mysqli or mysql
 //@para $NewDB is the new database name
@@ -1008,7 +1128,8 @@ function PopulateSQLData($NewSQL=false,$Demo=false,$db,$DBType,$NewDB = false){
 				if($DBType == 'mysqli'){//if the mysql db type is mysqli
 						mysqli_select_db($db,$NewDB);
 						//currently there is no 'USE' statements in sql file, no bother to remove them
-						$sql = file_get_contents($NewSQL);
+						$sql = 'SET names UTF8;';
+						$sql .= file_get_contents($NewSQL);
 						if(!$sql){
 							die(_('Failed to open the new sql file'));
 						}
@@ -1046,7 +1167,7 @@ function PopulateSQLData($NewSQL=false,$Demo=false,$db,$DBType,$NewDB = false){
 					PopulateSQLDataBySQL($Demo,$db,$DBType,false,$NewDB);
 						//we can let users wait instead of changing the my.cnf file
 						//It is a non affordable challenge for them since wamp set the max_allowed_packet 1M
-						//and kwamojademo.sql is 1.4M so at least it cannot install in wamp
+						//and weberpdemo.sql is 1.4M so at least it cannot install in wamp
 						//so we not use the multi query here
 
 
@@ -1087,12 +1208,12 @@ function PopulateSQLData($NewSQL=false,$Demo=false,$db,$DBType,$NewDB = false){
 //@para $NewDB is the new database name
 //@para $DemoDB is the demo database name
 //The purpose of this function is populate the database with mysql extention
-function PopulateSQLDataBySQL($File,$db,$DBType,$NewDB=false,$DemoDB='kwamojademo'){
+function PopulateSQLDataBySQL($File,$db,$DBType,$NewDB=false,$DemoDB='weberpdemo'){
 						$dbName = ($NewDB) ? $NewDB : $DemoDB;
 						($DBType=='mysqli')?mysqli_select_db($db,$dbName):mysql_select_db($dbName,$db);
 						$SQLScriptFile = file($File);
 						$ScriptFileEntries = sizeof($SQLScriptFile);
-						$SQL ='';
+						$SQL =' SET names UTF8;';
 						$InAFunction = false;
 						for ($i=0; $i<$ScriptFileEntries; $i++) {
 
@@ -1133,11 +1254,22 @@ function PopulateSQLDataBySQL($File,$db,$DBType,$NewDB=false,$DemoDB='kwamojadem
 
 }
 
+function CryptPass( $Password ) {
+    if (PHP_VERSION_ID < 50500) {
+        $salt = base64_encode(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM));
+        $salt = str_replace('+', '.', $salt);
+        $hash = crypt($Password, '$2y$10$'.$salt.'$');
+    } else {
+        $hash = password_hash($Password,PASSWORD_DEFAULT);
+    }
+    return $hash;
+ }
+
 //@para $db the database connection
 //@para $DatabaseName the database to update
 //@para $DBConnectType if it is mysql extention or not
-//@para $AdminPasswd the kwamoja administrator's password
-//@para $AdminEmail the kwamoja administrators' email
+//@para $AdminPasswd the weberp administrator's password
+//@para $AdminEmail the weberp administrators' email
 //@para $AdminLangauge the administrator's language for login
 //@para $CompanyName the company
 //The purpose of this function is to update the admin accounts and company name information
@@ -1147,8 +1279,8 @@ function DBUpdate($db,$DatabaseName,$DBConnectType,$AdminPasswd,$AdminEmail,$Adm
 	//select the database to connect
 	$Result = (!$MysqlExt) ? mysqli_select_db($db,$DatabaseName):mysql_select_db($DatabaseName,$db);
 
-	$sql = "UPDATE www_users
-				SET password = '".sha1($AdminPasswd)."',
+	$sql = "UPDATE weberp_www_users
+				SET password = '".CryptPass($AdminPasswd)."',
 					email = '".$AdminEmail."',
 				        language = '".$AdminLanguage."'
 				WHERE userid = 'admin'";
@@ -1158,7 +1290,7 @@ function DBUpdate($db,$DatabaseName,$DBConnectType,$AdminPasswd,$AdminEmail,$Adm
 			prnMsg(_('Failed to update the email address and password of the administrator and the error is').((!$MysqlExt)?mysqli_error($db):mysql_error($db)),'error');
 	}
 
-	$sql = "UPDATE companies
+	$sql = "UPDATE weberp_companies
 			SET coyname = '". ((!$MysqlExt)?mysqli_real_escape_string($db, $CompanyName):mysql_real_escape_string($CompanyName,$db)) . "'
 			WHERE coycode = 1";
 	$Result = (!$MysqlExt)?mysqli_query($db,$sql):mysql_query($sql,$db);
@@ -1534,6 +1666,5 @@ if(typeof tz !== 'undefined'){
 }
 </script>
 
-
 </body>
-
+</html>

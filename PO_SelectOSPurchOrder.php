@@ -1,6 +1,8 @@
 <?php
 
-$PricesSecurity = 1000;
+/* $Id: PO_SelectOSPurchOrder.php 7468 2016-03-09 02:59:37Z exsonqu $*/
+
+$PricesSecurity = 12;
 
 include('includes/session.inc');
 
@@ -11,125 +13,130 @@ include('includes/DefinePOClass.php');
 
 if (isset($_GET['SelectedStockItem'])) {
 	$SelectedStockItem = trim($_GET['SelectedStockItem']);
-} //isset($_GET['SelectedStockItem'])
+}
 elseif (isset($_POST['SelectedStockItem'])) {
 	$SelectedStockItem = trim($_POST['SelectedStockItem']);
-} //isset($_POST['SelectedStockItem'])
+}
 
 if (isset($_GET['OrderNumber'])) {
 	$OrderNumber = $_GET['OrderNumber'];
-} //isset($_GET['OrderNumber'])
+}
 elseif (isset($_POST['OrderNumber'])) {
 	$OrderNumber = $_POST['OrderNumber'];
-} //isset($_POST['OrderNumber'])
+}
 
 if (isset($_GET['SelectedSupplier'])) {
 	$SelectedSupplier = trim($_GET['SelectedSupplier']);
-} //isset($_GET['SelectedSupplier'])
+}
 elseif (isset($_POST['SelectedSupplier'])) {
 	$SelectedSupplier = trim($_POST['SelectedSupplier']);
-} //isset($_POST['SelectedSupplier'])
+}
 
-echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">';
-echo '<div>';
-echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post">
+	<div>
+	<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 
 if (isset($_POST['ResetPart'])) {
 	unset($SelectedStockItem);
-} //isset($_POST['ResetPart'])
+}
 
-if (isset($OrderNumber) and $OrderNumber != '') {
+if (isset($OrderNumber) AND $OrderNumber != '') {
 	if (!is_numeric($OrderNumber)) {
 		echo '<br /><b>' . _('The Order Number entered') . ' <u>' . _('MUST') . '</u> ' . _('be numeric') . '.</b><br />';
 		unset($OrderNumber);
-	} //!is_numeric($OrderNumber)
-	else {
+	} else {
 		echo _('Order Number') . ' - ' . $OrderNumber;
 	}
-} //isset($OrderNumber) and $OrderNumber != ''
-else {
+} else {
 	if (isset($SelectedSupplier)) {
 		echo '<br />
-				<div class="page_help_text noPrint">' . _('For supplier') . ': ' . $SelectedSupplier . ' ' . _('and') . ' ';
+				<div class="page_help_text">' . _('For supplier') . ': ' . $SelectedSupplier . ' ' . _('and') . ' ';
 		echo '<input type="hidden" name="SelectedSupplier" value="' . $SelectedSupplier . '" />
 				</div>';
-	} //isset($SelectedSupplier)
+	}
 	if (isset($SelectedStockItem)) {
 		echo '<input type="hidden" name="SelectedStockItem" value="' . $SelectedStockItem . '" />';
-	} //isset($SelectedStockItem)
+	}
 }
 
 if (isset($_POST['SearchParts'])) {
-	if (isset($_POST['Keywords']) and isset($_POST['StockCode'])) {
-		echo '<div class="page_help_text noPrint">' . _('Stock description keywords have been used in preference to the Stock code extract entered') . '.</div>';
-	} //isset($_POST['Keywords']) and isset($_POST['StockCode'])
+	if (isset($_POST['Keywords']) AND isset($_POST['StockCode'])) {
+		echo '<div class="page_help_text">' . _('Stock description keywords have been used in preference to the Stock code extract entered') . '.</div>';
+	}
+	if (isset($_POST['StockCat']) AND $_POST['StockCat'] == 'All'){
+		$WhereStockCat = ' ';
+	} else {
+		$WhereStockCat = " AND weberp_stockmaster.categoryid='" . $_POST['StockCat'] . "'";
+	}
 	if ($_POST['Keywords']) {
 		//insert wildcard characters in spaces
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord
-					FROM stockmaster
-					INNER JOIN locstock
-						ON stockmaster.stockid = locstock.stockid
-					INNER JOIN purchorderdetails
-						ON stockmaster.stockid=purchorderdetails.itemcode
-					WHERE purchorderdetails.completed=0
-						AND stockmaster.description " . LIKE . " '" . $SearchString . "'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					ORDER BY stockmaster.stockid";
+		$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					SUM(weberp_locstock.quantity) AS qoh,
+					weberp_stockmaster.units,
+					SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+					ON weberp_stockmaster.stockid = weberp_locstock.stockid
+					INNER JOIN weberp_purchorderdetails
+						ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+					INNER JOIN weberp_purchorders on weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+					INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_purchorderdetails.completed=0
+				AND weberp_stockmaster.description " . LIKE . " '" . $SearchString . "'
+				" . $WhereStockCat . "
+				GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				ORDER BY weberp_stockmaster.stockid";
 
 
-	} //$_POST['Keywords']
-	elseif ($_POST['StockCode']) {
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						SUM(locstock.quantity) AS qoh,
-						SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord,
-						stockmaster.units
-					FROM stockmaster
-					INNER JOIN locstock
-						ON stockmaster.stockid = locstock.stockid
-					INNER JOIN purchorderdetails
-						ON stockmaster.stockid=purchorderdetails.itemcode
-					WHERE purchorderdetails.completed=0
-						AND stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					ORDER BY stockmaster.stockid";
+	} elseif ($_POST['StockCode']) {
 
-	} //$_POST['StockCode']
-		elseif (!$_POST['StockCode'] and !$_POST['Keywords']) {
-		$SQL = "SELECT stockmaster.stockid,
-						stockmaster.description,
-						SUM(locstock.quantity) AS qoh,
-						stockmaster.units,
-						SUM(purchorderdetails.quantityord-purchorderdetails.quantityrecd) AS qord
-					FROM stockmaster
-					INNER JOIN locstock
-						ON stockmaster.stockid = locstock.stockid
-					INNER JOIN purchorderdetails
-						ON stockmaster.stockid=purchorderdetails.itemcode
-					WHERE purchorderdetails.completed=0
-						AND stockmaster.categoryid='" . $_POST['StockCat'] . "'
-					GROUP BY stockmaster.stockid,
-							stockmaster.description,
-							stockmaster.units
-					ORDER BY stockmaster.stockid";
-	} //!$_POST['StockCode'] and !$_POST['Keywords']
+		$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					SUM(weberp_locstock.quantity) AS qoh,
+					SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord,
+					weberp_stockmaster.units
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				INNER JOIN weberp_purchorderdetails
+				ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+				INNER JOIN weberp_purchorders on weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_purchorderdetails.completed=0
+				AND weberp_stockmaster.stockid " . LIKE . " '%" . $_POST['StockCode'] . "%'
+				" . $WhereStockCat . "
+				GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				ORDER BY weberp_stockmaster.stockid";
+
+	} elseif (!$_POST['StockCode'] AND !$_POST['Keywords']) {
+		$SQL = "SELECT weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					SUM(weberp_locstock.quantity) AS qoh,
+					weberp_stockmaster.units,
+					SUM(weberp_purchorderdetails.quantityord-weberp_purchorderdetails.quantityrecd) AS qord
+				FROM weberp_stockmaster INNER JOIN weberp_locstock
+				ON weberp_stockmaster.stockid = weberp_locstock.stockid
+				INNER JOIN weberp_purchorderdetails
+				ON weberp_stockmaster.stockid=weberp_purchorderdetails.itemcode
+				INNER JOIN weberp_purchorders on weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE weberp_purchorderdetails.completed=0
+				" . $WhereStockCat . "
+				GROUP BY weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				ORDER BY weberp_stockmaster.stockid";
+	}
 
 	$ErrMsg = _('No stock items were returned by the SQL because');
 	$DbgMsg = _('The SQL used to retrieve the searched parts was');
-	$StockItemsResult = DB_query($SQL, $db, $ErrMsg, $DbgMsg);
+	$StockItemsResult = DB_query($SQL, $ErrMsg, $DbgMsg);
 } //isset($_POST['SearchParts'])
 
 
@@ -140,108 +147,150 @@ $OrdersAfterDate = Date("d/m/Y",Mktime(0,0,0,Date("m")-2,Date("d"),Date("Y")));
 if (!isset($OrderNumber) or $OrderNumber == '') {
 	if (isset($SelectedSupplier)) {
 		echo '<a href="' . $RootPath . '/PO_Header.php?NewOrder=Yes&amp;SupplierID=' . $SelectedSupplier . '">' . _('Add Purchase Order') . '</a>';
-	} //isset($SelectedSupplier)
-	else {
+	} else {
 		echo '<a href="' . $RootPath . '/PO_Header.php?NewOrder=Yes">' . _('Add Purchase Order') . '</a>';
 	}
-	echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>';
+	echo '<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>';
 	echo '<table class="selection">
 			<tr>
-				<td>' . _('Order Number') . ': <input type="text" name="OrderNumber" minlength="0" maxlength="8" size="9" />  ' . _('Into Stock Location') . ':
-				<select minlength="0" name="StockLocation">';
+				<td>' . _('Order Number') . ': <input type="text" name="OrderNumber" autofocus="autofocus" maxlength="8" size="9" />  ' . _('Into Stock Location') . ':
+				<select name="StockLocation">';
 
-	if ($_SESSION['RestrictLocations'] == 0) {
-		$sql = "SELECT locationname,
-						loccode
-					FROM locations";
+	if (!isset($_POST['DateFrom'])) {
+		$DateSQL = "SELECT min(orddate) as fromdate,
+							max(orddate) as todate
+						FROM weberp_purchorders";
+		$DateResult = DB_query($DateSQL);
+		$DateRow = DB_fetch_array($DateResult);
+		$DateFrom = $DateRow['fromdate'];
+		$DateTo = $DateRow['todate'];
 	} else {
-		$sql = "SELECT locationname,
-						loccode
-					FROM locations
-					INNER JOIN www_users
-						ON locations.loccode=www_users.defaultlocation
-					WHERE www_users.userid='" . $_SESSION['UserID'] . "'";
+		$DateFrom = FormatDateForSQL($_POST['DateFrom']);
+		$DateTo = FormatDateForSQL($_POST['DateTo']);
 	}
-	$resultStkLocs = DB_query($sql, $db);
+
+	$sql = "SELECT weberp_locations.loccode, locationname,(SELECT count(*) FROM weberp_locations) AS total FROM weberp_locations
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
+	$ErrMsg = _('Failed to retrieve location data');
+	$resultStkLocs = DB_query($sql,$ErrMsg);
+	$UserLocations = DB_num_rows($resultStkLocs);
+	$AllListed = false;
 	while ($myrow = DB_fetch_array($resultStkLocs)) {
-		if (isset($_POST['StockLocation'])) {
-			if ($myrow['loccode'] == $_POST['StockLocation']) {
-				echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
-			} //$myrow['loccode'] == $_POST['StockLocation']
-			else {
-				echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
-			}
-		} //isset($_POST['StockLocation'])
-		elseif ($myrow['loccode'] == $_SESSION['UserStockLocation']) {
-			echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
-		} //$myrow['loccode'] == $_SESSION['UserStockLocation']
-		else {
-			echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+		if(!isset($LocQty)){
+			$LocQty = $myrow['total'];
 		}
-	} //$myrow = DB_fetch_array($resultStkLocs)
-	echo '</select> ' . _('Order Status:') . ' <select minlength="0" name="Status">';
-	if (!isset($_POST['Status']) or $_POST['Status'] == 'Pending_Authorised') {
+		if (isset($_POST['StockLocation'])) {//The user has selected location
+			if ($_POST['StockLocation'] == 'ALLLOC'){//user have selected all locations
+				if($AllListed === false) {//it's the first loop
+					echo '<option selected="selected" value="ALLLOC">' . _('All') . '</option>';
+					echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+					$AllListed = true;
+				} else { //it's not the first loop
+					echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+				}
+			
+			} else {//user have not selected all locations; There are two possibilities that users have right, but not choose all; or vice visa
+				if ($myrow['total'] == $UserLocations) { //user have allloc right
+					if($AllListed === false){//first loop
+						echo '<option value="ALLLOC">' . _('All') . '</option>';
+						$AllListed = true;
+					}
+				}
+				if ($myrow['loccode'] == $_POST['StockLocation']){
+					echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+				} else {
+					echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+				}
+			}
+		} else {//users have not selected locations
+			if($myrow['total'] == $UserLocations){//users have right to submit All locations
+				if($AllListed === false){//first loop
+					echo '<option selected="selected" value="ALLLOC">' . _('All') . '</option>';//default value is all 
+					echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+					$AllListed = true;
+				} else {//not first loop
+					echo '<option value="' . $myrow['loccode'] . '" >' . $myrow['locationname'] . '</option>';
+				}
+			} else {//no right to submit all locations
+				if ($myrow['loccode'] == $_SESSION['UserStockLocation']) {
+					echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+				} else {
+					echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+				}
+			
+			}
+
+		}
+	
+	}
+	echo '</select> ' . _('Order Status:') . ' <select name="Status">';
+	if (!isset($_POST['Status']) OR $_POST['Status'] == 'Pending_Authorised') {
 		echo '<option selected="selected" value="Pending_Authorised">' . _('Pending and Authorised') . '</option>';
-	} //!isset($_POST['Status']) or $_POST['Status'] == 'Pending_Authorised'
-	else {
+	} else {
 		echo '<option value="Pending_Authorised">' . _('Pending and Authorised') . '</option>';
 	}
-	if (isset($_POST['Status']) and $_POST['Status'] == 'Pending') {
-		echo '<option selected="selected" value="Pending">' . _('Pending') . '</option>';
-	} //$_POST['Status'] == 'Pending'
-	else {
-		echo '<option value="Pending">' . _('Pending') . '</option>';
+	if(isset($_POST['Status'])){
+		if ($_POST['Status'] == 'Pending') {
+			echo '<option selected="selected" value="Pending">' . _('Pending') . '</option>';
+		} else {
+			echo '<option value="Pending">' . _('Pending') . '</option>';
+		}
+		if ($_POST['Status'] == 'Authorised') {
+			echo '<option selected="selected" value="Authorised">' . _('Authorised') . '</option>';
+		} else {
+			echo '<option value="Authorised">' . _('Authorised') . '</option>';
+		}
+		if ($_POST['Status'] == 'Cancelled') {
+			echo '<option selected="selected" value="Cancelled">' . _('Cancelled') . '</option>';
+		} else {
+			echo '<option value="Cancelled">' . _('Cancelled') . '</option>';
+		}
+		if ($_POST['Status'] == 'Rejected') {
+			echo '<option selected="selected" value="Rejected">' . _('Rejected') . '</option>';
+		} else {
+			echo '<option value="Rejected">' . _('Rejected') . '</option>';
+		}
 	}
-	if (isset($_POST['Status']) and $_POST['Status'] == 'Authorised') {
-		echo '<option selected="selected" value="Authorised">' . _('Authorised') . '</option>';
-	} //$_POST['Status'] == 'Authorised'
-	else {
-		echo '<option value="Authorised">' . _('Authorised') . '</option>';
-	}
-	if (isset($_POST['Status']) and $_POST['Status'] == 'Cancelled') {
-		echo '<option selected="selected" value="Cancelled">' . _('Cancelled') . '</option>';
-	} //$_POST['Status'] == 'Cancelled'
-	else {
-		echo '<option value="Cancelled">' . _('Cancelled') . '</option>';
-	}
-	if (isset($_POST['Status']) and $_POST['Status'] == 'Rejected') {
-		echo '<option selected="selected" value="Rejected">' . _('Rejected') . '</option>';
-	} //$_POST['Status'] == 'Rejected'
-	else {
-		echo '<option value="Rejected">' . _('Rejected') . '</option>';
-	}
-	echo '</select> <input type="submit" name="SearchOrders" value="' . _('Search Purchase Orders') . '" />
+	$Checked = (isset($_POST['PODetails']))?'checked="checked"':'';
+	echo '</select>
+		' . _('Orders Between') . ':&nbsp;
+			<input type="text" name="DateFrom" value="' . ConvertSQLDate($DateFrom) . '"  class="date" size="10" alt="' . $_SESSION['DefaultDateFormat'] . '"  />
+		' . _('and') . ':&nbsp;
+			<input type="text" name="DateTo" value="' . ConvertSQLDate($DateTo) . '"  class="date" size="10" alt="' . $_SESSION['DefaultDateFormat'] . '"  />
+		<input type="submit" name="SearchOrders" value="' . _('Search Purchase Orders') . '" />
 		</td>
 		</tr>
+		<tr><td>' . _('Show PO Details') . '<input type="checkbox" name="PODetails" ' . $Checked . ' /></td></tr>
 		</table>';
 } //!isset($OrderNumber) or $OrderNumber == ''
 
-$SQL = "SELECT categoryid, categorydescription FROM stockcategory ORDER BY categorydescription";
-$result1 = DB_query($SQL, $db);
+$SQL = "SELECT categoryid, categorydescription FROM weberp_stockcategory ORDER BY categorydescription";
+$result1 = DB_query($SQL);
 
-echo '<br /><div class="page_help_text noPrint">' . _('To search for purchase orders for a specific part use the part selection facilities below') . '</div>';
+echo '<br /><div class="page_help_text">' . _('To search for purchase orders for a specific part use the part selection facilities below') . '</div>';
 echo '<br />
 		<table class="selection">
 		<tr>';
 
 echo '<td>' . _('Select a stock category') . ':
-		<select minlength="0" name="StockCat">';
-
+		<select name="StockCat">';
+if (DB_num_rows($result1)>0){
+	echo '<option value="All">' . _('All') . '</option>';
+}
 while ($myrow1 = DB_fetch_array($result1)) {
 	if (isset($_POST['StockCat']) and $myrow1['categoryid'] == $_POST['StockCat']) {
 		echo '<option selected="selected" value="' . $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
-	} //isset($_POST['StockCat']) and $myrow1['categoryid'] == $_POST['StockCat']
-	else {
+	} else {
 		echo '<option value="' . $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
 	}
 } //end loop through categories
 echo '</select></td>';
-echo '<td>' . _('Enter text extracts in the') . '<b>' . _('description') . '</b>:</td>';
-echo '<td><input type="text" name="Keywords" size="20" minlength="0" maxlength="25" /></td>
+echo '<td>' . _('Enter text extracts in the') .' '. '<b>' . _('description') . '</b>:</td>';
+echo '<td><input type="text" name="Keywords" size="20" maxlength="25" /></td>
 		</tr>
 		<tr><td></td>';
-echo '<td><b>' . _('OR') . '</b>' . _('Enter extract of the') . '<b>' . _('Stock Code') . '</b>:</td>';
-echo '<td><input type="text" name="StockCode" size="15" minlength="0" maxlength="18" /></td>
+echo '<td><b>' . _('OR').' '. '</b>' . _('Enter extract of the') .' '. '<b>' . _('Stock Code') . '</b>:</td>';
+echo '<td><input type="text" name="StockCode" size="15" maxlength="18" /></td>
 	</tr>
 	</table>
 	<br />';
@@ -255,16 +304,15 @@ echo '<table>
 echo '<br />';
 
 if (isset($StockItemsResult)) {
-	echo '<table cellpadding="2" class="selection">';
-	$TableHeader = '<tr>
-						<th class="SortableColumn" onclick="SortSelect(this)">' . _('Code') . '</th>
-						<th class="SortableColumn" onclick="SortSelect(this)">' . _('Description') . '</th>
-						<th>' . _('On Hand') . '</th>
-						<th>' . _('Orders') . '<br />' . _('Outstanding') . '</th>
-						<th>' . _('Units') . '</th>
-					</tr>';
-	echo $TableHeader;
-	$j = 1;
+	echo '<table cellpadding="2" class="selection">
+		<tr>
+			<th class="ascending">' . _('Code') . '</th>
+			<th class="ascending">' . _('Description') . '</th>
+			<th class="ascending">' . _('On Hand') . '</th>
+			<th class="ascending">' . _('Orders') . '<br />' . _('Outstanding') . '</th>
+			<th class="ascending">' . _('Units') . '</th>
+		</tr>';
+
 	$k = 0; //row colour counter
 
 	while ($myrow = DB_fetch_array($StockItemsResult)) {
@@ -281,244 +329,301 @@ if (isset($StockItemsResult)) {
 				<td>%s</td>
 				<td class="number">%s</td>
 				<td class="number">%s</td>
-				<td>%s</td></tr>', $myrow['stockid'], $myrow['description'], $myrow['qoh'], $myrow['qord'], $myrow['units']);
-
-		$j++;
-		If ($j == 12) {
-			$j = 1;
-			echo $TableHeader;
-		} //$j == 12
-		//end of page full new headings if
+				<td>%s</td></tr>',
+				$myrow['stockid'],
+				$myrow['description'],
+				$myrow['qoh'],
+				$myrow['qord'],
+				$myrow['units']);
 	} //end of while loop through search items
 
 	echo '</table>';
 
 } //end if stock search results to show
-else if (isset($_POST['SearchOrders'])) {
+else {
 	//figure out the SQL required from the inputs available
 
-	if (!isset($_POST['Status']) or $_POST['Status'] == 'Pending_Authorised') {
-		$StatusCriteria = " AND (purchorders.status='Pending' OR purchorders.status='Authorised' OR purchorders.status='Printed') ";
-	} //!isset($_POST['Status']) or $_POST['Status'] == 'Pending_Authorised'
-	elseif ($_POST['Status'] == 'Authorised') {
-		$StatusCriteria = " AND (purchorders.status='Authorised' OR purchorders.status='Printed')";
-	} //$_POST['Status'] == 'Authorised'
-		elseif ($_POST['Status'] == 'Pending') {
-		$StatusCriteria = " AND purchorders.status='Pending' ";
-	} //$_POST['Status'] == 'Pending'
-		elseif ($_POST['Status'] == 'Rejected') {
-		$StatusCriteria = " AND purchorders.status='Rejected' ";
-	} //$_POST['Status'] == 'Rejected'
-		elseif ($_POST['Status'] == 'Cancelled') {
-		$StatusCriteria = " AND purchorders.status='Cancelled' ";
-	} //$_POST['Status'] == 'Cancelled'
-	if (isset($OrderNumber) and $OrderNumber != '') {
-		$SQL = "SELECT purchorders.orderno,
-						purchorders.realorderno,
-						suppliers.suppname,
-						purchorders.orddate,
-						purchorders.deliverydate,
-						purchorders.initiator,
-						purchorders.status,
-						purchorders.requisitionno,
-						purchorders.allowprint,
-						suppliers.currcode,
-						currencies.decimalplaces AS currdecimalplaces,
-						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-				FROM purchorders INNER JOIN purchorderdetails
-				ON purchorders.orderno=purchorderdetails.orderno
-				INNER JOIN suppliers
-				ON purchorders.supplierno = suppliers.supplierid
-				INNER JOIN currencies
-				ON suppliers.currcode=currencies.currabrev
-				WHERE purchorderdetails.completed=0
-				AND purchorders.orderno='" . $OrderNumber . "'
-				GROUP BY purchorders.orderno ASC,
-					suppliers.suppname,
-					purchorders.orddate,
-					purchorders.status,
-					purchorders.initiator,
-					purchorders.requisitionno,
-					purchorders.allowprint,
-					suppliers.currcode";
-	} //isset($OrderNumber) and $OrderNumber != ''
-	else {
+	if (!isset($_POST['Status']) OR $_POST['Status'] == 'Pending_Authorised') {
+		$StatusCriteria = " AND (weberp_purchorders.status='Pending' OR weberp_purchorders.status='Authorised' OR weberp_purchorders.status='Printed') ";
+	} elseif ($_POST['Status'] == 'Authorised') {
+		$StatusCriteria = " AND (weberp_purchorders.status='Authorised' OR weberp_purchorders.status='Printed')";
+	} elseif ($_POST['Status'] == 'Pending') {
+		$StatusCriteria = " AND weberp_purchorders.status='Pending' ";
+	} elseif ($_POST['Status'] == 'Rejected') {
+		$StatusCriteria = " AND weberp_purchorders.status='Rejected' ";
+	} elseif ($_POST['Status'] == 'Cancelled') {
+		$StatusCriteria = " AND weberp_purchorders.status='Cancelled' ";
+	}
+	if (isset($OrderNumber) AND $OrderNumber != '') {
+		$SQL = "SELECT weberp_purchorders.orderno,
+						weberp_purchorders.realorderno,
+						weberp_suppliers.suppname,
+						weberp_purchorders.orddate,
+						weberp_purchorders.deliverydate,
+						weberp_purchorders.initiator,
+						weberp_purchorders.status,
+						weberp_purchorders.requisitionno,
+						weberp_purchorders.allowprint,
+						weberp_suppliers.currcode,
+						weberp_currencies.decimalplaces AS currdecimalplaces,
+						group_concat(CASE WHEN quantityord>quantityrecd THEN CONCAT(itemcode,'--',round(quantityord-quantityrecd)) ELSE '' END) as bal,
+						SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+				FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+				ON weberp_purchorders.orderno=weberp_purchorderdetails.orderno
+				INNER JOIN weberp_locationusers 
+				ON weberp_purchorders.intostocklocation=weberp_locationusers.loccode
+				AND userid='" . $_SESSION['UserID'] . "' AND canview = 1
+				INNER JOIN weberp_suppliers
+				ON weberp_purchorders.supplierno = weberp_suppliers.supplierid
+				INNER JOIN weberp_currencies
+				ON weberp_suppliers.currcode=weberp_currencies.currabrev
+				WHERE weberp_purchorderdetails.completed=0
+				AND weberp_purchorders.orderno='" . $OrderNumber . "'
+				GROUP BY weberp_purchorders.orderno ASC,
+					weberp_suppliers.suppname,
+					weberp_purchorders.orddate,
+					weberp_purchorders.status,
+					weberp_purchorders.initiator,
+					weberp_purchorders.requisitionno,
+					weberp_purchorders.allowprint,
+					weberp_suppliers.currcode";
+	} else {
 		//$OrderNumber is not set
 		if (isset($SelectedSupplier)) {
 			if (!isset($_POST['StockLocation'])) {
-				$_POST['StockLocation'] = $_SESSION['UserStockLocation'];
-			} //!isset($_POST['StockLocation'])
+				if (isset($UserLocations) AND isset($LocQty) AND $UserLocations == $LocQty) {
+					$WhereStockLocation = " AND weberp_purchorders.intostocklocation ='" . $_POST['StockLocation'] . "' ";
+				} else {
+					$_POST['StockLocation'] = $_SESSION['UserStockLocation'];
+					$WhereStockLocation = " AND weberp_purchorders.intostocklocation ='" . $_POST['StockLocation'] . "' ";
+				}
+			} else {
+				if ($_POST['StockLocation'] == 'ALLLOC'){
+					$WhereStockLocation = ' ';
+				} else {
+					$WhereStockLocation = " AND weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "' ";
+				}
+			}
 
 			if (isset($SelectedStockItem)) {
-				$SQL = "SELECT purchorders.realorderno,
-							purchorders.orderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.deliverydate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces AS currdecimalplaces,
-							SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-						FROM purchorders INNER JOIN purchorderdetails
-						ON purchorders.orderno = purchorderdetails.orderno
-						INNER JOIN suppliers
-						ON  purchorders.supplierno = suppliers.supplierid
-						INNER JOIN currencies
-						ON suppliers.currcode=currencies.currabrev
-						WHERE purchorderdetails.completed=0
-						AND purchorderdetails.itemcode='" . $SelectedStockItem . "'
-						AND purchorders.supplierno='" . $SelectedSupplier . "'
-						AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
-						" . $StatusCriteria . "
-						GROUP BY purchorders.orderno ASC,
-							purchorders.realorderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces";
-			} //isset($SelectedStockItem)
-			else {
-				$SQL = "SELECT purchorders.realorderno,
-							purchorders.orderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.deliverydate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces AS currdecimalplaces,
-							SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-						FROM purchorders INNER JOIN purchorderdetails
-						ON purchorders.orderno = purchorderdetails.orderno
-						INNER JOIN suppliers
-						ON  purchorders.supplierno = suppliers.supplierid
-						INNER JOIN currencies
-						ON suppliers.currcode=currencies.currabrev
-						WHERE purchorderdetails.completed=0
-						AND purchorders.supplierno='" . $SelectedSupplier . "'
-						AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
-						" . $StatusCriteria . "
-						GROUP BY purchorders.orderno ASC,
-							purchorders.realorderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces";
+				$SQL = "SELECT weberp_purchorders.realorderno,
+							weberp_purchorders.orderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.deliverydate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							group_concat(CASE WHEN quantityord>quantityrecd THEN CONCAT(itemcode,'--',round(quantityord-quantityrecd)) ELSE '' END) as bal,
+							SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+						FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+						ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers
+						ON  weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						INNER JOIN weberp_currencies
+						ON weberp_suppliers.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_purchorderdetails.completed=0
+						AND orddate>='" . $DateFrom . "'
+						AND orddate<='" . $DateTo . "'
+						AND weberp_purchorderdetails.itemcode='" . $SelectedStockItem . "'
+						AND weberp_purchorders.supplierno='" . $SelectedSupplier . "'
+						" . $WhereStockLocation 
+						 . $StatusCriteria . "
+						GROUP BY weberp_purchorders.orderno ASC,
+							weberp_purchorders.realorderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces";
+			} else {
+				$SQL = "SELECT weberp_purchorders.realorderno,
+							weberp_purchorders.orderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.deliverydate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							group_concat(CASE WHEN quantityord>quantityrecd THEN CONCAT(itemcode,'--',round(quantityord-quantityrecd)) ELSE '' END) as bal,
+							SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+						FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+						ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers
+						ON  weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						INNER JOIN weberp_currencies
+						ON weberp_suppliers.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_purchorderdetails.completed=0
+						AND orddate>='" . $DateFrom . "'
+						AND orddate<='" . $DateTo . "'
+						AND weberp_purchorders.supplierno='" . $SelectedSupplier . "'
+						" . $WhereStockLocation  
+						 . $StatusCriteria . "
+						GROUP BY weberp_purchorders.orderno ASC,
+							weberp_purchorders.realorderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces";
 			}
 		} //isset($SelectedSupplier)
 		else { //no supplier selected
 			if (!isset($_POST['StockLocation'])) {
-				$_POST['StockLocation'] = $_SESSION['UserStockLocation'];
-			} //!isset($_POST['StockLocation'])
-			if (isset($SelectedStockItem) and isset($_POST['StockLocation'])) {
-				$SQL = "SELECT purchorders.realorderno,
-							purchorders.orderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.deliverydate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces AS currdecimalplaces,
-							SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-						FROM purchorders INNER JOIN purchorderdetails
-						ON purchorders.orderno = purchorderdetails.orderno
-						INNER JOIN suppliers
-						ON  purchorders.supplierno = suppliers.supplierid
-						INNER JOIN currencies
-						ON suppliers.currcode=currencies.currabrev
-						WHERE purchorderdetails.completed=0
-						AND purchorderdetails.itemcode='" . $SelectedStockItem . "'
-						AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
-						" . $StatusCriteria . "
-						GROUP BY purchorders.orderno ASC,
-							purchorders.realorderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces";
-			} //isset($SelectedStockItem) and isset($_POST['StockLocation'])
-			else {
-				$SQL = "SELECT purchorders.realorderno,
-							purchorders.orderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.deliverydate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces AS currdecimalplaces,
-							SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
-						FROM purchorders INNER JOIN purchorderdetails
-						ON purchorders.orderno = purchorderdetails.orderno
-						INNER JOIN suppliers
-						ON  purchorders.supplierno = suppliers.supplierid
-						INNER JOIN currencies
-						ON suppliers.currcode=currencies.currabrev
-						WHERE purchorderdetails.completed=0
-						AND purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'
-						" . $StatusCriteria . "
-						GROUP BY purchorders.orderno ASC,
-							purchorders.realorderno,
-							suppliers.suppname,
-							purchorders.orddate,
-							purchorders.status,
-							purchorders.initiator,
-							purchorders.requisitionno,
-							purchorders.allowprint,
-							suppliers.currcode,
-							currencies.decimalplaces";
+				if (isset($UserLocations) AND isset($LocQty) AND $UserLocations == $LocQty) {
+					$WhereStockLocation = " ";
+					$_POST['StockLocation'] = 'ALLLOC';
+				} else {
+					$_POST['StockLocation'] = $_SESSION['UserStockLocation'];
+					$WhereStockLocation = " AND weberp_purchorders.intostocklocation ='" . $_POST['StockLocation'] . "' ";
+				}
+			} else {
+				if ($_POST['StockLocation'] == 'ALLLOC'){
+					$WhereStockLocation = ' ';
+				} else {
+					$WhereStockLocation = " AND weberp_purchorders.intostocklocation = '" . $_POST['StockLocation'] . "'";
+				}
+			}
+			if (isset($SelectedStockItem) AND isset($_POST['StockLocation'])) {
+				$SQL = "SELECT weberp_purchorders.realorderno,
+							weberp_purchorders.orderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.deliverydate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							group_concat(CASE WHEN quantityord>quantityrecd THEN CONCAT(itemcode,'--',round(quantityord-quantityrecd)) ELSE '' END) as bal,
+							SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+						FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+						ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers
+						ON  weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						INNER JOIN weberp_currencies
+						ON weberp_suppliers.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_purchorderdetails.completed=0
+						AND orddate>='" . $DateFrom . "'
+						AND orddate<='" . $DateTo . "'
+						AND weberp_purchorderdetails.itemcode='" . $SelectedStockItem . "'
+						" . $WhereStockLocation . 
+						 $StatusCriteria . "
+						GROUP BY weberp_purchorders.orderno ASC,
+							weberp_purchorders.realorderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces";
+			} else {
+				$SQL = "SELECT weberp_purchorders.realorderno,
+							weberp_purchorders.orderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.deliverydate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces AS currdecimalplaces,
+							group_concat(CASE WHEN quantityord>quantityrecd THEN CONCAT(itemcode,'--',round(quantityord-quantityrecd)) ELSE '' END) as bal,
+							SUM(weberp_purchorderdetails.unitprice*weberp_purchorderdetails.quantityord) AS ordervalue
+						FROM weberp_purchorders INNER JOIN weberp_purchorderdetails
+						ON weberp_purchorders.orderno = weberp_purchorderdetails.orderno
+						INNER JOIN weberp_suppliers
+						ON  weberp_purchorders.supplierno = weberp_suppliers.supplierid
+						INNER JOIN weberp_currencies
+						ON weberp_suppliers.currcode=weberp_currencies.currabrev
+						INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_purchorders.intostocklocation AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+						WHERE weberp_purchorderdetails.completed=0
+						AND orddate>='" . $DateFrom . "'
+						AND orddate<='" . $DateTo . "'
+						" . $WhereStockLocation .  
+						  $StatusCriteria . "
+						GROUP BY weberp_purchorders.orderno ASC,
+							weberp_purchorders.realorderno,
+							weberp_suppliers.suppname,
+							weberp_purchorders.orddate,
+							weberp_purchorders.status,
+							weberp_purchorders.initiator,
+							weberp_purchorders.requisitionno,
+							weberp_purchorders.allowprint,
+							weberp_suppliers.currcode,
+							weberp_currencies.decimalplaces";
 			}
 		} //end selected supplier
 	} //end not order number selected
 
 	$ErrMsg = _('No orders were returned by the SQL because');
-	$PurchOrdersResult = DB_query($SQL, $db, $ErrMsg);
+	$PurchOrdersResult = DB_query($SQL, $ErrMsg);
 
 	/*show a table of the orders returned by the SQL */
 
 	echo '<table cellpadding="2" width="97%" class="selection">';
 
-
+	if (isset($_POST['PODetails'])) {
+		$BalHead = '<th class="ascending">' . _('Balance') .' (' . _('Stock ID') . '--' . _('Quantity') . ' )</th>';
+	} else {
+		$BalHead = '';
+	}
 	echo '<tr>
-			<th class="SortableColumn" onclick="SortSelect(this)">' . _('Order #') . '</th>
-			<th class="SortableColumn" onclick="SortSelect(this)">' . _('Order Date') . '</th>
-			<th class="SortableColumn" onclick="SortSelect(this)">' . _('Delivery Date') . '</th>
-			<th class="SortableColumn" onclick="SortSelect(this)">' . _('Initiated by') . '</th>
-			<th class="SortableColumn" onclick="SortSelect(this)">' . _('Supplier') . '</th>
-			<th>' . _('Currency') . '</th>';
+			<th class="ascending">' . _('Order #') . '</th>
+			<th class="ascending">' . _('Order Date') . '</th>
+			<th class="ascending">' . _('Delivery Date') . '</th>
+			<th class="ascending">' . _('Initiated by') . '</th>
+			<th class="ascending">' . _('Supplier') . '</th>
+			' . $BalHead . '
+			<th class="ascending">' . _('Currency') . '</th>';
 
-	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) or !isset($PricesSecurity)) {
-		echo '<th>' . _('Order Total') . '</th>';
-	} //in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) or !isset($PricesSecurity)
-	echo '<th>' . _('Status') . '</th>
+	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
+		echo '<th class="ascending">' . _('Order Total') . '</th>';
+	}
+	echo '<th class="ascending">' . _('Status') . '</th>
 			<th>' . _('Print') . '</th>
 			<th>' . _('Receive') . '</th>
 		</tr>';
 	$j = 1;
 	$k = 0; //row colour counter
 	while ($myrow = DB_fetch_array($PurchOrdersResult)) {
+		$Bal = '';
+		if (isset($_POST['PODetails'])) {
+			//lets retrieve the PO balance here to make it a standard sql query.
+			$BalSql = "SELECT itemcode, quantityord - quantityrecd as balance FROM weberp_purchorderdetails WHERE orderno = '" . $myrow['orderno'] . "'";
+			$ErrMsg = _('Failed to retrieve purchorder details');
+			$BalResult  = DB_query($BalSql,$ErrMsg);
+			if (DB_num_rows($BalResult)>0) {
+				while ($BalRow = DB_fetch_array($BalResult)) {
+					$Bal .= '<br/>' . $BalRow['itemcode'] . ' -- ' . $BalRow['balance'];
+				}
+			}
+		}
+		if (isset($_POST['PODetails'])) {
+			$BalRow = '<td width="250" style="word-break:break-all">' . $Bal . '</td>';
+		} else {
+			$BalRow = '';
+		}
+
 		if ($k == 1) {
 			/*alternate bgcolour of row for highlighting */
 			echo '<tr class="EvenTableRows">';
@@ -532,21 +637,17 @@ else if (isset($_POST['SearchOrders'])) {
 		$ModifyPage = $RootPath . '/PO_Header.php?ModifyOrderNumber=' . $myrow['orderno'];
 		if ($myrow['status'] == 'Printed') {
 			$ReceiveOrder = '<a href="' . $RootPath . '/GoodsReceived.php?PONumber=' . $myrow['orderno'] . '">' . _('Receive') . '</a>';
-		} //$myrow['status'] == 'Printed'
-		else {
+		} else {
 			$ReceiveOrder = '';
 		}
-		if ($myrow['status'] == 'Authorised' and $myrow['allowprint'] == 1) {
+		if ($myrow['status'] == 'Authorised' AND $myrow['allowprint'] == 1) {
 			$PrintPurchOrder = '<a target="_blank" href="' . $RootPath . '/PO_PDFPurchOrder.php?OrderNo=' . $myrow['orderno'] . '">' . _('Print') . '</a>';
-		} //$myrow['status'] == 'Authorised' and $myrow['allowprint'] == 1
-		elseif ($myrow['status'] == 'Authorisied' and $myrow['allowprint'] == 0) {
+		} elseif ($myrow['status'] == 'Authorisied' AND $myrow['allowprint'] == 0) {
 			$PrintPurchOrder = _('Printed');
-		} //$myrow['status'] == 'Authorisied' and $myrow['allowprint'] == 0
-			elseif ($myrow['status'] == 'Printed') {
+		} elseif ($myrow['status'] == 'Printed') {
 			$PrintPurchOrder = '<a target="_blank" href="' . $RootPath . '/PO_PDFPurchOrder.php?OrderNo=' . $myrow['orderno'] . '&amp;realorderno=' . $myrow['realorderno'] . '&amp;ViewingOnly=2">
 				' . _('Print Copy') . '</a>';
-		} //$myrow['status'] == 'Printed'
-		else {
+		} else {
 			$PrintPurchOrder = _('N/A');
 		}
 
@@ -554,8 +655,8 @@ else if (isset($_POST['SearchOrders'])) {
 		$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
 		$FormatedDeliveryDate = ConvertSQLDate($myrow['deliverydate']);
 		$FormatedOrderValue = locale_number_format($myrow['ordervalue'], $myrow['currdecimalplaces']);
-		$sql = "SELECT realname FROM www_users WHERE userid='" . $myrow['initiator'] . "'";
-		$UserResult = DB_query($sql, $db);
+		$sql = "SELECT realname FROM weberp_www_users WHERE userid='" . $myrow['initiator'] . "'";
+		$UserResult = DB_query($sql);
 		$MyUserRow = DB_fetch_array($UserResult);
 		$InitiatorName = $MyUserRow['realname'];
 
@@ -564,21 +665,20 @@ else if (isset($_POST['SearchOrders'])) {
 			<td>' . $FormatedDeliveryDate . '</td>
 			<td>' . $InitiatorName . '</td>
 			<td>' . $myrow['suppname'] . '</td>
+			' . $BalRow . '
 			<td>' . $myrow['currcode'] . '</td>';
-		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) or !isset($PricesSecurity)) {
+		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 			echo '<td class="number">' . $FormatedOrderValue . '</td>';
-		} //in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) or !isset($PricesSecurity)
+		}
 		echo '<td>' . _($myrow['status']) . '</td>
-					<td>' . $PrintPurchOrder . '</td>
-					<td>' . $ReceiveOrder . '</td>
-				</tr>';
-		//end of page full new headings if
+				<td>' . $PrintPurchOrder . '</td>
+				<td>' . $ReceiveOrder . '</td>
+			</tr>';
 	} //end of while loop around purchase orders retrieved
 
 	echo '</table>';
 }
-echo '<script  type="text/javascript">defaultControl(document.forms[0].StockCode);</script>';
 echo '</div>
-	  </form>';
+      </form>';
 include('includes/footer.inc');
 ?>

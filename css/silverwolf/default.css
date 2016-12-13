@@ -1,588 +1,522 @@
-@font-face {
-font-family:Ubuntu;
-font-style:normal;
-font-weight:400;
-src:local(Ubuntu), url(http://themes.googleusercontent.com/static/fonts/ubuntu/v4/_xyN3apAT_yRRDeqB3sPRg.woff) format(woff);
+/* $Id: default.css 7627 2016-09-19 03:55:49Z rchacon $*/
+/***
+
+New "SilverWolf" Theme for WebERP
+
+by Hindra Joshua
+
+Based from the previous theme "SilverWolf"
+Credits to the original authors.
+
+NOTE:
+This CSS is not yet optimized. Some styles maybe 'redundant' or 'unused',
+but for the obvious one it will be cleaned up.
+To optimized the rest we should examined the whole codes! That would be for
+the next project. :)
+
+***/
+
+button img {
+	/* Describes how button image should be displayed. */
+	height:21px;
+	width:21px;
 }
 
-body {
-font-family:"Ubuntu, Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
-font-weight:400;
-background:url(images/stripe.png) #FFF;
-margin:0;
-padding:5px;
+
+body{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:10pt;
+	background:url(images/stripe.png) white;
+	margin:0;
+	padding:5px;
 }
 
-input,textarea,select {
-font-family:inherit;
-font-size:inherit;
+a{
+	color:#5B5B68;
+	text-decoration:none;
 }
-
-div.container {
-width:100%;
-padding-top:1%;
+a:hover{
+	color:#000;
+	text-decoration:underline;
 }
-
-div.box {
-box-sizing:border-box;
--moz-box-sizing:border-box;
--webkit-box-sizing:border-box;
-width:32%;
-float:left;
-margin-left:1%;
-border:1px solid;
-border-radius:5px;
+form{
 }
-
-div.box_header {
-width:98%;
-border:solid 1px;
-border-radius:7px;
-font-size:120%;
-font-weight:700;
-color:#727277;
-margin:1%;
+img{
+	border:none;
+	vertical-align:middle;
 }
-
-label.box {
-clear:left;
-float:left;
-width:48%;
-text-align:left;
-padding-left:1%;
+p.good{
+	font-weight:bold;
+	color:green;
 }
-
-select.box {
-width:98%;
-background:#E0E0E2;
-border-radius:7px;
-margin:1%;
+p.bad{
+	font-weight:bold;
+	color:red;
 }
-
-#mask {
-display:none;
-position:fixed;
-top:0;
-right:0;
-bottom:0;
-left:0;
-background-image:url(images/mask.png);
-z-index:2;
+table{
+	width:auto; /* automatic width */
+	max-width:90%;
+	margin:0 auto;
+	margin-bottom:10px;
 }
-
-#dialog {
-min-width:10%;
-max-width:50%;
-display:inline-block;
-background:#fff;
-z-index:99;
-border:solid #000 1px;
-border-radius:7px;
-position:fixed;
-top:50%;
-left:50%;
-margin-top:-9em;
-margin-left:-15em;
-box-shadow:0 0 5px #16187A;
-padding:2px 2px 5px;
+table.selection{
 }
-
-#dialog_header {
-background:lightgray;
-width:auto;
-border-radius:4px;
-font-size:130%;
-text-align:left;
-padding-left:5px;
-color:#000;
-margin:2px;
-}
-
-#dialog_main {
-background:#FFF;
-width:auto;
-border-radius:4px;
-text-align:left;
-padding-left:5px;
-padding-right:5px;
-font-style:italic;
-font-size:130%;
-color:#565141;
-margin:3% 2px;
-}
-
-input.okButton {
-display:inline-block;
-background-color:lightgray;
-border:thin;
-color:#000;
-border-radius:3px;
-cursor:pointer;
-font-style:normal;
-box-shadow:2px 2px 3px;
-width:20%;
-border-color:#CCC;
-margin:2px 15px 5px 0;
-padding:2px;
-}
-
-input.okButton:active {
-box-shadow:0 0 0;
-border:thin;
-border-color:#CCC;
-padding:2px;
-}
-
-input.okButton:hover {
-background-color:lightgray;
-box-shadow:2px 2px 3px;
-border:thin;
-border-color:#CCC;
-padding:2px;
-}
-
-input:required,select:required,textarea:required {
-background-color:#BFBFBF;
-}
-
-a {
-color:#5B5B68;
-text-decoration:none;
-}
-
-img {
-border:none;
-vertical-align:middle;
-margin-left: 4px;
-}
-
-.PrintIcon {
-float:right;
-cursor:pointer;
-}
-
-p.good {
-font-weight:700;
-color:green;
-}
-
-p.bad {
-font-weight:700;
-color:red;
-}
-
-p.page_title_text {
-background:#DCDCDC;
-font-size:120%;
-text-align:center;
-margin:10px auto;
-padding:5px;
-}
-
-table {
-width:auto;
-max-width:90%;
-margin:0 auto 10px;
-}
-
-table.selection {
-border:solid 1px #B8BAC5;
-border-radius:5px;
-}
-
 th {
-background-color:#C3C3C3;
-color:#300;
-text-align:center;
-vertical-align:middle;
+	background-color:#C3C3C3;
+	color:#300;
+	font-size:100%;
+	font-weight:normal;
+	text-align:center;
+	vertical-align:middle;
+}
+th.number{
+	background-color:#CCCCE5; /* Should be #C3C3C3 ? */
+	text-align:right;
+}
+th.text{
+	background-color:#CCCCE5; /* Should be #C3C3C3 ? */
+	text-align:left;
+}
+th.ascending {
+  cursor: s-resize;
+}
+th.descending {
+  cursor: n-resize;
+}
+th:after {
+	content: "";
+	float: right;
+	margin-top: 7px;
+	visibility: hidden;
+}
+th.ascending:after {
+	border-width: 0 4px 4px;
+	border-style: solid;
+	border-color: #000 transparent;
+	visibility: visible;
+}
+th.descending:after {
+	border-bottom: none;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid #000;
+	visibility: visible;
+}
+td{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:100%;
+	text-align:left;
+}
+td.select{
+	background-color:#eee;
+}
+.centre{
+	margin:0 auto 10px;
+	text-align:center;
 }
 
-th.number {
-background-color:#cccce5;
-color:#300;
-text-align:right;
-vertical-align:middle;
+input{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:100%;
+	background-color:#e3e1e1;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+input:hover{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:100%;
+	background-color:#e3e5f5;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+input.image{
+	border-width:0px;
+	background-color:transparent;
+}
+input.inputerror, input.error, select.error, select.selecterror, label.error {
+	color:red;
+	border: 2px solid red;
+}
+input:required, select:required, textarea:required {
+	background-color:lightyellow;
+}
+select{
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+	font-size:100%;
+}
+.EvenTableRows{
+	background-color:#ccc;
+}
+.OddTableRows{
+	background-color:#eee;
 }
 
-th.SortableColumn {
-cursor:s-resize;
+div.error{
+	background-color:#fddbdb;
+	color:red;
+	border:1px solid red;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.warn{
+	background-color:#f5dbfd;
+	color:maroon;
+	border:1px solid maroon;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.success{
+	background-color:#b9ecb4;
+	color:#006400;/* darkgreen is not a w3c css valid color */
+	border:1px solid #006400;/* darkgreen is not a w3c css valid color */
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.info{
+	background-color:#c7ccf6;
+	color:navy;
+	border:1px solid navy;
+	width:80%;
+	text-align:center;
+	margin:0 auto;
+}
+div.page_help_text{ /* many */
+	background-color:#ccc;/* lightgray is not a w3c css valid color #ccc */
+	border:#a52a2a 1px solid;
+	border-radius: 5px;
+	padding-top:3px;/* 2px in merge */
+	padding-bottom:3px; /* 2px in merge */
+	padding-left:3px;   /* 10px in merge */
+	z-index:1;
+	width:50%; /* 80% in merge */
+	float:none;
+	visibility:visible;
+	margin:0 auto;
+	position:static;
+	font-family:Verdana, Arial, Helvetica;
+	font-weight:normal;
+	font-size:100%;
+	color:black;
+	text-align:center;
 }
 
-td {
-text-align:left;
+.dpTbl{
+	border:solid navy 1px;
 }
-
-.centre {
-text-align:center;
-margin:0 auto 10px;
+.dpTD{
+	border:0;
+	width:20px;
+	background-color:#eee;
+	text-align:right;
+	cursor:pointer;
 }
-
-input:hover {
-background-color:#e3e5f5;
-border-color:gray;
-border-style:solid;
-border-width:1px;
+.dpDayHighlight{
+	border:0;
+	width:20px;
+	background-color:yellow;
+	text-align:right;
+	cursor:pointer;
 }
-
-input.image {
-background-color:transparent;
-border-width:0;
-}
-
-input.image:hover {
-background-color:transparent;
-}
-
-select.inputerror {
-background:#FFA4A4;
-}
-
-.EvenTableRows {
-background-color:#ccc;
-}
-
-div.error {
-background-color:#fddbdb;
-color:red;
-border:1px solid red;
-width:80%;
-text-align:center;
-margin:0 auto;
-}
-
-div.warn {
-background-color:#f5dbfd;
-color:maroon;
-border:1px solid maroon;
-width:80%;
-text-align:center;
-margin:0 auto;
-}
-
-div.success {
-background-color:#b9ecb4;
-color:#006400;
-border:1px solid #006400;
-width:80%;
-text-align:center;
-margin:0 auto;
-}
-
-div.info {
-background-color:#c7ccf6;
-color:navy;
-border:1px solid navy;
-width:80%;
-text-align:center;
-margin:0 auto;
-}
-
-div.page_help_text {
-background-color:#ccc;
-border:#a52a2a 1px solid;
-border-radius:5px;
-padding-top:3px;
-padding-bottom:3px;
-padding-left:3px;
-z-index:1;
-width:50%;
-float:none;
-visibility:visible;
-position:static;
-color:#000;
-text-align:center;
-margin:0 auto;
-}
-
-.dpTbl {
-border:solid navy 1px;
-}
-
-.dpTD {
-border:0;
-width:20px;
-background-color:#eee;
-text-align:right;
-cursor:pointer;
-}
-
-.dpDayHighlight {
-border:0;
-width:20px;
-background-color:#FF0;
-text-align:right;
-cursor:pointer;
-}
-
-.dpTDHover {
-border:0;
-width:20px;
-background-color:#ccc;
-text-align:right;
-cursor:pointer;
+.dpTDHover{
+	border:0;
+	width:20px;
+	background-color:#ccc;
+	text-align:right;
+	cursor:pointer;
 }
 
 .table1 {
-width:90%;
-border:0 0 2px 2px #222 solid;
-background:#eee;
-margin:0 auto;
+	width:90%;
+	background: #eee;
+	border: 0px 0px 2px 2px #222 solid;
+	background: #eee;
+	margin: 0 auto;
 }
-
-.tableheader {
-background-color:#cccce5;
-color:#300;
+.tableheader{
+	font-weight:normal;
+	background-color:#cccce5;
+	color:#300;
 }
-
-.notavailable {
-font-weight:lighter;
-font-style:italic;
-color:#555;
+.notavailable{ /* WorkOrderIssue.php, WorkOrderStatus.php  */
+	font-weight:lighter;/* light is not a w3c css valid font weight */
+	font-style:italic;
+	color:#555;
 }
-
-.label {
-font-weight:700;
-font-style:normal;
-color:#000;
-background-color:#ccc;
+.label{ /*WorkOrderCosting.php, WorkOrderEntry.php, WorkOrderIssue.php, WorkOrderStatus.php */
+	font-weight:bold;
+	font-style:normal;
+	font-size:120%;
+	color:black;
+	background-color:#ccc;
 }
-
 .table_index {
-background-color:#F1FFDD;
+	background-color: #F1FFDD;
 }
 
-.header {
-background-image:url();
-background-repeat:no-repeat;
-background-attachment:fixed;
-border:none;
-margin:0;
-padding:0;
+.header{ /* used in \includes\InputSerialItemsFile.php */
+	background-image:url("");
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+	border:none;
+	margin:0px;
+	padding:0px;
+}
+input.inputerror{ /* many * .php */
+	background-color:#fddbdb;
+}
+textarea{
+	font-size:100%;
+	background-color:#e3e1e1;
+	border-width:1px;
+	border-bottom-color:gray;
+	border-bottom-style:solid;
+	border-top-color:gray;
+	border-top-style:solid;
+	border-left-color:gray;
+	border-left-style:solid;
+	border-right-color:gray;
+	border-right-style:solid;
+}
+select.selecterror{ /*AccountGroups.php, BankAccounts.php, BOMs.php, Stocks.php */
+	background-color:#fddbdb;
 }
 
-.OsRow {
-background-color:#234567;
-color:#FFF;
+.OsRow{ /* PO_OrderDetails.php */
+	background-color:#234567;
+	color:white;
 }
 
-#HeaderDiv {
-overflow:hidden;
-background:url(images/menu_bg_grey.png) repeat-x #cfcfcf;
-color:gray;
-border:thin solid lightgray;
-padding:3px;
+/*** CANVAS ***/
+
+#CanvasDiv{
 }
 
-#AppInfoDiv {
-float:left;
+/*** HEADER ***/
+
+#HeaderDiv{
+	overflow:hidden; /* REQUIRED:height according to items contained */
+	background:url(images/menu_bg_grey.png) repeat-x #cfcfcf;
+	color:gray;
+	padding:3px;
+	border:thin solid lightgray;
+}
+#HeaderWrapDiv{
 }
 
-#AppInfoUserDiv a {
-color:gray;
+/*** HEADER - APP INFO ***/
+
+#AppInfoDiv{
+	float:left; /* REQUIRED:to the left */
+}
+#AppInfoDiv img{
+	vertical-align:middle; /* center image and text vertically */
+}
+#AppInfoCompanyDiv{
+	display:table-cell; /* REQUIRED:as a cell */
+}
+#AppInfoUserDiv{
+	display:table-cell; /* REQUIRED:as a cell */
+}
+#AppInfoUserDiv a{
+	color:gray;
+}
+#AppInfoUserDiv a:hover{
+	color:black;
+	text-decoration:underline;
+}
+#AppInfoModuleDiv{
 }
 
-#QuickMenuDiv {
-float:right;
-margin-top:2px;
+/*** HEADER - QUICK MENU ***/
+
+#QuickMenuDiv{
+	float:right; /* to the right side  */
+	margin-top:2px;
+}
+#QuickMenuDiv ul{
+	list-style:none; /* hide the bullets */
+}
+#QuickMenuDiv li{
+	display:inline; /* items are inline */
 }
 
-#QuickMenuDiv ul {
-list-style:none;
+/*** links as buttons!!! clicking anywhere in the button will activate
+ the link!!! ***HJ***/
+
+#QuickMenuDiv li a{
+	padding:9px; /* links as button */
+	border:thin outset lightgray; /* un-pressed state */
+}
+#QuickMenuDiv li a:hover{
+	padding:9px; /* links as button */
+	border:thin inset lightgray; /* pressed state */
+	text-decoration:none; /* no underline */
+	color:black;
 }
 
-#QuickMenuDiv li {
-display:inline;
+/*** BODY ***/
+
+#BodyDiv{
+	clear:both; /* REQUIRED */
+	overflow:hidden; /* REQUIRED */
+	color:black;
+	background:whitesmoke;
+	padding-bottom:5px;
+	text-align:center;
 }
 
-#QuickMenuDiv li a {
-border:thin outset lightgray;
-padding:9px;
+
+/*** BODY - MAIN MENU ***/
+
+#MainMenuDiv{
+	float:left; /* REQUIRED:to the left side */
+	white-space:nowrap; /* don't break text */
+	text-align:center;
+	width:12%;
+	margin-top:3px;
+}
+#MainMenuDiv ul{
+	padding:0; /* REQUIRED:remove extra gaps (ex-bullets) */
+	margin:0 3px 0 0;
+	border:thin outset silver;
+}
+#MainMenuDiv li{
+	list-style:none; /* REQUIRED */
+	padding:0; /* REQUIRED */
+}
+#MainMenuDiv li a,
+#MainMenuDiv li a:hover,
+#MainMenuDiv li a:active,
+#MainMenuDiv .main_menu_selected a,
+#MainMenuDiv .main_menu_selected a:hover{ /* common styles */
+	display:block; /* REQUIRED */
+	padding:3px;
+	border:thin outset silver;
+	color:black;
+	text-decoration:none;
+	background:silver;
+}
+#MainMenuDiv li a:hover{ /* link as button!!! pressed state */
+	border:thin inset silver;
+}
+#MainMenuDiv .main_menu_selected a,#MainMenuDiv .main_menu_selected a:hover{ /* the selected button */
+	border:thin inset silver;
+	background:dimgray;
+	color:white;
 }
 
-#QuickMenuDiv li a:hover {
-border:thin inset lightgray;
-text-decoration:none;
-color:#000;
-padding:9px;
+/*** BODY - SUB MENU ***/
+
+#SubMenuDiv{
+	display:table;
+	float:right;
+	overflow:hidden;
+	width:88%;
+	margin-top:3px;
+	text-align:left;
+}
+#SubMenuDiv ul{
+	list-style-type:none; /* REQUIRED:hide bullets */
+	padding:0; /* REQUIRED:remove extra gaps (ex-bullets) */
+	margin:0;
+	background:gainsboro;
+	border:thin outset gainsboro;
+	margin-left:3px;
+}
+#SubMenuDiv li{
+	list-style:none; /* REQUIRED:hide the bullets */
+	padding:2px;
+}
+.menu_group_headers{
+	background:silver;
+	outline:thin outset silver;
+	text-align:center;
+	color:black;
 }
 
-#BodyDiv {
-clear:both;
-overflow:hidden;
-color:#000;
-background:#F5F5F5;
-padding-bottom:5px;
-text-align:center;
+#TransactionsDiv,#InquiriesDiv,#MaintenanceDiv{
+	display:table-cell;
+}
+#InquiriesDiv div{ /* default div, used for custom report header */
+	background:silver;
+	color:black;
+	padding:2px;
+}
+.menu_group_item p{
+	color:#00f; /* This is the color for bullets, I like it to be the same as the anchor color, but it's up to you */
+	text-indent:-10px; /* this makes the bullet to appear as the li tag previously used */
+	margin:0 0 0 12px; /* One thing that I didnÃÂÃÂ´t like of the li was that it had no left margin applied */
 }
 
-#MainMenuDiv {
-float:left;
-white-space:nowrap;
-text-align:center;
-width:12%;
-margin-top:3px;
-}
+/*** FOOTER ***/
 
-#MainMenuDiv ul {
-border:thin outset silver;
-margin:0 3px 0 0;
-padding:0;
+#FooterDiv{
+	clear:both; /* REQUIRED */
+	overflow:hidden;
+	color:gray;
+	background:url(images/menu_bg_grey.png) repeat-x #cfcfcf;
+	border:thin solid lightgray;
 }
-
-#MainMenuDiv li {
-list-style:none;
-padding:0;
+#FooterWrapDiv{
+	overflow:hidden;
+	padding:3px;
 }
-
-#MainMenuDiv li a,#MainMenuDiv li a:hover,#MainMenuDiv li a:active,#MainMenuDiv .main_menu_selected a,#MainMenuDiv .main_menu_selected a:hover {
-display:block;
-border:thin outset silver;
-color:#000;
-text-decoration:none;
-background:silver;
-padding:3px;
+#FooterLogoDiv{
+	float:left;
+	background:white;
+	border-radius:8px;
+	padding:3px;
+	margin-left:44%; /* to the center (approx) */
 }
-
-#MainMenuDiv li a:hover {
-border:thin inset silver;
+#FooterVersionDiv{
+	clear:both; /* below the logo */
+	text-align:center;
 }
-
-#MainMenuDiv .main_menu_selected a,#MainMenuDiv .main_menu_selected a:hover {
-border:thin inset silver;
-background:#696969;
-color:#FFF;
+#FooterTimeDiv{
+	display:block;
+	float:right;
+	line-height:2.8em; /* Center the text vertically.
+						  [vertical-align has no effect on text alone] */
 }
-
-#SubMenuDiv {
-display:table;
-float:right;
-overflow:hidden;
-width:88%;
-margin-top:3px;
-text-align:left;
+#Report {
+	/* Division id for reports. */}
+#Report table {
+	/* Body of a report formatted with table tag. */
 }
-
-#SubMenuDiv ul {
-list-style-type:none;
-background:#DCDCDC;
-border:thin outset #DCDCDC;
-margin:0 0 0 3px;
-padding:0;
+.centre {
+	text-align:center;
+	/* Class selector to horizontal align a text (centre) in an element. */
 }
-
-#SubMenuDiv li {
-list-style:none;
-padding:2px;
+.number {
+	text-align:right;
+	/* Class selector to horizontal align a number (right) in an element. */
 }
-
-.menu_group_headers {
-background:silver;
-outline:thin outset silver;
-text-align:center;
-color:#000;
+.text {
+	text-align:left;
+	/* Class selector to horizontal align a text (left) in an element. */
 }
-
-#TransactionsDiv,#InquiriesDiv,#MaintenanceDiv {
-width:33%;
-display:table-cell;
+.page_title_text {
+	background:gainsboro;
+	margin:10px auto;
+	padding:5px;
+	text-align:center;
+	/* Class selector for page title. */
 }
-
-#InquiriesDiv div {
-width:33%;
-background:silver;
-color:#000;
-padding:2px;
-}
-
-.menu_group_item p {
-color:#00f;
-text-indent:-10px;
-margin:0 0 0 12px;
-}
-
-#FooterDiv {
-clear:both;
-overflow:hidden;
-color:gray;
-background:url(images/menu_bg_grey.png) repeat-x #cfcfcf;
-border:thin solid lightgray;
-}
-
-#FooterWrapDiv {
-overflow:hidden;
-padding:3px;
-}
-
-#FooterLogoDiv {
-float:left;
-background:#FFF;
-border-radius:8px 8px 8px 8px;
-margin-left:47%;
-padding:3px;
-}
-
-#FooterVersionDiv {
-clear:both;
-float:left;
-margin-left:47%;
-}
-
-#FooterTimeDiv {
-float:right;
-margin-top:-22px;
-}
-
-#dialog_buttons,td.number,input.number,input.integer {
-text-align:right;
-}
-
-a:hover,#AppInfoUserDiv a:hover {
-color:#000;
-text-decoration:underline;
-}
-
-td.select,.OddTableRows {
-background-color:#eee;
-}
-
-input,textarea {
-background-color:#e3e1e1;
-border-color:gray;
-border-style:solid;
-border-width:1px;
-}
-
-input.inputerror,select.selecterror {
-background-color:#fddbdb;
-}
-
-#AppInfoDiv img,#FooterLogoDiv img {
-vertical-align:middle;
-}
-
-#AppInfoCompanyDiv,#AppInfoUserDiv {
-display:table-cell;
-}
-
-#favourites {
-background:#B6B6B6;
-color:#3C434D;
-font-size: 150%;
-padding-top: 2px;
-padding-bottom: 2px;
-padding-left: 7px;
-padding-right: 7px;
-border-radius: 15px;
-border: solid 1px #000;
-margin: 2px;
-}
-
-#favourites:hover {
-box-shadow:2px 2px 3px #86C3D7, -2px -2px 3px #383878;
-cursor:pointer;
-}
-
-#PlusMinus:hover {
-box-shadow:2px 2px 3px #86C3D7, -2px -2px 3px #383878;
-cursor:pointer;
-}
+/* END Style for all. ********************************************************/

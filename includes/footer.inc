@@ -1,66 +1,23 @@
 <?php
-echo '<div id="mask">
-				<div id="dialog" name="dialog"></div>
-			</div>';
 
+/* $Id: footer.inc 6594 2014-03-02 23:15:39Z turbopt $*/
 
-if (isset($Messages) and count($Messages) > 0) {
-	foreach ($Messages as $Message) {
-		$Prefix = '';
-		switch ($Message[1]) {
-			case 'error':
-				$Class = 'error';
-				$Prefix = $Prefix ? $Prefix : _('ERROR') . ' ' . _('Report');
-				if (isset($_SESSION['LogSeverity']) and $_SESSION['LogSeverity'] > 3) {
-					fwrite($LogFile, date('Y-m-d h-m-s') . ',' . $Type . ',' . $_SESSION['UserID'] . ',' . trim($Msg, ',') . "\n");
-				}
-				echo '<div class="' . $Class . ' noPrint"><b>' . $Prefix . '</b> : ' . $Message[0] . '</div>';
-				break;
-			case 'warn':
-				$Class = 'warn';
-				$Prefix = $Prefix ? $Prefix : _('WARNING') . ' ' . _('Report');
-				if (isset($_SESSION['LogSeverity']) and $_SESSION['LogSeverity'] > 3) {
-					fwrite($LogFile, date('Y-m-d h-m-s') . ',' . $Type . ',' . $_SESSION['UserID'] . ',' . trim($Msg, ',') . "\n");
-				}
-				echo '<div class="' . $Class . ' noPrint"><b>' . $Prefix . '</b> : ' . $Message[0] . '</div>';
-				break;
-			case 'success':
-				$Class = 'success';
-				$Prefix = $Prefix ? $Prefix : _('SUCCESS') . ' ' . _('Report');
-				if (isset($_SESSION['LogSeverity']) and $_SESSION['LogSeverity'] > 3) {
-					fwrite($LogFile, date('Y-m-d h-m-s') . ',' . $Type . ',' . $_SESSION['UserID'] . ',' . trim($Msg, ',') . "\n");
-				}
-				echo '<div class="' . $Class . ' noPrint"><b>' . $Prefix . '</b> : ' . $Message[0] . '</div>';
-				break;
-			case 'info':
-			default:
-				$Prefix = $Prefix ? $Prefix : _('INFORMATION') . ' ' . _('Message');
-				$Class = 'info';
-				if (isset($_SESSION['LogSeverity']) and $_SESSION['LogSeverity'] > 2) {
-					fwrite($LogFile, date('Y-m-d h-m-s') . ',' . $Type . ',' . $_SESSION['UserID'] . ',' . trim($Msg, ',') . "\n");
-				}
-				echo '<div class="' . $Class . ' noPrint"><b>' . $Prefix . '</b> : ' . $Message[0] . '</div>';
-		}
-	}
-}
-
-echo '<br /></div>'; // BodyWrapDiv
-
+echo '</div>'; // BodyWrapDiv
 echo '</div>'; // BodyDiv
 
-echo '<div id="FooterDiv" class="noPrint">';
+echo '<div id="FooterDiv">';
 echo '<div id="FooterWrapDiv">';
 
 echo '<div id="FooterLogoDiv">';
-echo '<a href="http://www.kwamoja.com" target="_blank"><img src="' . $RootPath . '/' . $_SESSION['LogoFile'] . '" width="120" alt="KwaMoja" title="KwaMoja" /></a>';
-echo '</div>';
-
-echo '<div id="FooterVersionDiv">';
-echo 'KwaMoja ' . _('version') . ' ' . $_SESSION['VersionNumber'];
+	echo '<img src="'. $RootPath . '/' . $_SESSION['LogoFile'] . '" width="120" alt="webERP" title="webERP ' . _('Copyright') . ' &copy; weberp.org - ' . date('Y') . '" />';
 echo '</div>';
 
 echo '<div id="FooterTimeDiv">';
-echo DisplayDateTime();
+	echo DisplayDateTime();
+echo '</div>';
+
+echo '<div id="FooterVersionDiv">';
+	echo 'webERP ' . _('version') . ' ' . $_SESSION['VersionNumber'] . ' ' . _('Copyright') . ' &copy; 2004 - ' . Date('Y'). ' <a target="_blank" href="http://www.weberp.org/weberp/doc/Manual/ManualContributors.html">weberp.org</a>';
 echo '</div>';
 
 echo '</div>'; // FooterWrapDiv

@@ -1,2 +1,2 @@
-USE kwamojademo;
-TRUNCATE TABLE audittrail;
+USE weberpdemo;
+TRUNCATE TABLE weberp_audittrail;

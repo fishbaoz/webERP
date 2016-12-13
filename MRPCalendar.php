@@ -1,8 +1,9 @@
 <?php
 
-/* MRPCalendar.php
- * Maintains the calendar of valid manufacturing dates for MRP
- */
+/* $Id: MRPCalendar.php 6941 2014-10-26 23:18:08Z daintree $ */
+
+// MRPCalendar.php
+// Maintains the calendar of valid manufacturing dates for MRP
 
 include('includes/session.inc');
 $Title = _('MRP Calendar');
@@ -15,22 +16,23 @@ if (isset($_POST['ChangeDate'])){
 	$ChangeDate =trim(mb_strtoupper($_GET['ChangeDate']));
 }
 
-echo '<p class="page_title_text noPrint" >
+echo '<p class="page_title_text">
 		<img src="'.$RootPath.'/css/'.$Theme.'/images/inventory.png" title="' .
 			_('Inventory') . '" alt="" />' . ' ' . $Title . '
 	</p>';
 
 if (isset($_POST['submit'])) {
-	submit($db, $ChangeDate);
+	submit($db,$ChangeDate);
 } elseif (isset($_POST['update'])) {
-	update($db, $ChangeDate);
+	update($db,$ChangeDate);
 } elseif (isset($_POST['ListAll'])) {
 	ShowDays($db);
 } else {
-	ShowInputForm($db, $ChangeDate);
+	ShowInputForm($db,$ChangeDate);
 }
 
-function submit(&$db,&$ChangeDate) {
+function submit(&$db,&$ChangeDate)  //####SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT_SUBMIT####
+{
 
 	//initialize no input errors
 	$InputError = 0;
@@ -68,21 +70,21 @@ function submit(&$db,&$ChangeDate) {
 	}
 
 	 if ($InputError == 1) {
-		ShowInputForm($db, $ChangeDate);
+		ShowInputForm($db,$ChangeDate);
 		return;
 	 }
 
-	$sql = "DROP TABLE IF EXISTS mrpcalendar";
-	$result = DB_query($sql,$db);
+	$sql = "DROP TABLE IF EXISTS weberp_mrpcalendar";
+	$result = DB_query($sql);
 
-	$sql = "CREATE TABLE mrpcalendar (
+	$sql = "CREATE TABLE weberp_mrpcalendar (
 				calendardate date NOT NULL,
 				daynumber int(6) NOT NULL,
 				manufacturingflag smallint(6) NOT NULL default '1',
 				INDEX (daynumber),
 				PRIMARY KEY (calendardate)) DEFAULT CHARSET=utf8";
 	$ErrMsg = _('The SQL to create passbom failed with the message');
-	$result = DB_query($sql,$db,$ErrMsg);
+	$result = DB_query($sql,$ErrMsg);
 
 	$i = 0;
 
@@ -106,70 +108,71 @@ function submit(&$db,&$ChangeDate) {
 			 }
 		 }
 
-		 $sql = "INSERT INTO mrpcalendar (
+		 $sql = "INSERT INTO weberp_mrpcalendar (
 					calendardate,
 					daynumber,
 					manufacturingflag)
 				 VALUES ('" . $DateAdd . "',
 						'1',
 						'" . $ManuFlag . "')";
-		$result = DB_query($sql,$db,$ErrMsg);
+		$result = DB_query($sql,$ErrMsg);
 	}
 
 	// Update daynumber. Set it so non-manufacturing days will have the same daynumber as a valid
 	// manufacturing day that precedes it. That way can read the table by the non-manufacturing day,
 	// subtract the leadtime from the daynumber, and find the valid manufacturing day with that daynumber.
 	$DayNumber = 1;
-	$sql = "SELECT * FROM mrpcalendar
+	$sql = "SELECT * FROM weberp_mrpcalendar
 			ORDER BY calendardate";
-	$result = DB_query($sql,$db,$ErrMsg);
+	$result = DB_query($sql,$ErrMsg);
 	while ($myrow = DB_fetch_array($result)) {
-		if ($myrow['manufacturingflag'] == "1") {
-			$DayNumber++;
-		}
-		$CalDate = $myrow['calendardate'];
-		$sql = "UPDATE mrpcalendar SET daynumber = '" . $DayNumber . "'
+		   if ($myrow['manufacturingflag'] == "1") {
+			   $DayNumber++;
+		   }
+		   $CalDate = $myrow['calendardate'];
+		   $sql = "UPDATE weberp_mrpcalendar SET daynumber = '" . $DayNumber . "'
 					WHERE calendardate = '" . $CalDate . "'";
-		$resultupdate = DB_query($sql,$db,$ErrMsg);
+		   $resultupdate = DB_query($sql,$ErrMsg);
 	}
 	prnMsg(_('The MRP Calendar has been created'),'success');
-	ShowInputForm($db, $ChangeDate);
+	ShowInputForm($db,$ChangeDate);
 
 } // End of function submit()
 
 
-function update(&$db,&$ChangeDate) {
+function update(&$db,&$ChangeDate)  //####UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_UPDATE_####
+{
 // Change manufacturing flag for a date. The value "1" means the date is a manufacturing date.
 // After change the flag, re-calculate the daynumber for all dates.
 
 	$InputError = 0;
 	$CalDate = FormatDateForSQL($ChangeDate);
-	$sql="SELECT COUNT(*) FROM mrpcalendar
+	$sql="SELECT COUNT(*) FROM weberp_mrpcalendar
 		  WHERE calendardate='$CalDate'
 		  GROUP BY calendardate";
-	$result = DB_query($sql,$db);
+	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
-	if ($myrow[0] < 1  or  !Is_Date($ChangeDate))  {
+	if ($myrow[0] < 1  ||  !Is_Date($ChangeDate))  {
 		$InputError = 1;
 		prnMsg(_('Invalid Change Date'),'error');
 	}
 
 	 if ($InputError == 1) {
-		ShowInputForm($db, $ChangeDate);
+		ShowInputForm($db,$ChangeDate);
 		return;
 	 }
 
-	$sql="SELECT mrpcalendar.* FROM mrpcalendar WHERE calendardate='$CalDate'";
-	$result = DB_query($sql,$db);
+	$sql="SELECT weberp_mrpcalendar.* FROM weberp_mrpcalendar WHERE calendardate='$CalDate'";
+	$result = DB_query($sql);
 	$myrow = DB_fetch_row($result);
 	$newmanufacturingflag = 0;
 	if ($myrow[2] == 0) {
 		$newmanufacturingflag = 1;
 	}
-	$sql = "UPDATE mrpcalendar SET manufacturingflag = '".$newmanufacturingflag."'
+	$sql = "UPDATE weberp_mrpcalendar SET manufacturingflag = '".$newmanufacturingflag."'
 			WHERE calendardate = '".$CalDate."'";
 	$ErrMsg = _('Cannot update the MRP Calendar');
-	$resultupdate = DB_query($sql,$db,$ErrMsg);
+	$resultupdate = DB_query($sql,$ErrMsg);
 	prnMsg(_('The MRP calendar record for') . ' ' . $ChangeDate  . ' ' . _('has been updated'),'success');
 	unset ($ChangeDate);
 	ShowInputForm($db,$ChangeDate);
@@ -179,22 +182,22 @@ function update(&$db,&$ChangeDate) {
 	// manufacturing day that precedes it. That way can read the table by the non-manufacturing day,
 	// subtract the leadtime from the daynumber, and find the valid manufacturing day with that daynumber.
 	$DayNumber = 1;
-	$sql = "SELECT * FROM mrpcalendar ORDER BY calendardate";
-	$result = DB_query($sql,$db,$ErrMsg);
+	$sql = "SELECT * FROM weberp_mrpcalendar ORDER BY calendardate";
+	$result = DB_query($sql,$ErrMsg);
 	while ($myrow = DB_fetch_array($result)) {
-		if ($myrow['manufacturingflag'] == '1') {
-			$DayNumber++;
-		}
-		$CalDate = $myrow['calendardate'];
-		$sql = "UPDATE mrpcalendar SET daynumber = '" . $DayNumber . "'
+		   if ($myrow['manufacturingflag'] == '1') {
+			   $DayNumber++;
+		   }
+		   $CalDate = $myrow['calendardate'];
+		   $sql = "UPDATE weberp_mrpcalendar SET daynumber = '" . $DayNumber . "'
 					WHERE calendardate = '" . $CalDate . "'";
-		$resultupdate = DB_query($sql,$db,$ErrMsg);
+		   $resultupdate = DB_query($sql,$ErrMsg);
 	} // End of while
 
 } // End of function update()
 
 
-function ShowDays(&$db) {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_####
+function ShowDays(&$db)  {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_####
 
 // List all records in date range
 	$FromDate = FormatDateForSQL($_POST['FromDate']);
@@ -203,12 +206,12 @@ function ShowDays(&$db) {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_L
 				   daynumber,
 				   manufacturingflag,
 				   DAYNAME(calendardate) as dayname
-			FROM mrpcalendar
+			FROM weberp_mrpcalendar
 			WHERE calendardate >='" . $FromDate . "'
 			AND calendardate <='" . $ToDate . "'";
 
 	$ErrMsg = _('The SQL to find the parts selected failed with the message');
-	$result = DB_query($sql,$db,$ErrMsg);
+	$result = DB_query($sql,$ErrMsg);
 
 	echo '<br />
 		<table class="selection">
@@ -240,7 +243,7 @@ function ShowDays(&$db) {//####LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_LISTALL_L
 } // End of function ShowDays()
 
 
-function ShowInputForm(&$db,&$ChangeDate) {//####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_#####
+function ShowInputForm(&$db,&$ChangeDate)  {//####DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_DISPLAY_#####
 
 // Display form fields. This function is called the first time
 // the page is called, and is also invoked at the end of all of the other functions.
@@ -249,8 +252,8 @@ function ShowInputForm(&$db,&$ChangeDate) {//####DISPLAY_DISPLAY_DISPLAY_DISPLAY
 		$_POST['FromDate']=date($_SESSION['DefaultDateFormat']);
 		$_POST['ToDate']=date($_SESSION['DefaultDateFormat']);
 	}
-	echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post" class="noPrint">
-		  <div>
+	echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
+          <div>
 			<br />
 			<br />';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
@@ -259,44 +262,38 @@ function ShowInputForm(&$db,&$ChangeDate) {//####DISPLAY_DISPLAY_DISPLAY_DISPLAY
 
 	echo '<tr>
 			<td>' . _('From Date') . ':</td>
-			<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] .'" name="FromDate" size="10" required="required" minlength="10" maxlength="10" value="' . $_POST['FromDate'] . '" /></td></tr>
+			<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] .'" name="FromDate" required="required" autofocus="autofocus" size="10" maxlength="10" value="' . $_POST['FromDate'] . '" /></td></tr>
 			<tr><td>' . _('To Date') . ':</td>
-			<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] .'" name="ToDate" size="10" required="required" minlength="10" maxlength="10" value="' . $_POST['ToDate'] . '" /></td>
+			<td><input type="text" class="date" alt="' . $_SESSION['DefaultDateFormat'] .'" name="ToDate" required="required" size="10" maxlength="10" value="' . $_POST['ToDate'] . '" /></td>
 		</tr>
-		<tr>
-			<td></td>
-		</tr>
-		<tr>
-			<td></td>
-		</tr>
-		<tr>
-			<td>'._('Exclude The Following Days').'</td>
-		</tr>
-		<tr>
+		<tr><td></td></tr>
+		<tr><td></td></tr>
+		<tr><td>' . _('Exclude The Following Days') . '</td></tr>
+		 <tr>
 			<td>' . _('Saturday') . ':</td>
 			<td><input type="checkbox" name="Saturday" value="Saturday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Sunday') . ':</td>
 			<td><input type="checkbox" name="Sunday" value="Sunday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Monday') . ':</td>
 			<td><input type="checkbox" name="Monday" value="Monday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Tuesday') . ':</td>
 			<td><input type="checkbox" name="Tuesday" value="Tuesday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Wednesday') . ':</td>
 			<td><input type="checkbox" name="Wednesday" value="Wednesday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Thursday') . ':</td>
 			<td><input type="checkbox" name="Thursday" value="Thursday" /></td>
 		</tr>
-		<tr>
+		 <tr>
 			<td>' . _('Friday') . ':</td>
 			<td><input type="checkbox" name="Friday" value="Friday" /></td>
 		</tr>
@@ -314,13 +311,13 @@ function ShowInputForm(&$db,&$ChangeDate) {//####DISPLAY_DISPLAY_DISPLAY_DISPLAY
 		<table class="selection">
 		<tr>
 			<td>' . _('Change Date Status') . ':</td>
-			<td><input type="text" name="ChangeDate" class="date" alt="' . $_SESSION['DefaultDateFormat'] . '" size="10" minlength="10" maxlength="10" value="' . $_POST['ChangeDate'] . '" /></td>
+			<td><input type="text" name="ChangeDate" class="date" alt="' . $_SESSION['DefaultDateFormat'] . '" size="12" maxlength="12" value="' . $_POST['ChangeDate'] . '" /></td>
 			<td><input type="submit" name="update" value="' . _('Update') . '" /></td>
 		</tr>
 		</table>
 		<br />
 		<br />
-		</div>
+        </div>
 		</form>';
 
 } // End of function ShowInputForm()

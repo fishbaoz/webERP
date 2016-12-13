@@ -1,24 +1,28 @@
 <?php
 
+/* $Id: FixedAssetTransfer.php 6941 2014-10-26 23:18:08Z daintree $*/
+
 include('includes/session.inc');
 
 $Title = _('Change Asset Location');
 
 $ViewTopic = 'FixedAssets';
 $BookMark = 'AssetTransfer';
+
 include('includes/header.inc');
 
-echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>';
+echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/magnifier.png" title="' . _('Search') .
+		'" alt="" />' . ' ' . $Title . '</p>';
 
 foreach ($_POST as $AssetToMove => $Value) { //Value is not used?
-	if (mb_substr($AssetToMove, 0, 4) == 'Move') { // the form variable is of the format MoveAssetID so need to strip the move bit off
-		$AssetID = mb_substr($AssetToMove, 4);
-		if (isset($_POST['Location' . $AssetID]) and $_POST['Location' . $AssetID] != '') {
-			$sql = "UPDATE fixedassets
-						SET assetlocation='" . $_POST['Location' . $AssetID] . "'
-						WHERE assetid='" . $AssetID . "'";
+	if (mb_substr($AssetToMove,0,4)=='Move') { // the form variable is of the format MoveAssetID so need to strip the move bit off
+		$AssetID	= mb_substr($AssetToMove,4);
+		if (isset($_POST['Location' . $AssetID]) AND $_POST['Location' . $AssetID] !=''){
+			$sql		= "UPDATE weberp_fixedassets
+						SET assetlocation='".$_POST['Location'.$AssetID] ."'
+						WHERE assetid='". $AssetID . "'";
 
-			$result = DB_query($sql, $db);
+			$result=DB_query($sql);
 			prnMsg(_('The Fixed Asset has been moved successfully'), 'success');
 			echo '<br />';
 		}
@@ -26,19 +30,19 @@ foreach ($_POST as $AssetToMove => $Value) { //Value is not used?
 }
 
 if (isset($_GET['AssetID'])) {
-	$AssetID = $_GET['AssetID'];
+	$AssetID=$_GET['AssetID'];
 } else if (isset($_POST['AssetID'])) {
-	$AssetID = $_POST['AssetID'];
+	$AssetID=$_POST['AssetID'];
 } else {
-	$sql = "SELECT categoryid, categorydescription FROM fixedassetcategories";
-	$result = DB_query($sql, $db);
-	echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">';
-	echo '<div>';
+	$sql="SELECT categoryid, categorydescription FROM weberp_fixedassetcategories";
+	$result=DB_query($sql);
+	echo '<form action="'. htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">';
+    echo '<div>';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 	echo '<table class="selection"><tr>';
-	echo '<td>' . _('In Asset Category') . ': </td>';
-	echo '<td><select minlength="0" name="AssetCat">';
+	echo '<td>' .  _('In Asset Category') . ': </td>';
+	echo '<td><select name="AssetCat">';
 
 	if (!isset($_POST['AssetCat'])) {
 		$_POST['AssetCat'] = '';
@@ -53,103 +57,105 @@ if (isset($_GET['AssetID'])) {
 	}
 
 	echo '</select></td>';
-	echo '<td>' . _('Enter partial') . '<b> ' . _('Description') . '</b>:</td><td>';
+	echo '<td>' .  _('Enter partial') . '<b> ' . _('Description') . '</b>:</td><td>';
 
 
 	if (isset($_POST['Keywords'])) {
-		echo '<input type="text" autofocus="autofocus" name="Keywords" value="' . trim($_POST['Keywords'], '%') . '" size="20" minlength="0" maxlength="25" />';
+		echo '<input type="text" name="Keywords" value="' . trim($_POST['Keywords'],'%') . '" title="' . _('Enter some text that should appear in the fixed asset\'s description to search for') . '" size="20" maxlength="25" />';
 	} else {
-		echo '<input type="text" autofocus="autofocus" name="Keywords" size="20" minlength="0" maxlength="25" />';
+		echo '<input type="text" name="Keywords" title="' . _('Enter some text that should appear in the fixed asset\'s description to search for') . '" size="20" maxlength="25" />';
 	}
 
 	echo '</td>
 		</tr>
 		<tr>
-			<td>' . _('Asset Location') . ':</td>
-			<td><select minlength="0" name="AssetLocation">';
-	if (!isset($_POST['AssetLocation'])) {
-		$_POST['AssetLocation'] = 'ALL';
-	}
-	if ($_POST['AssetLocation'] == 'ALL') {
-		echo '<option selected="selected" value="ALL">' . _('Any asset location') . '</option>';
-	} else {
-		echo '<option value="ALL">' . _('Any asset location') . '</option>';
-	}
-	$result = DB_query("SELECT locationid, locationdescription FROM fixedassetlocations", $db);
+		<td>' . _('Asset Location') . ':</td>
+		<td><select name="AssetLocation">';
+			if (!isset($_POST['AssetLocation'])) {
+				$_POST['AssetLocation'] = 'ALL';
+			}
+			if ($_POST['AssetLocation']=='ALL'){
+				echo '<option selected="selected" value="ALL">' . _('Any asset location') . '</option>';
+			} else {
+				echo '<option value="ALL">' . _('Any asset location') . '</option>';
+			}
+			$result = DB_query("SELECT locationid, locationdescription FROM weberp_fixedassetlocations");
 
-	while ($myrow = DB_fetch_array($result)) {
-		if ($myrow['locationid'] == $_POST['AssetLocation']) {
-			echo '<option selected="selected" value="' . $myrow['locationid'] . '">' . $myrow['locationdescription'] . '</option>';
-		} else {
-			echo '<option value="' . $myrow['locationid'] . '">' . $myrow['locationdescription'] . '</option>';
-		}
-	}
-	echo '</select>';
+			while ($myrow = DB_fetch_array($result)) {
+				if ($myrow['locationid'] == $_POST['AssetLocation']) {
+					echo '<option selected="selected" value="' . $myrow['locationid'] . '">' . $myrow['locationdescription'] . '</option>';
+				} else {
+					echo '<option value="' . $myrow['locationid'] . '">' . $myrow['locationdescription'] . '</option>';
+				}
+			}
+			echo '</select>';
 
 
-	echo '<td><b>' . _('OR') . ' ' . '</b>' . _('Enter partial') . ' <b>' . _('Asset Code') . '</b>:</td>';
+	echo '<td><b>' . _('OR').' ' . '</b>' . _('Enter partial') .' <b>' .  _('Asset Code') . '</b>:</td>';
 	echo '<td>';
 
 	if (isset($_POST['AssetID'])) {
-		echo '<input type="text" name="AssetID" value="' . trim($_POST['AssetID'], '%') . '" size="15" minlength="0" maxlength="40" />';
+		echo '<input type="text" name="AssetID" value="'. trim($_POST['AssetID'],'%') . '" title="' . _('Enter some text that should appear in the fixed asset\'s item code to search for') . '" size="15" maxlength="20" />';
 	} else {
-		echo '<input type="text" name="AssetID" size="15" minlength="0" maxlength="40" />';
+		echo '<input type="text" name="AssetID" title="' . _('Enter some text that should appear in the fixed asset\'s item code to search for') . '" size="15" maxlength="20" />';
 	}
 
-	echo '</td></tr></table><br />';
-
-	echo '<div class="centre"><input type="submit" name="Search" value="' . _('Search Now') . '" /></div>
-		  </div>
-		  </form>
-		  <br />';
+	echo '</td>
+		</tr>
+		</table>
+		<br />
+		<div class="centre"><input type="submit" name="Search" value="'. _('Search Now') . '" /></div>
+          </div>
+          </form>
+          <br />';
 }
 
 if (isset($_POST['Search'])) {
 
-	if ($_POST['AssetLocation'] == 'ALL') {
-		$AssetLocation = '%';
+	if ($_POST['AssetLocation']=='ALL') {
+		$AssetLocation	='%';
 	} else {
-		$AssetLocation = '%' . $_POST['AssetLocation'] . '%';
+		$AssetLocation	= '%'.$_POST['AssetLocation'].'%';
 	}
-	if ($_POST['AssetCat'] == 'All') {
-		$AssetID = '%';
+	if ($_POST['AssetCat']=='All') {
+		$AssetID	='%';
 	}
 	if (isset($_POST['Keywords'])) {
-		$Keywords = '%' . $_POST['Keywords'] . '%';
+		$Keywords	='%'.$_POST['Keywords'].'%';
 	} else {
-		$Keywords = '%';
+		$Keywords	='%';
 	}
 	if (isset($_POST['AssetID'])) {
-		$AssetID = '%' . $_POST['AssetID'] . '%';
+		$AssetID	='%'.$_POST['AssetID'].'%';
 	} else {
-		$AssetID = '%';
+		$AssetID	='%';
 	}
 
 
-	$sql = "SELECT fixedassets.assetid,
-				fixedassets.cost,
-				fixedassets.accumdepn,
-				fixedassets.description,
-				fixedassets.depntype,
-				fixedassets.serialno,
-				fixedassets.barcode,
-				fixedassets.assetlocation as ItemAssetLocation,
-				fixedassetlocations.locationdescription
-			FROM fixedassets
-			INNER JOIN fixedassetlocations
-			ON fixedassets.assetlocation=fixedassetlocations.locationid
-			WHERE fixedassets.assetcategoryid " . LIKE . "'" . $_POST['AssetCat'] . "'
-			AND fixedassets.description " . LIKE . "'" . $Keywords . "'
-			AND fixedassets.assetid " . LIKE . "'" . $AssetID . "'
-			AND fixedassets.assetlocation " . LIKE . "'" . $AssetLocation . "'
-			ORDER BY fixedassets.assetid";
+	$sql= "SELECT weberp_fixedassets.assetid,
+				weberp_fixedassets.cost,
+				weberp_fixedassets.accumdepn,
+				weberp_fixedassets.description,
+				weberp_fixedassets.depntype,
+				weberp_fixedassets.serialno,
+				weberp_fixedassets.barcode,
+				weberp_fixedassets.assetlocation as ItemAssetLocation,
+				weberp_fixedassetlocations.locationdescription
+			FROM weberp_fixedassets
+			INNER JOIN weberp_fixedassetlocations
+			ON weberp_fixedassets.assetlocation=weberp_fixedassetlocations.locationid
+			WHERE weberp_fixedassets.assetcategoryid " . LIKE . "'".$_POST['AssetCat']."'
+			AND weberp_fixedassets.description " . LIKE . "'".$Keywords."'
+			AND weberp_fixedassets.assetid " . LIKE . "'".$AssetID."'
+			AND weberp_fixedassets.assetlocation " . LIKE . "'".$AssetLocation."'
+			ORDER BY weberp_fixedassets.assetid";
 
 
-	$Result = DB_query($sql, $db);
+	$Result=DB_query($sql);
 	echo '<br />';
-	echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">
-		  <div>';
-	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+	echo '<form action="'. htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
+          <div>';
+    echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 	echo '<table class="selection">';
 	echo '<tr>
 			<th>' . _('Asset ID') . '</th>
@@ -161,43 +167,43 @@ if (isset($_POST['Search'])) {
 			<th colspan="2">' . _('Move To') . '</th>
 		</tr>';
 
-	$locationsql = "SELECT locationid, locationdescription from fixedassetlocations";
-	$LocationResult = DB_query($locationsql, $db);
+	$locationsql="SELECT locationid, locationdescription from weberp_fixedassetlocations";
+	$LocationResult=DB_query($locationsql);
 
-	while ($myrow = DB_fetch_array($Result)) {
+	while ($myrow=DB_fetch_array($Result)) {
 
 		echo '<tr>
 				<td>' . $myrow['assetid'] . '</td>
 				<td>' . $myrow['description'] . '</td>
 				<td>' . $myrow['serialno'] . '</td>
-				<td class="number">' . locale_number_format($myrow['cost'], $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
-				<td class="number">' . locale_number_format($myrow['accumdepn'], $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
+				<td class="number">' . locale_number_format($myrow['cost'],$_SESSION['CompanyRecord']['decimalplaces']) . '</td>
+				<td class="number">' . locale_number_format($myrow['accumdepn'],$_SESSION['CompanyRecord']['decimalplaces']) . '</td>
 				<td>' . $myrow['ItemAssetLocation'] . '</td>';
-		echo '<td><select minlength="0" name="Location' . $myrow['assetid'] . '" onchange="ReloadForm(Move' . $myrow['assetid'] . ')">';
-		$ThisDropDownName = 'Location' . $myrow['assetid'];
-		while ($LocationRow = DB_fetch_array($LocationResult)) {
+		echo '<td><select name="Location' . $myrow['assetid'] . '" onchange="ReloadForm(Move'.$myrow['assetid'].')">';
+		$ThisDropDownName	= 'Location' . $myrow['assetid'];
+		while ($LocationRow=DB_fetch_array($LocationResult)) {
 
-			if (isset($_POST[$ThisDropDownName]) and ($_POST[$ThisDropDownName] == $LocationRow['locationid'])) {
-				echo '<option selected="selected" value="' . $LocationRow['locationid'] . '">' . $LocationRow['locationdescription'] . '</option>';
+			if(isset($_POST[$ThisDropDownName]) AND ($_POST[$ThisDropDownName] == $LocationRow['locationid'])) {
+				echo '<option selected="selected" value="' . $LocationRow['locationid'].'">' . $LocationRow['locationdescription'] . '</option>';
 			} elseif ($LocationRow['locationid'] == $myrow['ItemAssetLocation']) {
-				echo '<option selected="selected" value="' . $LocationRow['locationid'] . '">' . $LocationRow['locationdescription'] . '</option>';
+				echo '<option selected="selected" value="'.$LocationRow['locationid'].'">' . $LocationRow['locationdescription'] . '</option>';
 			} else {
-				echo '<option value="' . $LocationRow['locationid'] . '">' . $LocationRow['locationdescription'] . '</option>';
+				echo '<option value="'.$LocationRow['locationid'].'">' . $LocationRow['locationdescription'] . '</option>';
 			}
 		}
-		DB_data_seek($LocationResult, 0);
+		DB_data_seek($LocationResult,0);
 		echo '</select></td>';
-		echo '<input type="hidden" name="AssetCat" value="' . $_POST['AssetCat'] . '" />';
-		echo '<input type="hidden" name="AssetLocation" value="' . $_POST['AssetLocation'] . '" />';
-		echo '<input type="hidden" name="Keywords" value="' . $_POST['Keywords'] . '" />';
-		echo '<input type="hidden" name="AssetID" value="' . $_POST['AssetID'] . '" />';
-		echo '<input type="hidden" name="Search" value="' . $_POST['Search'] . '" />';
-		echo '<td><input type="submit" name="Move' . $myrow['assetid'] . '" value="Move" /></td>';
+		echo '<input type="hidden" name="AssetCat" value="' . $_POST['AssetCat'].'" />';
+		echo '<input type="hidden" name="AssetLocation" value="' . $_POST['AssetLocation'].'" />';
+		echo '<input type="hidden" name="Keywords" value="' . $_POST['Keywords'].'" />';
+		echo '<input type="hidden" name="AssetID" value="' . $_POST['AssetID'].'" />';
+		echo '<input type="hidden" name="Search" value="' . $_POST['Search'].'" />';
+		echo '<td><input type="submit" name="Move'.$myrow['assetid'].'" value="Move" /></td>';
 		echo '</tr>';
 	}
 	echo '</table>
-		  </div>
-		  </form>';
+          </div>
+          </form>';
 }
 
 include('includes/footer.inc');

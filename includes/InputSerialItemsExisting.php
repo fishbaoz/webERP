@@ -1,29 +1,23 @@
 <?php
 
-/* Input Serial Items - used for inputing serial numbers or batch/roll/bundle
- * referencesfor controlled items - used in:
- * - ConfirmDispatchControlledInvoice.php
- * - GoodsReceivedControlled.php
- * - StockAdjustments.php
- * - StockTransfers.php
- * - CreditItemsControlled.php
- */
+/* $Id: InputSerialItemsExisting.php 6941 2014-10-26 23:18:08Z daintree $*/
 
-/* If the User has selected Keyed Entry, show them this special select list...
- * it is just in the way if they are doing file imports it also would not
- * be applicable in a PO and possible other situations...
- */
-
+/**
+If the User has selected Keyed Entry, show them this special select list...
+it is just in the way if they are doing file imports
+it also would not be applicable in a PO and possible other situations...
+**/
 if ($_POST['EntryType'] == 'KEYED'){
         /*Also a multi select box for adding bundles to the dispatch without keying */
      $sql = "SELECT serialno, quantity
-			FROM stockserialitems
+			FROM weberp_stockserialitems
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockserialitems.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canupd=1
 			WHERE stockid='" . $StockID . "'
-			AND loccode ='" . $LocationOut."'
+			AND weberp_stockserialitems.loccode ='" . $LocationOut."'
 			AND quantity > 0";
 
-	$ErrMsg = '<br />'. _('Could not retrieve the items for'). ' ' . $StockID;
-    $Bundles = DB_query($sql,$db, $ErrMsg );
+	$ErrMsg = '<br />' .  _('Could not retrieve the items for'). ' ' . $StockID;
+    $Bundles = DB_query($sql, $ErrMsg );
 	echo '<table class="selection"><tr>';
 	if (DB_num_rows($Bundles)>0){
 		$AllSerials=array();
@@ -32,9 +26,9 @@ if ($_POST['EntryType'] == 'KEYED'){
 			$AllSerials[$Itm->BundleRef] = $Itm->BundleQty;
 		}
 
-		echo '<td valign="top"><b>'. _('Select Existing Items'). '</b><br />';
+		echo '<td valign="top"><b>' .  _('Select Existing Items'). '</b><br />';
 
-		echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?identifier=' . $identifier . '" method="post" class="noPrint">';
+		echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?identifier=' . $identifier . '" method="post">';
 		echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 		echo '<input type="hidden" name="LineNo" value="' . $LineNo . '">
 			<input type="hidden" name="StockID" value="' . $StockID . '">
@@ -48,14 +42,15 @@ if ($_POST['EntryType'] == 'KEYED'){
 		while ($myrow=DB_fetch_array($Bundles,$db)){
 			if ($LineItem->Serialised==1){
 				if ( !array_key_exists($myrow['serialno'], $AllSerials) ){
-					echo '<option value="' . $myrow['serialno'] . '">' . $myrow['serialno'].'</option>';
+					echo '<option value="' . $myrow['serialno'] . '">' . $myrow['serialno'] . '</option>';
 					$ItemsAvailable++;
 				}
 			} else {
-				if ( !array_key_exists($myrow['serialno'], $AllSerials)  or
+				
+				if ( !array_key_exists($myrow['serialno'], $AllSerials)  OR
 					($myrow['quantity'] - $AllSerials[$myrow['serialno']] >= 0) ) {
-
-					$RecvQty = $myrow['quantity'] - $AllSerials[$myrow['serialno']];
+					//Use the $InOutModifier to ajust the negative or postive direction of the quantity. Otherwise the calculated quantity is wrong.
+					$RecvQty = $myrow['quantity'] - $InOutModifier*$AllSerials[$myrow['serialno']];
 					echo '<option value="' . $myrow['serialno'] . '/|/'. $RecvQty .'">' . $myrow['serialno'].' - ' . _('Qty left'). ': ' . $RecvQty . '</option>';
 					$ItemsAvailable += $RecvQty;
 				}
@@ -69,7 +64,7 @@ if ($_POST['EntryType'] == 'KEYED'){
 		echo $ItemsAvailable . ' ' . _('items available');
 		echo '</td>';
 	} else {
-		echo '<td>'. prnMsg( _('There does not appear to be any of') . ' ' . $StockID . ' ' . _('left in'). ' '. $LocationOut , 'warn') . '</td>';
+		echo '<td>' .  prnMsg( _('There does not appear to be any of') . ' ' . $StockID . ' ' . _('left in'). ' '. $LocationOut , 'warn') . '</td>';
 	}
 	echo '</tr></table>';
 }

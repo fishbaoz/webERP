@@ -6,11 +6,11 @@ $PathPrefix = '../';
 // TBD The followiung line needs to be replace when more translations are available
 $ReportLanguage = 'en_US';					// default language file
 
-define('DBReports','reports');			// name of the databse table holding the main report information (ReportID)
-define('DBRptFields','reportfields');	// name of the database table holding the report fields
+define('DBReports','weberp_reports');			// name of the databse table holding the main report information (ReportID)
+define('DBRptFields','weberp_reportfields');	// name of the database table holding the report fields
 //define('FPDF_FONTPATH','../fonts/');  FPDF path to fonts directory
 
-// Fetch necessary include files - Host application specific (KwaMoja)
+// Fetch necessary include files - Host application specific (webERP)
 require($PathPrefix . 'includes/session.inc');
 require_once($PathPrefix . 'includes/DateFunctions.inc');
 
@@ -29,9 +29,9 @@ if (isset($_GET['reportid'])) { // then entered with report id requested, fix va
 	$GoBackURL=''; // unset the return path to default
 }
 //check to see how script was entered
-if (!isset($_GET['action']) or (!isset($_POST['ReportID']))) {
+if (!isset($_GET['action']) OR (!isset($_POST['ReportID']))) {
 	// then form entered from somewhere other than itself or contained a bad ID, show start form
-	if (isset($_POST['todo']) and (!isset($_POST['ReportID']))) { // Error - button without report selected
+	if (isset($_POST['todo']) AND (!isset($_POST['ReportID']))) { // Error - button without report selected
 		$usrMsg[] = array('message'=>RPT_NORPT, 'level'=>'error');
 	}
 	// fetch the existing reports for the selection menus
@@ -41,7 +41,7 @@ if (!isset($_GET['action']) or (!isset($_POST['ReportID']))) {
 	$IncludePage = 'forms/ReportsList.html';
 } elseif (!isset($_POST['todo'])) { // Now find out if an image button button was pressed and act on it
 	for ($i=1; $i<1000; $i++) { // figure out what sequence button was pressed
-		if (isset($_POST['up'.$i.'_x']) or isset($_POST['dn'.$i.'_x'])) { $SeqNum = $i; break; }
+		if (isset($_POST['up'.$i.'_x']) OR isset($_POST['dn'.$i.'_x'])) { $SeqNum = $i; break; }
 	}
 	$ReportID = $_POST['ReportID']; // fetch the report id
 	if (isset($_POST['up'.$SeqNum.'_x'])) { // the shift up button was pushed, check for not at first sequence
@@ -49,14 +49,14 @@ if (!isset($_GET['action']) or (!isset($_POST['ReportID']))) {
 	} elseif (isset($_POST['dn'.$SeqNum.'_x'])) { // the shift down button was pushed
 		$sql = "SELECT seqnum FROM ".DBRptFields."
 						WHERE reportid = '".$ReportID."' AND entrytype = 'fieldlist';";
-		$Result=DB_query($sql,$db,'','',false,true);
+		$Result=DB_query($sql,'','',false,true);
 		if ($SeqNum<DB_num_rows($Result)) {
 			$success = ChangeSequence($ReportID, $SeqNum, 'fieldlist', 'down');
 		}
 	}
 	// Overrride stored settings with current selected values
 	$Prefs = FetchReportDetails($_POST['ReportID']); // fetch the current settings
-	if (isset($_POST['FilterForm']) or isset($_POST['PageForm'])) {
+	if (isset($_POST['FilterForm']) OR isset($_POST['PageForm'])) {
 		// then we're here from a filter or page form, also read any updtes from the forms.
 		$Prefs = ReadPostData($ReportID, $Prefs);
 	}
@@ -69,9 +69,9 @@ if (!isset($_GET['action']) or (!isset($_POST['ReportID']))) {
 	switch ($_POST['todo']) {
 		case RPT_BTN_DELRPT: // enter here only from My Report selection, never from default report
 			$sql= "DELETE FROM ".DBReports." WHERE id = '".$ReportID."'";
-			$Result=DB_query($sql,$db,'','',false,true);
+			$Result=DB_query($sql,'','',false,true);
 			$sql= "DELETE FROM ".DBRptFields." WHERE reportid = '".$ReportID."'";
-			$Result=DB_query($sql,$db,'','',false,true);
+			$Result=DB_query($sql,'','',false,true);
 			// Recreate drop down list and return to report home (handled in Cancel below)
 
 		case RPT_BTN_CANCEL:
@@ -192,7 +192,7 @@ function GetReports($Default) {
 		WHERE defaultreport='".$Def."'
 		ORDER BY groupname, reportname";
 
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$DefaultReports = array();
 	while ($Temp = DB_fetch_array($Result)) {
 		$DefaultReports[] = $Temp;
@@ -221,7 +221,7 @@ function build_dropdown_list($arraylist) {
 function FetchReportDetails($ReportID) {
 	global $db;
 	$sql= "SELECT *	FROM ".DBReports." WHERE id = '".$ReportID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$myrow=DB_fetch_assoc($Result);
 	foreach ($myrow as $key=>$value) {
 		$Prefs[$key]=$value;
@@ -244,7 +244,7 @@ function RetrieveFields($ReportID, $EntryType) {
 	$sql= "SELECT *	FROM ".DBRptFields."
 		WHERE reportid = '".$ReportID."' AND entrytype = '".$EntryType."'
 		ORDER BY seqnum";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	while ($FieldValues = DB_fetch_assoc($Result)) {
 		$FieldListings[] = $FieldValues;
 	}
@@ -262,7 +262,7 @@ function ChangeSequence($ReportID,
 		AND entrytype = '".$EntryType."'
 		AND seqnum = '".$SeqNum."'";
 
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$myrow = DB_fetch_row($Result);
 	$OrigID = $myrow[0];
 	if ($UpDown=='up') {
@@ -275,9 +275,9 @@ function ChangeSequence($ReportID,
 		WHERE reportid = '".$ReportID."'
 		AND entrytype = '".$EntryType."'
 		AND seqnum = '".$NewSeqNum."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$sql = "UPDATE ".DBRptFields." SET seqnum='".$NewSeqNum."' WHERE id = '".$OrigID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	return true;
 }
 
@@ -342,7 +342,7 @@ function ReadPostData($ReportID, $Prefs) {
 		$success = SavePrefs($ReportID);
 		// values saved, read them back in to update $Prefs array
 		$sql= "SELECT *	FROM ".DBReports." WHERE id = '".$ReportID."'";
-		$Result=DB_query($sql,$db,'','',false,true);
+		$Result=DB_query($sql,'','',false,true);
 		$myrow=DB_fetch_assoc($Result);
 		foreach ($myrow as $key=>$value) $Prefs[$key]=$value;
 		return $Prefs;
@@ -383,7 +383,7 @@ function ReadPostData($ReportID, $Prefs) {
 		if (!$Prefs['defaultreport']) { // save it since it's a custom report
 			$sql = "UPDATE ".DBRptFields." SET params='".$Prefs['CritListings'][$i-1]['params']."'
 				WHERE reportid ='".$ReportID."' AND entrytype='critlist' AND seqnum='".$i."'";
-			$Result=DB_query($sql,$db,'','',false,true);
+			$Result=DB_query($sql,'','',false,true);
 		}
 		$i++;
 	}
@@ -400,7 +400,7 @@ function ReadPostData($ReportID, $Prefs) {
 				visible='".$Prefs['FieldListings'][$i-1]['visible']."',
 				columnbreak='".$Prefs['FieldListings'][$i-1]['columnbreak']."'
 			WHERE reportid ='".$ReportID."' AND entrytype='fieldlist' AND seqnum='".$i."'";
-		$Result=DB_query($sql,$db,'','',false,true);
+		$Result=DB_query($sql,'','',false,true);
 		$i++;
 	}
 	return $Prefs;
@@ -409,7 +409,7 @@ function ReadPostData($ReportID, $Prefs) {
 function SaveFilters($ReportID, $EntryType, $Params) {
 	global $db;
 	$sql = "UPDATE ".DBRptFields." SET params='".$Params."' WHERE reportid ='".$ReportID."' AND entrytype='".$EntryType."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	return true;
 }
 
@@ -417,10 +417,10 @@ function SaveDefSettings($ReportID, $EntryType, $SeqNum) {
 	// This function sets all the params for a given entrytype to 0 and sets just the new default seqnum to 1
 	global $db;
 	$sql = "UPDATE ".DBRptFields." SET params='0' WHERE reportid='".$ReportID."' AND entrytype='".$EntryType."';";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$sql = "UPDATE ".DBRptFields." SET params='1'
 		WHERE reportid ='".$ReportID."' AND entrytype='".$EntryType."' AND seqnum='".$SeqNum."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	return true;
 }
 
@@ -487,7 +487,7 @@ function SavePrefs($ReportID) {
 			col19width = ".$_POST['Col19Width'].",
 			col20width = ".$_POST['Col20Width'].",
 		WHERE id ='".$ReportID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	return true;
 }
 
@@ -503,7 +503,7 @@ function SaveNewReport($ReportID, $AllowOverwrite) {
 	}
 	// check for duplicate report name and error or overwrite if allowed
 	$sql = "SELECT id, defaultreport FROM ".DBReports." WHERE reportname='".addslashes($_POST['ReportName'])."';";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	if (DB_num_rows($Result)>0) $myrow = DB_fetch_array($Result);
 	if (isset($myrow)) { // then we have a duplicate report name do some checking
 		if ($myrow['defaultreport']) { // it's a default don't allow overwrite no matter what, return
@@ -520,9 +520,9 @@ function SaveNewReport($ReportID, $AllowOverwrite) {
 		// check for the same report to update or replace a different report than ReportID
 		if ($myrow['id']<>$ReportID) { // erase the report to overwrite and duplicate ReportID
 			$sql= "DELETE FROM ".DBReports." WHERE id = '".$myrow['id']."'";
-			$Result=DB_query($sql,$db,'','',false,true);
+			$Result=DB_query($sql,'','',false,true);
 			$sql= "DELETE FROM ".DBRptFields." WHERE reportid = '".$myrow['id']."'";
-			$Result=DB_query($sql,$db,'','',false,true);
+			$Result=DB_query($sql,'','',false,true);
 		} else { // just return because the save as name is the same as the current report name
 			$Rtn['message'] = RPT_REPORT.$Prefs['reportname'].RPT_WASSAVED.$_POST['ReportName'];
 			$Rtn['ReportID'] = $ReportID;
@@ -534,20 +534,20 @@ function SaveNewReport($ReportID, $AllowOverwrite) {
 	$OrigID = $ReportID;
 	// Set the report id to 0 to prepare to duplicate
 	$sql = "UPDATE ".DBReports." SET id=0 WHERE id='".$ReportID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	$sql = "INSERT INTO ".DBReports." SELECT * FROM ".DBReports." WHERE id=0;";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	// Fetch the id entered
-	$ReportID = DB_Last_Insert_ID($db,'reports','id');
+	$ReportID = DB_Last_Insert_ID($db,'weberp_reports','id');
 	// Restore original report ID from 0
 	$sql = "UPDATE ".DBReports." SET id='".$OrigID."' WHERE id=0;";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	// Set the report name per the form and make a non-default report
 	$sql = "UPDATE ".DBReports." SET reportname='".addslashes($_POST['ReportName'])."', defaultreport='0' WHERE id ='".$ReportID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	// fetch the fields and duplicate
 	$sql = "SELECT * FROM ".DBRptFields." WHERE reportid='".$OrigID."'";
-	$Result=DB_query($sql,$db,'','',false,true);
+	$Result=DB_query($sql,'','',false,true);
 	while ($temp = DB_fetch_array($Result)) $field[] = $temp;
 	foreach ($field as $row) {
 		$sql = "INSERT INTO ".DBRptFields." (reportid, entrytype, seqnum, fieldname,
@@ -555,7 +555,7 @@ function SaveNewReport($ReportID, $AllowOverwrite) {
 			VALUES ('".$ReportID."', '".$row['entrytype']."', '".$row['seqnum']."',
 				'".$row['fieldname']."', '".$row['displaydesc']."', '".$row['visible']."',
 				'".$row['columnbreak']."', '".$row['params']."');";
-		$Result=DB_query($sql,$db,'','',false,true);
+		$Result=DB_query($sql,'','',false,true);
 	}
 	$Rtn['message'] = RPT_REPORT.$Prefs['reportname'].RPT_WASSAVED.$_POST['ReportName'];
 	$Rtn['ReportID'] = $ReportID;

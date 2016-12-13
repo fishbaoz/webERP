@@ -1,84 +1,72 @@
 <?php
+/* $Id: CustomerPurchases.php 7090 2015-01-20 13:43:08Z daintree $*/
+/* This script is to view the items purchased by a customer. */
 
 include('includes/session.inc');
-$Title = _('Customer Purchases');
+$Title = _('Customer Purchases');// Screen identificator.
+$ViewTopic = 'ARInquiries';// Filename's id in ManualContents.php's TOC.
+/* This help needs to be writing...
+$BookMark = 'CustomerPurchases';// Anchor's id in the manual's html document.*/
 include('includes/header.inc');
 
-if (isset($_GET['DebtorNo'])) {
-	$DebtorNo = $_GET['DebtorNo'];
-} //isset($_GET['DebtorNo'])
-else if (isset($_POST['DebtorNo'])) {
-	$DebtorNo = $_POST['DebtorNo'];
-} //isset($_POST['DebtorNo'])
-else {
+if(isset($_GET['DebtorNo'])) {
+	$DebtorNo = $_GET['DebtorNo'];// Set DebtorNo from $_GET['DebtorNo'].
+} elseif(isset($_POST['DebtorNo'])) {
+	$DebtorNo = $_POST['DebtorNo'];// Set DebtorNo from $_POST['DebtorNo'].
+} else {
 	prnMsg(_('This script must be called with a customer code.'), 'info');
 	include('includes/footer.inc');
 	exit;
 }
 
-$SQL = "SELECT debtorsmaster.name,
-				custbranch.brname
-		FROM debtorsmaster
-		INNER JOIN custbranch
-			ON debtorsmaster.debtorno=custbranch.debtorno
-		WHERE debtorsmaster.debtorno = '" . $DebtorNo . "'";
+$SQL = "SELECT weberp_debtorsmaster.name,
+				weberp_custbranch.brname
+		FROM weberp_debtorsmaster
+		INNER JOIN weberp_custbranch
+			ON weberp_debtorsmaster.debtorno=weberp_custbranch.debtorno
+		WHERE weberp_debtorsmaster.debtorno = '" . $DebtorNo . "'";
 
 $ErrMsg = _('The customer details could not be retrieved by the SQL because');
-$CustomerResult = DB_query($SQL, $db, $ErrMsg);
+$CustomerResult = DB_query($SQL, $ErrMsg);
 $CustomerRecord = DB_fetch_array($CustomerResult);
 
-echo '<p class="page_title_text noPrint" >
-		<img src="' . $RootPath . '/css/' . $Theme . '/images/customer.png" title="' . _('Customer') . '" alt="" /> ' . _('Items Purchased by Customer') . ' : ' . $CustomerRecord['name'] . '
-	</p>';
+echo '<p class="page_title_text"><img alt="" src="'.$RootPath.'/css/'.$Theme.
+	'/images/customer.png" title="' .
+	_('Customer') . '" /> ' .// Icon title.
+	_('Items Purchased by Customer') . '<br />' . $DebtorNo . " - " . $CustomerRecord['name'] . '</p>';// Page title.
 
-if ($_SESSION['RestrictLocations'] == 0) {
-	$SQL = "SELECT stockmoves.stockid,
-					stockmaster.description,
-					systypes.typename,
-					transno,
-					locations.locationname,
-					trandate,
-					branchcode,
-					price,
-					reference,
-					qty,
-					narrative
-				FROM stockmoves
-				INNER JOIN stockmaster
-					ON stockmaster.stockid=stockmoves.stockid
-				INNER JOIN systypes
-					ON stockmoves.type=systypes.typeid
-				INNER JOIN locations
-					ON stockmoves.loccode=locations.loccode
-				WHERE debtorno='" . $DebtorNo . "'
-				ORDER BY trandate DESC";
-} else {
-	$SQL = "SELECT stockmoves.stockid,
-					stockmaster.description,
-					systypes.typename,
-					transno,
-					locations.locationname,
-					trandate,
-					stockmoves.branchcode,
-					price,
-					reference,
-					qty,
-					narrative
-				FROM stockmoves
-				INNER JOIN stockmaster
-					ON stockmaster.stockid=stockmoves.stockid
-				INNER JOIN systypes
-					ON stockmoves.type=systypes.typeid
-				INNER JOIN locations
-					ON stockmoves.loccode=locations.loccode
-				INNER JOIN www_users
-					ON locations.loccode=www_users.defaultlocation
-				WHERE debtorno='" . $DebtorNo . "'
-					AND www_users.userid='" . $_SESSION['UserID'] . "'
-				ORDER BY trandate DESC";
+$SQL = "SELECT weberp_stockmoves.stockid,
+			weberp_stockmaster.description,
+			weberp_systypes.typename,
+			transno,
+			weberp_locations.locationname,
+			trandate,
+			weberp_stockmoves.branchcode,
+			price,
+			reference,
+			qty,
+			narrative
+		FROM weberp_stockmoves
+		INNER JOIN weberp_stockmaster
+			ON weberp_stockmaster.stockid=weberp_stockmoves.stockid
+		INNER JOIN weberp_systypes
+			ON weberp_stockmoves.type=weberp_systypes.typeid
+		INNER JOIN weberp_locations
+			ON weberp_stockmoves.loccode=weberp_locations.loccode
+		INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1";
+
+$SQLWhere=" WHERE weberp_stockmoves.debtorno='" . $DebtorNo . "'";
+
+if ($_SESSION['SalesmanLogin'] != '') {
+	$SQL .= " INNER JOIN weberp_custbranch
+				ON weberp_stockmoves.branchcode=weberp_custbranch.branchcode";
+	$SQLWhere .= " AND weberp_custbranch.salesman='" . $_SESSION['SalesmanLogin'] . "'";
 }
+
+$SQL .= $SQLWhere . " ORDER BY trandate DESC";
+
 $ErrMsg = _('The stock movement details could not be retrieved by the SQL because');
-$StockMovesResult = DB_query($SQL, $db, $ErrMsg);
+$StockMovesResult = DB_query($SQL, $ErrMsg);
 
 if (DB_num_rows($StockMovesResult) == 0) {
 	echo '<br />';
@@ -107,14 +95,14 @@ else {
 				<td>' . ConvertSQLDate($StockMovesRow['trandate']) . '</td>
 				<td>' . $StockMovesRow['stockid'] . '</td>
 				<td>' . $StockMovesRow['description'] . '</td>
-				<td>' . $StockMovesRow['typename'] . '</td>
-				<td>' . $StockMovesRow['transno'] . '</td>
+				<td>' . _($StockMovesRow['typename']) . '</td>
+				<td class="number">' . $StockMovesRow['transno'] . '</td>
 				<td>' . $StockMovesRow['locationname'] . '</td>
 				<td>' . $StockMovesRow['branchcode'] . '</td>
 				<td class="number">' . locale_number_format($StockMovesRow['price'], $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
 				<td class="number">' . locale_number_format(-$StockMovesRow['qty'], $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
 				<td class="number">' . locale_number_format((-$StockMovesRow['qty'] * $StockMovesRow['price']), $_SESSION['CompanyRecord']['decimalplaces']) . '</td>
-				<td>' . $StockMovesRow['reference'] . '</td>
+				<td class="number">' . $StockMovesRow['reference'] . '</td>
 				<td>' . $StockMovesRow['narrative'] . '</td>
 			</tr>';
 

@@ -1,24 +1,25 @@
 <?php
+/* $Id: PcTabs.php 7482 2016-04-01 08:36:03Z exsonqu $ */
 
 include('includes/session.inc');
 $Title = _('Maintenance Of Petty Cash Tabs');
 /* webERP manual links before header.inc */
-$ViewTopic = 'PettyCash';
+$ViewTopic= 'PettyCash';
 $BookMark = 'PCTabSetup';
 include('includes/header.inc');
 
-echo '<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/money_add.png" title="' . _('Payment Entry') . '" alt="" />' . ' ' . $Title . '</p>';
+echo '<p class="page_title_text"><img src="'.$RootPath.'/css/'.$Theme.'/images/money_add.png" title="' . _('Payment Entry') . '" alt="" />' . ' ' . $Title . '</p>';
 
-if (isset($_POST['SelectedTab'])) {
+if (isset($_POST['SelectedTab'])){
 	$SelectedTab = mb_strtoupper($_POST['SelectedTab']);
-} elseif (isset($_GET['SelectedTab'])) {
+} elseif (isset($_GET['SelectedTab'])){
 	$SelectedTab = mb_strtoupper($_GET['SelectedTab']);
 }
 
 if (isset($_POST['Cancel'])) {
 	unset($SelectedTab);
-	unset($_POST['TabCode']);
-	unset($_POST['SelectUser']);
+	unset($_POST['TabCode'] );
+	unset($_POST['SelectUser'] );
 	unset($_POST['SelectTabs']);
 	unset($_POST['SelectCurrency']);
 	unset($_POST['TabLimit']);
@@ -44,82 +45,102 @@ if (isset($_POST['Submit'])) {
 	ie the page has called itself with some user input */
 
 	//first off validate inputs sensible
-	$i = 1;
+	$i=1;
 
-	if ($_POST['TabCode'] == '' or $_POST['TabCode'] == ' ' or $_POST['TabCode'] == '  ') {
+	if ($_POST['TabCode']=='' OR $_POST['TabCode']==' ' OR $_POST['TabCode']=='  ') {
 		$InputError = 1;
-		prnMsg('<br />' . _('The Tab code cannot be an empty string or spaces'), 'error');
+		prnMsg('<br />' . _('The Tab code cannot be an empty string or spaces'),'error');
 		$Errors[$i] = 'TabCode';
 		$i++;
-	} elseif (mb_strlen($_POST['TabCode']) > 20) {
+	} elseif (mb_strlen($_POST['TabCode']) >20) {
 		$InputError = 1;
-		echo prnMsg(_('The Tab code must be twenty characters or less long'), 'error');
+		echo prnMsg(_('The Tab code must be twenty characters or less long'),'error');
 		$Errors[$i] = 'TabCode';
 		$i++;
-	} elseif (($_POST['SelectUser']) == '') {
+	} elseif (($_POST['SelectUser'])=='') {
 		$InputError = 1;
-		echo prnMsg(_('You must select a User for this tab'), 'error');
+		echo prnMsg(_('You must select a User for this tab'),'error');
 		$Errors[$i] = 'UserName';
 		$i++;
-	} elseif (($_POST['SelectTabs']) == '') {
+	} elseif (($_POST['SelectTabs'])=='') {
 		$InputError = 1;
-		echo prnMsg(_('You must select a type of tab from the list'), 'error');
+		echo prnMsg(_('You must select a type of tab from the list'),'error');
 		$Errors[$i] = 'TabType';
 		$i++;
-	} elseif (($_POST['SelectAssigner']) == '') {
+	} elseif (empty($_POST['SelectAssigner'])) {
 		$InputError = 1;
-		echo prnMsg(_('You must select a User to assign cash to this tab'), 'error');
+		echo prnMsg(_('You must select a User to assign cash to this tab'),'error');
 		$Errors[$i] = 'AssignerName';
 		$i++;
-	} elseif (($_POST['SelectAuthoriser']) == '') {
+	} elseif (empty($_POST['SelectAuthoriser'])) {
 		$InputError = 1;
-		echo prnMsg(_('You must select a User to authorise this tab'), 'error');
+		echo prnMsg(_('You must select a User to authorise this tab'),'error');
 		$Errors[$i] = 'AuthoriserName';
 		$i++;
-	} elseif (($_POST['GLAccountCash']) == '') {
+	} elseif (($_POST['GLAccountCash'])=='') {
 		$InputError = 1;
-		echo prnMsg(_('You must select a General ledger code for the cash to be assigned from'), 'error');
+		echo prnMsg(_('You must select a General ledger code for the cash to be assigned from'),'error');
 		$Errors[$i] = 'GLCash';
 		$i++;
-	} elseif (($_POST['GLAccountPcashTab']) == '') {
+	} elseif (($_POST['GLAccountPcashTab'])=='') {
 		$InputError = 1;
-		echo prnMsg(_('You must select a General ledger code for this petty cash tab'), 'error');
+		echo prnMsg(_('You must select a General ledger code for this petty cash tab'),'error');
 		$Errors[$i] = 'GLTab';
 		$i++;
 	}
+	
+	if ($InputError == 0) {
+		$Authorisers = '';
+		$i = 0;
+		foreach ($_POST['SelectAuthoriser'] as $value) {
+			if ($i) $Authorisers .= ',';
+			$Authorisers .= $value;
+			$i++;
+		}
+		$Assigners = '';
+		$i = 0;
+		foreach ($_POST['SelectAssigner'] as $value) {
+			if ($i) $Assigners .= ',';
+			$Assigners .= $value;
+			$i++;
+		}
 
-	if (isset($SelectedTab) and $InputError != 1) {
+	}
 
-		$sql = "UPDATE pctabs SET usercode = '" . $_POST['SelectUser'] . "',
+	if (isset($SelectedTab) AND $InputError !=1) {
+		//get the authorisers value
+	
+
+		$sql = "UPDATE weberp_pctabs SET usercode = '" . $_POST['SelectUser'] . "',
 									typetabcode = '" . $_POST['SelectTabs'] . "',
 									currency = '" . $_POST['SelectCurrency'] . "',
 									tablimit = '" . filter_number_format($_POST['TabLimit']) . "',
-									assigner = '" . $_POST['SelectAssigner'] . "',
-									authorizer = '" . $_POST['SelectAuthoriser'] . "',
+									assigner = '" . $Assigners . "',
+									authorizer = '" . $Authorisers . "',
 									glaccountassignment = '" . $_POST['GLAccountCash'] . "',
 									glaccountpcash = '" . $_POST['GLAccountPcashTab'] . "'
-				WHERE tabcode = '" . $SelectedTab . "'";
+				WHERE tabcode = '".$SelectedTab."'";
 
-		$msg = _('The Petty Cash Tab') . ' ' . $SelectedTab . ' ' . _('has been updated');
-	} elseif ($InputError != 1) {
+		$msg = _('The Petty Cash Tab') . ' ' . $SelectedTab . ' ' .  _('has been updated');
+	} elseif ( $InputError !=1 ) {
 
 		// First check the type is not being duplicated
 
 		$checkSql = "SELECT count(*)
-					 FROM pctabs
+					 FROM weberp_pctabs
 					 WHERE tabcode = '" . $_POST['TabCode'] . "'";
 
-		$CheckResult = DB_query($checkSql, $db);
+		$CheckResult = DB_query($checkSql);
 		$CheckRow = DB_fetch_row($CheckResult);
 
-		if ($CheckRow[0] > 0) {
+		if ( $CheckRow[0] > 0 ) {
 			$InputError = 1;
-			prnMsg(_('The Tab ') . ' ' . $_POST['TabCode'] . ' ' . _(' already exists'), 'error');
+			prnMsg( _('The Tab ') .' ' . $_POST['TabCode'] . ' ' . _(' already exists'),'error');
 		} else {
 
 			// Add new record on submit
 
-			$sql = "INSERT INTO pctabs	(tabcode,
+			$sql = "INSERT INTO weberp_pctabs	(tabcode,
 							 			 usercode,
 										 typetabcode,
 										 currency,
@@ -133,20 +154,20 @@ if (isset($_POST['Submit'])) {
 									'" . $_POST['SelectTabs'] . "',
 									'" . $_POST['SelectCurrency'] . "',
 									'" . filter_number_format($_POST['TabLimit']) . "',
-									'" . $_POST['SelectAssigner'] . "',
-									'" . $_POST['SelectAuthoriser'] . "',
+									'" . $Assigners . "',
+									'" . $Authorisers . "',
 									'" . $_POST['GLAccountCash'] . "',
 									'" . $_POST['GLAccountPcashTab'] . "')";
 
-			$msg = _('The Petty Cash Tab') . ' ' . $_POST['TabCode'] . ' ' . _('has been created');
+			$msg = _('The Petty Cash Tab') . ' ' . $_POST['TabCode'] .  ' ' . _('has been created');
 
 		}
 	}
 
-	if ($InputError != 1) {
-		//run the SQL from either of the above possibilites
-		$result = DB_query($sql, $db);
-		prnMsg($msg, 'success');
+	if ( $InputError !=1) {
+	//run the SQL from either of the above possibilites
+		$result = DB_query($sql);
+		prnMsg($msg,'success');
 		unset($SelectedTab);
 		unset($_POST['SelectUser']);
 		unset($_POST['TabCode']);
@@ -159,22 +180,22 @@ if (isset($_POST['Submit'])) {
 		unset($_POST['GLAccountPcashTab']);
 	}
 
-} elseif (isset($_GET['delete'])) {
+} elseif ( isset($_GET['delete']) ) {
 
-	$sql = "DELETE FROM pctabs WHERE tabcode='" . $SelectedTab . "'";
-	$ErrMsg = _('The Tab record could not be deleted because');
-	$result = DB_query($sql, $db, $ErrMsg);
-	prnMsg(_('The Petty Cash Tab') . ' ' . $SelectedTab . ' ' . _('has been deleted'), 'success');
-	unset($SelectedTab);
-	unset($_GET['delete']);
+			$sql="DELETE FROM weberp_pctabs WHERE tabcode='".$SelectedTab."'";
+			$ErrMsg = _('The Tab record could not be deleted because');
+			$result = DB_query($sql,$ErrMsg);
+			prnMsg(_('The Petty Cash Tab') .  ' ' . $SelectedTab  . ' ' . _('has been deleted') ,'success');
+			unset ($SelectedTab);
+			unset($_GET['delete']);
 }
 
-if (!isset($SelectedTab)) {
+if (!isset($SelectedTab)){
 
-	/* It could still be the second time the page has been run and a record has been selected for modification - SelectedTab will exist because it was sent with the new call. If its the first time the page has been displayed with no parameters
-	then none of the above are true and the list of sales types will be displayed with
-	links to delete or edit each. These will call the same page again and allow update/input
-	or deletion of the records*/
+/* It could still be the second time the page has been run and a record has been selected for modification - SelectedTab will exist because it was sent with the new call. If its the first time the page has been displayed with no parameters
+then none of the above are true and the list of sales types will be displayed with
+links to delete or edit each. These will call the same page again and allow update/input
+or deletion of the records*/
 
 	$sql = "SELECT tabcode,
 					usercode,
@@ -185,20 +206,20 @@ if (!isset($SelectedTab)) {
 					authorizer,
 					glaccountassignment,
 					glaccountpcash,
-					currencies.decimalplaces,
+					weberp_currencies.decimalplaces,
 					chartmaster1.accountname AS glactassigntname,
 					chartmaster2.accountname AS glactpcashname
-				FROM pctabs INNER JOIN currencies
-				ON pctabs.currency=currencies.currabrev
-				INNER JOIN pctypetabs
-				ON pctabs.typetabcode=pctypetabs.typetabcode
-				INNER JOIN chartmaster AS chartmaster1 ON
-				pctabs.glaccountassignment = chartmaster1.accountcode
-				INNER JOIN chartmaster AS chartmaster2 ON
-				pctabs.glaccountpcash = chartmaster2.accountcode
+				FROM weberp_pctabs INNER JOIN weberp_currencies
+				ON weberp_pctabs.currency=weberp_currencies.currabrev
+				INNER JOIN weberp_pctypetabs
+				ON weberp_pctabs.typetabcode=weberp_pctypetabs.typetabcode
+				INNER JOIN weberp_chartmaster AS chartmaster1 ON
+				weberp_pctabs.glaccountassignment = chartmaster1.accountcode
+				INNER JOIN weberp_chartmaster AS chartmaster2 ON
+				weberp_pctabs.glaccountpcash = chartmaster2.accountcode
 				ORDER BY tabcode";
-	$result = DB_query($sql, $db);
-	if (DB_num_rows($result) > 0) {
+	$result = DB_query($sql);
+	if (DB_num_rows($result)>0){
 		echo '<br /><table class="selection">';
 		echo '<tr>
 				<th>' . _('Tab Code') . '</th>
@@ -212,15 +233,15 @@ if (!isset($SelectedTab)) {
 				<th>' . _('GL Account Petty Cash Tab') . '</th>
 			</tr>';
 
-		$k = 0; //row colour counter
+		$k=0; //row colour counter
 
 		while ($myrow = DB_fetch_array($result)) {
-			if ($k == 1) {
+			if ($k==1){
 				echo '<tr class="EvenTableRows">';
-				$k = 0;
+				$k=0;
 			} else {
 				echo '<tr class="OddTableRows">';
-				$k = 1;
+				$k=1;
 			}
 
 			printf('<td>%s</td>
@@ -233,8 +254,19 @@ if (!isset($SelectedTab)) {
 					<td>%s</td>
 					<td>%s</td>
 					<td><a href="%sSelectedTab=%s">' . _('Edit') . '</a></td>
-					<td><a href="%sSelectedTab=%s&amp;delete=yes" onclick=\' return MakeConfirm("' . _('Are you sure you wish to delete this tab code?') . '", \'Confirm Delete\', this);\'>' . _('Delete') . '</a></td>
-					</tr>', $myrow['tabcode'], $myrow['usercode'], $myrow['typetabdescription'], $myrow['currabrev'], locale_number_format($myrow['tablimit'], $myrow['decimalplaces']), $myrow['assigner'], $myrow['authorizer'], $myrow['glaccountassignment'] . ' - ' . $myrow['glactassigntname'], $myrow['glaccountpcash'] . ' - ' . $myrow['glactpcashname'], htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '?', $myrow['tabcode'], htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '?', $myrow['tabcode']);
+					<td><a href="%sSelectedTab=%s&amp;delete=yes" onclick=\' return confirm("' . _('Are you sure you wish to delete this tab code?') . '");\'>' . _('Delete') . '</a></td>
+					</tr>',
+					$myrow['tabcode'],
+					$myrow['usercode'],
+					$myrow['typetabdescription'],
+					$myrow['currabrev'],
+					locale_number_format($myrow['tablimit'],$myrow['decimalplaces']),
+					$myrow['assigner'],
+					$myrow['authorizer'],
+					$myrow['glaccountassignment'].' - '. $myrow['glactassigntname'],
+					$myrow['glaccountpcash'].' - '.$myrow['glactpcashname'],
+					htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?', $myrow['tabcode'],
+					htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?', $myrow['tabcode']);
 		}
 		//END WHILE LIST LOOP
 		echo '</table>';
@@ -244,67 +276,65 @@ if (!isset($SelectedTab)) {
 //end of ifs and buts!
 if (isset($SelectedTab)) {
 
-	echo '<br /><div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">' . _('Show All Tabs Defined') . '</a></div>';
+	echo '<br /><div class="centre"><a href="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">' . _('Show All Tabs Defined') . '</a></div>';
 }
 if (!isset($_GET['delete'])) {
 
-	echo '<form onSubmit="return VerifyForm(this);" method="post" class="noPrint" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '">';
-	echo '<div>';
-	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-	echo '<br />'; //Main table
+	echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '">
+			<div>
+			<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
+			<br />'; //Main table
 
-	if (isset($SelectedTab) and $SelectedTab != '') {
+	if ( isset($SelectedTab) AND $SelectedTab!='' ) {
 
-		$sql = "SELECT * FROM pctabs
-				WHERE tabcode='" . $SelectedTab . "'";
+		$sql = "SELECT * FROM weberp_pctabs
+				WHERE tabcode='".$SelectedTab."'";
 
-		$result = DB_query($sql, $db);
+		$result = DB_query($sql);
 		$myrow = DB_fetch_array($result);
 
 		$_POST['TabCode'] = $myrow['tabcode'];
-		$_POST['SelectUser'] = $myrow['usercode'];
-		$_POST['SelectTabs'] = $myrow['typetabcode'];
-		$_POST['SelectCurrency'] = $myrow['currency'];
-		$_POST['TabLimit'] = locale_number_format($myrow['tablimit']);
-		$_POST['SelectAssigner'] = $myrow['assigner'];
-		$_POST['SelectAuthoriser'] = $myrow['authorizer'];
-		$_POST['GLAccountCash'] = $myrow['glaccountassignment'];
-		$_POST['GLAccountPcashTab'] = $myrow['glaccountpcash'];
+		$_POST['SelectUser']  = $myrow['usercode'];
+		$_POST['SelectTabs']  = $myrow['typetabcode'];
+		$_POST['SelectCurrency']  = $myrow['currency'];
+		$_POST['TabLimit']  = locale_number_format($myrow['tablimit']);
+		$_POST['SelectAssigner']  = $myrow['assigner'];
+		$_POST['SelectAuthoriser']  = $myrow['authorizer'];
+		$_POST['GLAccountCash']  = $myrow['glaccountassignment'];
+		$_POST['GLAccountPcashTab']  = $myrow['glaccountpcash'];
 
 
 		echo '<input type="hidden" name="SelectedTab" value="' . $SelectedTab . '" />';
-		echo '<input type="hidden" name="TabCode" value="' . $_POST['TabCode'] . '" />';
+		echo '<input type="hidden" name="TabCode" value="' . $_POST['TabCode']. '" />';
 		echo '<table class="selection">
 				<tr>
 				<td>' . _('Tab Code') . ':</td>
 				<td>' . $_POST['TabCode'] . '</td>
 				</tr>';
-	} else {
-		// This is a new type so the user may volunteer a type code
+	} else 	{
+		// This is a new type so the user must enter a type code
 		echo '<table class="selection">
-				<tr>
-					<td>' . _('Tab Code') . ':</td>
-					<td><input type="text" required="required" minlength="1" maxlength="20" name="TabCode" /></td>
-				</tr>';
+				<tr><td>' . _('Tab Code') . ':</td>
+					<td><input type="text"' . (in_array('TypeTabCode',$Errors) ? 'class="inputerror"' : '' ) .' name="TabCode" required="required" autofocus="autofocus" /></td></tr>';
 
 	}
 
 	if (!isset($_POST['typetabdescription'])) {
-		$_POST['typetabdescription'] = '';
+		$_POST['typetabdescription']='';
 	}
 
 	echo '<tr>
 			<td>' . _('User Name') . ':</td>
-			<td><select required="required" minlength="1" name="SelectUser">';
+			<td><select name="SelectUser">';
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users ORDER BY userid";
+			FROM weberp_www_users ORDER BY userid";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['SelectUser']) and $myrow['userid'] == $_POST['SelectUser']) {
+		if (isset($_POST['SelectUser']) and $myrow['userid']==$_POST['SelectUser']) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -313,22 +343,23 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop get user
 
-	echo '</select></td></tr>';
-	DB_free_result($result);
+	echo '</select></td>
+		</tr>';
+    DB_free_result($result);
 
 	echo '<tr>
 			<td>' . _('Type Of Tab') . ':</td>
-			<td><select required="required" minlength="1" name="SelectTabs">';
+			<td><select name="SelectTabs">';
 
 	$SQL = "SELECT typetabcode,
 					typetabdescription
-			FROM pctypetabs
+			FROM weberp_pctypetabs
 			ORDER BY typetabcode";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['SelectTabs']) and $myrow['typetabcode'] == $_POST['SelectTabs']) {
+		if (isset($_POST['SelectTabs']) and $myrow['typetabcode']==$_POST['SelectTabs']) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -338,18 +369,18 @@ if (!isset($_GET['delete'])) {
 	} //end while loop get type of tab
 
 	echo '</select></td></tr>';
-	DB_free_result($result);
+    DB_free_result($result);
 
 	echo '<tr>
 			<td>' . _('Currency') . ':</td>
-			<td><select required="required" minlength="1" name="SelectCurrency">';
+			<td><select name="SelectCurrency">';
 
-	$SQL = "SELECT currency, currabrev FROM currencies";
+	$SQL = "SELECT currency, currabrev FROM weberp_currencies";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['SelectCurrency']) and $myrow['currabrev'] == $_POST['SelectCurrency']) {
+		if (isset($_POST['SelectCurrency']) and $myrow['currabrev']==$_POST['SelectCurrency']) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -358,29 +389,32 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop get type of tab
 
-	echo '</select></td></tr>';
-	DB_free_result($result);
+	echo '</select></td>
+		</tr>';
+    DB_free_result($result);
 
 	if (!isset($_POST['TabLimit'])) {
-		$_POST['TabLimit'] = 0;
+		$_POST['TabLimit']=0;
 	}
 
 	echo '<tr>
 			<td>' . _('Limit Of Tab') . ':</td>
-			<td><input type="text" class="number" name="TabLimit" size="12" required="required" minlength="1" maxlength="11" value="' . $_POST['TabLimit'] . '" /></td></tr>';
+			<td><input type="text" class="integer" name="TabLimit" size="12" maxlength="11" value="' . $_POST['TabLimit'] . '" /></td></tr>';
 
-	echo '<tr><td>' . _('Assigner') . ':</td>
-			<td><select required="required" minlength="1" name="SelectAssigner">';
+	echo '<tr>
+			<td>' . _('Assigner') . ':</td>
+			<td><select multiple="multiple" name="SelectAssigner[]">';
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users
+			FROM weberp_www_users
 			ORDER BY userid";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['SelectAssigner']) and $myrow['userid'] == $_POST['SelectAssigner']) {
+		$Assigners = explode(',',$_POST['SelectAssigner']);
+		if (isset($_POST['SelectAssigner']) and in_array($myrow['userid'],$Assigners)) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -389,22 +423,24 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop get assigner
 
-	echo '</select></td></tr>';
-	DB_free_result($result);
+    echo '</select></td>
+		</tr>';
+    DB_free_result($result);
 
 	echo '<tr>
 			<td>' . _('Authoriser') . ':</td>
-			<td><select required="required" minlength="1" name="SelectAuthoriser">';
+			<td><select multiple="multiple" name="SelectAuthoriser[]">';
 
 	$SQL = "SELECT userid,
 					realname
-			FROM www_users
+			FROM weberp_www_users
 			ORDER BY userid";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['SelectAuthoriser']) and $myrow['userid'] == $_POST['SelectAuthoriser']) {
+		$Authorizer = explode(',',$_POST['SelectAuthoriser']);
+		if (isset($_POST['SelectAuthoriser']) and in_array($myrow['userid'],$Authorizer)) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -413,23 +449,24 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop get authoriser
 
-	echo '</select></td></tr>';
-	DB_free_result($result);
+    echo '</select></td>
+		</tr>';
+    DB_free_result($result);
 
 	echo '<tr>
 			<td>' . _('GL Account Cash Assignment') . ':</td>
-			<td><select required="required" minlength="1" name="GLAccountCash">';
+			<td><select name="GLAccountCash">';
 
-	$SQL = "SELECT chartmaster.accountcode,
-					chartmaster.accountname
-			FROM chartmaster INNER JOIN bankaccounts
-			ON chartmaster.accountcode = bankaccounts.accountcode
-			ORDER BY chartmaster.accountcode";
+	$SQL = "SELECT weberp_chartmaster.accountcode,
+					weberp_chartmaster.accountname
+			FROM weberp_chartmaster INNER JOIN weberp_bankaccounts
+			ON weberp_chartmaster.accountcode = weberp_bankaccounts.accountcode
+			ORDER BY weberp_chartmaster.accountcode";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['GLAccountCash']) and $myrow['accountcode'] == $_POST['GLAccountCash']) {
+		if (isset($_POST['GLAccountCash']) and $myrow['accountcode']==$_POST['GLAccountCash']) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -438,21 +475,22 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop
 
-	echo '</select></td></tr>';
-	DB_free_result($result);
+    echo '</select></td>
+		</tr>';
+    DB_free_result($result);
 
 	echo '<tr>
 			<td>' . _('GL Account Petty Cash Tab') . ':</td>
-			<td><select required="required" minlength="1" name="GLAccountPcashTab">';
+			<td><select name="GLAccountPcashTab">';
 
 	$SQL = "SELECT accountcode, accountname
-			FROM chartmaster
+			FROM weberp_chartmaster
 			ORDER BY accountcode";
 
-	$result = DB_query($SQL, $db);
+	$result = DB_query($SQL);
 
 	while ($myrow = DB_fetch_array($result)) {
-		if (isset($_POST['GLAccountPcashTab']) and $myrow['accountcode'] == $_POST['GLAccountPcashTab']) {
+		if (isset($_POST['GLAccountPcashTab']) and $myrow['accountcode']==$_POST['GLAccountPcashTab']) {
 			echo '<option selected="selected" value="';
 		} else {
 			echo '<option value="';
@@ -461,14 +499,18 @@ if (!isset($_GET['delete'])) {
 
 	} //end while loop
 
-	echo '</select></td></tr>';
-	echo '</table>'; // close main table
-	DB_free_result($result);
+    echo '</select></td>
+		</tr>
+		</table>'; // close main table
+    DB_free_result($result);
 
-	echo '<br /><div class="centre"><input type="submit" name="Submit" value="' . _('Accept') . '" /><input type="submit" name="Cancel" value="' . _('Cancel') . '" /></div>';
-
-	echo '</div>
-		  </form>';
+	echo '<br />
+		<div class="centre">
+			<input type="submit" name="Submit" value="' . _('Accept') . '" />
+			<input type="submit" name="Cancel" value="' . _('Cancel') . '" />
+		</div>
+		</div>
+	</form>';
 
 } // end if user wish to delete
 

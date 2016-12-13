@@ -1,28 +1,32 @@
 <?php
-
+/* $Id:  $*/
 /* Script to import fixed assets into a specified period*/
 
 include('includes/session.inc');
 $Title = _('Import Fixed Assets');
 include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
+echo '<p class="page_title_text"><img alt="" src="' . $RootPath . '/css/' . $Theme . 
+		'/images/fixed_assets.png" title="' . 
+		_('Import Fixed Assets from .csv file') . '" />' . ' ' . 
+		_('Import Fixed Assets from .csv file') . '</p>';
 
 // If this script is called with a file object, then the file contents are imported
 // If this script is called with the gettemplate flag, then a template file is served
 // Otherwise, a file upload form is displayed
 
 $FieldNames = array(
-	'Description', //0
-	'LongDescription', //1
-	'AssetCategoryID', //2
-	'SerialNo', //3
-	'BarCode', //4
-	'AssetLocationCode', //5
-	'Cost', //6
-	'AccumDepn', //7
-	'DepnType', //8 - SL or DV
-	'DepnRate', //9
-	'DatePurchased' //10
+	'Description',			//  0 'Title of the fixed asset',
+	'LongDescription',		//  1 'Description of the fixed asset',
+	'AssetCategoryID',		//  2 'Asset category id',
+	'SerialNo',				//  3 'Serial number',
+	'BarCode',				//  4 'Bar code',
+	'AssetLocationCode',	//  5 'Asset location code',
+	'Cost',					//  6 'Cost',
+	'AccumDepn',			//  7 'Accumulated depreciation',
+	'DepnType',				//  8 'Depreciation type - SL or DV',
+	'DepnRate',				//  9 'Depreciation rate',
+	'DatePurchased'			// 10 'Date of purchase',
 );
 
 if ($_FILES['SelectedAssetFile']['name']) { //start file processing
@@ -30,6 +34,13 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	//initialize
 	$InputError = false;
 
+/*
+	if ($_FILES['SelectedAssetFile']['type'] != 'text/csv') {
+		prnMsg (_('File has type') . ' ' . $_FILES['SelectedAssetFile']['type'] . ', ' . _('but only "text/csv" is allowed.'),'error');
+		include('includes/footer.inc');
+		exit;
+	}
+*/
 	//get file handle
 	$FileHandle = fopen($_FILES['SelectedAssetFile']['tmp_name'], 'r');
 
@@ -37,8 +48,8 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	$HeaderRow = fgetcsv($FileHandle, 10000, ",");
 
 	//check for correct number of fields
-	if (count($HeaderRow) != count($FieldNames)) {
-		prnMsg(_('File contains') . ' ' . count($HeaderRow) . ' ' . _('columns, expected') . ' ' . count($FieldNames) . '. ' . _('Study a downloaded template to see the format for the file'), 'error');
+	if ( count($HeaderRow) != count($FieldNames) ) {
+		prnMsg (_('File contains') . ' '. count($HeaderRow). ' ' . _('columns, expected') . ' '. count($FieldNames). '. ' . _('Study a downloaded template to see the format for the file'),'error');
 		fclose($FileHandle);
 		include('includes/footer.inc');
 		exit;
@@ -47,8 +58,8 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	//test header row field name and sequence
 	$i = 0;
 	foreach ($HeaderRow as $FieldName) {
-		if (mb_strtoupper($FieldName) != mb_strtoupper($FieldNames[$i])) {
-			prnMsg(_('The selected file contains fields in the incorrect order (' . mb_strtoupper($FieldName) . ' != ' . mb_strtoupper($FieldNames[$i]) . _('. Download a template and ensure that fields are in the same sequence as the template.')), 'error');
+		if ( mb_strtoupper($FieldName) != mb_strtoupper($FieldNames[$i]) ) {
+			prnMsg (_('The selected file contains fields in the incorrect order ('. mb_strtoupper($FieldName). ' != '. mb_strtoupper($FieldNames[$i]). '. ' ._('Download a template and ensure that fields are in the same sequence as the template.')),'error');
 			fclose($FileHandle);
 			include('includes/footer.inc');
 			exit;
@@ -57,23 +68,23 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	}
 
 	//start database transaction
-	DB_Txn_Begin($db);
+	DB_Txn_Begin();
 
 	//loop through file rows
 	$Row = 1;
-	while (($myrow = fgetcsv($FileHandle, 10000, ',')) !== FALSE) {
+	while ( ($myrow = fgetcsv($FileHandle, 10000, ',')) !== FALSE ) {
 
 		//check for correct number of fields
 		$FieldCount = count($myrow);
-		if ($FieldCount != count($FieldNames)) {
-			prnMsg(count($FieldNames) . ' ' . _('fields are required, but') . ' ' . $FieldCount . ' ' . _('fields were received'), 'error');
+		if ($FieldCount != count($FieldNames)){
+			prnMsg (count($FieldNames) . ' ' . _('fields are required, but') . ' '. $FieldCount . ' ' . _('fields were received'),'error');
 			fclose($FileHandle);
 			include('includes/footer.inc');
 			exit;
 		}
 
 		// cleanup the data (csv files often import with empty strings and such)
-		for ($i = 0; $i < count($myrow); $i++) {
+		for ($i=0; $i<count($myrow);$i++) {
 			$myrow[$i] = trim($myrow[$i]);
 			switch ($i) {
 				case 0:
@@ -104,81 +115,81 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 					$DepnType = mb_strtoupper($myrow[$i]);
 					break;
 				case 9:
-					$DepnRate = $myrow[$i];
+					$DepnRate= $myrow[$i];
 					break;
 				case 10:
-					$DatePurchased = $myrow[$i];
+					$DatePurchased= $myrow[$i];
 					break;
 			} //end switch
 		} //end loop around fields from import
 
-		if (mb_strlen($Description) == 0 or mb_strlen($Description) > 50) {
-			prnMsg('The description of the asset is expected to be more than 3 characters long and less than 50 characters long', 'error');
+		if (mb_strlen($Description)==0 OR mb_strlen($Description)>50){
+			prnMsg('The description of the asset is expected to be more than 3 characters long and less than 50 characters long','error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Description:') . ' ' . $Description;
-			$InputError = true;
+			$InputError=true;
 		}
-		if (!is_numeric($DepnRate)) {
-			prnMsg(_('The depreciation rate is expected to be numeric'), 'error');
+		if (!is_numeric($DepnRate)){
+			prnMsg(_('The depreciation rate is expected to be numeric'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Depreciation Rate:') . ' ' . $DepnRate;
-			$InputError = true;
-		} elseif ($DepnRate < 0 or $DepnRate > 100) {
-			prnMsg(_('The depreciation rate is expected to be a number between 0 and 100'), 'error');
-			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Depreciation Rate:') . ' ' . $DepnRate;
-			$InputError = true;
+			$InputError=true;
+		}elseif ($DepnRate<0 OR $DepnRate>100){
+			prnMsg(_('The depreciation rate is expected to be a number between 0 and 100'),'error');
+			echo '<br />' .  _('Row:') . $Row . ' - ' ._('Invalid Depreciation Rate:') . ' ' . $DepnRate;
+			$InputError=true;
 		}
-		if (!is_numeric($AccumDepn)) {
-			prnMsg(_('The accumulated depreciation is expected to be numeric'), 'error');
+		if (!is_numeric($AccumDepn)){
+			prnMsg(_('The accumulated depreciation is expected to be numeric'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Accumulated Depreciation:') . ' ' . $AccumDepn;
-			$InputError = true;
-		} elseif ($AccumDepn < 0) {
-			prnMsg(_('The accumulated depreciation is expected to be either zero or a positive number'), 'error');
+			$InputError=true;
+		} elseif ($AccumDepn<0){
+			 prnMsg(_('The accumulated depreciation is expected to be either zero or a positive number'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Accumulated Depreciation:') . ' ' . $AccumDepn;
-			$InputError = true;
+			$InputError=true;
 		}
-		if (!is_numeric($Cost)) {
-			prnMsg(_('The cost is expected to be numeric'), 'error');
+		if (!is_numeric($Cost)){
+			prnMsg(_('The cost is expected to be numeric'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Cost:') . ' ' . $Cost;
-			$InputError = true;
-		} elseif ($Cost <= 0) {
-			prnMsg(_('The cost is expected to be a positive number'), 'error');
+			$InputError=true;
+		} elseif ($Cost<=0){
+			 prnMsg(_('The cost is expected to be a positive number'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid Cost:') . ' ' . $AccumDepn;
-			$InputError = true;
+			$InputError=true;
 		}
-		if ($DepnType != 'SL' and $DepnType != 'DV') {
-			prnMsg(_('The depreciation type must be either "SL" - Straight Line or "DV" - Diminishing Value'), 'error');
+		if ($DepnType !='SL' AND $DepnType!='DV'){
+			prnMsg(_('The depreciation type must be either "SL" - Straight Line or "DV" - Diminishing Value'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid depreciation type:') . ' ' . $DepnType;
 			$InputError = true;
 		}
-		$result = DB_query("SELECT categoryid FROM fixedassetcategories WHERE categoryid='" . $AssetCategoryID . "'", $db);
-		if (DB_num_rows($result) == 0) {
+		$result = DB_query("SELECT categoryid FROM weberp_fixedassetcategories WHERE categoryid='" . $AssetCategoryID . "'");
+		if (DB_num_rows($result)==0){
 			$InputError = true;
-			prnMsg(_('The asset category code entered must be exist in the assetcategories table'), 'error');
+			prnMsg(_('The asset category code entered must be exist in the assetcategories table'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid asset category:') . ' ' . $AssetCategoryID;
 		}
-		$result = DB_query("SELECT locationid FROM fixedassetlocations WHERE locationid='" . $AssetLocationCode . "'", $db);
-		if (DB_num_rows($result) == 0) {
+		$result = DB_query("SELECT locationid FROM weberp_fixedassetlocations WHERE locationid='" . $AssetLocationCode . "'");
+		if (DB_num_rows($result)==0){
 			$InputError = true;
-			prnMsg(_('The asset location code entered must be exist in the asset locations table'), 'error');
+			prnMsg(_('The asset location code entered must be exist in the asset locations table'),'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid asset location code:') . ' ' . $AssetLocationCode;
 		}
-		if (!Is_Date($DatePurchased)) {
+		if (!Is_Date($DatePurchased)){
 			$InputError = true;
-			prnMsg(_('The date purchased must be entered in the format:') . ' ' . $_SESSION['DefaultDateFormat'], 'error');
+			prnMsg(_('The date purchased must be entered in the format:') . ' ' . $_SESSION['DefaultDateFormat'],'error');
 			echo '<br />' . _('Row:') . $Row . ' - ' . _('Invalid date format:') . ' ' . $DatePurchased;
 		}
-		if ($DepnType == 'DV') {
-			$DepnType = 1;
+		if ($DepnType=='DV'){
+			$DepnType=1;
 		} else {
-			$DepnType = 0;
+			$DepnType=0;
 		}
 
-		if ($InputError == false) { //no errors
+		if ($InputError == false){ //no errors
 
-			$TransNo = GetNextTransNo(49, $db);
-			$PeriodNo = GetPeriod(ConvertSQLDate($_POST['DateToEnter']), $db);
+			$TransNo = GetNextTransNo(49,$db);
+			$PeriodNo = GetPeriod(ConvertSQLDate($_POST['DateToEnter']),$db);
 
 			//attempt to insert the stock item
-			$sql = "INSERT INTO fixedassets (description,
+			$sql = "INSERT INTO weberp_fixedassets (description,
 											longdescription,
 											assetcategoryid,
 											serialno,
@@ -201,15 +212,15 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 									'" . $DepnRate . "',
 									'" . FormatDateForSQL($DatePurchased) . "')";
 
-			$ErrMsg = _('The asset could not be added because');
+			$ErrMsg =  _('The asset could not be added because');
 			$DbgMsg = _('The SQL that was used to add the asset and failed was');
-			$result = DB_query($sql, $db, $ErrMsg, $DbgMsg);
+			$result = DB_query($sql, $ErrMsg, $DbgMsg);
 
-			if (DB_error_no($db) == 0) { //the insert of the new code worked so bang in the fixedassettrans records too
+			if (DB_error_no() ==0) { //the insert of the new code worked so bang in the weberp_fixedassettrans records too
 
 
-				$AssetID = DB_Last_Insert_ID($db, 'fixedassets', 'assetid');
-				$sql = "INSERT INTO fixedassettrans ( assetid,
+				$AssetID = DB_Last_Insert_ID($db, 'weberp_fixedassets','assetid');
+				$sql = "INSERT INTO weberp_fixedassettrans ( assetid,
 												transtype,
 												transno,
 												transdate,
@@ -226,11 +237,11 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 											'cost',
 											'" . $Cost . "')";
 
-				$ErrMsg = _('The transaction for the cost of the asset could not be added because');
+				$ErrMsg =  _('The transaction for the cost of the asset could not be added because');
 				$DbgMsg = _('The SQL that was used to add the fixedasset trans record that failed was');
-				$InsResult = DB_query($sql, $db, $ErrMsg, $DbgMsg);
+				$InsResult = DB_query($sql,$ErrMsg,$DbgMsg);
 
-				$sql = "INSERT INTO fixedassettrans ( assetid,
+				$sql = "INSERT INTO weberp_fixedassettrans ( assetid,
 													transtype,
 													transno,
 													transdate,
@@ -247,12 +258,12 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 											'depn',
 											'" . $AccumDepn . "')";
 
-				$ErrMsg = _('The transaction for the cost of the asset could not be added because');
+				$ErrMsg =  _('The transaction for the cost of the asset could not be added because');
 				$DbgMsg = _('The SQL that was used to add the fixedasset trans record that failed was');
-				$InsResult = DB_query($sql, $db, $ErrMsg, $DbgMsg);
+				$InsResult = DB_query($sql,$ErrMsg,$DbgMsg);
 
-				if (DB_error_no($db) == 0) {
-					prnMsg(_('Inserted the new asset:') . ' ' . $Description, 'info');
+				if (DB_error_no() ==0) {
+					prnMsg( _('Inserted the new asset:') . ' ' . $Description,'info');
 				}
 			}
 		} // there were errors checking the row so no inserts
@@ -260,18 +271,18 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 	}
 
 	if ($InputError == 1) { //exited loop with errors so rollback
-		prnMsg(_('Failed on row ' . $Row . '. Batch import has been rolled back.'), 'error');
-		DB_Txn_Rollback($db);
+		prnMsg(_('Failed on row '. $Row. '. Batch import has been rolled back.'),'error');
+		DB_Txn_Rollback();
 	} else { //all good so commit data transaction
-		DB_Txn_Commit($db);
-		prnMsg(_('Batch Import of') . ' ' . $_FILES['SelectedAssetFile']['name'] . ' ' . _('has been completed. All assets in the file have been committed to the database.'), 'success');
+		DB_Txn_Commit();
+		prnMsg( _('Batch Import of') .' ' . $_FILES['SelectedAssetFile']['name']  . ' '. _('has been completed. All assets in the file have been committed to the database.'),'success');
 	}
 
 	fclose($FileHandle);
 
-} elseif (isset($_POST['gettemplate']) or isset($_GET['gettemplate'])) { //download an import template
+} elseif ( isset($_POST['gettemplate']) OR isset($_GET['gettemplate']) ) { //download an import template
 
-	echo '<br /><br /><br />"' . implode('","', $FieldNames) . '"<br /><br /><br />';
+	echo '<br /><br /><br />"'. implode('","',$FieldNames). '"<br /><br /><br />';
 
 } else { //show file upload form
 
@@ -281,26 +292,22 @@ if ($_FILES['SelectedAssetFile']['name']) { //start file processing
 		<br />
 		<br />
 	';
-	echo '<form onSubmit="return VerifyForm(this);" enctype="multipart/form-data" action="Z_ImportFixedAssets.php" method="post" class="noPrint">';
-	echo '<div class="centre">';
+	echo '<form enctype="multipart/form-data" action="Z_ImportFixedAssets.php" method="post">';
+    echo '<div class="centre">';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
 	echo '<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />';
 	echo '<table class="selection">
-			<tr>
-				<td>' . _('Select Date to Upload B/Fwd Assets To:') . '</td>
-				<td><select minlength="0" name="DateToEnter">';
-	$PeriodsResult = DB_query("SELECT lastdate_in_period FROM periods ORDER BY periodno", $db);
-	while ($PeriodRow = DB_fetch_row($PeriodsResult)) {
+					<tr><td>' . _('Select Date to Upload B/Fwd Assets To:') . '</td>
+							<td><select name="DateToEnter">';
+	$PeriodsResult = DB_query("SELECT lastdate_in_period FROM weberp_periods ORDER BY periodno");
+	while ($PeriodRow = DB_fetch_row($PeriodsResult)){
 		echo '<option value="' . $PeriodRow[0] . '">' . ConvertSQLDate($PeriodRow[0]) . '</option>';
 	}
 	echo '</select></td></tr>';
-	echo '<tr>
-			<td>' . _('Fixed Assets Upload file:') . '</td><td><input name="SelectedAssetFile" type="file" /></td>
-		</tr>
-	</table>
+	echo '<tr><td>' . _('Fixed Assets Upload file:') . '</td><td><input name="SelectedAssetFile" type="file" /></td></tr></table>
 			<input type="submit" value="' . _('Send File') . '" />
-		</div>
+        </div>
 		</form>';
 
 }

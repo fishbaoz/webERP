@@ -230,7 +230,7 @@ class code128 extends linearBarcode {
 
 		$biteCode['DATA'] = '';
 		// Find start character
-		if(strlen($this->text)>=2 and is_numeric($this->text{0}) and is_numeric($this->text{1})) {
+		if(strlen($this->text)>=2 && is_numeric($this->text{0}) && is_numeric($this->text{1})) {
 			// If the first and second characters are numeric use character set C
 			// and insert START_C char
 			$biteCode['DATA'] .= $this->codeTable[self::START_C];
@@ -278,7 +278,7 @@ class code128 extends linearBarcode {
 			$checksumCounter++;
 
 			// find next char set.
-			if(strlen($this->text) > ($i+2) and is_numeric($this->text{$i+1}) and is_numeric($this->text{$i+2})) {
+			if(strlen($this->text) > ($i+2) && is_numeric($this->text{$i+1}) && is_numeric($this->text{$i+2})) {
 				if($characterSet!=self::CHARSET_C) {
 					$characterValue = 99;
 					$biteCode['DATA'] .= $this->codeTable[$characterValue];

@@ -1,19 +1,20 @@
 <?php
+/* $Id: SelectAsset.php 4443 2010-12-23 15:30:30Z tim_schofield $*/
 
-$PricesSecurity = 9;
-
-include('includes/session.inc');
+include ('includes/session.inc');
 $Title = _('Select an Asset');
+
 $ViewTopic = 'FixedAssets';
 $BookMark = 'AssetSelection';
-include('includes/header.inc');
+
+include ('includes/header.inc');
 
 if (isset($_GET['AssetID'])) {
 	//The page is called with a AssetID
 	$_POST['Select'] = $_GET['AssetID'];
 }
 
-if (isset($_GET['NewSearch']) or isset($_POST['Next']) or isset($_POST['Previous']) or isset($_POST['Go'])) {
+if (isset($_GET['NewSearch']) OR isset($_POST['Next']) OR isset($_POST['Previous']) OR isset($_POST['Go'])) {
 	unset($AssetID);
 	unset($_SESSION['SelectedAsset']);
 	unset($_POST['Select']);
@@ -31,29 +32,29 @@ if (isset($_POST['AssetCode'])) {
 // Always show the search facilities
 $SQL = "SELECT categoryid,
 				categorydescription
-			FROM fixedassetcategories
+			FROM weberp_fixedassetcategories
 			ORDER BY categorydescription";
-$result = DB_query($SQL, $db);
+$result = DB_query($SQL);
 if (DB_num_rows($result) == 0) {
-	prnMsg( _('There are no asset categories currently defined please use the link below to set them up') . '<br /><a href="' . $RootPath . '/FixedAssetCategories.php">' . _('Define Asset Categories') . '</a>', 'warn');
-	include('includes/footer.inc');
+	echo '<p><font size="4" color="red">' . _('Problem Report') . ':</font><br />' . _('There are no asset categories currently defined please use the link below to set them up');
+	echo '<br /><a href="' . $RootPath . '/FixedAssetCategories.php">' . _('Define Asset Categories') . '</a>';
 	exit;
 }
 // end of showing search facilities
 
-echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '" method="post" class="noPrint">
+echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '" method="post">
 	<div>
 		<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />
-		<p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>
+		<p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . $Title . '</p>
 		<table class="selection">
 		<tr>
 			<td>' . _('In Asset Category') . ':</td>
-			<td><select minlength="0" name="AssetCategory">';
+			<td><select name="AssetCategory">';
 
 if (!isset($_POST['AssetCategory'])) {
 	$_POST['AssetCategory'] = 'ALL';
 }
-if ($_POST['AssetCategory'] == 'ALL') {
+if ($_POST['AssetCategory']=='ALL'){
 	echo '<option selected="selected" value="ALL">' . _('Any asset category') . '</option>';
 } else {
 	echo '<option value="ALL">' . _('Any asset category') . '</option>';
@@ -70,25 +71,25 @@ echo '</select></td>
 	<td>' . _('Enter partial description') . ':</td>
 	<td>';
 if (isset($_POST['Keywords'])) {
-	echo '<input type="text" name="Keywords" value="' . $_POST['Keywords'] . '" size="20" minlength="0" maxlength="25" />';
+	echo '<input type="text" name="Keywords" autofocus="autofocus" value="' . $_POST['Keywords'] . '" size="20" maxlength="25" />';
 } else {
-	echo '<input type="text" name="Keywords" size="20" minlength="0" maxlength="25" />';
+	echo '<input type="text" name="Keywords" autofocus="autofocus" size="20" maxlength="25" />';
 }
 echo '</td>
 	</tr>
 	<tr>
 		<td>' . _('Asset Location') . ':</td>
-		<td><select minlength="0" name="AssetLocation">';
+		<td><select name="AssetLocation">';
 
 if (!isset($_POST['AssetLocation'])) {
 	$_POST['AssetLocation'] = 'ALL';
 }
-if ($_POST['AssetLocation'] == 'ALL') {
+if ($_POST['AssetLocation']=='ALL'){
 	echo '<option selected="selected" value="ALL">' . _('Any asset location') . '</option>';
 } else {
 	echo '<option value="ALL">' . _('Any asset location') . '</option>';
 }
-$result = DB_query("SELECT locationid, locationdescription FROM fixedassetlocations", $db);
+$result = DB_query("SELECT locationid, locationdescription FROM weberp_fixedassetlocations");
 
 while ($myrow = DB_fetch_array($result)) {
 	if ($myrow['locationid'] == $_POST['AssetLocation']) {
@@ -103,9 +104,9 @@ echo '  </td>
 		<td><b>' . _('OR') . ' ' . '</b>' . _('Enter partial asset code') . ':</td>
 		<td>';
 if (isset($_POST['AssetCode'])) {
-	echo '<input type="text" class="number" name="AssetCode" value="' . $_POST['AssetCode'] . '" size="15" minlength="0" maxlength="13" />';
+	echo '<input type="text" class="number" name="AssetCode" value="' . $_POST['AssetCode'] . '" size="15" maxlength="13" />';
 } else {
-	echo '<input type="text" name="AssetCode" size="15" minlength="0" maxlength="13" />';
+	echo '<input type="text" name="AssetCode" size="15" maxlength="13" />';
 }
 echo '</td>
 	</tr>
@@ -115,98 +116,97 @@ echo '</td>
 		<input type="submit" name="Search" value="' . _('Search Now') . '" />
 	</div>
 	<br />
-	</div>';
-echo '<script  type="text/javascript">defaultControl(document.forms[0].Keywords);</script>';
+    </div>';
 
 // query for list of record(s)
-if (isset($_POST['Go']) or isset($_POST['Next']) or isset($_POST['Previous'])) {
-	$_POST['Search'] = 'Search';
+if(isset($_POST['Go']) OR isset($_POST['Next']) OR isset($_POST['Previous'])) {
+	$_POST['Search']='Search';
 }
-if (isset($_POST['Search']) or isset($_POST['Go']) or isset($_POST['Next']) or isset($_POST['Previous'])) {
-	if (!isset($_POST['Go']) and !isset($_POST['Next']) and !isset($_POST['Previous'])) {
+if (isset($_POST['Search']) OR isset($_POST['Go']) OR isset($_POST['Next']) OR isset($_POST['Previous'])) {
+	if (!isset($_POST['Go']) AND !isset($_POST['Next']) AND !isset($_POST['Previous'])) {
 		// if Search then set to first page
 		$_POST['PageOffset'] = 1;
 	}
-	if ($_POST['Keywords'] and $_POST['AssetCode']) {
-		prnMsg(_('Asset description keywords have been used in preference to the asset code extract entered'), 'info');
+	if ($_POST['Keywords'] AND $_POST['AssetCode']) {
+		prnMsg( _('Asset description keywords have been used in preference to the asset code extract entered'), 'info' );
 	}
 	$SQL = "SELECT assetid,
 					description,
 					datepurchased,
-					fixedassetlocations.locationdescription
-			FROM fixedassets INNER JOIN fixedassetlocations
-			ON fixedassets.assetlocation=fixedassetlocations.locationid ";
+					weberp_fixedassetlocations.locationdescription
+			FROM weberp_fixedassets INNER JOIN weberp_fixedassetlocations
+			ON weberp_fixedassets.assetlocation=weberp_fixedassetlocations.locationid ";
 
 	if ($_POST['Keywords']) {
 		//insert wildcard characters in spaces
 		$_POST['Keywords'] = mb_strtoupper($_POST['Keywords']);
 		$SearchString = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
 		if ($_POST['AssetCategory'] == 'ALL') {
-			if ($_POST['AssetLocation'] == 'ALL') {
-				$SQL .= "WHERE description " . LIKE . "'" . $SearchString . "'
-						ORDER BY fixedassets.assetid";
+			if ($_POST['AssetLocation']=='ALL'){
+				$SQL .= "WHERE description " . LIKE .  "'" . $SearchString . "'
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND description " . LIKE . "'" . $SearchString . "'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND description " . LIKE .  "'" . $SearchString . "'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
-			if ($_POST['AssetLocation'] == 'ALL') {
-				$SQL .= "WHERE description " . LIKE . "'" . $SearchString . "'
+			if ($_POST['AssetLocation']=='ALL'){
+				$SQL .= "WHERE description " . LIKE .  "'" . $SearchString . "'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND description " . LIKE . "'" . $SearchString . "'
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND description " . LIKE .  "'" . $SearchString . "'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
 	} elseif (isset($_POST['AssetCode'])) {
 		if ($_POST['AssetCategory'] == 'ALL') {
-			if ($_POST['AssetLocation'] == 'ALL') {
-				$SQL .= "WHERE fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
-						ORDER BY fixedassets.assetid";
+			if ($_POST['AssetLocation']=='ALL'){
+				$SQL .= "WHERE weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
-			if ($_POST['AssetLocation'] == 'ALL') {
-				$SQL .= "WHERE fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+			if ($_POST['AssetLocation']=='ALL'){
+				$SQL .= "WHERE weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						AND fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						AND weberp_fixedassets.assetid " . LIKE . " '%" . $_POST['AssetCode'] . "%'
 						AND  assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
-	} elseif (!isset($_POST['AssetCode']) and !isset($_POST['Keywords'])) {
+	} elseif (!isset($_POST['AssetCode']) AND !isset($_POST['Keywords'])) {
 		if ($_POST['AssetCategory'] == 'All') {
-			if ($_POST['AssetLocation'] == 'ALL') {
-				$SQL .= 'ORDER BY fixedassets.assetid';
+			if ($_POST['AssetLocation']=='ALL'){
+				$SQL .= 'ORDER BY weberp_fixedassets.assetid';
 			} else {
-				$SQL .= "WHERE fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						ORDER BY fixedassets.assetid";
+				$SQL .= "WHERE weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		} else {
-			if ($_POST['AssetLocation'] == 'ALL') {
+			if ($_POST['AssetLocation']=='ALL'){
 				$SQL .= "WHERE assetcategoryid='" . $_POST['AssetCategory'] . "'
-						ORDER BY fixedassets.assetid";
+						ORDER BY weberp_fixedassets.assetid";
 			} else {
 				$SQL .= "WHERE assetcategoryid='" . $_POST['AssetCategory'] . "'
-						AND fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
-						ORDER BY fixedassets.assetid";
+						AND weberp_fixedassets.assetlocation='" . $_POST['AssetLocation'] . "'
+						ORDER BY weberp_fixedassets.assetid";
 			}
 		}
 	}
 
 	$ErrMsg = _('No assets were returned by the SQL because');
 	$DbgMsg = _('The SQL that returned an error was');
-	$SearchResult = DB_query($SQL, $db, $ErrMsg, $DbgMsg);
+	$SearchResult = DB_query($SQL, $ErrMsg, $DbgMsg);
 
 	if (DB_num_rows($SearchResult) == 0) {
 		prnMsg(_('No assets were returned by this search please re-enter alternative criteria to try again'), 'info');
@@ -215,14 +215,14 @@ if (isset($_POST['Search']) or isset($_POST['Go']) or isset($_POST['Next']) or i
 }
 /* end query for list of records */
 /* display list if there is more than one record */
-if (isset($SearchResult) and !isset($_POST['Select'])) {
+if (isset($SearchResult) AND !isset($_POST['Select'])) {
 	$ListCount = DB_num_rows($SearchResult);
 	if ($ListCount > 0) {
 		// If the user hit the search button and there is more than one item to show
 		$ListPageMax = ceil($ListCount / $_SESSION['DisplayRecordsMax']);
 		if (isset($_POST['Next'])) {
 			if ($_POST['PageOffset'] < $ListPageMax) {
-				$_POST['PageOffset']++;
+				$_POST['PageOffset'] ++;
 			}
 		}
 		if (isset($_POST['Previous'])) {
@@ -235,7 +235,7 @@ if (isset($SearchResult) and !isset($_POST['Select'])) {
 		}
 		if ($ListPageMax > 1) {
 			echo '<div class="centre"><p>&nbsp;&nbsp;' . $_POST['PageOffset'] . ' ' . _('of') . ' ' . $ListPageMax . ' ' . _('pages') . '. ' . _('Go to Page') . ': ';
-			echo '<select minlength="0" name="PageOffset">';
+			echo '<select name="PageOffset">';
 			$ListPage = 1;
 			while ($ListPage <= $ListPageMax) {
 				if ($ListPage == $_POST['PageOffset']) {
@@ -253,10 +253,11 @@ if (isset($SearchResult) and !isset($_POST['Select'])) {
 			echo '<br /></div>';
 		}
 		echo '</form>';
-
-		echo '<form onSubmit="return VerifyForm(this);" action="FixedAssetItems.php" method="post">';
+		
+		echo '<form action="FixedAssetItems.php" method="post">';
 		echo '<div>';
 		echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+	
 		echo '<table class="selection">';
 		$tableheader = '<tr>
 					<th>' . _('Asset Code') . '</th>
@@ -271,7 +272,7 @@ if (isset($SearchResult) and !isset($_POST['Select'])) {
 		if (DB_num_rows($SearchResult) <> 0) {
 			DB_data_seek($SearchResult, ($_POST['PageOffset'] - 1) * $_SESSION['DisplayRecordsMax']);
 		}
-		while (($myrow = DB_fetch_array($SearchResult)) and ($RowIndex <> $_SESSION['DisplayRecordsMax'])) {
+		while (($myrow = DB_fetch_array($SearchResult)) AND ($RowIndex <> $_SESSION['DisplayRecordsMax'])) {
 			if ($k == 1) {
 				echo '<tr class="EvenTableRows">';
 				$k = 0;
@@ -279,13 +280,13 @@ if (isset($SearchResult) and !isset($_POST['Select'])) {
 				echo '<tr class="OddTableRows">';
 				$k++;
 			}
-			echo '<td><input type="submit" name="Select" value="' . $myrow['assetid'] . '" /></td>
+			echo '<td><input type="submit" name="Select" value="' . $myrow['assetid'] .'" /></td>
 				<td>' . $myrow['description'] . '</td>
 				<td>' . $myrow['locationdescription'] . '</td>
 				<td>' . ConvertSQLDate($myrow['datepurchased']) . '</td>
 				</tr>';
 			$j++;
-			if ($j == 20 and ($RowIndex + 1 != $_SESSION['DisplayRecordsMax'])) {
+			if ($j == 20 AND ($RowIndex + 1 != $_SESSION['DisplayRecordsMax'])) {
 				$j = 1;
 				echo $tableheader;
 			}
@@ -295,9 +296,10 @@ if (isset($SearchResult) and !isset($_POST['Select'])) {
 		//end of while loop
 		echo '</table>';
 		echo '</div>
-		  </form>';
+          </form>';
 	} // there were records to list
+    
 }
 /* end display list if there is more than one record */
-include('includes/footer.inc');
+include ('includes/footer.inc');
 ?>

@@ -1,19 +1,19 @@
 <?php
+/* $Id: LanguageSetup.php 7097 2015-01-24 17:32:11Z rchacon $ */
 
 /* Set internal character encoding to UTF-8 */
 mb_internal_encoding('UTF-8');
 
-/* This file is included in session.inc or PDFStarter.php or a report script
- * that does not use PDFStarter.php to check for the existance of gettext
- * function and setup the necessary enviroment to allow for automatic translation
- * Set language - defined in config.php or user variable when logging in
- * (session.inc) NB this language must also exist in the locale on the web-server
- * normally the lower case two character country code underscore uppercase 2
- * character country code does the trick  except for en !!
- */
+/* This file is included in session.inc or PDFStarter.php or a report script that does not use PDFStarter.php
+to check for the existence of gettext function and setup the necessary environment to allow for automatic translation
+
+Set language - defined in config.php or user variable when logging in (session.inc)
+NB this language must also exist in the locale on the web-server
+normally the lower case two character language code underscore uppercase
+2 character country code does the trick  except for en !!*/
 
 
-if (isset($_POST['Language'])) {
+If (isset($_POST['Language'])) {
 	$_SESSION['Language'] = $_POST['Language'];
 	$Language = $_POST['Language'];
 } elseif (!isset($_SESSION['Language'])) {
@@ -22,18 +22,33 @@ if (isset($_POST['Language'])) {
 } else {
 	$Language = $_SESSION['Language'];
 }
+//Check users' locale format via their language
+//Then pass this information to the js for number validation purpose
 
-/* Since LanguagesArray requires the function _() to translate the
- * language names - we must provide a substitute if it doesn't exist
- * aready before we include includes/LanguagesArray.php
- */
+$Collect = array(
+	'US'=>array('en_US.utf8','en_GB.utf8','ja_JP.utf8','hi_IN.utf8','mr_IN.utf8','sw_KE.utf8','tr_TR.utf8','vi_VN.utf8','zh_CN.utf8','zh_HK.utf8','zh_TW.utf8'),
+	'IN'=>array('en_IN.utf8','hi_IN.utf8','mr_IN.utf8'),
+	'EE'=>array('ar_EG.utf8','cz_CZ.utf8','fr_CA.utf8','fr_FR.utf8','hr_HR.utf8','pl_PL.utf8','ru_RU.utf8','sq_AL.utf8','sv_SE.utf8'),
+	'FR'=>array('ar_EG.utf8','cz_CZ.utf8','fr_CA.utf8','fr_FR.utf8','hr_HR.utf8','pl_PL.utf8','ru_RU.utf8','sq_AL.utf8','sv_SE.utf8'),
+	'GM'=>array('de_DE.utf8','el_GR.utf8','es_ES.utf8','fa_IR.utf8','id_ID.utf8','it_IT.utf8','ro_RO.utf8','lv_LV.utf8','nl_NL.utf8','pt_BR.utf8','pt_PT.utf8'));
 
+foreach($Collect as $Key=>$Value) {
+	if(in_array($Language,$Value)) {
+		$Lang = $Key;
+		$_SESSION['Lang'] = $Lang;
+	}
+}
+
+/*Since LanguagesArray requires the function _() to translate the language names - we must provide a substitute if it doesn't exist aready before we include includes/LanguagesArray.php
+ * */
 if (!function_exists('gettext')) {
-	/* PHPGettext integration by Braian Gomez http://www.vairux.com/
-	 */
+/*
+	PHPGettext integration by Braian Gomez
+	http://www.vairux.com/
+*/
 	require_once($PathPrefix . 'includes/php-gettext/streams.php');
 	require_once($PathPrefix . 'includes/php-gettext/gettext.php');
-	if (isset($_SESSION['Language'])) {
+	if(isset($_SESSION['Language'])){
 		$Locale = $_SESSION['Language'];
 	} else {
 		$Locale = $DefaultLanguage;
@@ -45,18 +60,18 @@ if (!function_exists('gettext')) {
 		$LangFile = 'locale/' . $Locale . '/LC_MESSAGES/messages.mo';
 	}
 
-	if (file_exists($LangFile)) {
+	if (file_exists($LangFile)){
 		$input = new FileReader($LangFile);
 		$PhpGettext = new gettext_reader($input);
 
-		if (!function_exists('_')) {
+		if (!function_exists('_')){
 			function _($text) {
 				global $PhpGettext;
 				return $PhpGettext->translate($text);
 			}
 		}
 	} elseif (!function_exists('_')) {
-		function _($text) {
+		function _($text){
 			return $text;
 		}
 	}
@@ -64,22 +79,22 @@ if (!function_exists('gettext')) {
 } else {
 	include($PathPrefix . 'includes/LanguagesArray.php');
 
-	$LocaleSet = setlocale(LC_ALL, $_SESSION['Language'], $LanguagesArray[$_SESSION['Language']]['WindowsLocale']);
-	$LocaleSet = setlocale(LC_NUMERIC, 'C', 'en_GB.utf8', 'en_GB', 'en_US', 'english-us');
+	$LocaleSet = setlocale (LC_ALL, $_SESSION['Language'],$LanguagesArray[$_SESSION['Language']]['WindowsLocale']);
+	$LocaleSet = setlocale (LC_NUMERIC, 'C','en_GB.utf8','en_GB','en_US','english-us');
 
-	if (defined('LC_MESSAGES')) { //it's a unix/linux server
-		$LocaleSet = setlocale(LC_MESSAGES, $_SESSION['Language']);
+	if (defined('LC_MESSAGES')){ //it's a unix/linux server
+		$LocaleSet = setlocale (LC_MESSAGES, $_SESSION['Language']);
 	}
 	//Turkish seems to be a special case
-	if ($_SESSION['Language'] == 'tr_TR.utf8') {
+	if ($_SESSION['Language']=='tr_TR.utf8') {
 		$Locale = setlocale(LC_CTYPE, 'C');
 	}
 
 	// possibly even if locale fails the language will still switch by using Language instead of locale variable
 	putenv('LANG=' . $_SESSION['Language']);
 	putenv('LANGUAGE=' . $_SESSION['Language']);
-	bindtextdomain('messages', $PathPrefix . 'locale');
-	textdomain('messages');
+	bindtextdomain ('messages', $PathPrefix . 'locale');
+	textdomain ('messages');
 	bind_textdomain_codeset('messages', 'UTF-8');
 }
 

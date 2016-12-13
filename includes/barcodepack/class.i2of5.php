@@ -100,7 +100,7 @@ class i2of5 extends linearBarcode {
 
 				// Encode first char into lines
 				$bars = true;
-				while($bars and $firstCounter<13) {
+				while($bars && $firstCounter<13) {
 					if($this->codeTable[$this->text{$i}]{$firstCounter}=="1") {
 						$biteCode['DATA'] .= '1';	// line
 					} else {
@@ -111,7 +111,7 @@ class i2of5 extends linearBarcode {
 
 				// Second char is encoded to spaces
 				$spaces = true;
-				while($spaces and $secondCounter<13) {
+				while($spaces && $secondCounter<13) {
 					if($this->codeTable[$this->text{$i+1}]{$secondCounter}=='1') {
 						$biteCode['DATA'] .= '0';	// space
 						$secondCounter++;

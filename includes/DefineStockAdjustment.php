@@ -1,5 +1,5 @@
 <?php
-
+/* $Id: DefineStockAdjustment.php 6033 2013-06-24 07:36:26Z daintree $*/
 class StockAdjustment {
 
 	var $StockID;
@@ -12,11 +12,10 @@ class StockAdjustment {
 	var $DecimalPlaces;
 	var $Quantity;
 	var $tag;
-	var $SerialItems;
-	/*array to hold controlled items*/
-
+	var $SerialItems; /*array to hold controlled items*/
+	
 	//Constructor
-	function StockAdjustment() {
+	function StockAdjustment(){
 		$this->StockID = '';
 		$this->StockLocation = '';
 		$this->Controlled = '';
@@ -27,7 +26,7 @@ class StockAdjustment {
 		$this->DecimalPlaces = 0;
 		$this->SerialItems = array();
 		$this->Quantity = 0;
-		$this->tag = 0;
+		$this->tag=0;
 	}
 }
 ?>

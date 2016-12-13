@@ -1,146 +1,119 @@
 <?php
-
+/* $Id: Login.php 7535 2016-05-20 13:43:16Z rchacon $*/
 // Display demo user name and password within login form if $AllowDemoMode is true
 
-include('LanguageSetup.php');
-
-if ((isset($AllowDemoMode)) and ($AllowDemoMode == True) and (!isset($demo_text))) {
-	$demo_text = _('login as user') . ': <i>' . _('admin') . '</i><br />' . _('with password') . ': <i>' . _('kwamoja') . '</i>';
+//include ('LanguageSetup.php');
+if ((isset($AllowDemoMode)) AND ($AllowDemoMode == True) AND (!isset($demo_text))) {
+	$demo_text = _('Login as user') .': <i>' . _('admin') . '</i><br />' ._('with password') . ': <i>' . _('weberp') . '</i>' .
+		'<br /><a href="../">' . _('Return') . '</a>';// This line is to add a return link.
 } elseif (!isset($demo_text)) {
-	$demo_text = _('Please login here');
+	$demo_text = '';
 }
-
-echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-			"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">';
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-	<title>KwaMoja Login screen</title>
+	<title>webERP Login screen</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-	<link rel="stylesheet" href="css/login.css" type="text/css" />
-	<!-- Javascript required for Twitter follow me button-->
-	<script>
-	  !function(d,s,id){
-		var js,fjs=d.getElementsByTagName(s)[0];
-		if(!d.getElementById(id)){
-		  js=d.createElement(s);
-		  js.id=id;
-		  js.src="//platform.twitter.com/widgets.js";
-		  fjs.parentNode.insertBefore(js,fjs);
-		}
-	  }(document,"script","twitter-wjs");
-	</script>
-	<!-- End of Javascript required for Twitter follow me button-->
+	<link rel="stylesheet" href="css/<?php echo $Theme;?>/login.css" type="text/css" />
 </head>
 <body>
-
 <?php
-if (get_magic_quotes_gpc()) {
+
+if (get_magic_quotes_gpc()){
 	echo '<p style="background:white">';
 	echo _('Your webserver is configured to enable Magic Quotes. This may cause problems if you use punctuation (such as quotes) when doing data entry. You should contact your webmaster to disable Magic Quotes');
 	echo '</p>';
 }
-?>
 
+?>
 <div id="container">
-	<table>
-		<tr>
-			<th colspan="2">
-				<div id="login_logo">
-					<a href="http://www.kwamoja.com" target="_blank"><img src="companies/logo.png" style="width:100%" /></a>
-				</div>
-			</th>
-		</tr>
-		<tr>
-			<td width="70%">
-				<div id="login_box">
-					<form action="<?php
-echo htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8');
-?>" method="post" class="noPrint">
-					<input type="hidden" name="FormID" value="<?php
-echo $_SESSION['FormID'];
-?>" />
-					<label><?php
-echo _('Company');
-?>:</label>
+	<div id="login_logo"></div>
+	<div id="login_box">
+	<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8');?>" method="post">
+    <div>
+	<input type="hidden" name="FormID" value="<?php echo $_SESSION['FormID']; ?>" />
+	<span>
+<?php
 
-					<?php
-if ($AllowCompanySelectionBox === 'Hide') {
-	// do not show input or selection box
-	echo '<input type="hidden" name="CompanyNameField"  value="' . $DefaultCompany . '" />';
-} else if ($AllowCompanySelectionBox === 'ShowInputBox'){
-	// show input box
-	echo '<input type="text" required="required" autofocus="autofocus" name="CompanyNameField"  value="' . $DefaultCompany . '" />';
-} else {
-	// Show selection box ($AllowCompanySelectionBox == 'ShowSelectionBox')
-	echo '<select name="CompanyNameField">';
+	    if (isset($CompanyList) AND is_array($CompanyList)) {
+            foreach ($CompanyList as $key => $CompanyEntry){
+                if ($DefaultDatabase == $CompanyEntry['database']) {
+                    $CompanyNameField = "$key";
+                    $DefaultCompany = $CompanyEntry['company'];
+                }
+            }
+	        if ($AllowCompanySelectionBox === 'Hide'){
+			    // do not show input or selection box
+			    echo '<input type="hidden" name="CompanyNameField"  value="' .  $CompanyNameField . '" />';
+		    } elseif ($AllowCompanySelectionBox === 'ShowInputBox'){
+			    // show input box
+			    echo _('Company') .': <br />' .  '<input type="text" name="DefaultCompany"  autofocus="autofocus" required="required" value="' .  htmlspecialchars($DefaultCompany ,ENT_QUOTES,'UTF-8') . '" disabled="disabled"/>';//use disabled input for display consistency
+		        echo '<input type="hidden" name="CompanyNameField"  value="' .  $CompanyNameField . '" />';
+		    } else {
+                // Show selection box ($AllowCompanySelectionBox == 'ShowSelectionBox')
+                echo _('Company') . ':<br />';
+                echo '<select name="CompanyNameField">';
+                foreach ($CompanyList as $key => $CompanyEntry){
+                    if (is_dir('companies/' . $CompanyEntry['database']) ){
+                        if ($CompanyEntry['database'] == $DefaultDatabase) {
+                            echo '<option selected="selected" label="'.htmlspecialchars($CompanyEntry['company'],ENT_QUOTES,'UTF-8').'" value="'.$key.'">' . htmlspecialchars($CompanyEntry['company'],ENT_QUOTES,'UTF-8') . '</option>';
+                        } else {
+                            echo '<option label="'.htmlspecialchars($CompanyEntry['company'],ENT_QUOTES,'UTF-8').'" value="'.$key.'">' . htmlspecialchars($CompanyEntry['company'],ENT_QUOTES,'UTF-8') . '</option>';
+                        }
+                    }
+                }
+                echo '</select>';
+            }
+	    }
+	      else { //provision for backward compat - remove when we have a reliable upgrade for config.php
+            if ($AllowCompanySelectionBox === 'Hide'){
+			    // do not show input or selection box
+			    echo '<input type="hidden" name="CompanyNameField"  value="' . $DefaultCompany . '" />';
+		    } else if ($AllowCompanySelectionBox === 'ShowInputBox'){
+			    // show input box
+			    echo _('Company') . '<input type="text" name="CompanyNameField"  autofocus="autofocus" required="required" value="' . $DefaultCompany . '" />';
+		    } else {
+      			// Show selection box ($AllowCompanySelectionBox == 'ShowSelectionBox')
+    			echo _('Company') . ':<br />';
+	    		echo '<select name="CompanyNameField">';
+	    		$Companies = scandir('companies/', 0);
+			    foreach ($Companies as $CompanyEntry){
+                    if (is_dir('companies/' . $CompanyEntry) AND $CompanyEntry != '..' AND $CompanyEntry != '' AND $CompanyEntry!='.svn' AND $CompanyEntry!='.'){
+                        if ($CompanyEntry==$DefaultDatabase) {
+                            echo '<option selected="selected" label="'.$CompanyEntry.'" value="'.$CompanyEntry.'">' . $CompanyEntry . '</option>';
+                        } else {
+                            echo '<option label="'.$CompanyEntry.'" value="'.$CompanyEntry.'">' . $CompanyEntry . '</option>';
+                        }
+                    }
+    	        }
+    	         echo '</select>';
+            }
+        } //end provision for backward compat
+?>
 
-	$DirHandle = dir('companies/');
+	</span>
+	<br />
+	<span><?php echo _('User name'); ?>:</span><br />
+	<input type="text" name="UserNameEntryField" required="required" autofocus="autofocus" maxlength="20" placeholder="<?php echo _('User name'); ?>" /><br />
+	<span><?php echo _('Password'); ?>:</span><br />
+	<input type="password" required="required" name="Password" placeholder="<?php echo _('Password'); ?>" /><br />
+	<div id="demo_text">
+<?php
 
-	while (false !== ($CompanyEntry = $DirHandle->read())) {
-		if (is_dir('companies/' . $CompanyEntry) and $CompanyEntry != '..' and $CompanyEntry != '' and $CompanyEntry != '.svn' and $CompanyEntry != '.') {
-			if ($CompanyEntry == $DefaultCompany) {
-				echo '<option selected="selected" label="' . $CompanyEntry . '" value="' . $CompanyEntry . '">' . $CompanyEntry . '</option>';
-			} else {
-				echo '<option label="' . $CompanyEntry . '" value="' . $CompanyEntry . '">' . $CompanyEntry . '</option>';
-			}
-		}
+	if (isset($demo_text)){
+		echo $demo_text;
 	}
-
-	$DirHandle->close();
-
-	echo '</select>';
-}
 ?>
 
-					<br />
-					<label><?php
-echo _('User name');
-?>:</label>
-					<input type="text" autofocus="autofocus" required="required" name="UserNameEntryField" maxlength="20" /><br />
-					<label><?php
-echo _('Password');
-?>:</label>
-					<input type="password" required="required" name="Password" />
-	   <div id="demo_text">
-	   <?php
-if (isset($demo_text)) {
-	echo $demo_text;
-}
-?>
-	   </div>
-					<button class="button" type="submit" value="<?php
-echo _('Login');
-?>" name="SubmitUser">
-					<?php
-echo _('Login');
-?>
-					 <img src="css/tick.png" title="' . _('Upgrade') . '" alt="" class="ButtonIcon" /></button>
-					 </div>
-					</form>
-				</div>
-			</td>
-			<td style="width: 20%; padding-left: 1%;">
-				<div>
-					<b>Join us at :</b><br />
-					<a href="https://sourceforge.net/projects/kwamoja" target="_blank"><img src="css/sourceforge-logo.png" style="width:70%; border: 1px solid #A49999;" /></a><br />
-					<a href="https://launchpad.net/kwamoja" target="_blank"><img src="css/launchpad.png" style="width:70%; border: 1px solid #A49999;" /></a><br />
-					<a href="https://kwamoja.codeplex.com/" target="_blank"><img src="css/codeplex-logo.png" style="width:70%; border: 1px solid #A49999;" /></a><br /><br />
-				</div>
-			</td>
-			<td style="width: 25%; padding-left: 0%;">
-				<div>
-					<b>Follow us at :</b>
-					<!--Follow us on twitter button-->
-					<a href="https://twitter.com/KwaMoja" class="twitter-follow-button" data-show-count="false">Follow @KwaMoja</a><br />
-					<a href="http://www.facebook.com/Kwamoja" target="_blank"><img src="css/FindUsOnFacebook.png" style="width:70%; border: 1px solid #A49999;" /></a>
-					<a href="http://www.linkedin.com/groups/KwaMoja-4833235?trk=myg_ugrp_ovr" target="_blank"><img src="css/linkedin.png" style="width:70%; border: 1px solid #A49999;" /></a>
-				</div>
-			</td>
-		</tr>
-	</table>
+	</div>
+	<input class="button" type="submit" value="<?php echo _('Login'); ?>" name="SubmitUser" />
+	    </div>
+	</form>
+	</div>
+	<br />
+	<div style="text-align:center"><a href="https://sourceforge.net/projects/web-erp"><img src="https://sflogo.sourceforge.net/sflogo.php?group_id=70949&amp;type=8" width="80" height="15" alt="Get webERP Accounting &amp; Business Management at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a></div>
 </div>
-
 </body>
 </html>

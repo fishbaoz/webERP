@@ -1,43 +1,37 @@
 <?php
 
-include('includes/session.inc');
+/* $Id: NoSalesItems.php 2012-05-12 $*/
+
+include ('includes/session.inc');
 $Title = _('No Sales Items Searching');
-include('includes/header.inc');
+include ('includes/header.inc');
 if (!(isset($_POST['Search']))) {
-	echo '<div class="centre"><p class="page_title_text noPrint" ><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('No Sales Items') . '" alt="" />' . ' ' . _('No Sales Items') . '</p></div>';
-	echo '<div class="page_help_text noPrint">' . _('List of items with stock available during the last X days at the selected locations but did not sell any quantity during these X days.') . '<br />' . _('This list gets the no selling items, items at the location just wasting space, or need a price reduction, etc.') . '<br />' . _('Stock available during the last X days means there was a stock movement that produced that item into that location before that day, and no other positive stock movement has been created afterwards.  No sell any quantity means, there is no sales order for that item from that location.') . '</div>';
+echo '<div class="centre"><p class="page_title_text"><img src="' . $RootPath . '/css/' . $Theme . '/images/magnifier.png" title="' . _('No Sales Items') . '" alt="" />' . ' ' . _('No Sales Items') . '</p></div>';
+	echo '<div class="page_help_text">'
+	. _('List of items with stock available during the last X days at the selected locations but did not sell any quantity during these X days.'). '<br />' .  _( 'This list gets the no selling items, items at the location just wasting space, or need a price reduction, etc.') . '<br />' .  _('Stock available during the last X days means there was a stock movement that produced that item into that location before that day, and no other positive stock movement has been created afterwards.  No sell any quantity means, there is no sales order for that item from that location.')  . '</div>';
 	echo '<br />';
-	echo '<form onSubmit="return VerifyForm(this);" action="' . htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') . '?name="SelectCustomer" method="post" class="noPrint">';
+	echo '<form action="' . htmlspecialchars($_SERVER['PHP_SELF'],ENT_QUOTES,'UTF-8') . '?name="SelectCustomer" method="post">';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 	echo '<table class="selection">';
 
 	//select location
 	echo '<tr>
-			<td>' . _('Select Location') . '</td>
-			<td>:</td>
-			<td>
-				<select minlength="0" name="Location[]" multiple="multiple">';
-	if ($_SESSION['RestrictLocations'] == 0) {
-		$sql = "SELECT locationname,
-						loccode
-					FROM locations";
-		echo '<option value="All" selected="selected">' . _('All') . '</option>';
-	} else {
-		$sql = "SELECT locationname,
-						loccode
-					FROM locations
-					INNER JOIN www_users
-						ON locations.loccode=www_users.defaultlocation
-					WHERE www_users.userid='" . $_SESSION['UserID'] . "'";
-	}
-	$locationresult = DB_query($sql, $db);
-	$i = 0;
+			 <td>' . _('Select Location') . '</td>
+			 <td>:</td>
+			 <td><select name="Location[]" multiple="multiple">
+				<option value="All" selected="selected">' . _('All') . '</option>';;
+	$sql = "SELECT 	weberp_locations.loccode,locationname
+			FROM 	weberp_locations
+			INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+			ORDER BY locationname";
+	$locationresult = DB_query($sql);
+	$i=0;
 	while ($myrow = DB_fetch_array($locationresult)) {
-		if (isset($_POST['Location'][$i]) and $myrow['loccode'] == $_POST['Location'][$i]) {
-			echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
-			$i++;
+		if(isset($_POST['Location'][$i]) AND $myrow['loccode'] == $_POST['Location'][$i]){
+		echo '<option selected="selected" value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+		$i++;
 		} else {
-			echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+			echo '<option value="' . $myrow['loccode'] . '">'  . $myrow['locationname']  . '</option>';
 		}
 	}
 	echo '</select></td>
@@ -47,12 +41,12 @@ if (!(isset($_POST['Search']))) {
 	echo '<tr>
 			<td width="150">' . _('Select Customer Type') . '</td>
 			<td>:</td>
-			<td><select minlength="0" name="Customers">';
+			<td><select name="Customers">';
 
 	$sql = "SELECT typename,
 					typeid
-				FROM debtortype";
-	$result = DB_query($sql, $db);
+				FROM weberp_debtortype";
+	$result = DB_query($sql);
 	echo '<option value="All">' . _('All') . '</option>';
 	while ($myrow = DB_fetch_array($result)) {
 		echo '<option value="' . $myrow['typeid'] . '">' . $myrow['typename'] . '</option>';
@@ -61,24 +55,24 @@ if (!(isset($_POST['Search']))) {
 		</tr>';
 
 	// stock category selection
-	$SQL = "SELECT categoryid,categorydescription
-			FROM stockcategory
+	$SQL="SELECT categoryid,categorydescription
+			FROM weberp_stockcategory
 			ORDER BY categorydescription";
-	$result1 = DB_query($SQL, $db);
+	$result1 = DB_query($SQL);
 	echo '<tr>
 			<td width="150">' . _('In Stock Category') . ' </td>
 			<td>:</td>
-			<td><select minlength="0" name="StockCat">';
-	if (!isset($_POST['StockCat'])) {
-		$_POST['StockCat'] = 'All';
+			<td><select name="StockCat">';
+	if (!isset($_POST['StockCat'])){
+		$_POST['StockCat']='All';
 	}
-	if ($_POST['StockCat'] == 'All') {
+	if ($_POST['StockCat']=='All'){
 		echo '<option selected="selected" value="All">' . _('All') . '</option>';
 	} else {
 		echo '<option value="All">' . _('All') . '</option>';
 	}
 	while ($myrow1 = DB_fetch_array($result1)) {
-		if ($myrow1['categoryid'] == $_POST['StockCat']) {
+		if ($myrow1['categoryid']==$_POST['StockCat']){
 			echo '<option selected="selected" value="' . $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
 		} else {
 			echo '<option value="' . $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
@@ -89,7 +83,7 @@ if (!(isset($_POST['Search']))) {
 	echo '<tr>
 			<td>' . _('Number Of Days') . ' </td>
 			<td>:</td>
-			<td><input class="number" tabindex="3" type="text" name="NumberOfDays" size="8" required="required"	minlength="1" maxlength="8" value="30" /></td>
+			<td><input class="integer" tabindex="3" type="text" required="required" title="' . _('Enter the number of days to examine the sales for') . '" name="NumberOfDays" size="8" maxlength="8" value="30" /></td>
 		 </tr>
 	</table>
 	<br />
@@ -100,45 +94,50 @@ if (!(isset($_POST['Search']))) {
 } else {
 
 	// everything below here to view NumberOfNoSalesItems on selected location
-	$FromDate = FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']), 'd', -filter_number_format($_POST['NumberOfDays'])));
-	if ($_POST['StockCat'] == 'All') {
+	$FromDate = FormatDateForSQL(DateAdd(Date($_SESSION['DefaultDateFormat']),'d', -filter_number_format($_POST['NumberOfDays'])));
+	if ($_POST['StockCat']=='All'){
 		$WhereStockCat = "";
-	} else {
-		$WhereStockCat = " AND stockmaster.categoryid = '" . $_POST['StockCat'] . "'";
+	}else{
+		$WhereStockCat = " AND weberp_stockmaster.categoryid = '" . $_POST['StockCat'] ."'";
 	}
 
 	if ($_POST['Location'][0] == 'All') {
-		$SQL = "SELECT 	stockmaster.stockid,
-					stockmaster.description,
-					stockmaster.units
-				FROM 	stockmaster,locstock
-				WHERE 	stockmaster.stockid = locstock.stockid " . $WhereStockCat . "
-					AND (locstock.quantity > 0)
+		$SQL = "SELECT 	weberp_stockmaster.stockid,
+					weberp_stockmaster.description,
+					weberp_stockmaster.units
+				FROM 	weberp_stockmaster,weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE 	weberp_stockmaster.stockid = weberp_locstock.stockid ".
+						$WhereStockCat . "
+					AND (weberp_locstock.quantity > 0)
 					AND NOT EXISTS (
 							SELECT *
-							FROM 	salesorderdetails, salesorders
-							WHERE 	stockmaster.stockid = salesorderdetails.stkcode
-									AND (salesorderdetails.orderno = salesorders.orderno)
-									AND salesorderdetails.actualdispatchdate > '" . $FromDate . "')
+							FROM 	weberp_salesorderdetails, weberp_salesorders
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_salesorders.fromstkloc AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode
+									AND (weberp_salesorderdetails.orderno = weberp_salesorders.orderno)
+									AND weberp_salesorderdetails.actualdispatchdate > '" . $FromDate . "')
 					AND NOT EXISTS (
 							SELECT *
-							FROM 	stockmoves
-							WHERE 	stockmoves.stockid = stockmaster.stockid
-									AND stockmoves.trandate >= '" . $FromDate . "')
+							FROM 	weberp_stockmoves
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmoves.stockid = weberp_stockmaster.stockid
+									AND weberp_stockmoves.trandate >= '" . $FromDate . "')
 					AND EXISTS (
 							SELECT *
-							FROM 	stockmoves
-							WHERE 	stockmoves.stockid = stockmaster.stockid
-									AND stockmoves.trandate < '" . $FromDate . "'
-									AND stockmoves.qty >0)
-				GROUP BY stockmaster.stockid
-				ORDER BY stockmaster.stockid";
-	} else {
+							FROM 	weberp_stockmoves
+							INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_stockmoves.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+							WHERE 	weberp_stockmoves.stockid = weberp_stockmaster.stockid
+									AND weberp_stockmoves.trandate < '" . $FromDate . "'
+									AND weberp_stockmoves.qty >0)
+				GROUP BY weberp_stockmaster.stockid
+				ORDER BY weberp_stockmaster.stockid";
+	}else{
 		$WhereLocation = '';
 		if (sizeof($_POST['Location']) == 1) {
-			$WhereLocation = " AND locstock.loccode ='" . $_POST['Location'][0] . "' ";
+			$WhereLocation = " AND weberp_locstock.loccode ='" . $_POST['Location'][0] . "' ";
 		} else {
-			$WhereLocation = " AND locstock.loccode IN(";
+			$WhereLocation = " AND weberp_locstock.loccode IN(";
 			$commactr = 0;
 			foreach ($_POST['Location'] as $key => $value) {
 				$WhereLocation .= "'" . $value . "'";
@@ -149,40 +148,43 @@ if (!(isset($_POST['Search']))) {
 			} // End of foreach
 			$WhereLocation .= ')';
 		}
-		$SQL = "SELECT 	stockmaster.stockid,
-						stockmaster.description,
-						stockmaster.units,
-						locstock.quantity,
-						locations.locationname
-				FROM 	stockmaster,locstock,locations
-				WHERE 	stockmaster.stockid = locstock.stockid
-						AND (locstock.loccode = locations.loccode)" . $WhereLocation . $WhereStockCat . "
-						AND (locstock.quantity > 0)
+		$SQL = "SELECT 	weberp_stockmaster.stockid,
+						weberp_stockmaster.description,
+						weberp_stockmaster.units,
+						weberp_locstock.quantity,
+						weberp_locations.locationname
+				FROM 	weberp_stockmaster,weberp_locstock,weberp_locations
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locations.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE 	weberp_stockmaster.stockid = weberp_locstock.stockid
+						AND (weberp_locstock.loccode = weberp_locations.loccode)".
+						$WhereLocation .
+						$WhereStockCat . "
+						AND (weberp_locstock.quantity > 0)
 						AND NOT EXISTS (
 								SELECT *
-								FROM 	salesorderdetails, salesorders
-								WHERE 	stockmaster.stockid = salesorderdetails.stkcode
-										AND (salesorders.fromstkloc = locstock.loccode)
-										AND (salesorderdetails.orderno = salesorders.orderno)
-										AND salesorderdetails.actualdispatchdate > '" . $FromDate . "')
+								FROM 	weberp_salesorderdetails, weberp_salesorders
+								WHERE 	weberp_stockmaster.stockid = weberp_salesorderdetails.stkcode
+										AND (weberp_salesorders.fromstkloc = weberp_locstock.loccode)
+										AND (weberp_salesorderdetails.orderno = weberp_salesorders.orderno)
+										AND weberp_salesorderdetails.actualdispatchdate > '" . $FromDate . "')
 						AND NOT EXISTS (
 								SELECT *
-								FROM 	stockmoves
-								WHERE 	stockmoves.loccode = locstock.loccode
-										AND stockmoves.stockid = stockmaster.stockid
-										AND stockmoves.trandate >= '" . $FromDate . "')
+								FROM 	weberp_stockmoves
+								WHERE 	weberp_stockmoves.loccode = weberp_locstock.loccode
+										AND weberp_stockmoves.stockid = weberp_stockmaster.stockid
+										AND weberp_stockmoves.trandate >= '" . $FromDate . "')
 						AND EXISTS (
 								SELECT *
-								FROM 	stockmoves
-								WHERE 	stockmoves.loccode = locstock.loccode
-										AND stockmoves.stockid = stockmaster.stockid
-										AND stockmoves.trandate < '" . $FromDate . "'
-										AND stockmoves.qty >0)
-				ORDER BY stockmaster.stockid";
+								FROM 	weberp_stockmoves
+								WHERE 	weberp_stockmoves.loccode = weberp_locstock.loccode
+										AND weberp_stockmoves.stockid = weberp_stockmaster.stockid
+										AND weberp_stockmoves.trandate < '" . $FromDate . "'
+										AND weberp_stockmoves.qty >0)
+				ORDER BY weberp_stockmaster.stockid";
 	}
-	$result = DB_query($SQL, $db);
-	echo '<p class="page_title_text noPrint"  align="center"><strong>' . _('No Sales Items') . '</strong></p>';
-	echo '<form onSubmit="return VerifyForm(this);" action="PDFNoSalesItems.php"  method="GET">
+	$result = DB_query($SQL);
+	echo '<p class="page_title_text" align="center"><strong>' . _('No Sales Items') . '</strong></p>';
+	echo '<form action="PDFNoSalesItems.php"  method="GET">
 		<table class="selection">';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 	$TableHeader = '<tr>
@@ -209,8 +211,10 @@ if (!(isset($_POST['Search']))) {
 			$k = 1;
 		}
 		$QOHResult = DB_query("SELECT sum(quantity)
-				FROM locstock
-				WHERE stockid = '" . $myrow['stockid'] . "'", $db);
+				FROM weberp_locstock
+				INNER JOIN weberp_locationusers ON weberp_locationusers.loccode=weberp_locstock.loccode AND weberp_locationusers.userid='" .  $_SESSION['UserID'] . "' AND weberp_locationusers.canview=1
+				WHERE stockid = '" . $myrow['stockid'] . "'" .
+				$WhereLocation);
 		$QOHRow = DB_fetch_row($QOHResult);
 		$QOH = $QOHRow[0];
 
@@ -223,11 +227,16 @@ if (!(isset($_POST['Search']))) {
 					<td class="number">%s</td>
 					<td class="number">%s</td>
 					<td>%s</td>
-					</tr>', $i, 'All', $CodeLink, $myrow['description'], $QOH, //on hand on ALL locations
-				$QOH, // total on hand
-				$myrow['units'] //unit
-				);
-		} else {
+					</tr>',
+					$i,
+					'All',
+					$CodeLink,
+					$myrow['description'],
+					$QOH, //on hand on ALL locations
+					$QOH, // total on hand
+					$myrow['units'] //unit
+					);
+		}else{
 			printf('<td class="number">%s</td>
 					<td>%s</td>
 					<td>%s</td>
@@ -235,10 +244,15 @@ if (!(isset($_POST['Search']))) {
 					<td class="number">%s</td>
 					<td class="number">%s</td>
 					<td>%s</td>
-					</tr>', $i, $myrow['locationname'], $CodeLink, $myrow['description'], $myrow['quantity'], //on hand on location selected only
-				$QOH, // total on hand
-				$myrow['units'] //unit
-				);
+					</tr>',
+					$i,
+					$myrow['locationname'],
+					$CodeLink,
+					$myrow['description'],
+					$myrow['quantity'], //on hand on location selected only
+					$QOH, // total on hand
+					$myrow['units'] //unit
+					);
 		}
 		$i++;
 	}
@@ -246,5 +260,5 @@ if (!(isset($_POST['Search']))) {
 	echo '<br />
 	</form>';
 }
-include('includes/footer.inc');
+include ('includes/footer.inc');
 ?>
