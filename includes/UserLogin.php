@@ -17,6 +17,11 @@ define('UL_MAINTENANCE', 5);
  *	See define() statements above.
  */
 
+define('ROOT_PATH', dirname(__FILE__).'/../');
+require ROOT_PATH.'uc_config.inc.php';
+require ROOT_PATH.'uc_client/client.php';
+
+
 function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
 
 	global $debug;
@@ -50,9 +55,10 @@ function userLogin($Name, $Password, $SysAdminEmail = '', $db) {
         $PasswordVerified = false;
 		$Auth_Result = DB_query($sql,$ErrMsg);
 
+		list($uid) = uc_user_login($Name, $Password);
 		if (DB_num_rows($Auth_Result) > 0) {
 			$myrow = DB_fetch_array($Auth_Result);
-			if (VerifyPass($Password,$myrow['password'])) {
+			if (/*VerifyPass($Password,$myrow['password'])*/$uid > 0) {
 				$PasswordVerified = true;
 			} elseif (isset($GLOBALS['CryptFunction'])) {
 				/*if the password stored in the DB was compiled the old way,

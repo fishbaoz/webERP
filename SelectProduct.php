@@ -72,7 +72,8 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 								weberp_stockmaster.volume,
 								weberp_stockmaster.grossweight,
 								weberp_stockcategory.categorydescription,
-								weberp_stockmaster.categoryid
+								weberp_stockmaster.categoryid,
+								weberp_stockmaster.barcode
 						FROM weberp_stockmaster INNER JOIN weberp_stockcategory
 						ON weberp_stockmaster.categoryid=weberp_stockcategory.categoryid
 						WHERE stockid='" . $StockID . "'");
@@ -138,6 +139,10 @@ if (!isset($_POST['Search']) AND (isset($_POST['Select']) OR isset($_SESSION['Se
 	}
 	echo '</td><th class="number">' . _('Units') . ':</th>
 			<td class="select">' . $myrow['units'] . '</td></tr>';
+	echo '</td><th class="number">' . _('Barcode') . ':</th>
+			<td class="select">' .'<img src="includes/barcodepack/barcode.php?text=' . $myrow['barcode'] . '"/>'
+               . '</td></tr>';
+
 	echo '<tr><th class="number">' . _('Volume') . ':</th>
 			<td class="select" colspan="2">' . locale_number_format($myrow['volume'], 3) . '</td>
 			<th class="number">' . _('Weight') . ':</th>

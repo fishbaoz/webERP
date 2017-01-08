@@ -146,7 +146,9 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 	$TotalQuantity += $myrow['quantity'];
 
 	if ($Serialised == 1 and $Perishable==0){
-		echo '<td>' . $myrow['serialno'] . '</td>';
+		echo '<td>' . $myrow['serialno'] .
+		'<img src="includes/barcodepack/barcode.php?text=' . $myrow['serialno'] . '"/>' .
+		'</td>';
 		echo '<th></th>';
 	} else if ($Serialised == 1 and $Perishable==1) {
 		echo '<td>' . $myrow['serialno'] . '</td>

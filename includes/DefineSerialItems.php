@@ -27,7 +27,7 @@ function GetExpiryDate ($StockID, $LocCode, $BundleRef){
 				AND serialno = '" . $BundleRef . "'";
 	$Result = DB_query($SQL);
 	if (DB_num_rows($Result)==0){
-		return '0000-00-00';
+		return '2016-01-01';
 	} else {
 		$myrow = DB_fetch_row($Result);
 		return ConvertSQLDate($myrow[0]);
